@@ -261,7 +261,9 @@ window.conseilLadder=async function(db,riotProfiles,{force=false}={}){
 };
 // Évolution de la semaine pour un joueur et une file (solo/flex)
 window.conseilWeekDelta=function(cur,base,id,q="solo"){
-  const a=cur?.players?.[id]?.[q],b=base?.players?.[id]?.[q];
+  // compte récupéré sur un autre appareil : on reprend le relevé de début de semaine de l'ancien compte
+  let oid=id;const seen=new Set();while(!base?.players?.[oid]&&CLAIM_BY[oid]&&!seen.has(oid)){seen.add(oid);oid=CLAIM_BY[oid]}
+  const a=cur?.players?.[id]?.[q],b=base?.players?.[oid]?.[q];
   if(!a)return null;
   if(!b)return{games:0,wins:0,lp:0,fresh:true};
   return{games:(a.w+a.l)-(b.w+b.l),wins:a.w-b.w,lp:conseilRankValue(a)-conseilRankValue(b)};
