@@ -379,7 +379,7 @@ function conseilStars(kind,key){
 .cpop-tag{font:700 .78rem "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--tv-amber,#ffb400)}
 .cpop-q{margin:0;font:400 1.55rem/1.15 "Anton","Impact",sans-serif;text-transform:uppercase;color:#fff}
 .cpop-yes{align-self:stretch;padding:14px;border:0;background:var(--tv-red,#e4002b);color:#fff;font:700 1.15rem "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
-.cpop-btns{display:flex;flex-direction:column;gap:8px}.cpop-alt{background:transparent!important;color:#a7abb6!important;border:2px solid #3a3e48!important;font-size:1rem!important}
+.cpop-btns{display:flex;flex-direction:column;gap:8px}.cpop-alt{font-size:1rem!important}
 .cpop-yes:hover,.cpop-yes:focus-visible{background:#ff1744;outline:2px solid #fff;outline-offset:2px}
 html[data-camp="wow"] .cpop-yes{background:#ffb400;color:#08090b}
 .ctoast{position:fixed;right:16px;bottom:16px;z-index:9998;width:min(360px,calc(100% - 32px));background:#15171c;border-left:6px solid #e4002b;padding:14px 40px 14px 16px;box-shadow:0 12px 40px rgba(0,0,0,.55);animation:ctin .35s ease-out;transition:opacity .3s,transform .3s}
@@ -402,7 +402,7 @@ html[data-camp="wow"] .cpop-yes{background:#ffb400;color:#08090b}
     else q=pick(BASE_LINES);
     css();open=true;
     const el=document.createElement("div");el.className="cpop";el.setAttribute("role","alertdialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-labelledby","cpopQ");
-    el.innerHTML=`<div class="cpop-box"><span class="cpop-tag">${tag}</span><p class="cpop-q" id="cpopQ"></p><div class="cpop-btns"><button class="cpop-yes" type="button">Oui</button><button class="cpop-yes cpop-alt" type="button">Je suis une pute</button></div></div>`;
+    el.innerHTML=`<div class="cpop-box"><span class="cpop-tag">${tag}</span><p class="cpop-q" id="cpopQ"></p><div class="cpop-btns"><button class="cpop-yes" type="button">Oui</button><button class="cpop-yes cpop-alt" type="button">Je suis une sasa</button></div></div>`;
     el.querySelector(".cpop-q").textContent=q;
     const prevOverflow=document.documentElement.style.overflow;document.documentElement.style.overflow="hidden";
     const btns=[...el.querySelectorAll(".cpop-yes")],btn=btns[0];
