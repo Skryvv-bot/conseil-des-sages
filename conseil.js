@@ -256,7 +256,10 @@ window.conseilLadder=async function(db,riotProfiles,{force=false}={}){
   }
   // point de départ de la semaine : premier relevé depuis lundi
   let base=null;
-  try{const q=await db.collection("ladderSnap").where("day",">=",isoDay(weekStart())).orderBy("day").limit(1).get();base=q.docs[0]?.data()||null}catch(e){console.warn("snap",e)}
+  // pour chaque sage : son premier relevé de la semaine (ceux qui ont ajouté leur Riot ID en cours de semaine partent de ce jour-là)
+  try{const q=await db.collection("ladderSnap").where("day",">=",isoDay(weekStart())).orderBy("day").get();const players={},since={};
+    q.docs.map(d=>d.data()).forEach(sn=>{for(const [id,v] of Object.entries(sn.players||{}))if(!players[id]&&(v.solo||v.flex)){players[id]=v;since[id]=sn.day}});
+    base=q.docs.length?{day:q.docs[0].data().day,players,since}:null}catch(e){console.warn("snap",e)}
   return{current:cur,base};
 };
 // Évolution de la semaine pour un joueur et une file (solo/flex)
