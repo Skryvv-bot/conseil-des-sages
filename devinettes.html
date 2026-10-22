@@ -46,6 +46,11 @@ h1{font-family:var(--display);font-weight:700;font-size:clamp(1.9rem,5.4vw,3rem)
 @media (max-width:460px){.tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .spell{width:112px;height:112px;border:2px solid var(--gold);box-shadow:0 0 22px rgba(10,200,185,.25);overflow:hidden;background:var(--void)}
 .spell img{width:100%;height:100%;display:block;transition:filter .4s,transform .4s}
+.kit{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:6px}
+.kitc{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;background:var(--panel);border:1px solid var(--line2);text-align:center;min-width:0}
+.kitc img{width:48px;height:48px;display:block}.kitc b{font:700 .95rem var(--display);color:var(--gold)}.kitc span{font-size:.78rem;line-height:1.15;color:var(--muted);overflow-wrap:anywhere}
+.kitc.on{border-color:var(--hit);background:rgba(47,191,113,.12)}.kitc.on span{color:#fff}
+@media (max-width:420px){.kitc img{width:38px;height:38px}.kitc span{font-size:.7rem}}
 .keys5{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 .keys5 button{width:52px;height:52px;font:700 1.1rem var(--display);color:var(--gold);background:var(--panel);border:1px solid var(--gold2);cursor:pointer}
 .keys5 button.ok{background:var(--hit);color:#fff;border-color:var(--hit)}.keys5 button.ko{background:var(--miss);color:#fff;border-color:var(--miss)}
@@ -415,7 +420,7 @@ function start(){
     $("modeLabel").textContent=MODES[mode]+" · partie libre";
   }
   done=guesses.includes(target.n)||gaveUp;
-  ability=null;abilityErr=false;bonus=kind==="daily"?store.get("fd-daily-"+mode,{}).bonus||null:null;
+  ability=null;abilityErr=false;bonus=kind==="daily"?store.get("fd-daily-"+mode,{}).bonus??null:null;
   if(mode==="ability")loadAbility(0);
   render();
 }
@@ -431,7 +436,9 @@ async function loadAbility(tries){
     const r=rng(seed^0x51ed270b),slot=Math.floor(r()*5),rot=[90,180,270][Math.floor(r()*3)];
     const sp=slot===0?c.passive:c.spells[slot-1];
     if(target.n!==want)return;
-    ability={slot,rot,name:sp.name,img:`https://ddragon.leagueoflegends.com/cdn/${v}/img/${slot===0?"passive":"spell"}/${sp.image.full}`};
+    const ico=(k,x)=>`https://ddragon.leagueoflegends.com/cdn/${v}/img/${k===0?"passive":"spell"}/${x.image.full}`;
+    const kit=[c.passive,...c.spells.slice(0,4)].map((x,k)=>({name:x.name,img:ico(k,x)}));
+    ability={slot,rot,name:sp.name,img:ico(slot,sp),kit};
   }catch(e){
     if(target.n!==want)return;
     if(tries<6&&!guesses.length){const i=(DATA.indexOf(target)+1)%DATA.length;target=DATA[i];return loadAbility(tries+1)}   // champion absent de Data Dragon : on passe au suivant
@@ -466,11 +473,12 @@ function renderPuzzle(){
   pz.hidden=false;
   if(mode==="ability"){
     if(!ability){pz.innerHTML=abilityErr?`<div class="lbl">Impossible de charger les icônes de Riot pour le moment. Réessaie dans un instant.</div>`:`<div class="lbl">Chargement de la compétence…</div>`;return}
-    const n=guesses.length,color=done||n>=2,straight=done||n>=4;
+    const n=guesses.length,color=done||n>=2,straight=done||n>=4,revealed=done&&(gaveUp||bonus!=null);
     pz.innerHTML=`<div class="lbl">À quel champion appartient cette compétence ?</div>
       <div class="spell"><img alt="Icône de la compétence mystère" src="${ability.img}" style="filter:${color?"none":"grayscale(1) contrast(1.1)"};transform:rotate(${straight?0:ability.rot}deg)"></div>
-      <div class="sub">${done?`${esc(ability.name)} · ${SLOTS[ability.slot]==="Passif"?"Passif":"Touche "+SLOTS[ability.slot]}`:n<2?"La couleur revient après 2 erreurs, l'image se redresse après 4":n<4?"L'image se redresse après 4 erreurs":"Compétence en couleur et à l'endroit"}</div>
-      ${done&&!gaveUp?`<div class="lbl" style="margin-top:6px">Bonus : quelle touche ?</div><div class="keys5">${SLOTS.map((k,i)=>`<button data-slot="${i}" class="${bonus!=null?(i===ability.slot?"ok":i===bonus?"ko":""):""}" ${bonus!=null?"disabled":""}>${k==="Passif"?"P":k}</button>`).join("")}</div>${bonus!=null?`<div class="sub">${bonus===ability.slot?"Bien joué, c'était la bonne touche !":"Raté, c'était "+(ability.slot===0?"le passif":"le "+SLOTS[ability.slot])+"."}</div>`:""}`:""}`;
+      <div class="sub">${done?(revealed?`${esc(ability.name)} · ${SLOTS[ability.slot]==="Passif"?"Passif":"Touche "+SLOTS[ability.slot]}`:"Bien trouvé ! Maintenant, la touche ?"):n<2?"La couleur revient après 2 erreurs, l'image se redresse après 4":n<4?"L'image se redresse après 4 erreurs":"Compétence en couleur et à l'endroit"}</div>
+      ${done&&!gaveUp?`<div class="lbl" style="margin-top:6px">Bonus : quelle touche ?</div><div class="keys5">${SLOTS.map((k,i)=>`<button data-slot="${i}" class="${bonus!=null?(i===ability.slot?"ok":i===bonus?"ko":""):""}" ${bonus!=null?"disabled":""}>${k==="Passif"?"P":k}</button>`).join("")}</div>${bonus!=null?`<div class="sub">${bonus===ability.slot?"Bien joué, c'était la bonne touche !":"Raté, c'était "+(ability.slot===0?"le passif":"le "+SLOTS[ability.slot])+"."}</div>`:""}`:""}
+      ${revealed?`<div class="lbl" style="margin-top:10px">Le kit complet de ${esc(target.n)}</div><div class="kit">${ability.kit.map((x,i)=>`<div class="kitc${i===ability.slot?" on":""}"><img src="${x.img}" alt="" loading="lazy"><b>${i===0?"Passif":SLOTS[i]}</b><span>${esc(x.name)}</span></div>`).join("")}</div>`:""}`;
     pz.querySelectorAll("[data-slot]").forEach(b=>b.onclick=()=>{bonus=+b.dataset.slot;if(kind==="daily")store.set("fd-daily-"+mode,{day:today(),guesses,gaveUp,bonus});render()});
     return;
   }
