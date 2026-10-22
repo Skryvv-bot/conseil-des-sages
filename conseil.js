@@ -60,7 +60,7 @@ window.conseilNav=function(active){
     <button class="cnav-install" id="cnavInstall" hidden>Installer l'appli</button></div>`;
   document.body.prepend(nav);
   const tk=document.createElement("div");tk.className="tv-ticker";tk.setAttribute("aria-label","Bandeau d'infos");
-  tk.innerHTML=`<div class="in"><span class="dot">● Direct</span><div style="overflow:hidden;flex:1;min-width:0"><div class="run" id="tvRun"></div></div></div>`;
+  tk.innerHTML=`<div class="in"><div style="overflow:hidden;flex:1;min-width:0"><div class="run" id="tvRun"></div></div></div>`;
   document.body.prepend(tk);conseilTicker(defaultTicker());
   const item=CONSEIL_NAV.find(n=>n.id===group);
   if(item&&item.sub){const wrap=document.querySelector(".wrap");if(wrap){const sub=document.createElement("div");sub.className="csub";
@@ -159,7 +159,9 @@ function watchCamps(db,uid){
     try{mine?localStorage.setItem("my-camp",mine):localStorage.removeItem("my-camp")}catch(e){}
     // traîtres des 7 derniers jours dans le bandeau
     const week=Date.now()-7*864e5;
-    window.CAMP_TRAITORS=Object.values(docs).filter(w=>w.switchedAt&&Date.parse(w.switchedAt)>week&&campSide(w)).sort((a,b)=>b.switchedAt.localeCompare(a.switchedAt));
+    // changements de camp faits par erreur : pas d'annonce de trahison
+    const NOT_TRAITOR=[["skryvv","2026-10-22T15:30:00Z"]];
+    window.CAMP_TRAITORS=Object.values(docs).filter(w=>w.switchedAt&&Date.parse(w.switchedAt)>week&&campSide(w)&&!NOT_TRAITOR.some(([p,t])=>String(w.pseudo||"").toLowerCase()===p&&Date.parse(w.switchedAt)<Date.parse(t))).sort((a,b)=>b.switchedAt.localeCompare(a.switchedAt));
     if(!window.CUSTOM_TICKER)conseilTicker(defaultTicker());
     window.dispatchEvent(new Event("conseil-camps"));
   },e=>console.warn("camps",e));
