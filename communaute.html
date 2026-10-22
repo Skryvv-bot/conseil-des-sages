@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Le Conseil des Sages</title>
+<meta name="theme-color" content="#08090b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png?v=2">
+<link rel="apple-touch-icon" href="icon-192.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Barlow:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="conseil.css">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="conseil.js"></script>
+<style>
+.bet{display:flex;flex-direction:column;gap:10px;padding:14px;background:var(--void);border:1px solid var(--line2)}
+.bet.open{border-color:var(--hex2)}
+.bet .who{font:700 1.05rem var(--display);color:var(--goldhi)}
+.side{display:flex;flex-direction:column;gap:2px;padding:10px;border:1px solid var(--line2);cursor:pointer;background:var(--panel);text-align:left;color:var(--ink);font:inherit}
+.side[aria-pressed="true"]{border-color:var(--hex);box-shadow:inset 0 0 0 1px var(--hex2)}
+.side b{font:700 .95rem var(--display)}
+.side.win b{color:var(--ok)}.side.loss b{color:var(--red)}
+.sides{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bal{font:900 1.6rem var(--display);color:var(--goldhi)}
+.trial{display:flex;flex-direction:column;gap:10px;padding:16px;background:var(--void);border:1px solid var(--line2);position:relative;overflow:hidden}
+.trial .charge{font-size:1.02rem;color:var(--ink);border-left:3px solid var(--gold2);padding-left:10px}
+.stamp{position:absolute;right:14px;top:14px;transform:rotate(-8deg);font:900 1.1rem var(--display);letter-spacing:.12em;padding:4px 10px;border:3px solid currentColor}
+.stamp.g{color:var(--red)}.stamp.i{color:var(--ok)}.stamp.e{color:var(--muted)}
+.cat{display:flex;flex-direction:column;gap:8px;padding:14px;background:var(--void);border:1px solid var(--line2)}
+.crown{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--gold);background:linear-gradient(90deg,rgba(200,170,110,.15),transparent)}
+.crown b{font:700 1rem var(--display);color:var(--goldhi)}
+.vote{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;font-size:.9rem}
+.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:640px){.form{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="phead between">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <span class="eyebrow">La vie du groupe</span>
+      <h1>Le Conseil</h1>
+      <p class="sub">Paris sur les parties des potes, tribunal des défaites, et élection du sage de la semaine.</p>
+    </div>
+    <span class="me" id="me">Connexion au Conseil…</span>
+  </header>
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-paris" aria-selected="true">Paris</button>
+    <button role="tab" id="tab-banc" aria-selected="false">Banc des accusés</button>
+    <button role="tab" id="tab-sage" aria-selected="false">Sage de la semaine</button>
+    <button role="tab" id="tab-profil" aria-selected="false">Mon profil</button>
+  </div>
+
+  <!-- PARIS -->
+  <section id="v-paris" class="frame panel">
+    <div class="between"><h2>Paris entre potes</h2><div style="text-align:right"><span class="note">Tes points du Conseil</span><div class="bal" id="bal">–</div></div></div>
+    <p class="note">Chacun démarre avec 1 000 points (pas d'argent réel). Quand un sage lance une partie, ouvre un pari : les mises restent ouvertes 8 minutes. À la fin de la partie, le joueur ou celui qui a ouvert le pari annonce le résultat, et les gagnants se partagent la cagnotte au prorata de leur mise.</p>
+    <div id="inGame"></div>
+    <form class="row" id="openForm">
+      <select id="betTarget" aria-label="Joueur" style="flex:1 1 180px"></select>
+      <select id="betLabel" aria-label="Type de partie"><option>Ranked Solo/Duo</option><option>Ranked Flex</option><option>Normale</option><option>ARAM</option><option>Arena</option><option>Clash</option></select>
+      <button class="btn" type="submit">Ouvrir un pari</button>
+    </form>
+    <p class="err" id="openErr" hidden></p>
+    <h3>Paris en cours</h3>
+    <div class="list" id="openBets"></div>
+    <div class="grid2">
+      <div class="list"><h3>Classement des parieurs</h3><div class="list" id="betBoard"></div></div>
+      <div class="list"><h3>Derniers résultats</h3><div class="list" id="betHist"></div></div>
+    </div>
+  </section>
+
+  <!-- BANC -->
+  <section id="v-banc" class="frame panel" hidden>
+    <h2>Le banc des accusés</h2>
+    <p class="note">Une défaite ? Accuse le coupable. Le Conseil vote pendant 24 heures, puis le verdict tombe. L'accusé peut plaider sa défense mais ne vote pas.</p>
+    <form class="form" id="trialForm">
+      <label class="f">Accusé<select id="tAccused" required></select></label>
+      <label class="f">Chef d'accusation<input type="text" id="tCharge" maxlength="200" placeholder="Ex. n'a jamais gank top en 35 minutes" required></label>
+      <div><button class="btn" type="submit">Porter l'accusation</button></div>
+    </form>
+    <p class="err" id="trialErr" hidden></p>
+    <div class="list" id="trials"></div>
+  </section>
+
+  <!-- SAGE -->
+  <section id="v-sage" class="frame panel" hidden>
+    <div class="between"><h2>Sage de la semaine</h2><span class="note" id="weekInfo"></span></div>
+    <div id="lastWinners"></div>
+    <p class="note">Vote dans chaque catégorie pour cette semaine. Tu peux changer ton vote jusqu'à dimanche minuit, puis les gagnants sont couronnés pour la semaine suivante.</p>
+    <div class="grid3" id="cats"></div>
+  </section>
+
+  <!-- PROFIL -->
+  <section id="v-profil" class="frame panel" hidden>
+    <h2>Mon profil</h2>
+    <p class="note">Ton profil sert partout sur le site : générateur d'équipes, Clash, paris, votes et parties en direct.</p>
+    <form class="form" id="profForm">
+      <label class="f">Pseudo<input type="text" id="pPseudo" maxlength="20" required></label>
+      <label class="f">Riot ID (optionnel)<input type="text" id="pRiot" maxlength="40" placeholder="Pseudo#TAG"></label>
+      <label class="f">Région<select id="pRegion"></select></label>
+      <label class="f">Rang actuel<select id="pRank"></select></label>
+      <label class="f">Pseudo Discord (pour détecter tes parties)<input type="text" id="pDiscord" maxlength="40" placeholder="Ton nom affiché sur le serveur"></label>
+      <div class="f">Postes préférés (dans l'ordre de clic)<div class="chips" id="pRoles"></div></div>
+      <div class="row"><button class="btn" type="submit">Enregistrer mon profil</button><span class="okmsg" id="profMsg"></span></div>
+    </form>
+  </section>
+  <footer>Site de fan du Conseil des Sages, sans lien avec Riot Games ni Discord. Les points du Conseil n'ont aucune valeur réelle.</footer>
+</div>
+
+<script>
+conseilNav("conseil");
+const $=id=>document.getElementById(id), esc=conseilEsc;
+const ROLES=["Top","Jungle","Mid","Bot","Support"];
+const RANKS=["Non classé","Fer","Bronze","Argent","Or","Platine","Émeraude","Diamant","Maître","Grand Maître","Challenger"];
+const REGIONS={euw1:"EUW",eun1:"EUNE",na1:"NA",kr:"KR",br1:"BR",tr1:"TR",ru:"RU",jp1:"JP",la1:"LAN",la2:"LAS",oc1:"OCE"};
+const DISCORD_GUILD="781876426571251743", START=1000, OPEN_MIN=8, MAX_STAKE=500;
+const CATS=[{k:"carry",t:"Le plus carry",i:"⚔"},{k:"drole",t:"Le plus drôle",i:"☺"},{k:"tilt",t:"Le plus tilté",i:"☄"}];
+let db=null,uid=null,connErr=false,members={},bets={},stakes={},trials={},sage={},playing=[],profRoles=[];
+
+// ---------- onglets ----------
+const TABS=["paris","banc","sage","profil"];
+function showTab(id){for(const t of TABS){$("v-"+t).hidden=t!==id;$("tab-"+t).setAttribute("aria-selected",t===id)}}
+for(const t of TABS)$("tab-"+t).onclick=()=>{showTab(t);history.replaceState(null,"","#"+t)};
+if(TABS.includes(location.hash.slice(1)))showTab(location.hash.slice(1));
+const me=()=>members[uid];const myPseudo=()=>me()?.pseudo||"";
+const nameOf=id=>members[id]?.pseudo||"Un sage";
+const ms=v=>v&&typeof v.toMillis==="function"?v.toMillis():+v||0;
+
+// ---------- Profil ----------
+$("pRegion").innerHTML=Object.entries(REGIONS).map(([k,v])=>`<option value="${k}">${v}</option>`).join("");
+$("pRank").innerHTML=RANKS.map(r=>`<option>${r}</option>`).join("");
+function renderRoleChips(){$("pRoles").innerHTML=ROLES.map(r=>{const i=profRoles.indexOf(r);return `<button type="button" class="chip" data-r="${r}" aria-pressed="${i>=0}">${i>=0?(i+1)+". ":""}${r}</button>`}).join("");
+  $("pRoles").querySelectorAll(".chip").forEach(c=>c.onclick=()=>{const r=c.dataset.r,i=profRoles.indexOf(r);i>=0?profRoles.splice(i,1):profRoles.push(r);renderRoleChips()})}
+let profFilled=false;
+function fillProfile(){if(profFilled||!db)return;const m=me()||{};profFilled=true;
+  $("pPseudo").value=m.pseudo||"";$("pRiot").value=m.riotId||"";$("pRegion").value=m.region||"euw1";$("pRank").value=m.rank||"Non classé";$("pDiscord").value=m.discord||"";profRoles=(m.roles||[]).slice();renderRoleChips()}
+renderRoleChips();
+$("profForm").onsubmit=async e=>{e.preventDefault();if(!db)return;const msg=$("profMsg");
+  const pseudo=$("pPseudo").value.trim().slice(0,20),riotId=$("pRiot").value.trim().replace(/\s*#\s*/,"#");
+  if(riotId&&!/^.{3,16}#[A-Za-z0-9]{2,5}$/.test(riotId)){msg.className="err";msg.textContent="Le Riot ID doit avoir la forme Pseudo#TAG.";return}
+  if(Object.entries(members).some(([id,m])=>id!==uid&&m.pseudo?.toLowerCase()===pseudo.toLowerCase())){msg.className="err";msg.textContent="Ce pseudo est déjà pris.";return}
+  try{await db.doc("riot/"+uid).set({pseudo,riotId,region:$("pRegion").value,rank:$("pRank").value,discord:$("pDiscord").value.trim().slice(0,40),roles:profRoles.slice(),updated:new Date().toISOString()},{merge:true});
+    msg.className="okmsg";msg.textContent="Profil enregistré."}catch(x){msg.className="err";msg.textContent="Enregistrement impossible, réessaie."}};
+
+// ---------- Détection via le widget Discord ----------
+async function loadDiscord(){try{const r=await fetch(`https://discord.com/api/guilds/${DISCORD_GUILD}/widget.json`);if(!r.ok){playing=null;renderBets();return}
+  const w=await r.json();playing=(w.members||[]).filter(m=>/league of legends/i.test(m.game?.name||"")).map(m=>m.username);renderBets()}catch(e){playing=null;renderBets()}}
+loadDiscord();setInterval(loadDiscord,60000);
+
+// ---------- Paris ----------
+function betPool(id){const ss=Object.values(stakes).filter(s=>s.bet===id);const w=ss.filter(s=>s.side==="win"),l=ss.filter(s=>s.side==="loss");
+  const sum=a=>a.reduce((x,s)=>x+(+s.amount||0),0);return{ss,w,l,sw:sum(w),sl:sum(l),total:sum(ss)}}
+function balances(){
+  const b={};const add=(u,v)=>{b[u]=(b[u]??START)+v};
+  for(const id of Object.keys(members))b[id]=START;
+  for(const [id,bet] of Object.entries(bets)){const p=betPool(id);
+    if(bet.status==="open"){for(const s of p.ss)add(s.uid,-s.amount);continue}
+    if(bet.status!=="done"||!bet.result)continue;
+    const win=bet.result==="win"?p.w:p.l,wsum=bet.result==="win"?p.sw:p.sl;
+    for(const s of p.ss){if(!wsum){continue}const gain=win.includes(s)?Math.floor(s.amount/wsum*p.total):0;add(s.uid,gain-s.amount)}}
+  return b}
+function renderBets(){
+  if(!db){$("openBets").innerHTML=`<div class="note">${connErr?"Paris indisponibles.":"Chargement…"}</div>`;return}
+  const bal=balances();$("bal").textContent=(bal[uid]??START).toLocaleString("fr-FR");
+  // joueurs détectés
+  const byDiscord={};for(const [id,m] of Object.entries(members))if(m.discord)byDiscord[m.discord.toLowerCase()]=id;
+  const now=Date.now(),openTargets=new Set(Object.values(bets).filter(b=>b.status==="open").map(b=>b.target));
+  if(playing===null)$("inGame").innerHTML=`<p class="note">Astuce : active le widget du serveur Discord (Paramètres du serveur › Widget) et renseigne ton pseudo Discord dans ton profil pour que le site détecte quand un sage lance LoL.</p>`;
+  else{const det=playing.map(u=>byDiscord[u.toLowerCase()]).filter(Boolean);
+    $("inGame").innerHTML=det.length?`<div class="list">${det.map(id=>`<div class="item"><span class="tag live">Sur LoL</span><b class="grow">${esc(nameOf(id))}${conseilCampTag(id)}</b>${openTargets.has(id)?'<span class="note">pari ouvert</span>':id===uid?'<span class="note">c\'est toi</span>':`<button class="btn small" data-quick="${id}">Ouvrir un pari</button>`}</div>`).join("")}</div>`:`<p class="note">Personne du Conseil n'est sur LoL d'après Discord pour l'instant.</p>`;
+    $("inGame").querySelectorAll("[data-quick]").forEach(b=>b.onclick=()=>openBet(b.dataset.quick,"Partie détectée sur Discord"))}
+  // sélecteur
+  const sel=$("betTarget"),cur=sel.value;
+  sel.innerHTML=`<option value="">Sur qui parier ?</option>`+Object.entries(members).filter(([,m])=>m.pseudo).sort((a,b)=>a[1].pseudo.localeCompare(b[1].pseudo)).map(([id,m])=>`<option value="${id}">${esc(m.pseudo)}</option>`).join("");sel.value=cur;
+  // paris ouverts / à régler
+  const live=Object.entries(bets).filter(([,b])=>b.status==="open").sort((a,b)=>ms(b[1].closesAt)-ms(a[1].closesAt));
+  $("openBets").innerHTML=live.length?live.map(([id,b])=>{const p=betPool(id),closes=ms(b.closesAt),open=now<closes,mine=stakes[id+"_"+uid],canSettle=(uid===b.target||uid===b.openedBy)&&!open;
+    const pw=p.total?Math.round(100*p.sw/p.total):50;
+    return `<div class="bet ${open?"open":""}" data-b="${id}"><div class="between"><div><span class="who">${esc(b.targetPseudo)}</span>${conseilCampTag(b.target)} <span class="note">· ${esc(b.label||"Partie")} · ouvert par ${esc(b.openedPseudo)}</span></div>
+      <span class="tag ${open?"live":""}">${open?"Mises ouvertes · "+Math.max(0,Math.ceil((closes-now)/60000))+" min":"En attente du résultat"}</span></div>
+      <div class="bar"><i style="width:${pw}%;background:var(--ok)"></i><i style="width:${100-pw}%;background:var(--red)"></i></div>
+      <div class="between note"><span>Victoire : ${p.sw} pts (${p.w.length})</span><span>Cagnotte ${p.total} pts</span><span>Défaite : ${p.sl} pts (${p.l.length})</span></div>
+      ${open&&uid!==b.target?`<div class="sides"><button class="side win" data-side="win" aria-pressed="${mine?.side==="win"}"><b>Victoire</b><span class="note">${mine?.side==="win"?"Ta mise : "+mine.amount:"Parier sur la victoire"}</span></button><button class="side loss" data-side="loss" aria-pressed="${mine?.side==="loss"}"><b>Défaite</b><span class="note">${mine?.side==="loss"?"Ta mise : "+mine.amount:"Parier sur la défaite"}</span></button></div>
+        <div class="row"><input type="number" min="10" max="${MAX_STAKE}" step="10" value="${mine?.amount||100}" aria-label="Mise" data-amt style="width:110px"><span class="note">points (10 à ${MAX_STAKE})</span></div>`:open?`<p class="note">Tu ne peux pas parier sur ta propre partie.</p>`:""}
+      ${canSettle?`<div class="row"><span class="note">Résultat :</span><button class="btn small green" data-res="win">Victoire</button><button class="btn small red" data-res="loss">Défaite</button><button class="btn ghost small" data-res="cancel">Annuler le pari</button></div>`:!open?`<p class="note">${esc(b.targetPseudo)} ou ${esc(b.openedPseudo)} annoncera le résultat.</p>`:""}</div>`}).join(""):`<div class="empty">Aucun pari en cours.</div>`;
+  $("openBets").querySelectorAll(".bet").forEach(el=>{const id=el.dataset.b;
+    el.querySelectorAll("[data-side]").forEach(s=>s.onclick=()=>placeStake(id,s.dataset.side,+el.querySelector("[data-amt]").value));
+    el.querySelectorAll("[data-res]").forEach(s=>s.onclick=()=>settle(id,s.dataset.res))});
+  // classement
+  const board=Object.entries(bal).filter(([id])=>members[id]?.pseudo).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  $("betBoard").innerHTML=board.length?board.map(([id,v],i)=>`<div class="item ${id===uid?"mine":""}"><b style="color:var(--gold);width:24px">${i+1}</b><span class="grow ellip">${esc(nameOf(id))}${conseilCampTag(id)}</span><b>${v.toLocaleString("fr-FR")}</b></div>`).join(""):`<div class="note">Personne n'a encore parié.</div>`;
+  const hist=Object.entries(bets).filter(([,b])=>b.status==="done").sort((a,b)=>(b[1].settledAt||"").localeCompare(a[1].settledAt||"")).slice(0,8);
+  $("betHist").innerHTML=hist.length?hist.map(([id,b])=>`<div class="item"><span class="tag ${b.result==="win"?"ok":b.result==="loss"?"live":""}">${b.result==="win"?"Victoire":b.result==="loss"?"Défaite":"Annulé"}</span><span class="grow ellip">${esc(b.targetPseudo)} · ${esc(b.label||"")}</span><span class="note">${betPool(id).total} pts</span></div>`).join(""):`<div class="note">Aucun pari terminé.</div>`;
+}
+async function openBet(target,label){const err=$("openErr");err.hidden=true;
+  if(!myPseudo()){err.textContent="Crée d'abord ton profil (onglet Mon profil).";err.hidden=false;return}
+  if(!target||!members[target]){err.textContent="Choisis un sage.";err.hidden=false;return}
+  if(Object.values(bets).some(b=>b.status==="open"&&b.target===target)){err.textContent="Un pari est déjà ouvert sur ce sage.";err.hidden=false;return}
+  try{await db.collection("bets").add({target,targetPseudo:members[target].pseudo,label:label||"Partie",openedBy:uid,openedPseudo:myPseudo(),created:new Date().toISOString(),
+    closesAt:firebase.firestore.Timestamp.fromMillis(Date.now()+OPEN_MIN*60000),status:"open",result:null})}catch(e){err.textContent="Ouverture impossible.";err.hidden=false}}
+$("openForm").onsubmit=e=>{e.preventDefault();openBet($("betTarget").value,$("betLabel").value)};
+async function placeStake(id,side,amount){if(!myPseudo()){showTab("profil");return}
+  amount=Math.round(Math.max(10,Math.min(MAX_STAKE,amount||0))/10)*10;const cur=stakes[id+"_"+uid]?.amount||0,bal=balances()[uid]??START;
+  if(amount>bal+cur){alertBet(id,`Pas assez de points (il te reste ${bal}).`);return}
+  try{await db.doc("stakes/"+id+"_"+uid).set({bet:id,uid,pseudo:myPseudo(),side,amount,updated:new Date().toISOString()})}catch(e){alertBet(id,"Les mises sont fermées.")}}
+function alertBet(id,t){const el=document.querySelector(`.bet[data-b="${id}"]`);if(el){let p=el.querySelector(".err");if(!p){p=document.createElement("p");p.className="err";el.appendChild(p)}p.textContent=t}}
+async function settle(id,res){try{await db.doc("bets/"+id).update(res==="cancel"?{status:"cancel",result:null,settledBy:uid,settledAt:new Date().toISOString()}:{status:"done",result:res,settledBy:uid,settledAt:new Date().toISOString()})}catch(e){alertBet(id,"Action impossible.")}}
+setInterval(()=>{if(!$("v-paris").hidden&&!document.activeElement?.matches?.("[data-amt]"))renderBets()},20000);
+
+// ---------- Banc des accusés ----------
+function renderTrials(){
+  const sel=$("tAccused"),cur=sel.value;
+  sel.innerHTML=`<option value="">Choisis l'accusé</option>`+Object.entries(members).filter(([id,m])=>m.pseudo&&id!==uid).sort((a,b)=>a[1].pseudo.localeCompare(b[1].pseudo)).map(([id,m])=>`<option value="${id}">${esc(m.pseudo)}</option>`).join("");sel.value=cur;
+  if(!db){$("trials").innerHTML=`<div class="note">${connErr?"Tribunal indisponible.":"Chargement…"}</div>`;return}
+  const now=Date.now(),list=Object.entries(trials).sort((a,b)=>b[1].created.localeCompare(a[1].created)).slice(0,20);
+  $("trials").innerHTML=list.length?list.map(([id,t])=>{const votes=Object.values(t.votes||{}),g=votes.filter(v=>v==="coupable").length,i=votes.filter(v=>v==="innocent").length,open=now<t.closesAt,myV=t.votes?.[uid];
+    const verdict=!open?(g>i?`<span class="stamp g">Coupable</span>`:i>g?`<span class="stamp i">Innocent</span>`:`<span class="stamp e">Non-lieu</span>`):"";
+    return `<div class="trial" data-t="${id}">${verdict}<div><b style="font:700 1.1rem var(--display);color:var(--goldhi)">${esc(t.accusedPseudo)}</b>${conseilCampTag(t.accusedUid)} <span class="note">accusé par ${esc(t.accuserPseudo)}${conseilCampTag(t.accuser)} · ${new Date(t.created).toLocaleDateString("fr-FR",{day:"numeric",month:"short"})}</span></div>
+      <div class="charge">« ${esc(t.charge)} »</div>
+      ${t.defense?`<div class="note"><b style="color:var(--hex)">Défense :</b> ${esc(t.defense)}</div>`:""}
+      <div class="bar"><i style="width:${g+i?100*g/(g+i):50}%;background:var(--red)"></i><i style="width:${g+i?100*i/(g+i):50}%;background:var(--ok)"></i></div>
+      <div class="between note"><span>Coupable : ${g}</span><span>${open?"Verdict dans "+Math.max(1,Math.ceil((t.closesAt-now)/3600000))+" h":"Verdict rendu"}</span><span>Innocent : ${i}</span></div>
+      ${open&&uid!==t.accusedUid&&myPseudo()?`<div class="row"><button class="btn small red" data-v="coupable" ${myV==="coupable"?'aria-pressed="true"':""}>${myV==="coupable"?"✓ ":""}Coupable</button><button class="btn small green" data-v="innocent">${myV==="innocent"?"✓ ":""}Innocent</button></div>`:""}
+      ${open&&uid===t.accusedUid?`<form class="row" data-def><input type="text" maxlength="200" placeholder="Ta plaidoirie" value="${esc(t.defense||"")}" style="flex:1 1 220px" aria-label="Défense"><button class="btn small" type="submit">Plaider</button></form>`:""}
+      ${t.accuser===uid&&open?`<div><button class="btn ghost small" data-del>Retirer l'accusation</button></div>`:""}</div>`}).join(""):`<div class="empty">Le tribunal est vide. Personne n'a encore été accusé.</div>`;
+  $("trials").querySelectorAll(".trial").forEach(el=>{const id=el.dataset.t;
+    el.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>db.doc("trials/"+id).update({["votes."+uid]:b.dataset.v}).catch(e=>console.warn(e)));
+    const f=el.querySelector("[data-def]");if(f)f.onsubmit=e=>{e.preventDefault();db.doc("trials/"+id).update({defense:f.querySelector("input").value.trim().slice(0,200)}).catch(()=>{})};
+    const d=el.querySelector("[data-del]");if(d)d.onclick=()=>db.doc("trials/"+id).delete().catch(()=>{})});
+}
+$("trialForm").onsubmit=async e=>{e.preventDefault();const err=$("trialErr");err.hidden=true;
+  if(!myPseudo()){err.textContent="Crée d'abord ton profil (onglet Mon profil).";err.hidden=false;return}
+  const acc=$("tAccused").value;if(!acc){err.textContent="Choisis l'accusé.";err.hidden=false;return}
+  try{await db.collection("trials").add({accuser:uid,accuserPseudo:myPseudo(),accusedUid:acc,accusedPseudo:members[acc].pseudo,charge:$("tCharge").value.trim().slice(0,200),created:new Date().toISOString(),closesAt:Date.now()+24*3600e3,votes:{}});$("trialForm").reset()}
+  catch(x){err.textContent="Accusation impossible pour le moment.";err.hidden=false}};
+
+// ---------- Sage de la semaine ----------
+function tally(week){const t={};for(const c of CATS)t[c.k]={};for(const v of Object.values(sage))if(v.week===week)for(const c of CATS)if(v[c.k])t[c.k][v[c.k]]=(t[c.k][v[c.k]]||0)+1;return t}
+function winners(week){const t=tally(week),w={};for(const c of CATS){const e=Object.entries(t[c.k]).sort((a,b)=>b[1]-a[1]);if(e.length&&(!e[1]||e[0][1]>e[1][1]))w[c.k]=e[0]}return w}
+function renderSage(){
+  const week=conseilWeek(),last=conseilWeek(new Date(Date.now()-7*864e5));
+  const end=new Date();end.setDate(end.getDate()+((7-end.getDay())%7));end.setHours(23,59,0,0);
+  $("weekInfo").textContent=`Semaine ${week.split("-W")[1]} · votes jusqu'au ${end.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"})}`;
+  const lw=winners(last);
+  $("lastWinners").innerHTML=Object.keys(lw).length?`<div class="crown"><span style="font-size:1.6rem">👑</span><div class="grow"><b>Couronnés la semaine dernière</b><div class="note">${CATS.filter(c=>lw[c.k]).map(c=>`${c.t} : <b style="color:var(--goldhi)">${esc(nameOf(lw[c.k][0]))}</b> (${lw[c.k][1]} voix)`).join(" · ")}</div></div></div>`:"";
+  if(!db){$("cats").innerHTML=`<div class="note">${connErr?"Votes indisponibles.":"Chargement…"}</div>`;return}
+  const t=tally(week),mine=sage[week+"_"+uid]||{},people=Object.entries(members).filter(([,m])=>m.pseudo).sort((a,b)=>a[1].pseudo.localeCompare(b[1].pseudo));
+  $("cats").innerHTML=CATS.map(c=>{const rk=Object.entries(t[c.k]).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    return `<div class="cat"><h3>${c.i} ${c.t}</h3>
+      <select data-cat="${c.k}" aria-label="${c.t}" ${myPseudo()?"":"disabled"}><option value="">${myPseudo()?"Ton vote…":"Crée ton profil pour voter"}</option>${people.map(([id,m])=>`<option value="${id}" ${mine[c.k]===id?"selected":""}>${esc(m.pseudo)}</option>`).join("")}</select>
+      <div class="list">${rk.length?rk.map(([id,n],i)=>`<div class="vote"><span class="ellip">${i===0?"👑 ":""}${esc(nameOf(id))}${conseilCampTag(id)}</span><b>${n}</b></div>`).join(""):`<span class="note">Pas encore de vote.</span>`}</div></div>`}).join("");
+  $("cats").querySelectorAll("select").forEach(s=>s.onchange=()=>db.doc("sageVotes/"+week+"_"+uid).set({week,pseudo:myPseudo(),[s.dataset.cat]:s.value||null,updated:new Date().toISOString()},{merge:true}).catch(e=>console.warn(e)));
+}
+
+// ---------- Données ----------
+function renderAll(){$("me").innerHTML=!db?(connErr?"Hors ligne":"Connexion au Conseil…"):myPseudo()?`Connecté : <b>${esc(myPseudo())}</b>`:"Sage anonyme · crée ton profil";
+  if(!document.activeElement||!document.activeElement.closest(".bet,.trial,.cat"))renderBets();renderTrials();renderSage();fillProfile()}
+renderAll();
+(async()=>{const c=await conseilConnect();if(!c.db){connErr=true;renderAll();return}db=c.db;uid=c.uid;
+  const sub=(col,fn)=>db.collection(col).onSnapshot(q=>{const o={};q.docs.forEach(d=>o[d.id]=d.data());fn(o);renderAll()},e=>console.warn(col,e));
+  let firstRiot=true;sub("riot",o=>{members=o;if(firstRiot){firstRiot=false;if(!location.hash&&!o[uid])showTab("profil")}});sub("bets",o=>bets=o);sub("stakes",o=>stakes=o);sub("trials",o=>trials=o);sub("sageVotes",o=>sage=o);
+  renderAll()})();
+
+window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
+</script>
+</body>
+</html>

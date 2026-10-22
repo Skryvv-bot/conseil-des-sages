@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Notes de patch du Conseil</title>
+<meta name="theme-color" content="#08090b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png?v=2">
+<link rel="apple-touch-icon" href="icon-192.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Barlow:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="conseil.css">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="conseil.js"></script>
+<style>
+.ver{font:900 clamp(2rem,6vw,3.2rem) var(--display);color:var(--goldhi);line-height:1}
+.tldr{display:flex;flex-direction:column;gap:6px;margin:0;padding-left:20px}
+.tldr li{color:var(--ink)}
+.sec{display:flex;flex-direction:column;gap:6px}
+.chg{display:grid;grid-template-columns:170px minmax(0,1fr);gap:12px;padding:10px 12px;background:var(--void);border:1px solid var(--line2);border-left-width:3px}
+@media (max-width:560px){.chg{grid-template-columns:1fr;gap:2px}}
+.chg b{font:700 .95rem var(--display);color:var(--goldhi)}
+.chg span{color:var(--ink);font-size:.94rem}
+.chg.buff{border-left-color:var(--ok)}.chg.nerf{border-left-color:var(--red)}.chg.adj{border-left-color:var(--gold)}.chg.item{border-left-color:var(--hex)}.chg.mode{border-left-color:#a35cff}
+.chg.hl{background:rgba(10,200,185,.08);border-color:var(--hex2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="phead between">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <span class="eyebrow">Notes de patch résumées</span>
+      <h1>Patch</h1>
+      <p class="sub">L'essentiel de chaque patch en deux minutes. Les changements qui touchent tes champions favoris sont surlignés.</p>
+    </div>
+    <select id="verSel" aria-label="Version du patch"></select>
+  </header>
+  <section class="frame panel">
+    <div class="between"><div><div class="ver" id="ver"></div><span class="note" id="vdate"></span></div><a class="btn ghost" id="vlink" target="_blank" rel="noopener">Notes officielles</a></div>
+    <h3>En bref</h3>
+    <ul class="tldr" id="tldr"></ul>
+  </section>
+  <section class="frame panel">
+    <div class="between"><h2>Détail</h2><div class="chips" id="filters"></div></div>
+    <label class="f">Tes champions favoris (séparés par des virgules)<input type="text" id="favs" placeholder="Ex. Jinx, Lee Sin, Ahri"></label>
+    <div id="secs" class="list"></div>
+  </section>
+  <footer>Résumé non officiel rédigé pour le Conseil des Sages. Les notes officielles font foi.</footer>
+</div>
+<script>
+conseilNav("patch");
+const PATCHES=[{"v": "26.21", "date": "2026-10-21", "url": "https://www.leagueoflegends.com/fr-fr/news/game-updates/league-of-legends-patch-26-21-notes/", "tldr": ["Caitlyn, Jinx, Lee Sin, Nidalee, Qiyana, Rammus, Tristana, Viktor et Yone prennent des nerfs.", "Varus est retravaillé : plus de poke avec le Q, moins de build on-hit. Locke est réajusté.", "Miss Fortune, Ryze, Taliyah, Sion, Nunu et Vel'Koz sont renforcés.", "ARAM Mayhem passe en version « Journey to Stardom » avec de nouvelles règles « Headliner » et une nouvelle progression.", "Les téléchargements de replays sont limités à 10 par heure."], "sections": [{"k": "buff", "t": "Renforcements", "items": [["Azir", "Mana par niveau 40 → 50."], ["Darius", "Q : 4 s de recharge au rang max (au lieu de 5)."], ["Miss Fortune", "E 90-210 dégâts ; R : dégâts des coups critiques 145 % (au lieu de 130 %)."], ["Nunu et Willump", "R : dégâts max 750/1100/1450 (au lieu de 625/925/1275)."], ["Orianna", "Ratios AP : Q 60 %, W 85 %."], ["Ryze", "Q : bonus Flux jusqu'à 100 % et plus de vitesse ; W : ratio AP 70 %."], ["Sion", "Plus de PV par niveau (95) ; R jusqu'à +200 % de dégâts en charge."], ["Taliyah", "E plus fort (70-250, +70 % AP) et 225 % de dégâts aux monstres."], ["Vel'Koz", "Passif 35-205 (+65 % AP)."], ["Xin Zhao", "Q : ratio AD bonus 45 %."], ["Zyra", "W : graines qui reviennent plus vite (16 → 10 s)."]]}, {"k": "nerf", "t": "Affaiblissements", "items": [["Caitlyn", "Tir dans la tête 60-80 % AD (au lieu de 100 % au max) ; Q un peu plus fort en compensation."], ["Jinx", "Moins de PV de base (610) et d'AD par niveau (3)."], ["Lee Sin", "W : 8 s de recharge ; R : 150/350/550 dégâts, et la cible percutée ne prend plus de dégâts en % des PV."], ["Nidalee", "W en cougar et E en humaine affaiblis."], ["Qiyana", "Q : 70-190 dégâts (au lieu de 80-200)."], ["Rammus", "W : moins d'armure et de résistance magique bonus."], ["Tristana", "Q : moins de vitesse d'attaque en début de partie (40 % au rang 1)."], ["Viktor", "Vitesse 330 ; bouclier du Q réduit."], ["Wukong", "Passif : moins d'armure par cumul, mais plus de régénération de PV."], ["Yone", "Q : ratio AD 105 %."]]}, {"k": "adj", "t": "Ajustements", "items": [["Varus", "Q bien plus fort sur le bonus AD (léthalité), W on-hit et % PV réduits : moins de build on-hit, plus de poke."], ["Locke", "Plus de dégâts sur E, W redistribué, Q rembourse jusqu'à 40 %."], ["Taric", "Q, E et R fonctionnent sur les alliés intouchables."], ["Twisted Fate", "R révèle aussi les unités intouchables."]]}, {"k": "item", "t": "Objets", "items": [["Bastion Breaker", "Létalité 22 → 18, charges réduites ; le Sabotage dure indéfiniment."], ["Dawncore", "+15 AP par 100 % de régénération de mana de base (au lieu de 10)."], ["Gluttonous Greaves", "Coût 1 000 → 1 100 or."], ["Hubris", "Plus fort en mêlée (15 AD de base), plus faible à distance (10 AD, 2 par cumul)."]]}, {"k": "mode", "t": "Modes et système", "items": [["ARAM Mayhem", "« Journey to Stardom » : chaque partie a une règle Headliner (K/DA, Pentakill, True Damage, HEARTSTEEL…), une nouvelle progression par missions et plus de 30 nouveaux augments."], ["Arena", "Nombreux équilibrages : Ezreal, Gangplank, Gnar, Skarner, Yone renforcés ; Yuumi, Galio, Milio, Morgana affaiblis."], ["Classic", "Mordekaiser, Yorick, Hécarim et Lucian rejoignent le mode Classic ; tous les nerfs de Kassadin sont annulés."], ["Replays", "Téléchargements limités à 10 par heure."], ["Skins", "Ligne True Damage « Know My Name » : Ekko Prestige, Akali, Qiyana, Senna et Yasuo."]]}]}];
+const $=id=>document.getElementById(id),esc=conseilEsc;
+let cur=0,filter="all";
+const norm=s=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z]/g,"");
+try{$("favs").value=localStorage.getItem("patch-favs")||""}catch(e){}
+$("verSel").innerHTML=PATCHES.map((p,i)=>`<option value="${i}">Patch ${p.v}</option>`).join("");
+$("verSel").onchange=()=>{cur=+$("verSel").value;render()};
+$("favs").oninput=()=>{try{localStorage.setItem("patch-favs",$("favs").value)}catch(e){}render()};
+const F=[["all","Tout"],["buff","Renforcements"],["nerf","Affaiblissements"],["adj","Ajustements"],["item","Objets"],["mode","Modes"],["fav","Mes champions"]];
+function render(){const p=PATCHES[cur];
+  $("ver").textContent=p.v;$("vdate").textContent="Sorti le "+new Date(p.date).toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"});$("vlink").href=p.url;
+  $("tldr").innerHTML=p.tldr.map(t=>`<li>${esc(t)}</li>`).join("");
+  $("filters").innerHTML=F.map(([k,l])=>`<button class="chip" data-f="${k}" aria-pressed="${filter===k}">${l}</button>`).join("");
+  $("filters").querySelectorAll(".chip").forEach(c=>c.onclick=()=>{filter=c.dataset.f;render()});
+  const favs=$("favs").value.split(",").map(norm).filter(Boolean);
+  const isFav=n=>favs.some(f=>norm(n).includes(f)||f.includes(norm(n)));
+  const html=p.sections.filter(s=>filter==="all"||filter==="fav"||filter===s.k).map(s=>{
+    const items=s.items.filter(([n])=>filter!=="fav"||isFav(n));if(!items.length)return"";
+    return `<div class="sec"><h3>${esc(s.t)}</h3>${items.map(([n,d])=>`<div class="chg ${s.k} ${isFav(n)?"hl":""}"><b>${esc(n)}</b><span>${esc(d)}</span></div>`).join("")}</div>`}).join("");
+  $("secs").innerHTML=html||`<div class="empty">${filter==="fav"?"Aucun de tes champions favoris n'est touché par ce patch.":"Rien dans cette catégorie."}</div>`;
+}
+render();
+</script>
+</body>
+</html>

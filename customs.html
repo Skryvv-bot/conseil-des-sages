@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Customs & Clash du Conseil</title>
+<meta name="theme-color" content="#08090b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png?v=2">
+<link rel="apple-touch-icon" href="icon-192.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Barlow:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="conseil.css">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="conseil.js"></script>
+<script src="champions.js"></script>
+<style>
+.team{display:flex;flex-direction:column;gap:6px;padding:14px;border:1px solid var(--line2);background:var(--void)}
+.team.blue{border-top:3px solid #3a8fe0}.team.red{border-top:3px solid var(--red)}
+.team h3{display:flex;justify-content:space-between;color:var(--ink)}
+.tp{display:grid;grid-template-columns:62px minmax(0,1fr) auto;gap:8px;align-items:center;font-size:.92rem;padding:6px 0;border-bottom:1px solid var(--line2)}
+.tp:last-child{border-bottom:0}
+.role{font:600 .66rem var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.rk{font-size:.78rem;color:var(--gold)}
+.pool{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px}
+.pp{display:flex;gap:8px;align-items:center;padding:8px 10px;background:var(--void);border:1px solid var(--line2);cursor:pointer;min-width:0}
+.pp[aria-pressed="true"]{border-color:var(--hex2);background:rgba(10,200,185,.07)}
+.pp .ck{width:16px;height:16px;border:1px solid var(--gold2);flex:none;display:grid;place-items:center;font-size:.7rem;color:var(--hex)}
+.pp small{color:var(--muted);display:block}
+.reel{height:120px;overflow:hidden;position:relative;border:1px solid var(--gold2);background:var(--void);display:flex;align-items:center;justify-content:center}
+.reel::before,.reel::after{content:"";position:absolute;left:0;right:0;height:36px;pointer-events:none;z-index:1}
+.reel::before{top:0;background:linear-gradient(180deg,var(--void),transparent)}.reel::after{bottom:0;background:linear-gradient(0deg,var(--void),transparent)}
+.reel b{font:900 clamp(1.6rem,5vw,2.6rem) var(--display);letter-spacing:.04em;color:var(--goldhi);text-align:center}
+.picks{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.cc{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;background:var(--void);border:1px solid var(--line2);text-align:center}
+.cc img,.cc .mono{width:64px;height:64px;border:1px solid var(--gold2)}
+.cc .mono{display:grid;place-items:center;font:700 1.3rem var(--display);color:var(--void);background:var(--gold)}
+.cc b{font:700 .95rem var(--display);color:var(--goldhi)}
+.challenge{padding:12px 14px;border:1px dashed var(--gold);color:var(--goldhi);background:rgba(200,170,110,.06)}
+.ev{display:flex;flex-direction:column;gap:10px;padding:14px;background:var(--void);border:1px solid var(--line2)}
+.cov{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+@media (max-width:600px){.cov{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.cov div{padding:6px 8px;border:1px solid var(--line2);font-size:.82rem;min-width:0}
+.cov div.full{border-color:var(--ok)}
+.cov div b{display:block;font:600 .66rem var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.date{font:700 1rem var(--display);color:var(--goldhi)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="phead between">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <span class="eyebrow">Jouer ensemble</span>
+      <h1>Customs & Clash</h1>
+      <p class="sub">Monte deux équipes équilibrées pour vos customs, tire des champions au hasard, et organise les inscriptions au Clash.</p>
+    </div>
+    <span class="me" id="me">Connexion au Conseil…</span>
+  </header>
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-gen" aria-selected="true">Générateur 5v5</button>
+    <button role="tab" id="tab-roue" aria-selected="false">Roue des champions</button>
+    <button role="tab" id="tab-clash" aria-selected="false">Clash</button>
+  </div>
+
+  <!-- GÉNÉRATEUR -->
+  <section id="v-gen" class="frame panel">
+    <div class="between"><h2>Qui joue ?</h2><span class="note" id="selCount"></span></div>
+    <p class="note">Coche les présents. Le rang et les postes préférés viennent du profil de chacun (onglet <a href="communaute.html#profil">Le Conseil › Mon profil</a>). Tu peux aussi ajouter un invité.</p>
+    <div class="pool" id="pool"><div class="note">Chargement des membres…</div></div>
+    <form class="row" id="guestForm">
+      <input type="text" id="gName" maxlength="20" placeholder="Nom de l'invité" aria-label="Nom de l'invité" style="flex:1 1 160px" required>
+      <select id="gRank" aria-label="Rang de l'invité"></select>
+      <select id="gRole" aria-label="Poste préféré de l'invité"><option value="">Poste : peu importe</option></select>
+      <button class="btn ghost" type="submit">Ajouter l'invité</button>
+    </form>
+    <div class="row"><button class="btn" id="genBtn">Générer les équipes</button><button class="btn ghost" id="champBtn" hidden>Tirer les champions</button><button class="btn ghost" id="copyBtn" hidden>Copier pour Discord</button><span class="okmsg" id="copyMsg"></span></div>
+    <div class="grid2" id="teams"></div>
+  </section>
+
+  <!-- ROUE -->
+  <section id="v-roue" class="frame panel" hidden>
+    <h2>Roue des champions</h2>
+    <div class="chips" id="roueMode" role="group" aria-label="Type de tirage">
+      <button class="chip" data-m="one" aria-pressed="true">1 champion</button>
+      <button class="chip" data-m="team" aria-pressed="false">Équipe (1 par poste)</button>
+      <button class="chip" data-m="aram" aria-pressed="false">5 au hasard (ARAM)</button>
+    </div>
+    <div class="chips" id="roueRole" role="group" aria-label="Poste">
+      <button class="chip" data-r="" aria-pressed="true">Tous postes</button>
+      <button class="chip" data-r="Top" aria-pressed="false">Top</button><button class="chip" data-r="Jungle" aria-pressed="false">Jungle</button>
+      <button class="chip" data-r="Mid" aria-pressed="false">Mid</button><button class="chip" data-r="Bot" aria-pressed="false">Bot</button><button class="chip" data-r="Support" aria-pressed="false">Support</button>
+    </div>
+    <label class="row note" style="gap:8px"><input type="checkbox" id="withChal"> Ajouter un défi au hasard</label>
+    <div class="reel" id="reel" aria-live="polite"><b id="reelName">?</b></div>
+    <div class="row"><button class="btn gold" id="spin">Lancer la roue</button></div>
+    <div id="roueRes" class="list"></div>
+  </section>
+
+  <!-- CLASH -->
+  <section id="v-clash" class="frame panel" hidden>
+    <div class="between"><h2>Clash du Conseil</h2></div>
+    <p class="note">Crée une session Clash, chacun s'inscrit avec ses postes, et le site propose des équipes de 5. Pense à vérifier les dates officielles dans le client.</p>
+    <form class="row" id="clashForm">
+      <label class="f" style="flex:1 1 200px">Nom de la session<input type="text" id="cTitle" maxlength="40" placeholder="Ex. Clash Coupe de Shurima, jour 1" required></label>
+      <label class="f">Date et heure<input type="datetime-local" id="cDate" required></label>
+      <button class="btn" type="submit" style="align-self:flex-end">Créer la session</button>
+    </form>
+    <p class="err" id="clashErr" hidden></p>
+    <div class="list" id="events"><div class="note">Chargement…</div></div>
+  </section>
+  <footer>Site de fan du Conseil des Sages, sans lien avec Riot Games.</footer>
+</div>
+
+<script>
+conseilNav("customs");
+const $=id=>document.getElementById(id), esc=conseilEsc;
+const ROLES=["Top","Jungle","Mid","Bot","Support"];
+const RANKS=["Non classé","Fer","Bronze","Argent","Or","Platine","Émeraude","Diamant","Maître","Grand Maître","Challenger"];
+const RVAL=r=>{const i=RANKS.indexOf(r);return i<=0?4:i};   // non classé = niveau Or par défaut
+let db=null,uid=null,connErr=false,members={},guests=[],selected=new Set(),lastTeams=null,lastChamps=null,events={},regs={};
+
+// ---------- onglets ----------
+function showTab(id){for(const t of ["gen","roue","clash"]){$("v-"+t).hidden=t!==id;$("tab-"+t).setAttribute("aria-selected",t===id)}}
+for(const t of ["gen","roue","clash"])$("tab-"+t).onclick=()=>{showTab(t);history.replaceState(null,"","#"+t)};
+if(["gen","roue","clash"].includes(location.hash.slice(1)))showTab(location.hash.slice(1));
+
+// ---------- Générateur ----------
+$("gRank").innerHTML=RANKS.map(r=>`<option ${r==="Or"?"selected":""}>${r}</option>`).join("");
+$("gRole").innerHTML+=ROLES.map(r=>`<option>${r}</option>`).join("");
+function allPlayers(){
+  const ms=Object.entries(members).filter(([,m])=>m.pseudo).map(([id,m])=>({key:"m:"+id,name:m.pseudo,rank:m.rank||"Non classé",roles:m.roles||[],guest:false}));
+  return ms.concat(guests.map((g,i)=>({key:"g:"+i,name:g.name,rank:g.rank,roles:g.role?[g.role]:[],guest:true})));
+}
+function renderPool(){
+  const ps=allPlayers();
+  $("pool").innerHTML=ps.length?ps.map(p=>`<div class="pp" role="checkbox" tabindex="0" data-k="${esc(p.key)}" aria-pressed="${selected.has(p.key)}"><span class="ck">${selected.has(p.key)?"✓":""}</span>
+    <span class="grow" style="min-width:0"><b class="ellip" style="display:block">${esc(p.name)}${p.key.startsWith("m:")?conseilCampTag(p.key.slice(2)):""}${p.guest?' <span class="note">(invité)</span>':""}</b><small>${esc(p.rank)}${p.roles.length?" · "+p.roles.map(esc).join(", "):""}</small></span></div>`).join("")
+    :`<div class="note">${db?"Aucun membre avec un profil. Ajoute des invités ou crée ton profil dans Le Conseil.":connErr?"Membres indisponibles, ajoute des invités.":"Chargement des membres…"}</div>`;
+  $("pool").querySelectorAll(".pp").forEach(el=>{const tg=()=>{const k=el.dataset.k;selected.has(k)?selected.delete(k):selected.add(k);renderPool()};el.onclick=tg;el.onkeydown=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();tg()}}});
+  const n=[...selected].filter(k=>ps.some(p=>p.key===k)).length;
+  $("selCount").textContent=`${n} sélectionné${n>1?"s":""}${n===10?" · parfait":n<10?` · encore ${10-n} pour un 5v5`:" · trop de monde"}`;
+}
+$("guestForm").onsubmit=e=>{e.preventDefault();const name=$("gName").value.trim().slice(0,20);if(!name)return;guests.push({name,rank:$("gRank").value,role:$("gRole").value});selected.add("g:"+(guests.length-1));$("gName").value="";renderPool()};
+
+function assignRoles(team){
+  const n=team.length,roles=ROLES.slice(0,5);let best=null,bestScore=-1;
+  const perm=(arr,k=0)=>{if(k===arr.length){const sc=arr.slice(0,n).reduce((s,r,i)=>{const pr=team[i].roles;return s+(pr[0]===r?3:pr.includes(r)?2:pr.length?0:1)},0)+Math.random()*0.5;
+      if(sc>bestScore){bestScore=sc;best=arr.slice(0,n)}return}
+    for(let i=k;i<arr.length;i++){[arr[k],arr[i]]=[arr[i],arr[k]];perm(arr,k+1);[arr[k],arr[i]]=[arr[i],arr[k]]}};
+  perm(roles.slice());
+  return team.map((p,i)=>({...p,role:best[i]})).sort((a,b)=>ROLES.indexOf(a.role)-ROLES.indexOf(b.role));
+}
+function generate(){
+  const ps=allPlayers().filter(p=>selected.has(p.key));
+  if(ps.length<2||ps.length%2||ps.length>10){$("teams").innerHTML=`<p class="err">Sélectionne un nombre pair de joueurs, entre 2 et 10.</p>`;return}
+  const half=ps.length/2,vals=ps.map(p=>RVAL(p.rank)),total=vals.reduce((a,b)=>a+b,0),splits=[];
+  const rec=(start,pick)=>{if(pick.length===half){const s=pick.reduce((a,i)=>a+vals[i],0);splits.push({pick:pick.slice(),diff:Math.abs(total-2*s)});return}
+    for(let i=start;i<ps.length;i++){pick.push(i);rec(i+1,pick);pick.pop()}};
+  rec(1,[0]);
+  splits.sort((a,b)=>a.diff-b.diff);const min=splits[0].diff,good=splits.filter(s=>s.diff<=min+1);
+  const ch=good[Math.floor(Math.random()*good.length)].pick;
+  let A=ps.filter((_,i)=>ch.includes(i)),B=ps.filter((_,i)=>!ch.includes(i));
+  if(Math.random()<.5)[A,B]=[B,A];
+  lastTeams=[assignRoles(A),assignRoles(B)];lastChamps=null;renderTeams();
+}
+function renderTeams(){
+  if(!lastTeams)return;
+  const card=(t,cls,label)=>{const sum=t.reduce((a,p)=>a+RVAL(p.rank),0);
+    return `<div class="team ${cls}"><h3><span>${label}</span><span class="note">Niveau ${(sum/t.length).toFixed(1).replace(".",",")}</span></h3>${t.map((p,i)=>`<div class="tp"><span class="role">${p.role}</span><span class="ellip"><b>${esc(p.name)}</b>${p.key.startsWith("m:")?conseilCampTag(p.key.slice(2)):""}${lastChamps?` · <span style="color:var(--hex)">${esc(lastChamps[cls][i])}</span>`:""}</span><span class="rk">${esc(p.rank)}</span></div>`).join("")}</div>`};
+  $("teams").innerHTML=card(lastTeams[0],"blue","Équipe bleue")+card(lastTeams[1],"red","Équipe rouge");
+  $("champBtn").hidden=$("copyBtn").hidden=false;$("genBtn").textContent="Relancer";
+}
+$("genBtn").onclick=generate;
+$("champBtn").onclick=()=>{if(!lastTeams)return;const used=new Set();lastChamps={};
+  ["blue","red"].forEach((c,ti)=>{lastChamps[c]=lastTeams[ti].map(p=>{const pool=CHAMPIONS.filter(([n,r])=>r.includes(p.role)&&!used.has(n));const x=pool[Math.floor(Math.random()*pool.length)][0];used.add(x);return x})});renderTeams()};
+$("copyBtn").onclick=async()=>{if(!lastTeams)return;
+  const txt=["🔵 Équipe bleue",...lastTeams[0].map((p,i)=>`${p.role} : ${p.name}${lastChamps?" ("+lastChamps.blue[i]+")":""}`),"","🔴 Équipe rouge",...lastTeams[1].map((p,i)=>`${p.role} : ${p.name}${lastChamps?" ("+lastChamps.red[i]+")":""}`)].join("\n");
+  try{await navigator.clipboard.writeText(txt);$("copyMsg").textContent="Copié, colle-le sur Discord."}catch(e){$("copyMsg").textContent="Copie impossible, sélectionne le texte à la main."}
+  setTimeout(()=>$("copyMsg").textContent="",3000)};
+
+// ---------- Roue ----------
+const CHALLENGES=["Full AP, même si tu es AD","Interdit d'acheter des bottes","Premier item : Mejai","Tu dois finir la partie avec 0 mort","Ping « en route » à chaque fois que tu bouges","Que des items soutien","Pas le droit d'utiliser Flash","Tu dois prendre Ignite et Fantôme","Tu joues en écran figé (caméra verrouillée)","Interdit de recall avant 10 minutes","Achète un Warmog en premier","Tu dois voler le Baron ou le dragon","Mains inversées : jouer l'ult en premier à chaque combat","Interdit de last-hit avant 3 minutes","Tu dis « GG EZ » à chaque kill… dans le vocal du Conseil uniquement"];
+let rMode="one",rRole="",spinning=false,ddVer=null;
+const ddId=conseilChampId;
+fetch("https://ddragon.leagueoflegends.com/api/versions.json").then(r=>r.json()).then(v=>ddVer=v[0]).catch(()=>{});
+const champCard=(name,label)=>`<div class="cc">${ddVer?`<img alt="" src="https://ddragon.leagueoflegends.com/cdn/${ddVer}/img/champion/${ddId(name)}.png" onerror="this.outerHTML='<span class=&quot;mono&quot;>${esc(name.slice(0,2))}</span>'">`:`<span class="mono">${esc(name.slice(0,2))}</span>`}<b>${esc(name)}</b>${label?`<span class="role">${esc(label)}</span>`:""}</div>`;
+function chips(id,attr,set){$(id).querySelectorAll(".chip").forEach(b=>b.onclick=()=>{$(id).querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===b));set(b.dataset[attr])})}
+chips("roueMode","m",v=>{rMode=v;$("roueRole").hidden=v!=="one"});chips("roueRole","r",v=>rRole=v);
+function pickOne(role,used){const pool=CHAMPIONS.filter(([n,r])=>(!role||r.includes(role))&&!used.has(n));return pool[Math.floor(Math.random()*pool.length)][0]}
+$("spin").onclick=()=>{if(spinning)return;spinning=true;$("spin").disabled=true;$("roueRes").innerHTML="";
+  const used=new Set(),results=rMode==="one"?[[pickOne(rRole,used),rRole]]:rMode==="team"?ROLES.map(r=>{const c=pickOne(r,used);used.add(c);return[c,r]}):[0,1,2,3,4].map(()=>{const c=pickOne("",used);used.add(c);return[c,""]});
+  const start=performance.now(),dur=2200,el=$("reelName");let lastSwap=0;
+  const step=t=>{const k=(t-start)/dur;if(k<1){const interval=40+300*k*k;if(t-lastSwap>interval){el.textContent=CHAMPIONS[Math.floor(Math.random()*CHAMPIONS.length)][0];lastSwap=t}requestAnimationFrame(step)}
+    else{el.textContent=results.length===1?results[0][0]:"Tirage terminé !";spinning=false;$("spin").disabled=false;
+      const chal=$("withChal").checked?CHALLENGES[Math.floor(Math.random()*CHALLENGES.length)]:"";
+      $("roueRes").innerHTML=`<div class="picks">${results.map(([c,r])=>champCard(c,r)).join("")}</div>${chal?`<div class="challenge"><b>Défi :</b> ${esc(chal)}</div>`:""}`}};
+  requestAnimationFrame(step)};
+
+// ---------- Clash ----------
+function upcoming(){return Object.entries(events).filter(([,e])=>Date.parse(e.date)>Date.now()-6*3600e3).sort((a,b)=>Date.parse(a[1].date)-Date.parse(b[1].date))}
+function myPseudo(){return members[uid]?.pseudo||""}
+function clashTeams(list){
+  const teams=[];const pool=list.slice().sort((a,b)=>(a.roles||[]).length-(b.roles||[]).length);
+  const nT=Math.max(1,Math.floor(pool.length/5));for(let i=0;i<nT;i++)teams.push({});
+  const rest=[];
+  for(const p of pool){let placed=false;for(const r of (p.roles||[]).length?p.roles:ROLES){const t=teams.find(t=>!t[r]);if(t){t[r]=p.pseudo;placed=true;break}}if(!placed)rest.push(p.pseudo)}
+  for(const t of teams)for(const r of ROLES)if(!t[r]&&rest.length)t[r]=rest.shift()+" (fill)";
+  return{teams,rest};
+}
+function renderClash(){
+  const box=$("events"),list=upcoming();
+  if(!db){box.innerHTML=`<div class="note">${connErr?"Sessions indisponibles.":"Chargement…"}</div>`;return}
+  if(!list.length){box.innerHTML=`<div class="empty">Aucune session Clash prévue. Crée la première avec le formulaire ci-dessus.</div>`;return}
+  box.innerHTML=list.map(([id,e])=>{
+    const rs=Object.values(regs).filter(r=>r.event===id);const mine=regs[id+"_"+uid];
+    const cov=ROLES.map(r=>{const ns=rs.filter(x=>(x.roles||[]).includes(r)).map(x=>x.pseudo);return `<div class="${ns.length?"full":""}"><b>${r}</b>${ns.length?ns.map(esc).join(", "):"—"}</div>`}).join("");
+    const {teams,rest}=rs.length>=5?clashTeams(rs):{teams:[],rest:[]};
+    return `<div class="ev" data-e="${id}"><div class="between"><div><span class="date">${new Date(e.date).toLocaleString("fr-FR",{weekday:"long",day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"})}</span><div><b>${esc(e.title)}</b> <span class="note">· créé par ${esc(e.pseudo||"un sage")}</span></div></div>
+      <span class="tag ${rs.length>=5?"ok":""}">${rs.length} inscrit${rs.length>1?"s":""}</span></div>
+      <div class="cov">${cov}</div>
+      ${teams.length?`<div class="grid2">${teams.map((t,i)=>`<div class="team"><h3>Équipe ${i+1}</h3>${ROLES.map(r=>`<div class="tp"><span class="role">${r}</span><span class="ellip">${t[r]?esc(t[r]):'<span class="note">à trouver</span>'}</span><span></span></div>`).join("")}</div>`).join("")}</div>${rest.length?`<p class="note">Remplaçants : ${rest.map(esc).join(", ")}</p>`:""}`:`<p class="note">Il faut 5 inscrits pour former une équipe.</p>`}
+      <div class="row">${myPseudo()?`<span class="note">Mes postes :</span><span class="chips" data-roles>${ROLES.map(r=>`<button class="chip" data-r="${r}" aria-pressed="${!!mine&&(mine.roles||[]).includes(r)}">${r}</button>`).join("")}</span>
+        <button class="btn small" data-act="join">${mine?"Mettre à jour":"Je m'inscris"}</button>${mine?`<button class="btn ghost small" data-act="leave">Me désinscrire</button>`:""}`:`<span class="note">Crée ton profil dans <a href="communaute.html#profil">Le Conseil</a> pour t'inscrire.</span>`}
+        ${e.uid===uid?`<button class="btn ghost small" data-act="del">Supprimer la session</button>`:""}</div></div>`}).join("");
+  box.querySelectorAll(".ev").forEach(ev=>{const id=ev.dataset.e;
+    ev.querySelectorAll("[data-roles] .chip").forEach(c=>c.onclick=()=>c.setAttribute("aria-pressed",c.getAttribute("aria-pressed")!=="true"));
+    ev.querySelectorAll("[data-act]").forEach(b=>b.onclick=async()=>{const act=b.dataset.act;
+      try{if(act==="join"){const roles=[...ev.querySelectorAll('[data-roles] .chip[aria-pressed="true"]')].map(c=>c.dataset.r);
+          await db.doc("clashReg/"+id+"_"+uid).set({event:id,pseudo:myPseudo(),roles:roles.length?roles:ROLES.slice(),updated:new Date().toISOString()})}
+        else if(act==="leave")await db.doc("clashReg/"+id+"_"+uid).delete();
+        else if(act==="del")await db.doc("clash/"+id).delete();}catch(e){console.warn(e)}})});
+}
+$("clashForm").onsubmit=async e=>{e.preventDefault();const err=$("clashErr");err.hidden=true;
+  if(!db){return}if(!myPseudo()){err.textContent="Crée d'abord ton profil dans Le Conseil.";err.hidden=false;return}
+  const d=new Date($("cDate").value);if(isNaN(d)){err.textContent="Date invalide.";err.hidden=false;return}
+  try{await db.collection("clash").add({title:$("cTitle").value.trim().slice(0,40),date:d.toISOString(),uid,pseudo:myPseudo(),created:new Date().toISOString()});$("clashForm").reset()}
+  catch(x){err.textContent="Création impossible pour le moment.";err.hidden=false}};
+
+// ---------- Données ----------
+function renderAll(){$("me").innerHTML=!db?(connErr?"Hors ligne":"Connexion au Conseil…"):myPseudo()?`Connecté : <b>${esc(myPseudo())}</b>`:`<a href="communaute.html#profil">Crée ton profil</a>`;renderPool();renderClash()}
+renderAll();
+(async()=>{const c=await conseilConnect();if(!c.db){connErr=true;renderAll();return}db=c.db;uid=c.uid;
+  const sub=(col,fn)=>db.collection(col).onSnapshot(q=>{const o={};q.docs.forEach(d=>o[d.id]=d.data());fn(o);renderAll()},e=>console.warn(col,e));
+  sub("riot",o=>members=o);sub("clash",o=>events=o);sub("clashReg",o=>regs=o);renderAll()})();
+
+window.addEventListener("conseil-camps",()=>{try{renderAll();renderTeams()}catch(e){}});
+</script>
+</body>
+</html>

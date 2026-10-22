@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08090b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png?v=2">
+<link rel="apple-touch-icon" href="icon-192.png?v=2">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Tier List du Conseil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Barlow:wght@400;500;600;700&display=swap">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="conseil.js"></script>
+<style>
+/* Layout: écran "client de jeu" du Conseil — en-tête, deux onglets (Mon classement / Classement du Conseil), filtres par poste, rangées de tiers G→C */
+:root{
+  --void:#010a13; --night:#091428; --panel:#0e1b2e; --panel2:#15263d; --line:#463714; --line2:#1e2d43;
+  --ink:#f0e6d2; --muted:#a09b8c; --gold:#c8aa6e; --gold2:#785a28; --goldhi:#f0e6d2;
+  --hex:#0ac8b9; --hex2:#0397ab;
+  --tG:#f0c75e; --tS:#e8743b; --tA:#b05cff; --tB:#3a8fe0; --tC:#5f6b7a; --tF:#7a2a30;
+  --display:"Cinzel","Trajan Pro",Georgia,serif;
+  --body:"Barlow","Segoe UI",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:radial-gradient(900px 500px at 50% -120px,rgba(10,200,185,.14),transparent 70%),linear-gradient(180deg,var(--night),var(--void) 70%) fixed;background-color:var(--void);
+  color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;min-height:100%;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.topbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.links{display:flex;gap:8px;flex-wrap:wrap}
+.links a{text-decoration:none;font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:.78rem;border:1px solid var(--gold2);padding:7px 12px;color:var(--gold)}
+.links a:hover{border-color:var(--gold);color:var(--goldhi)}
+.me{color:var(--muted);font-size:.9rem}.me b{color:var(--hex)}
+header{display:flex;flex-direction:column;gap:6px}
+.eyebrow{font:600 .74rem var(--body);letter-spacing:.2em;text-transform:uppercase;color:var(--hex)}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(1.8rem,5vw,2.8rem);letter-spacing:.05em;text-transform:uppercase;margin:0;line-height:1.05;
+  background:linear-gradient(180deg,var(--goldhi),var(--gold) 55%,var(--gold2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--muted);margin:0;max-width:66ch}
+.tiersLegend{display:flex;gap:8px;flex-wrap:wrap;font-size:.82rem;color:var(--muted)}
+.tiersLegend span{display:inline-flex;gap:6px;align-items:center}
+.tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tabs button{font:700 .9rem var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);padding:12px 8px;cursor:pointer;
+  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.tabs button[aria-selected="true"]{color:var(--goldhi);border-color:var(--gold);background:linear-gradient(180deg,#1d3550,var(--panel2));box-shadow:inset 0 -2px 0 var(--hex)}
+.frame{border:1px solid var(--gold2);background:linear-gradient(180deg,rgba(21,38,61,.9),rgba(9,20,40,.95));position:relative}
+.frame::before{content:"";position:absolute;inset:3px;border:1px solid rgba(200,170,110,.15);pointer-events:none}
+.panel{padding:18px;display:flex;flex-direction:column;gap:14px}
+h2{font:700 1.1rem var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin:0}
+h3{font:600 .76rem var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--hex);margin:0}
+.note{font-size:.88rem;color:var(--muted);margin:0}
+.err{color:#ff8a8a;font-size:.9rem;margin:0}
+.btn{font:700 .82rem var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--hex);background:linear-gradient(180deg,#0b2a3c,#06141f);border:2px solid var(--hex2);padding:10px 18px;cursor:pointer;box-shadow:0 0 12px rgba(10,200,185,.2)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{color:var(--gold);border:1px solid var(--gold2);background:transparent;box-shadow:none}
+button:focus-visible,input:focus-visible{outline:2px solid var(--hex);outline-offset:2px}
+input[type=text]{font:500 1rem var(--body);color:var(--ink);background:var(--void);border:1px solid var(--gold2);padding:11px 12px;min-width:0}
+.reg{display:flex;gap:10px;flex-wrap:wrap}.reg input{flex:1 1 220px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{font:600 .8rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--void);border:1px solid var(--line2);padding:7px 12px;cursor:pointer}
+.chips button[aria-pressed="true"]{color:var(--hex);border-color:var(--hex2);background:rgba(10,200,185,.08)}
+.chips button .ok{color:var(--hex);margin-left:4px}
+.progress{display:flex;align-items:center;gap:10px;font-size:.86rem;color:var(--muted)}
+.pbar{flex:1;height:6px;background:var(--line2);position:relative}
+.pbar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,var(--hex2),var(--hex))}
+.items{display:flex;flex-direction:column;gap:6px}
+.item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 10px;background:var(--void);border:1px solid var(--line2)}
+.who{display:flex;gap:10px;align-items:center;min-width:0}
+.who b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who small{color:var(--muted)}
+.badge{display:inline-grid;place-items:center;min-width:48px;height:24px;padding:0 6px;font:700 .7rem var(--body);letter-spacing:.06em;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
+.tb{display:flex;gap:4px}
+.tb button{width:34px;height:32px;font:700 .95rem var(--display);color:var(--muted);background:var(--panel);border:1px solid var(--line2);cursor:pointer}
+.tb button:hover{color:var(--ink);border-color:var(--gold2)}
+.tb button[aria-pressed="true"]{color:#0a0f18;border-color:transparent}
+.tb button[data-t="G"][aria-pressed="true"]{background:var(--tG)}.tb button[data-t="S"][aria-pressed="true"]{background:var(--tS)}
+.tb button[data-t="A"][aria-pressed="true"]{background:var(--tA);color:#fff}.tb button[data-t="B"][aria-pressed="true"]{background:var(--tB);color:#fff}
+.tb button[data-t="C"][aria-pressed="true"]{background:var(--tC);color:#fff}.tb button[data-t="F"][aria-pressed="true"]{background:var(--tF);color:#fff}
+.tb button:disabled{opacity:.3;cursor:not-allowed}
+.caps{display:flex;gap:10px;flex-wrap:wrap;font-size:.82rem;color:var(--muted)}.caps b{color:var(--ink)}.caps .full b{color:var(--gold)}
+@media (max-width:480px){.tb button{width:30px}.who small{display:none}}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.tierlist{display:flex;flex-direction:column;gap:4px}
+.trow{display:grid;grid-template-columns:56px minmax(0,1fr);min-height:58px;border:1px solid var(--line2);background:var(--void)}
+.tl{display:grid;place-items:center;font:700 1.6rem var(--display);color:#0a0f18}
+.tl.G{background:var(--tG)}.tl.S{background:var(--tS)}.tl.A{background:var(--tA);color:#fff}.tl.B{background:var(--tB);color:#fff}.tl.C{background:var(--tC);color:#fff}.tl.F{background:var(--tF);color:#fff}
+.tcards{display:flex;flex-wrap:wrap;gap:6px;padding:8px;align-content:flex-start}
+.card{display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--panel);border:1px solid var(--line2);font-size:.88rem}
+.card .avg{font:700 .8rem var(--body);color:var(--gold);font-variant-numeric:tabular-nums}
+.card .rk{font:700 .74rem var(--display);color:var(--hex)}
+.empty{color:var(--muted);text-align:center;padding:22px;border:1px dashed var(--line2)}
+.saved{font-size:.82rem;color:var(--hex)}
+footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margin:0 auto}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <div class="topbar">
+    <span></span>
+    <span class="me" id="me">Connexion au Conseil…</span>
+  </div>
+
+  <header>
+    <span class="eyebrow">Conseil des Sages · Worlds 2026</span>
+    <h1>Tier list du Conseil</h1>
+    <p class="sub">Classe les 80 joueurs poste par poste et les 16 équipes. Les tiers suivent un rang mondial : un seul G, quatre S, cinq A et cinq B par poste (et pour les équipes). C veut dire que tu n'as pas assez vu le joueur, F qu'il est nul. Le classement du Conseil fait la moyenne de toutes les tier lists validées.</p>
+    <div class="tiersLegend" aria-hidden="true">
+      <span><span class="badge" style="background:var(--tG);color:#0a0f18">G</span>N°1 mondial (1 max)</span>
+      <span><span class="badge" style="background:var(--tS);color:#0a0f18">S</span>2e à 5e au monde (4 max)</span>
+      <span><span class="badge" style="background:var(--tA);color:#fff">A</span>6e à 10e (5 max)</span>
+      <span><span class="badge" style="background:var(--tB);color:#fff">B</span>11e à 15e (5 max)</span>
+      <span><span class="badge" style="background:var(--tC);color:#fff">C</span>Pas de data</span>
+      <span><span class="badge" style="background:var(--tF);color:#fff">F</span>Nul</span>
+    </div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-mine" aria-selected="true">Ma tier list</button>
+    <button role="tab" id="tab-council" aria-selected="false">Classement du Conseil</button>
+  </div>
+
+  <section id="v-mine" class="frame panel">
+    <div id="regBox"></div>
+    <div id="editor" hidden>
+      <div class="progress"><span id="progTxt"></span><span class="pbar"><i id="progBar"></i></span></div>
+      <div class="chips" id="catsMine" role="group" aria-label="Catégorie à classer" style="margin-top:12px"></div>
+      <div class="caps" id="gNote" style="margin-top:10px"></div>
+      <div class="items" id="items" style="margin-top:10px"></div>
+      <div class="actions" style="margin-top:14px">
+        <span class="saved" id="saved"></span>
+        <button class="btn" id="validate">Valider ma tier list</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="v-council" class="frame panel" hidden>
+    <div class="actions"><h2>Classement du Conseil</h2><span class="note" id="voters"></span></div>
+    <div class="chips" id="catsCouncil" role="group" aria-label="Catégorie affichée"></div>
+    <div id="council"></div>
+    <p class="note">Barème : G = 5, S = 4, A = 3, B = 2, F = 0. Un C (pas de data) ne compte pas dans la moyenne. Le tier du Conseil est la moyenne arrondie : 4,5 et plus = G, 3,5 = S, 2,5 = A, 1,5 = B, moins = F. Un joueur classé C par tout le monde reste en C. Seules les tier lists validées comptent.</p>
+  </section>
+
+  <footer>Page de fan non officielle du Conseil des Sages, sans lien avec Riot Games.</footer>
+</div>
+
+<script>
+conseilNav("tierlist");
+let connErr=false;
+const TEAMS={
+ GEN:{n:"Gen.G",c:"#b8932f",p:["Kiin","Canyon","Chovy","Ruler","Duro"]},
+ HLE:{n:"Hanwha Life Esports",c:"#f37321",p:["Zeus","Kanavi","Zeka","Gumayusi","Delight"]},
+ T1:{n:"T1",c:"#e2012d",p:["Doran","Oner","Faker","Peyz","Keria"]},
+ DK:{n:"Dplus KIA",c:"#1ebeb4",p:["Siwoo","Lucid","ShowMaker","Smash","Career"]},
+ AL:{n:"Anyone's Legend",c:"#d6336c",p:["Breathe","Tarzan","Shanks","Hope","Kael"]},
+ BLG:{n:"Bilibili Gaming",c:"#00a1d6",p:["Bin","Xun","Knight","Viper","ON"]},
+ TES:{n:"Top Esports",c:"#ff6a13",p:["369","Tian","Creme","JackeyLove","Zhuo"]},
+ IG:{n:"Invictus Gaming",c:"#8d99ae",p:["TheShy","Wei","Rookie","JiaQi","Meiko"]},
+ G2:{n:"G2 Esports",c:"#e6e6e6",p:["BrokenBlade","SkewMond","Caps","Hans Sama","Labrov"]},
+ MKOI:{n:"Movistar KOI",c:"#7b4ce0",p:["Myrwn","Elyoya","Jojopyun","Supa","Alvaro"]},
+ KC:{n:"Karmine Corp",c:"#2b6bff",p:["Canna","Yike","Kyeahoo","Caliste","Busio"]},
+ TL:{n:"Team Liquid",c:"#4a8fe7",p:["Morgan","Josedeodo","Quid","Yeon","CoreJJ"]},
+ LYON:{n:"LYON",c:"#3cb371",p:["Dhokla","Inspired","Saint","Berserker","Isles"]},
+ TSW:{n:"Team Secret Whales",c:"#c0c7d1",p:["Pun","Hizto","Dire","Eddie","Bie"]},
+ CFO:{n:"CTBC Flying Oyster",c:"#00a0e9",p:["Rest","Shad0w","Pout","Doggo","Kino"]},
+ LOS:{n:"LØS",c:"#f2c94c",p:["Zest","Curse","Feisty","Duduhh","Ackerman"]}
+};
+const ROLES=["Top","Jungle","Mid","Bot","Support"];
+const CATS=[...ROLES.map((r,i)=>({id:r,label:r,items:Object.entries(TEAMS).map(([k,t])=>({key:t.p[i],name:t.p[i],team:k}))})),
+  {id:"Equipes",label:"Équipes",items:Object.entries(TEAMS).map(([k,t])=>({key:k,name:t.n,team:k}))}];
+const TIERS=["G","S","A","B","C","F"], VAL={G:5,S:4,A:3,B:2,F:0}, CAP={G:1,S:4,A:5,B:5};
+const TOTAL=CATS.reduce((n,c)=>n+c.items.length,0);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function ink(hex){const n=parseInt(hex.slice(1),16),r=n>>16,g=n>>8&255,b=n&255;return (r*299+g*587+b*114)/1000>150?"#010a13":"#fff"}
+const badge0=t=>`<span class="badge" style="background:${TEAMS[t].c};color:${ink(TEAMS[t].c)}">${t}</span>`;
+const badge=t=>conseilTeamLogo(t,badge0(t));
+
+let db=null,uid=null,all={},mine=null,catMine="Top",catCouncil="Top",saveT=null,dirty=false;
+
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
+  $("v-mine").hidden=b.id!=="tab-mine";$("v-council").hidden=b.id!=="tab-council"});
+
+const ratings=()=>mine?.ratings||{};
+const ratedCount=r=>CATS.reduce((n,c)=>n+c.items.filter(i=>r[c.id+":"+i.key]).length,0);
+const catDone=(r,c)=>c.items.every(i=>r[c.id+":"+i.key]);
+
+function renderMe(){
+  const box=$("regBox");
+  if(box.contains(document.activeElement)&&document.activeElement.tagName==="INPUT")return;
+  if(!db){$("me").textContent=connErr?"Hors ligne":"Connexion…";box.innerHTML=connErr?`<p class="err">Connexion au Conseil impossible pour le moment. Recharge la page dans un instant.</p>`:`<p class="note">Connexion au Conseil…</p>`;$("editor").hidden=true;return}
+  if(!mine){$("me").textContent="Pas encore inscrit";$("editor").hidden=true;
+    box.innerHTML=`<h3>Entre ton pseudo pour commencer</h3><form class="reg" id="regForm" style="margin-top:8px"><input type="text" id="pseudo" maxlength="20" placeholder="Ton pseudo d'invocateur" required><button class="btn" type="submit">Commencer</button></form><p class="err" id="regErr" hidden></p>`;
+    $("regForm").onsubmit=async e=>{e.preventDefault();const v=$("pseudo").value.trim().slice(0,20);if(!v)return;
+      if(Object.entries(all).some(([id,p])=>id!==uid&&p.pseudo?.toLowerCase()===v.toLowerCase())){showErr("Ce pseudo est déjà pris au Conseil.");return}
+      try{await db.doc("tiers/"+uid).set({pseudo:v,ratings:{},complete:false,updated:new Date().toISOString()})}
+      catch(err){showErr("Impossible de t'inscrire pour le moment, réessaie.")}};
+    return}
+  $("me").innerHTML=`Connecté : <b>${esc(mine.pseudo)}</b>`;
+  box.innerHTML=`<p class="note">Choisis un tier pour chaque joueur, poste par poste, puis les équipes. Tes choix sont enregistrés au fur et à mesure.${mine.complete?' <b style="color:var(--hex)">Ta tier list est validée et compte dans le classement.</b>':""}</p>`;
+  $("editor").hidden=false;
+}
+function showErr(t){const e=$("regErr");if(e){e.textContent=t;e.hidden=false}}
+
+function renderEditor(){
+  if(!mine)return;const r=ratings(),n=ratedCount(r);
+  $("progTxt").textContent=`${n} / ${TOTAL} classés`;$("progBar").style.width=Math.round(100*n/TOTAL)+"%";
+  $("catsMine").innerHTML=CATS.map(c=>`<button data-c="${c.id}" aria-pressed="${c.id===catMine}">${c.label}${catDone(r,c)?'<span class="ok">✓</span>':""}</button>`).join("");
+  $("catsMine").querySelectorAll("button").forEach(b=>b.onclick=()=>{catMine=b.dataset.c;renderEditor()});
+  const cat=CATS.find(c=>c.id===catMine),gHolder=cat.items.find(i=>r[cat.id+":"+i.key]==="G");
+  const cnt=t=>cat.items.filter(i=>r[cat.id+":"+i.key]===t).length;
+  $("gNote").innerHTML=Object.entries(CAP).map(([k,c])=>`<span class="${cnt(k)>=c?"full":""}">${k} <b>${cnt(k)} / ${c}</b></span>`).join("")+`<span>C <b>${cnt("C")}</b></span><span>F <b>${cnt("F")}</b></span>`;
+  $("items").innerHTML=cat.items.map(i=>{const v=r[cat.id+":"+i.key];
+    return `<div class="item"><div class="who">${badge(i.team)}<b>${esc(i.name)}</b>${cat.id!=="Equipes"?`<small>${esc(TEAMS[i.team].n)}</small>`:""}</div>
+      <div class="tb" role="group" aria-label="Tier de ${esc(i.name)}">${TIERS.map(t=>{const full=CAP[t]&&v!==t&&cnt(t)>=CAP[t];return `<button data-k="${esc(i.key)}" data-t="${t}" aria-pressed="${v===t}" ${full?`disabled title="Déjà ${CAP[t]} ${t} à ce poste"`:""}>${t}</button>`}).join("")}</div></div>`}).join("");
+  $("items").querySelectorAll(".tb button").forEach(b=>b.onclick=()=>setTier(cat,b.dataset.k,b.dataset.t));
+  $("validate").disabled=n<TOTAL;
+  $("validate").textContent=mine.complete?"Validée ✓ (mise à jour auto)":"Valider ma tier list";$("validate").disabled=n<TOTAL||mine.complete;
+}
+function setTier(cat,key,t){
+  const r={...ratings()},id=cat.id+":"+key;
+  if(r[id]===t)delete r[id];else{
+    if(CAP[t]&&cat.items.filter(i=>cat.id+":"+i.key!==id&&r[cat.id+":"+i.key]===t).length>=CAP[t])return;
+    r[id]=t}
+  const complete=mine.complete&&ratedCount(r)===TOTAL;
+  mine={...mine,ratings:r,complete};dirty=true;renderEditor();
+  clearTimeout(saveT);$("saved").textContent="Enregistrement…";
+  saveT=setTimeout(async()=>{try{await db.doc("tiers/"+uid).update({ratings:mine.ratings,complete:mine.complete,updated:new Date().toISOString()});$("saved").textContent="Enregistré";dirty=false}catch(e){$("saved").textContent="Échec de l'enregistrement, réessaie."}finally{saveT=null}},600);
+}
+$("validate").onclick=async()=>{if(!mine||ratedCount(ratings())<TOTAL)return;
+  clearTimeout(saveT);saveT=null;mine={...mine,complete:true};renderEditor();
+  try{await db.doc("tiers/"+uid).update({ratings:mine.ratings,complete:true,updated:new Date().toISOString()});$("saved").textContent="Tier list validée, elle compte dans le classement du Conseil."}
+  catch(e){$("saved").textContent="Échec de la validation, réessaie."}};
+
+function tierOf(a){return a==null?"C":a>=4.5?"G":a>=3.5?"S":a>=2.5?"A":a>=1.5?"B":"F"}
+function renderCouncil(){
+  const valid=Object.values(all).filter(p=>p.complete&&p.ratings);
+  $("voters").textContent=valid.length?`${valid.length} tier list${valid.length>1?"s":""} validée${valid.length>1?"s":""}`:"";
+  $("catsCouncil").innerHTML=CATS.map(c=>`<button data-c="${c.id}" aria-pressed="${c.id===catCouncil}">${c.label}</button>`).join("");
+  $("catsCouncil").querySelectorAll("button").forEach(b=>b.onclick=()=>{catCouncil=b.dataset.c;renderCouncil()});
+  if(!db){$("council").innerHTML=`<div class="empty">Chargement du classement…</div>`;return}
+  if(!valid.length){$("council").innerHTML=`<div class="empty">Aucune tier list validée pour l'instant. Le classement apparaîtra dès que le premier sage aura validé la sienne.</div>`;return}
+  const cat=CATS.find(c=>c.id===catCouncil);
+  const rows=cat.items.map(i=>{const vs=valid.map(p=>VAL[p.ratings[cat.id+":"+i.key]]).filter(v=>v!==undefined);const avg=vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;return{...i,avg,n:vs.length}}).sort((a,b)=>(b.avg??-1)-(a.avg??-1)||a.name.localeCompare(b.name));
+  rows.forEach((r,i)=>r.rank=i+1);
+  $("council").innerHTML=`<div class="tierlist">${TIERS.map(t=>{const list=rows.filter(r=>tierOf(r.avg)===t);
+    return `<div class="trow"><div class="tl ${t}">${t}</div><div class="tcards">${list.length?list.map(r=>`<span class="card"><span class="rk">#${r.rank}</span>${badge(r.team)}<b>${esc(r.name)}</b><span class="avg">${r.avg==null?"—":r.avg.toFixed(2).replace(".",",")}</span></span>`).join(""):'<span class="note" style="padding:8px">—</span>'}</div></div>`}).join("")}</div>`;
+}
+
+function renderAll(){renderMe();renderEditor();renderCouncil()}
+renderAll();
+conseilLoadLogos(()=>renderAll());conseilDD().then(()=>renderAll());
+(async()=>{
+  const c=await conseilConnect();
+  if(!c.db){connErr=true;renderAll();return}
+  db=c.db;uid=c.uid;
+  db.collection("tiers").onSnapshot(q=>{all={};q.docs.forEach(d=>all[d.id]=d.data());
+    const fresh=uid&&all[uid]?all[uid]:null;
+    if(!mine||!dirty||!fresh)mine=fresh;else mine={...fresh,ratings:mine.ratings,complete:mine.complete};
+    renderAll()},e=>console.error(e));
+  renderAll();
+})();
+</script>
+
+</body>
+</html>

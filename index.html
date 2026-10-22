@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08090b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png?v=2">
+<link rel="apple-touch-icon" href="icon-192.png?v=2">
+<title>Conseil des Sages</title>
+<meta name="description" content="Le QG du Conseil des Sages : Discord, Worlds 2026, tier list, jeu de devinettes et parties LoL en direct.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Barlow:wght@400;500;600;700&display=swap">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="conseil.js"></script>
+<style>
+/* Layout: QG du Conseil — emblème + titre, compte à rebours WoW en bandeau, grille 2 colonnes (Discord / parties LoL), tuiles vers les pages, résumé Worlds */
+:root{
+  --void:#010a13; --night:#091428; --panel:#0e1b2e; --panel2:#15263d; --line:#463714; --line2:#1e2d43;
+  --ink:#f0e6d2; --muted:#a09b8c; --gold:#c8aa6e; --gold2:#785a28; --goldhi:#f0e6d2;
+  --hex:#0ac8b9; --hex2:#0397ab;
+  --fel:#7bd34a; --fel2:#2f6b1c; --discord:#5865f2; --live:#e84057;
+  --display:"Cinzel","Trajan Pro",Georgia,serif;
+  --body:"Barlow","Segoe UI",system-ui,sans-serif;
+  color-scheme:dark;
+}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html,body{margin:0}
+[hidden]{display:none!important}
+body{background:radial-gradient(900px 500px at 50% -120px,rgba(10,200,185,.14),transparent 70%),linear-gradient(180deg,var(--night),var(--void) 70%) fixed;background-color:var(--void);
+  color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;min-height:100%;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
+a{color:var(--hex)}
+.wrap{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+header{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.logo{width:104px;height:auto;flex:none;filter:drop-shadow(0 0 18px rgba(10,200,185,.25))}
+.logo .glow{animation:pulse 3.4s ease-in-out infinite;transform-origin:100px 92px}
+@keyframes pulse{50%{opacity:.55;transform:scale(1.12)}}
+.htxt{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.eyebrow{font:600 .74rem var(--body);letter-spacing:.2em;text-transform:uppercase;color:var(--hex)}
+h1{font-family:var(--display);font-weight:900;font-size:clamp(2rem,6vw,3.4rem);letter-spacing:.05em;text-transform:uppercase;margin:0;line-height:1;
+  background:linear-gradient(180deg,var(--goldhi),var(--gold) 55%,var(--gold2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.me{color:var(--muted);font-size:.9rem}.me b{color:var(--hex)}
+h2{font:700 1.05rem var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin:0}
+h3{font:600 .74rem var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--hex);margin:0}
+.note{font-size:.88rem;color:var(--muted);margin:0}
+.err{color:#ff8a8a;font-size:.9rem;margin:0}
+.frame{border:1px solid var(--gold2);background:linear-gradient(180deg,rgba(21,38,61,.9),rgba(9,20,40,.95));position:relative}
+.frame::before{content:"";position:absolute;inset:3px;border:1px solid rgba(200,170,110,.15);pointer-events:none}
+.panel{padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:700 .82rem var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--hex);background:linear-gradient(180deg,#0b2a3c,#06141f);border:2px solid var(--hex2);padding:10px 18px;cursor:pointer;text-decoration:none;box-shadow:0 0 12px rgba(10,200,185,.2)}
+.btn:hover{color:#bff7f1;border-color:var(--hex)}
+.btn.ghost{color:var(--gold);border:1px solid var(--gold2);background:transparent;box-shadow:none}
+.btn.small{padding:6px 10px;font-size:.7rem}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--hex);outline-offset:2px}
+input[type=text],select{font:500 1rem var(--body);color:var(--ink);background:var(--void);border:1px solid var(--gold2);padding:10px 12px;min-width:0}
+
+/* Compte à rebours WoW */
+.wow{border:1px solid var(--fel2);background:
+  radial-gradient(600px 220px at 15% 0%,rgba(123,211,74,.18),transparent 70%),
+  radial-gradient(500px 200px at 100% 100%,rgba(123,211,74,.08),transparent 70%),
+  linear-gradient(180deg,#0a1a12,#050d0a);padding:22px 20px;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:22px;align-items:center;position:relative;overflow:hidden}
+.wow::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,transparent 0 22px,rgba(123,211,74,.025) 22px 23px);pointer-events:none}
+@media (max-width:760px){.wow{grid-template-columns:1fr}}
+.wow h2{color:var(--fel);font-size:clamp(1.3rem,3.6vw,1.9rem);text-wrap:balance}
+.wow .eyebrow{color:var(--fel)}
+.wow p{margin:0;color:#c7d6bd}
+.clock{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:6px}
+.clock div{display:flex;flex-direction:column;align-items:center;padding:10px 4px;background:rgba(0,0,0,.35);border:1px solid var(--fel2)}
+.clock b{font:900 clamp(1.8rem,6vw,2.8rem)/1 var(--display);color:#eaffdc;font-variant-numeric:tabular-nums;text-shadow:0 0 18px rgba(123,211,74,.45)}
+.clock span{font:600 .66rem var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--fel)}
+.deserters{display:flex;flex-direction:column;gap:10px;position:relative;z-index:1}
+.dlist{display:flex;flex-wrap:wrap;gap:6px}
+.dchip{font-size:.86rem;padding:4px 10px;background:rgba(123,211,74,.1);border:1px solid var(--fel2);color:#dff5d0}
+.btn.fel{color:#dff5d0;border-color:var(--fel);background:linear-gradient(180deg,#173a12,#0a1a08);box-shadow:0 0 14px rgba(123,211,74,.25)}
+.btn.fel[aria-pressed="true"]{background:var(--fel);color:#0a1a08}
+
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:18px}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+
+/* Discord */
+.dc{border-color:#3b43a8}
+.dchead{display:flex;gap:14px;align-items:center}
+.dcicon{width:56px;height:56px;flex:none;border-radius:16px;background:var(--discord);display:grid;place-items:center;overflow:hidden}
+.dcicon img{width:100%;height:100%;object-fit:cover}
+.dcname{font:700 1.1rem var(--display);letter-spacing:.03em}
+.dcstats{display:flex;gap:14px;font-size:.9rem;color:var(--muted);flex-wrap:wrap}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:0}
+.btn.discord{color:#fff;background:var(--discord);border-color:var(--discord);box-shadow:0 0 14px rgba(88,101,242,.35)}
+.btn.discord:hover{filter:brightness(1.1);color:#fff}
+.online{display:flex;flex-wrap:wrap;gap:6px}
+.online span{display:inline-flex;gap:6px;align-items:center;font-size:.84rem;padding:3px 8px;background:var(--void);border:1px solid var(--line2)}
+.online img{width:18px;height:18px;border-radius:50%}
+.vc{font-size:.86rem;color:var(--muted)}
+
+/* Joueurs LoL */
+.players{display:flex;flex-direction:column;gap:6px}
+.pl{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 10px;background:var(--void);border:1px solid var(--line2)}
+.pl.ingame{border-color:var(--live);box-shadow:inset 3px 0 0 var(--live)}
+.st{font:700 .66rem var(--body);letter-spacing:.12em;text-transform:uppercase;padding:3px 7px;border:1px solid var(--line2);color:var(--muted);white-space:nowrap}
+.st.on{color:#fff;background:var(--live);border-color:var(--live)}
+.pinfo{display:flex;flex-direction:column;min-width:0}
+.pinfo b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pinfo small{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plinks{display:flex;gap:6px}
+.reg{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) auto auto;gap:8px}
+@media (max-width:600px){.reg{grid-template-columns:1fr 1fr}.reg button{grid-column:span 1}}
+
+/* Tuiles */
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.wrap{margin-top:16px}
+@media (max-width:960px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.tiles{grid-template-columns:1fr}}
+.tile{display:flex;flex-direction:column;gap:8px;padding:18px;text-decoration:none;color:var(--ink);transition:border-color .2s,transform .2s}
+.tile:hover{border-color:var(--gold);transform:translateY(-2px)}
+.tile .ic{font-size:1.6rem;color:var(--gold)}
+.tile b{font:700 1.05rem var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--goldhi)}
+.tile span{font-size:.9rem;color:var(--muted)}
+.tile .extra{font-size:.86rem;color:var(--hex)}
+.badge{display:inline-grid;place-items:center;min-width:44px;height:22px;padding:0 6px;font:700 .68rem var(--body);letter-spacing:.06em;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
+.nextm{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.9rem}
+.top3{display:flex;flex-direction:column;gap:2px;font-size:.88rem}
+.top3 i{font-style:normal;color:var(--gold);font-weight:700;margin-right:6px}
+.wk{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+@media (max-width:1000px){.wk{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:640px){.wk{grid-template-columns:1fr}}
+.wkc{display:flex;flex-direction:column;gap:6px;padding:14px;text-decoration:none;color:var(--ink);min-width:0}
+.wkc:hover{border-color:var(--gold)}
+.wki{font-size:1.4rem;line-height:1}
+.wkc b{font:700 .88rem var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
+.wkt{font-size:.88rem;color:var(--muted)}
+.wkt strong{color:var(--goldhi)}
+.feat{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,2fr) minmax(0,5fr);background:#15171c;min-height:200px}
+.feat .fa,.feat .fb{padding:24px 28px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;color:#08090b}
+.feat .fa{clip-path:polygon(0 0,100% 0,90% 100%,0 100%)}
+.feat .fb{clip-path:polygon(10% 0,100% 0,100% 100%,0 100%);align-items:flex-end;text-align:right}
+.feat .tn{font:400 clamp(2.4rem,7vw,5.4rem)/.9 var(--display);text-transform:uppercase;word-break:break-word}
+.feat .sm{font:700 .95rem var(--body);letter-spacing:.08em;text-transform:uppercase}
+.feat .mid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:16px 4px;text-align:center}
+.feat .vs{font:400 2.8rem var(--display);color:#fff}
+.feat .when{font:700 .95rem var(--body);color:var(--gold);text-transform:uppercase;letter-spacing:.06em}
+.feat .lg{display:flex;align-items:center;gap:10px}
+@media (max-width:640px){.feat{grid-template-columns:1fr}.feat .fa,.feat .fb{clip-path:none;align-items:flex-start;text-align:left}}
+.trailer{margin:0;display:flex;flex-direction:column;gap:8px}
+.trailer video{width:100%;aspect-ratio:16/9;display:block;background:#000;border:1px solid #2a2d35;object-fit:cover}
+.trailer figcaption{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.88rem;color:var(--muted)}
+.trailer .sound{margin-left:auto;font:700 .78rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--gold);background:transparent;border:1px solid var(--gold);padding:5px 10px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.trailer video{animation:none}}
+.camps{display:flex;flex-direction:column;gap:12px;position:relative;z-index:1;min-width:0}
+.campbar{display:flex;height:10px;background:#2a2d35;overflow:hidden}
+.campbar i{display:block;height:100%;transition:width .5s}
+.campbar .cl{background:#e4002b}.campbar .cw{background:#ffb400}
+.campcols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.camp{display:flex;flex-direction:column;gap:8px;min-width:0}
+.camp h3{display:flex;justify-content:space-between;gap:6px}
+.camp-lol h3{color:#ff4d6a!important}.camp-wow h3{color:#ffb400!important}
+.camp h3 b{font:400 1.3rem var(--display);color:#fff}
+.camp .dlist{min-height:30px}
+.camp-lol .dchip{background:rgba(228,0,43,.12);border-color:#7a0018;color:#ffd6dd}
+.camp-wow .dchip{background:rgba(255,180,0,.1);border-color:#7a5600;color:#ffe7b0}
+.camp .btn{font-size:.85rem!important;padding:10px 8px!important}
+.camp .btn[aria-pressed="true"]{outline:2px solid #fff;outline-offset:2px}
+.event{display:flex;flex-direction:column;gap:6px;padding:14px;background:#1d2027;border-left:6px solid var(--tv-red,#e4002b)}
+.ev-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.ev-when{font:700 .85rem var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
+.ev-title{font:400 1.45rem/1.05 var(--display);text-transform:uppercase;color:#fff}
+.ev-txt{margin:0;font-size:.95rem;color:var(--muted);line-height:1.45}
+.ev-cd{font:700 .95rem var(--body);color:#fff;letter-spacing:.04em}
+.ev-cd b{font:400 1.3rem var(--display);color:var(--gold);margin:0 2px}
+footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margin:0 auto}
+@media (prefers-reduced-motion:reduce){.logo .glow{animation:none}.tile{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <svg class="logo" viewBox="0 0 200 210" role="img" aria-label="Emblème du Conseil des Sages">
+      <defs>
+        <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0e6d2"/><stop offset=".45" stop-color="#c8aa6e"/><stop offset="1" stop-color="#785a28"/></linearGradient>
+        <linearGradient id="crys" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#cdfaf6"/><stop offset=".45" stop-color="#0ac8b9"/><stop offset="1" stop-color="#005a82"/></linearGradient>
+        <radialGradient id="glowG"><stop offset="0" stop-color="#0ac8b9" stop-opacity=".7"/><stop offset="1" stop-color="#0ac8b9" stop-opacity="0"/></radialGradient>
+        <linearGradient id="hood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1e3a5a"/><stop offset="1" stop-color="#0a1428"/></linearGradient>
+        <clipPath id="hexClip"><path d="M100,22 L164,58 L164,132 L100,168 L36,132 L36,58Z"/></clipPath>
+      </defs>
+      <path d="M100,8 L176,51 L176,139 L100,182 L24,139 L24,51Z" fill="#010a13" stroke="url(#gold)" stroke-width="3"/>
+      <path d="M100,22 L164,58 L164,132 L100,168 L36,132 L36,58Z" fill="#091428" stroke="#c8aa6e" stroke-width="1" stroke-opacity=".6"/>
+      <g fill="url(#gold)"><path d="M100,0 l6,9 -6,5 -6,-5z"/><path d="M24,51 l-8,-3 2,-8 8,6z"/><path d="M176,51 l8,-3 -2,-8 -8,6z"/></g>
+      <g clip-path="url(#hexClip)">
+        <circle class="glow" cx="100" cy="92" r="46" fill="url(#glowG)"/>
+        <path d="M44,170 L46,128 L60,108 L74,128 L78,170Z" fill="url(#hood)" stroke="#785a28"/>
+        <path d="M53,128 L60,116 L67,128 L60,134Z" fill="#010a13"/>
+        <circle cx="57.5" cy="126" r="1.3" fill="#0ac8b9"/><circle cx="62.5" cy="126" r="1.3" fill="#0ac8b9"/>
+        <path d="M122,170 L126,128 L140,108 L154,128 L156,170Z" fill="url(#hood)" stroke="#785a28"/>
+        <path d="M133,128 L140,116 L147,128 L140,134Z" fill="#010a13"/>
+        <circle cx="137.5" cy="126" r="1.3" fill="#0ac8b9"/><circle cx="142.5" cy="126" r="1.3" fill="#0ac8b9"/>
+        <path d="M70,172 L74,130 L100,102 L126,130 L130,172Z" fill="url(#hood)" stroke="url(#gold)" stroke-width="1.6"/>
+        <path d="M74,130 L100,140 L126,130" fill="none" stroke="#c8aa6e" stroke-opacity=".7"/>
+        <path d="M89,130 L100,116 L111,130 L100,138Z" fill="#010a13"/>
+        <path d="M94,127 l4,-1.4 M106,127 l-4,-1.4" stroke="#0ac8b9" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M100,56 L114,78 L100,104 L86,78Z" fill="url(#crys)" stroke="#cdfaf6"/>
+        <path d="M92,74 L100,60 L104,70Z" fill="#fff" opacity=".45"/>
+      </g>
+      <path d="M14,170 L186,170 L178,184 L186,198 L14,198 L22,184Z" fill="#0a1428" stroke="url(#gold)" stroke-width="2"/>
+      <text x="100" y="189" text-anchor="middle" font-family="Cinzel, Georgia, serif" font-weight="700" font-size="13" letter-spacing="1.6" fill="url(#gold)">CONSEIL DES SAGES</text>
+    </svg>
+    <div class="htxt">
+      <span class="eyebrow">Le QG</span>
+      <h1>Conseil des Sages</h1>
+      <span class="me" id="me">Connexion au Conseil…</span>
+    </div>
+  </header>
+  <section class="feat" id="feat" aria-label="Match à la une" hidden></section>
+
+  <!-- Compte à rebours WoW Forever -->
+  <section class="wow" aria-labelledby="wowT">
+    <div style="position:relative;z-index:1;display:flex;flex-direction:column;gap:10px">
+      <span class="eyebrow">World of Warcraft: Forever · jeudi 5 novembre, 00 h 00</span>
+      <h2 id="wowT">Fin de l'amitié dans…</h2>
+      <div class="clock" id="clock" aria-live="off">
+        <div><b id="cd-d">--</b><span>jours</span></div>
+        <div><b id="cd-h">--</b><span>heures</span></div>
+        <div><b id="cd-m">--</b><span>minutes</span></div>
+        <div><b id="cd-s">--</b><span>secondes</span></div>
+      </div>
+      <p id="wowMsg">Le 5 novembre, le Conseil se divise : les Fidèles restent sur la Faille, les Déserteurs partent pour Azeroth. Choisis ton camp.</p>
+    </div>
+    <div class="camps" aria-label="Les deux camps">
+      <div class="campbar" role="img" id="campBar" aria-label="Répartition des camps"><i class="cl" style="width:50%"></i><i class="cw" style="width:50%"></i></div>
+      <div class="campcols">
+        <div class="camp camp-lol"><h3>Fidèles de la Faille <b id="nLol">0</b></h3><div class="dlist" id="lolList"><span class="note">Personne pour l'instant.</span></div>
+          <button class="btn" id="pickLol" aria-pressed="false" disabled>Je reste sur LoL</button></div>
+        <div class="camp camp-wow"><h3>Déserteurs d'Azeroth <b id="nWow">0</b></h3><div class="dlist" id="dlist"><span class="note">Personne n'a encore avoué.</span></div>
+          <button class="btn fel" id="desert" aria-pressed="false" disabled>Je pars sur WoW</button></div>
+      </div>
+      <p class="note" id="campMsg"></p>
+    </div>
+  </section>
+
+  <div class="grid2">
+    <!-- Discord -->
+    <section class="frame panel dc" aria-labelledby="dcT">
+      <h2 id="dcT">Notre Discord</h2>
+      <div class="dchead">
+        <div class="dcicon" id="dcIcon"><svg width="34" height="26" viewBox="0 0 71 55" aria-hidden="true"><path fill="#fff" d="M60.1 4.9A58.5 58.5 0 0 0 45.6.4a40.6 40.6 0 0 0-1.8 3.7 54 54 0 0 0-16.2 0A40.6 40.6 0 0 0 25.8.4 58.4 58.4 0 0 0 11.3 4.9C2.1 18.6-.4 32 .8 45.2a58.9 58.9 0 0 0 17.9 9 43.6 43.6 0 0 0 3.8-6.2 38.2 38.2 0 0 1-6-2.9l1.5-1.1a42 42 0 0 0 36 0l1.5 1.1a38.3 38.3 0 0 1-6 2.9 43.4 43.4 0 0 0 3.8 6.2 58.7 58.7 0 0 0 17.9-9c1.5-15.3-2.5-28.6-10.9-40.3ZM23.7 37.1c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2 6.5 3.3 6.4 7.2c0 4-2.8 7.2-6.4 7.2Zm23.6 0c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2 6.5 3.3 6.4 7.2c0 4-2.8 7.2-6.4 7.2Z"/></svg></div>
+        <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+          <span class="dcname" id="dcName">Le Conseil Des Sages</span>
+          <span class="dcstats" id="dcStats" hidden><span><i class="dot" style="background:#3ba55d"></i><b id="dcOn">–</b> en ligne</span><span><i class="dot" style="background:#747f8d"></i><b id="dcAll">–</b> membres</span></span>
+        </div>
+      </div>
+      <a class="btn discord" href="https://discord.gg/ekEVAX8JN" target="_blank" rel="noopener">Rejoindre le Discord</a>
+      <div class="event" id="cdsEvent">
+        <div class="ev-top"><span class="tag live">Événement</span><span class="ev-when" id="evWhen">Jeudi 22 octobre · 20 h 30</span></div>
+        <b class="ev-title" id="evTitle">CDS Game : rendez-vous demain soir !</b>
+        <p class="ev-txt" id="evTxt">Le Conseil lance sa soirée CDS Game. Sniper sur les toits, îles flottantes et explosions garanties : ramène tes réflexes, ta mauvaise foi et ton meilleur micro.</p>
+        <div class="ev-cd" id="evCd"></div>
+      </div>
+      <figure class="trailer">
+        <video id="trailer" src="cds-bande-annonce.mp4" poster="cds-bande-annonce.jpg" muted loop playsinline autoplay preload="none" controls aria-label="Bande-annonce CDS Game"></video>
+        <figcaption><span class="tag live">Bande-annonce</span> CDS Game <button type="button" class="sound" id="soundBtn">Activer le son</button></figcaption>
+      </figure>
+      <div id="dcWidget" hidden>
+        <h3 style="margin-bottom:6px">En ligne maintenant</h3>
+        <div class="online" id="dcOnline"></div>
+        <p class="vc" id="dcVoice" style="margin-top:8px"></p>
+      </div>
+      <p class="note" style="font-size:.78rem">Lien d'invitation : discord.gg/ekEVAX8JN</p>
+    </section>
+
+    <!-- Parties LoL -->
+    <section class="frame panel" aria-labelledby="lolT">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <h2 id="lolT">Parties LoL du Conseil</h2>
+        <span class="note" id="liveInfo"></span>
+      </div>
+      <div id="riotReg"></div>
+      <div class="players" id="players"><div class="note">Chargement des invocateurs…</div></div>
+    </section>
+  </div>
+
+  <!-- Tuiles -->
+  <!-- Cette semaine au Conseil -->
+  <section aria-labelledby="weekT" style="display:flex;flex-direction:column;gap:12px">
+    <h2 id="weekT">Cette semaine au Conseil</h2>
+    <div class="wk">
+      <a class="wkc frame" href="communaute.html#sage"><span class="wki" aria-hidden="true">👑</span><b>Sage de la semaine</b><span id="wSage" class="wkt">Votes en cours</span></a>
+      <a class="wkc frame" href="communaute.html#paris"><span class="wki" aria-hidden="true">🎲</span><b>Paris</b><span id="wBets" class="wkt">Aucun pari en cours</span></a>
+      <a class="wkc frame" href="communaute.html#banc"><span class="wki" aria-hidden="true">⚖</span><b>Banc des accusés</b><span id="wTrial" class="wkt">Le tribunal est vide</span></a>
+      <a class="wkc frame" href="customs.html#clash"><span class="wki" aria-hidden="true">🛡</span><b>Prochain Clash</b><span id="wClash" class="wkt">Aucune session prévue</span></a>
+      <a class="wkc frame" href="patch.html"><span class="wki" aria-hidden="true">📜</span><b>Patch 26.21</b><span class="wkt">Nerfs pour Caitlyn, Jinx et Lee Sin ; Varus retravaillé ; ARAM Mayhem fait peau neuve.</span></a>
+    </div>
+  </section>
+
+  <section class="tiles" aria-label="Rubriques du Conseil">
+    <a class="tile frame" href="worlds.html">
+      <span class="ic" aria-hidden="true">🏆</span><b>Worlds 2026</b><span>Matchs, pronos, classement, winrates et tier list.</span>
+      <span class="extra" style="color:var(--gold)">◆ Un skin LoL à gagner pour le n°1 du pick'em</span>
+      <div id="nextMatch" class="nextm"></div>
+      <div id="top3" class="top3"></div>
+      <span class="extra" id="tierCount"></span>
+    </a>
+    <a class="tile frame" href="jeux.html">
+      <span class="ic" aria-hidden="true">?</span><b>Jeux</b><span>Devinettes du jour et échauffement avant de lancer une partie.</span>
+      <span class="extra" id="dailyInfo"></span>
+    </a>
+    <a class="tile frame" href="customs.html">
+      <span class="ic" aria-hidden="true">⚔</span><b>Customs & Clash</b><span>Équipes 5v5 équilibrées, roue des champions, inscriptions au Clash.</span>
+    </a>
+    <a class="tile frame" href="communaute.html">
+      <span class="ic" aria-hidden="true">◆</span><b>Le Conseil</b><span>Paris entre potes, banc des accusés, sage de la semaine et ton profil.</span>
+    </a>
+  </section>
+
+  <section class="frame panel install" data-install hidden>
+    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><img src="icon-192.png?v=2" alt="" width="56" height="56">
+      <div style="flex:1;min-width:200px"><h2>L'appli du Conseil</h2><p class="note">Installe le site sur ton téléphone ou ton ordinateur : il s'ouvre comme une vraie appli, avec son icône.</p></div>
+      <button class="btn" onclick="conseilInstall()">Installer</button></div>
+  </section>
+  <p class="note" id="iosHint" hidden style="text-align:center">Sur iPhone : touche <b>Partager</b> puis <b>Sur l'écran d'accueil</b> pour installer l'appli du Conseil.</p>
+
+  <footer>Site de fan du Conseil des Sages, sans lien avec Riot Games, Blizzard ni Discord.</footer>
+</div>
+
+<script>
+conseilNav("accueil");
+// ---------- Soirée CDS Game (heure à ajuster ici) ----------
+const CDS_GAME_START=new Date("2026-10-22T20:30:00+02:00").getTime(), CDS_GAME_HOURS=4;
+function tickEvent(){
+  const box=document.getElementById("cdsEvent"),now=Date.now(),ms=CDS_GAME_START-now;
+  if(now>CDS_GAME_START+CDS_GAME_HOURS*3600e3){box.hidden=true;return}
+  const today=new Date().toDateString()===new Date(CDS_GAME_START).toDateString();
+  if(ms<=0){
+    document.getElementById("evTitle").textContent="La soirée CDS Game a commencé !";
+    document.getElementById("evTxt").textContent="Tout le monde est en vocal : file sur le Discord, les snipers t'attendent sur les toits.";
+    document.getElementById("evCd").innerHTML="<b>En direct</b> sur le Discord du Conseil";return}
+  document.getElementById("evTitle").textContent=today?"CDS Game : c'est ce soir !":"CDS Game : rendez-vous demain soir !";
+  const h=Math.floor(ms/3600e3),m=Math.floor(ms%3600e3/60e3),sec=Math.floor(ms%60e3/1000);
+  document.getElementById("evCd").innerHTML=`Lancement dans <b>${h}</b>h <b>${String(m).padStart(2,"0")}</b>min <b>${String(sec).padStart(2,"0")}</b>s`;
+}
+tickEvent();setInterval(tickEvent,1000);
+(function(){const v=document.getElementById("trailer"),b=document.getElementById("soundBtn");
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches){v.removeAttribute("autoplay");v.pause()}
+  b.onclick=()=>{v.muted=!v.muted;if(!v.muted){v.currentTime=0;v.play().catch(()=>{})}b.textContent=v.muted?"Activer le son":"Couper le son"};
+  v.addEventListener("volumechange",()=>b.textContent=v.muted?"Activer le son":"Couper le son");})();
+if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!navigator.standalone)document.getElementById("iosHint").hidden=false;
+// ===== Réglages =====
+const DISCORD_INVITE="ekEVAX8JN", DISCORD_GUILD="781876426571251743";
+const WOW_LAUNCH=Date.parse("2026-11-04T23:00:00Z");   // 5 nov. 2026, 00:00 heure de Paris
+const LIVE_API="";   // adresse du relais Riot (Cloudflare Worker) une fois la clé obtenue, ex. "https://conseil-riot.xxx.workers.dev"
+const REGIONS={euw1:"EUW",eun1:"EUNE",na1:"NA",kr:"KR",br1:"BR",tr1:"TR",ru:"RU",jp1:"JP",la1:"LAN",la2:"LAS",oc1:"OCE"};
+const OPGG={euw1:"euw",eun1:"eune",na1:"na",kr:"kr",br1:"br",tr1:"tr",ru:"ru",jp1:"jp",la1:"lan",la2:"las",oc1:"oce"};
+const TEAMC={GEN:"#b8932f",HLE:"#f37321",T1:"#e2012d",DK:"#1ebeb4",AL:"#d6336c",BLG:"#00a1d6",TES:"#ff6a13",IG:"#8d99ae",G2:"#e6e6e6",MKOI:"#7b4ce0",KC:"#2b6bff",TL:"#4a8fe7",LYON:"#3cb371",TSW:"#c0c7d1",CFO:"#00a0e9",LOS:"#f2c94c"};
+const PTS={1:1,3:2,5:3};
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function ink(hex){const n=parseInt(hex.slice(1),16);return ((n>>16)*299+((n>>8)&255)*587+(n&255)*114)/1000>150?"#010a13":"#fff"}
+const badge0=t=>TEAMC[t]?`<span class="badge" style="background:${TEAMC[t]};color:${ink(TEAMC[t])}">${t}</span>`:`<span class="badge" style="background:var(--line2);color:var(--muted)">?</span>`;
+const badge=t=>conseilTeamLogo(t,badge0(t));
+let db=null,uid=null,connErr=false,riot={},wow={},picks={},results=null,tiersN=0,live={},champNames={};
+
+// ===== Compte à rebours =====
+function tick(){
+  const ms=WOW_LAUNCH-Date.now();
+  if(ms<=0){["d","h","m","s"].forEach(k=>$("cd-"+k).textContent="0");$("wowT").textContent="L'amitié est terminée.";$("wowMsg").textContent="WoW Forever est sorti. Les Fidèles gardent la Faille, les Déserteurs sont en Azeroth.";return}
+  const s=Math.floor(ms/1000);
+  $("cd-d").textContent=Math.floor(s/86400);$("cd-h").textContent=String(Math.floor(s%86400/3600)).padStart(2,"0");
+  $("cd-m").textContent=String(Math.floor(s%3600/60)).padStart(2,"0");$("cd-s").textContent=String(s%60).padStart(2,"0");
+}
+tick();setInterval(tick,1000);
+
+// ===== Discord =====
+async function loadDiscord(){
+  try{
+    const r=await fetch(`https://discord.com/api/v10/invites/${DISCORD_INVITE}?with_counts=true`);
+    if(r.ok){const j=await r.json();
+      if(j.guild?.name)$("dcName").textContent=j.guild.name;
+      if(j.approximate_presence_count!=null)$("dcOn").textContent=j.approximate_presence_count;
+      if(j.approximate_member_count!=null){$("dcAll").textContent=j.approximate_member_count;$("dcStats").hidden=false}
+      if(j.guild?.icon)$("dcIcon").innerHTML=`<img alt="" src="https://cdn.discordapp.com/icons/${j.guild.id}/${j.guild.icon}.png?size=128">`;}
+  }catch(e){console.warn("invite discord",e)}
+  try{
+    const r=await fetch(`https://discord.com/api/guilds/${DISCORD_GUILD}/widget.json`);
+    if(!r.ok)return;const w=await r.json();
+    const mem=w.members||[];
+    if(mem.length){$("dcWidget").hidden=false;
+      $("dcOnline").innerHTML=mem.slice(0,24).map(m=>`<span>${m.avatar_url?`<img alt="" src="${esc(m.avatar_url)}">`:""}${esc(m.username)}</span>`).join("")+(mem.length>24?`<span>+${mem.length-24}</span>`:"");
+      const vc={};for(const m of mem)if(m.channel_id){(vc[m.channel_id]=vc[m.channel_id]||[]).push(m.username)}
+      const names=Object.fromEntries((w.channels||[]).map(c=>[c.id,c.name]));
+      $("dcVoice").innerHTML=Object.keys(vc).length?Object.entries(vc).map(([id,us])=>`🔊 <b>${esc(names[id]||"Vocal")}</b> : ${us.map(esc).join(", ")}`).join("<br>"):"Personne en vocal pour l'instant.";
+    }
+    if(w.presence_count!=null){$("dcOn").textContent=w.presence_count;$("dcStats").hidden=false}
+  }catch(e){}
+}
+loadDiscord();setInterval(loadDiscord,120000);
+
+// ===== Joueurs LoL =====
+function riotParts(id){const i=id.lastIndexOf("#");return i>0?[id.slice(0,i).trim(),id.slice(i+1).trim()]:[id.trim(),""]}
+const opgg=(p)=>{const [n,t]=riotParts(p.riotId);return `https://www.op.gg/summoners/${OPGG[p.region]||"euw"}/${encodeURIComponent(n+"-"+t)}/ingame`};
+const poro=(p)=>{const [n,t]=riotParts(p.riotId);return `https://porofessor.gg/fr/live/${OPGG[p.region]||"euw"}/${encodeURIComponent(n+"-"+t)}`};
+const QUEUES={420:"Classée Solo/Duo",440:"Classée Flex",400:"Normale (draft)",430:"Normale",490:"Partie rapide",450:"ARAM",1700:"Arena",1710:"Arena",900:"URF",1900:"URF",700:"Clash",0:"Personnalisée"};
+function renderRiotReg(){
+  const box=$("riotReg");
+  if(box.contains(document.activeElement)&&["INPUT","SELECT"].includes(document.activeElement.tagName))return;
+  if(!db){box.innerHTML=connErr?`<p class="err">Connexion au Conseil impossible, recharge la page.</p>`:"";return}
+  const me=riot[uid];
+  if(me&&!box.dataset.edit){box.innerHTML=`<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><span class="note">Inscrit en tant que <b style="color:var(--hex)">${esc(me.pseudo)}</b> · ${esc(me.riotId)} (${REGIONS[me.region]||me.region})</span><button class="btn ghost small" id="editRiot">Modifier</button></div>`;
+    $("editRiot").onclick=()=>{box.dataset.edit="1";renderRiotReg()};return}
+  const guess=picks[uid]?.pseudo||wow[uid]?.pseudo||"";
+  box.innerHTML=`<form class="reg" id="riotForm">
+    <input type="text" id="rPseudo" maxlength="20" placeholder="Ton pseudo" aria-label="Pseudo" value="${esc(me?.pseudo||guess)}" required>
+    <input type="text" id="rId" maxlength="40" placeholder="Riot ID, ex. Faker#KR1" aria-label="Riot ID" value="${esc(me?.riotId||"")}" required>
+    <select id="rReg" aria-label="Région">${Object.entries(REGIONS).map(([k,v])=>`<option value="${k}" ${(me?.region||"euw1")===k?"selected":""}>${v}</option>`).join("")}</select>
+    <button class="btn" type="submit">${me?"Enregistrer":"Ajouter mon compte"}</button></form><p class="err" id="rErr" hidden></p>`;
+  $("riotForm").onsubmit=async e=>{e.preventDefault();
+    const pseudo=$("rPseudo").value.trim().slice(0,20),riotId=$("rId").value.trim().replace(/\s*#\s*/,"#"),region=$("rReg").value;
+    const err=t=>{const x=$("rErr");x.textContent=t;x.hidden=false};
+    if(!/^.{3,16}#[A-Za-z0-9]{2,5}$/.test(riotId)){err("Le Riot ID doit avoir la forme Pseudo#TAG, par exemple Faker#KR1.");return}
+    if(Object.entries(riot).some(([id,p])=>id!==uid&&p.riotId.toLowerCase()===riotId.toLowerCase())){err("Ce compte Riot est déjà inscrit.");return}
+    try{await db.doc("riot/"+uid).set({pseudo,riotId,region,updated:new Date().toISOString()},{merge:true});delete $("riotReg").dataset.edit}
+    catch(x){err("Enregistrement impossible pour le moment, réessaie.")}};
+}
+function renderPlayers(){
+  const list=Object.entries(riot).map(([id,p])=>({id,...p,lv:live[p.riotId?.toLowerCase()]}));
+  if(!db&&!list.length){$("players").innerHTML=`<div class="note">${connErr?"Liste indisponible.":"Chargement des invocateurs…"}</div>`;return}
+  if(!list.length){$("players").innerHTML=`<div class="note">Aucun invocateur inscrit. Ajoute ton Riot ID ci-dessus pour apparaître ici.</div>`;return}
+  list.sort((a,b)=>(b.lv?1:0)-(a.lv?1:0)||a.pseudo.localeCompare(b.pseudo));
+  $("players").innerHTML=list.map(p=>{
+    const g=p.lv, mins=g?Math.max(0,Math.floor((Date.now()-g.start)/60000)):0;
+    const status=LIVE_API?(g?`<span class="st on">En partie</span>`:`<span class="st">Hors partie</span>`):`<span class="st">${REGIONS[p.region]||""}</span>`;
+    const detail=g?`${esc(champNames[g.championId]||"Champion")} · ${esc(QUEUES[g.queueId]||"Partie")} · ${mins} min`:esc(p.riotId);
+    return `<div class="pl ${g?"ingame":""}">${status}<div class="pinfo"><b>${esc(p.pseudo)}${conseilCampTag(p.id)}</b><small>${detail}</small></div>
+      <div class="plinks"><a class="btn ghost small" href="${poro(p)}" target="_blank" rel="noopener">Live</a><a class="btn ghost small" href="${opgg(p)}" target="_blank" rel="noopener">op.gg</a></div></div>`}).join("");
+  const n=list.filter(p=>p.lv).length;
+  $("liveInfo").textContent=LIVE_API?(n?`${n} en partie`:"Personne en partie"):"Clique sur Live pour voir sa partie en cours";
+}
+async function loadChampNames(){
+  try{const v=(await (await fetch("https://ddragon.leagueoflegends.com/api/versions.json")).json())[0];
+    const d=(await (await fetch(`https://ddragon.leagueoflegends.com/cdn/${v}/data/fr_FR/champion.json`)).json()).data;
+    for(const k in d)champNames[d[k].key]=d[k].name}catch(e){}
+}
+async function loadLive(){
+  if(!LIVE_API)return;
+  const ps=Object.values(riot).filter(p=>p.riotId);if(!ps.length)return;
+  try{const r=await fetch(LIVE_API.replace(/\/$/,"")+"/live?players="+encodeURIComponent(ps.map(p=>p.riotId+"|"+p.region).join(",")));
+    if(!r.ok)throw new Error("HTTP "+r.status);const j=await r.json();live={};
+    for(const [id,g] of Object.entries(j.games||{}))if(g)live[id.toLowerCase()]=g;renderPlayers()}catch(e){console.warn("live",e)}
+}
+if(LIVE_API){loadChampNames();setInterval(loadLive,90000)}
+
+// ===== Déserteurs WoW =====
+function campOf(w){return w.side||(w.going?"wow":null)}
+function renderWow(){
+  const all=Object.entries(wow).filter(([,w])=>w.pseudo&&campOf(w));
+  const L=all.filter(([,w])=>campOf(w)==="lol"),Wo=all.filter(([,w])=>campOf(w)==="wow"),n=L.length+Wo.length;
+  const chips=(arr,empty)=>arr.length?arr.map(([id,w])=>`<span class="dchip"${id===uid?' style="outline:1px solid #fff"':""}>${esc(w.pseudo)}</span>`).join(""):`<span class="note">${empty}</span>`;
+  $("lolList").innerHTML=chips(L,"Personne pour l'instant.");$("dlist").innerHTML=chips(Wo,"Personne n'a encore avoué.");
+  $("nLol").textContent=L.length;$("nWow").textContent=Wo.length;
+  const pl=n?Math.round(100*L.length/n):50;
+  $("campBar").innerHTML=`<i class="cl" style="width:${pl}%"></i><i class="cw" style="width:${100-pl}%"></i>`;$("campBar").setAttribute("aria-label",`${L.length} fidèles de la Faille, ${Wo.length} déserteurs`);
+  const tr=(window.CAMP_TRAITORS||[])[0];
+  $("campMsg").textContent=(tr?`Traître de la semaine : ${tr.pseudo} (${campOf(tr)==="wow"?"parti pour Azeroth":"revenu sur la Faille"}). `:"")+(!n?"":L.length===Wo.length?"Égalité parfaite entre les deux camps.":L.length>Wo.length?`La Faille tient bon : ${L.length} contre ${Wo.length}.`:`Azeroth gagne du terrain : ${Wo.length} contre ${L.length}.`);
+  const mine=wow[uid]?campOf(wow[uid]):null;
+  for(const [id,side,label] of [["pickLol","lol","Je reste sur LoL"],["desert","wow","Je pars sur WoW"]]){const b=$(id);b.disabled=!db;b.setAttribute("aria-pressed",mine===side);b.textContent=mine===side?label+" ✓":label}
+}
+async function pickCamp(side){if(!db)return;
+  let pseudo=wow[uid]?.pseudo||riot[uid]?.pseudo||picks[uid]?.pseudo;
+  if(!pseudo){const f=$("rPseudo");pseudo=f&&f.value.trim();}
+  if(!pseudo){$("campMsg").textContent="Ajoute d'abord ton pseudo dans « Parties LoL du Conseil » (ou sur la page Worlds).";return}
+  const cur=wow[uid]?campOf(wow[uid]):null,next=cur===side?null:side;
+  const d={pseudo:pseudo.slice(0,20),side:next,going:next==="wow",updated:new Date().toISOString()};
+  if(cur&&next&&cur!==next){d.switchedAt=new Date().toISOString();d.prevSide=cur}   // changement de camp : trahison !
+  try{await db.doc("wow/"+uid).set(d,{merge:true})}catch(e){}}
+$("desert").onclick=()=>pickCamp("wow");$("pickLol").onclick=()=>pickCamp("lol");
+
+// ===== Résumé Worlds / tier list / jeu =====
+function renderFeat(){
+  const box=$("feat"),ms=(results?.matches||[]).filter(m=>m.a!=="TBD"&&m.b!=="TBD");
+  const m=ms.find(x=>x.status==="live")||ms.filter(x=>x.status==="upcoming").sort((a,b)=>Date.parse(a.date)-Date.parse(b.date))[0];
+  if(!m){box.hidden=true;return}box.hidden=false;
+  let va=0,vb=0;for(const p of Object.values(picks)){const v=p.picks?.[m.id];if(v===m.a)va++;else if(v===m.b)vb++}
+  const n=va+vb,pa=n?Math.round(100*va/n):0,live=m.status==="live";
+  const col=t=>TEAMC[t]||"#4a5160",fg=t=>ink(col(t));
+  box.innerHTML=`<div class="fa" style="background:${col(m.a)};color:${fg(m.a)}"><span class="sm">${esc(m.stage||"Worlds 2026")}${m.round?" · "+esc(m.round):""}</span>
+      <div class="lg">${conseilTeamLogo(m.a,"",56)}<span class="tn">${m.a}</span></div><span class="sm">${n?pa+" % des votes du Conseil":"Pas encore de vote"}</span></div>
+    <div class="mid"><span class="vs">${live?m.sa+" – "+m.sb:"VS"}</span><span class="when">${live?"● En direct":new Date(m.date).toLocaleString("fr-FR",{weekday:"short",day:"numeric",month:"short"})}</span>
+      <span style="font-weight:700">${live?"":new Date(m.date).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})+" · "}BO${m.bo}</span>
+      <a class="btn" href="worlds.html" style="margin-top:8px">${live?"Suivre":"Pronostiquer"}</a></div>
+    <div class="fb" style="background:${col(m.b)};color:${fg(m.b)}"><span class="sm">Worlds 2026</span>
+      <div class="lg" style="flex-direction:row-reverse">${conseilTeamLogo(m.b,"",56)}<span class="tn">${m.b}</span></div><span class="sm">${n?(100-pa)+" % des votes":""}</span></div>`;
+  // bandeau direct avec les infos du moment
+  const items=[];
+  for(const p of Object.values(riot))if(p.riotId&&live[p.riotId.toLowerCase()]){const g=live[p.riotId.toLowerCase()];items.push(`${p.pseudo} en partie sur ${champNames[g.championId]||"un champion"}`)}
+  const ob=Object.values(bets||{}).filter(b=>b.status==="open");for(const b of ob)items.push(`Pari ouvert sur ${b.targetPseudo}`);
+  items.push(`Worlds : ${m.a} – ${m.b} ${live?"en direct":new Date(m.date).toLocaleString("fr-FR",{weekday:"long",hour:"2-digit",minute:"2-digit"})}`);
+  if(Date.now()<CDS_GAME_START+CDS_GAME_HOURS*3600e3)items.unshift(Date.now()<CDS_GAME_START?"Soirée CDS Game jeudi 22 octobre à 20 h 30 sur le Discord":"Soirée CDS Game en cours sur le Discord");
+  items.push("Un skin LoL à gagner pour le n°1 du pick'em");
+  window.CUSTOM_TICKER=true;
+  for(const w of (window.CAMP_TRAITORS||[]).slice(0,2))items.unshift(`Trahison ! ${w.pseudo} ${campOf(w)==="wow"?"a quitté la Faille pour Azeroth":"est revenu sur la Faille"}`);
+  conseilTicker(items);
+}
+function renderSummary(){renderFeat();
+  const nm=$("nextMatch"),t3=$("top3");
+  const ms=(results?.matches||[]).filter(m=>m.a!=="TBD"&&m.b!=="TBD");
+  const lv=ms.find(m=>m.status==="live"), nx=ms.filter(m=>m.status==="upcoming").sort((a,b)=>Date.parse(a.date)-Date.parse(b.date))[0];
+  const m=lv||nx;
+  nm.innerHTML=m?`<span style="color:${lv?"var(--live)":"var(--muted)"};font-weight:700;font-size:.78rem;letter-spacing:.1em">${lv?"● EN DIRECT":new Date(m.date).toLocaleString("fr-FR",{weekday:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})}</span>${badge(m.a)}<span>${lv?m.sa+" – "+m.sb:"vs"}</span>${badge(m.b)}`:"";
+  const done=(results?.matches||[]).filter(m=>m.status==="done");
+  const rows=Object.values(picks).filter(p=>p.pseudo).map(p=>{let s=0;for(const m of done)if(p.picks?.[m.id]===m.winner)s+=PTS[m.bo]||1;if(results?.champion&&p.champion===results.champion)s+=5;return{n:p.pseudo,s}}).sort((a,b)=>b.s-a.s).slice(0,3);
+  t3.innerHTML=rows.length?rows.map((r,i)=>`<span><i>${i+1}.</i>${esc(r.n)} · ${r.s} pt${r.s>1?"s":""}</span>`).join(""):"";
+  $("tierCount").textContent=tiersN?`${tiersN} tier list${tiersN>1?"s":""} validée${tiersN>1?"s":""}`:"";
+}
+$("dailyInfo").textContent="Nouveau défi chaque jour dans les 5 modes.";
+
+let bets={},trials={},sage={},clash={};
+function renderWeek(){
+  const nm=id=>riot[id]?.pseudo||"un sage";
+  const last=conseilWeek(new Date(Date.now()-7*864e5)),cnt={};
+  for(const v of Object.values(sage))if(v.week===last)for(const k of ["carry","drole","tilt"])if(v[k]){cnt[k]=cnt[k]||{};cnt[k][v[k]]=(cnt[k][v[k]]||0)+1}
+  const lab={carry:"carry",drole:"drôle",tilt:"tilté"},w=Object.entries(cnt).map(([k,o])=>{const e=Object.entries(o).sort((a,b)=>b[1]-a[1])[0];return `Le plus ${lab[k]} : <strong>${esc(nm(e[0]))}</strong>`});
+  $("wSage").innerHTML=w.length?w.join("<br>"):"Votes en cours pour cette semaine";
+  const ob=Object.values(bets).filter(b=>b.status==="open");
+  $("wBets").innerHTML=ob.length?`<strong>${ob.length}</strong> pari${ob.length>1?"s":""} ouvert${ob.length>1?"s":""} · ${ob.slice(0,2).map(b=>esc(b.targetPseudo)).join(", ")}`:"Aucun pari en cours";
+  const tr=Object.values(trials).filter(t=>t.closesAt>Date.now()).sort((a,b)=>b.created.localeCompare(a.created))[0];
+  $("wTrial").innerHTML=tr?`<strong>${esc(tr.accusedPseudo)}</strong> est accusé : « ${esc(tr.charge.slice(0,70))}${tr.charge.length>70?"…":""} »`:"Le tribunal est vide";
+  const cl=Object.values(clash).filter(e=>Date.parse(e.date)>Date.now()).sort((a,b)=>Date.parse(a.date)-Date.parse(b.date))[0];
+  $("wClash").innerHTML=cl?`<strong>${new Date(cl.date).toLocaleString("fr-FR",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</strong> · ${esc(cl.title)}`:"Aucune session prévue";
+}
+function renderAll(){renderWeek();
+  const me=riot[uid]?.pseudo||picks[uid]?.pseudo||wow[uid]?.pseudo;
+  $("me").innerHTML=!db?(connErr?"Hors ligne":"Connexion au Conseil…"):me?`Bienvenue, <b>${esc(me)}</b>`:"Bienvenue, sage anonyme";
+  renderRiotReg();renderPlayers();renderWow();renderSummary();
+}
+renderAll();
+conseilLoadLogos(()=>renderAll());conseilDD().then(()=>renderAll());
+(async()=>{
+  const c=await conseilConnect();
+  if(!c.db){connErr=true;renderAll();return}
+  db=c.db;uid=c.uid;
+  const sub=(col,fn)=>db.collection(col).onSnapshot(q=>{const o={};q.docs.forEach(d=>o[d.id]=d.data());fn(o);renderAll()},e=>console.warn(col,e));
+  sub("riot",o=>{riot=o;loadLive()});
+  sub("wow",o=>wow=o);
+  sub("picks",o=>picks=o);
+  sub("tiers",o=>tiersN=Object.values(o).filter(t=>t.complete).length);
+  sub("bets",o=>bets=o);sub("trials",o=>trials=o);sub("sageVotes",o=>sage=o);sub("clash",o=>clash=o);
+  db.doc("results/state").onSnapshot(s=>{results=s.exists?s.data():null;renderAll()},()=>{});
+  renderAll();
+})();
+
+window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
+</script>
+</body>
+</html>

@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08090b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png?v=2">
+<link rel="apple-touch-icon" href="icon-192.png?v=2">
+<title>Échauffement du Conseil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Barlow:wght@400;500;600;700&display=swap">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="conseil.js"></script>
+<style>
+/* Layout: salle d'entraînement — en-tête, sélecteur d'exercice, arène (canvas) cadrée d'or avec HUD, puis classement du Conseil */
+:root{
+  --void:#010a13; --night:#091428; --panel:#0e1b2e; --panel2:#15263d; --line:#463714; --line2:#1e2d43;
+  --ink:#f0e6d2; --muted:#a09b8c; --gold:#c8aa6e; --gold2:#785a28; --goldhi:#f0e6d2;
+  --hex:#0ac8b9; --hex2:#0397ab; --red:#e84057; --ok:#2fbf71;
+  --display:"Cinzel","Trajan Pro",Georgia,serif;
+  --body:"Barlow","Segoe UI",system-ui,sans-serif;
+  color-scheme:dark;
+}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html,body{margin:0}
+[hidden]{display:none!important}
+body{background:radial-gradient(900px 500px at 50% -120px,rgba(10,200,185,.14),transparent 70%),linear-gradient(180deg,var(--night),var(--void) 70%) fixed;background-color:var(--void);
+  color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;min-height:100%;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.topbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.links{display:flex;gap:8px;flex-wrap:wrap}
+.links a{text-decoration:none;font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:.78rem;border:1px solid var(--gold2);padding:7px 12px;color:var(--gold)}
+.links a:hover{border-color:var(--gold);color:var(--goldhi)}
+.me{color:var(--muted);font-size:.9rem}.me b{color:var(--hex)}
+header{display:flex;flex-direction:column;gap:6px}
+.eyebrow{font:600 .74rem var(--body);letter-spacing:.2em;text-transform:uppercase;color:var(--hex)}
+h1{font-family:var(--display);font-weight:900;font-size:clamp(1.8rem,5vw,2.8rem);letter-spacing:.05em;text-transform:uppercase;margin:0;line-height:1.05;
+  background:linear-gradient(180deg,var(--goldhi),var(--gold) 55%,var(--gold2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--muted);margin:0;max-width:66ch}
+h2{font:700 1.05rem var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin:0}
+.note{font-size:.88rem;color:var(--muted);margin:0}
+.frame{border:1px solid var(--gold2);background:linear-gradient(180deg,rgba(21,38,61,.9),rgba(9,20,40,.95));position:relative}
+.panel{padding:18px;display:flex;flex-direction:column;gap:14px}
+.drills{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:720px){.drills{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.drills button{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;padding:12px;cursor:pointer;color:var(--muted);background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);
+  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.drills button b{font:700 .9rem var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+.drills button small{font-size:.8rem}
+.drills button .best{color:var(--hex);font-weight:600}
+.drills button[aria-pressed="true"]{border-color:var(--gold);box-shadow:inset 0 -2px 0 var(--hex);background:linear-gradient(180deg,#1d3550,var(--panel2))}
+.drills button[aria-pressed="true"] b{color:var(--goldhi)}
+.arena{position:relative;border:1px solid var(--gold2);background:#06101c;touch-action:none;user-select:none;-webkit-user-select:none}
+.arena canvas{display:block;width:100%;height:auto;cursor:crosshair}
+.hud{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;gap:10px;padding:10px 12px;pointer-events:none;font:700 .9rem var(--body);font-variant-numeric:tabular-nums;text-shadow:0 1px 3px #000}
+.hud span{background:rgba(1,10,19,.6);padding:3px 8px;border:1px solid var(--line2)}
+.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:20px;background:rgba(1,10,19,.78)}
+.overlay h3{font:900 clamp(1.3rem,4vw,2rem) var(--display);letter-spacing:.06em;text-transform:uppercase;margin:0;color:var(--goldhi)}
+.overlay p{margin:0;max-width:52ch;color:var(--ink)}
+.overlay .keys{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;font-size:.85rem;color:var(--muted)}
+.overlay kbd,.keyc{font:700 .85rem var(--body);padding:2px 8px;border:1px solid var(--gold2);background:var(--void);color:var(--gold)}
+.res{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-width:min(420px,100%)}
+.res div{display:flex;flex-direction:column;padding:8px;border:1px solid var(--line2);background:var(--void)}
+.res b{font:900 1.5rem var(--display);color:var(--goldhi);font-variant-numeric:tabular-nums}
+.res span{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:700 .85rem var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--hex);background:linear-gradient(180deg,#0b2a3c,#06141f);border:2px solid var(--hex2);padding:11px 22px;cursor:pointer;box-shadow:0 0 12px rgba(10,200,185,.2)}
+.btn:hover{color:#bff7f1;border-color:var(--hex)}
+.btn.ghost{color:var(--gold);border:1px solid var(--gold2);background:transparent;box-shadow:none}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--hex);outline-offset:2px}
+.pad{display:none;gap:6px;justify-content:center;flex-wrap:wrap}
+.pad button{width:52px;height:52px;font:900 1.2rem var(--display);color:var(--gold);background:var(--panel);border:1px solid var(--gold2);touch-action:manipulation}
+.pad button:active{background:var(--panel2)}
+@media (pointer:coarse){.pad.show{display:flex}}
+.board{display:flex;flex-direction:column;gap:6px}
+.lrow{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 10px;background:var(--void);border:1px solid var(--line2);font-variant-numeric:tabular-nums}
+.lrow.mine{border-color:var(--hex2);background:rgba(10,200,185,.06)}
+.lrow .rk{font:700 1rem var(--display);color:var(--gold)}
+.lrow b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lrow .sc{font:700 1rem var(--display);color:var(--goldhi)}
+.tabs2{display:flex;gap:6px;flex-wrap:wrap}
+.tabs2 button{font:600 .78rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--void);border:1px solid var(--line2);padding:7px 12px;cursor:pointer}
+.tabs2 button[aria-pressed="true"]{color:var(--hex);border-color:var(--hex2)}
+.reg{display:flex;gap:8px;flex-wrap:wrap}.reg input{flex:1 1 200px;font:500 1rem var(--body);color:var(--ink);background:var(--void);border:1px solid var(--gold2);padding:10px 12px;min-width:0}
+footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margin:0 auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <span></span>
+    <span class="me" id="me">Connexion au Conseil…</span>
+  </div>
+  <header>
+    <span class="eyebrow">Salle d'entraînement</span>
+    <h1>Échauffement</h1>
+    <p class="sub">Deux minutes pour se chauffer les mains avant de lancer une partie : esquiver des skillshots, prendre ses sbires au dernier coup, enchaîner ses sorts sans trembler.</p>
+  </header>
+
+  <div class="drills" role="group" aria-label="Exercice">
+    <button data-d="routine" aria-pressed="true"><b>Complet</b><small>Les 3 à la suite, ~2 min 30</small><small class="best" id="best-routine"></small></button>
+    <button data-d="dodge" aria-pressed="false"><b>Esquive</b><small>Skillshots et zones, 60 s</small><small class="best" id="best-dodge"></small></button>
+    <button data-d="cs" aria-pressed="false"><b>Last-hit</b><small>4 vagues de sbires</small><small class="best" id="best-cs"></small></button>
+    <button data-d="combo" aria-pressed="false"><b>Combos</b><small>Séquences de sorts, 40 s</small><small class="best" id="best-combo"></small></button>
+  </div>
+
+  <div class="arena" id="arena">
+    <canvas id="cv" width="960" height="540" aria-label="Zone de jeu"></canvas>
+    <div class="hud" id="hud" hidden><span id="hudL"></span><span id="hudM"></span><span id="hudR"></span></div>
+    <div class="overlay" id="ov"></div>
+  </div>
+  <div class="pad" id="pad"></div>
+
+  <section class="frame panel">
+    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><h2>Classement du Conseil</h2>
+      <div class="tabs2" id="lbTabs"><button data-d="dodge" aria-pressed="true">Esquive</button><button data-d="cs" aria-pressed="false">Last-hit</button><button data-d="combo" aria-pressed="false">Combos</button></div></div>
+    <div id="regBox"></div>
+    <div class="board" id="board"><div class="note">Chargement…</div></div>
+  </section>
+  <footer>Site de fan du Conseil des Sages, sans lien avec Riot Games.</footer>
+</div>
+
+<script>
+conseilNav("echauffement");
+// ================== Base ==================
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const cv=$("cv"),ctx=cv.getContext("2d"),W=960,H=540;
+const C={void:"#010a13",ground:"#0b1a2b",grid:"#11233a",gold:"#c8aa6e",gold2:"#785a28",ink:"#f0e6d2",muted:"#a09b8c",hex:"#0ac8b9",red:"#e84057",ok:"#2fbf71",blue:"#3a8fe0",purple:"#a35cff"};
+const DRILLS={dodge:"Esquive",cs:"Last-hit",combo:"Combos"};
+const lsGet=(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+let best=lsGet("warmup-best",{dodge:0,cs:0,combo:0,routine:0});
+let selected="routine",game=null,routineQueue=null,routineScores=null,mouse={x:W/2,y:H/2};
+let db=null,uid=null,connErr=false,scores={},pseudoSrc={};
+
+function fitCanvas(){const dpr=Math.min(2,window.devicePixelRatio||1);cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+fitCanvas();
+function toGame(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height}}
+function drawGround(){ctx.fillStyle=C.ground;ctx.fillRect(0,0,W,H);ctx.strokeStyle=C.grid;ctx.lineWidth=1;
+  for(let x=0;x<=W;x+=48){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}for(let y=0;y<=H;y+=48){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}}
+function hud(l,m,r){$("hud").hidden=false;$("hudL").textContent=l;$("hudM").textContent=m;$("hudR").textContent=r}
+function overlay(html){const o=$("ov");o.innerHTML=html;o.hidden=!html}
+function renderBest(){for(const k of ["dodge","cs","combo","routine"])$("best-"+k).textContent=best[k]?`Record : ${best[k]}`:""}
+
+// ================== Exercice 1 : Esquive ==================
+function Dodge(){
+  const g={name:"dodge",t:0,dur:60,lives:3,dodged:0,inv:0,shots:[],zones:[],spawn:0.8,flashCd:0,fx:[],
+    p:{x:W/2,y:H/2,tx:W/2,ty:H/2,r:13,v:270,vx:0,vy:0},over:false};
+  g.input=(type,pt)=>{if(type==="move"){g.p.tx=pt.x;g.p.ty=pt.y;g.fx.push({x:pt.x,y:pt.y,t:0,k:"click"})}
+    if(type==="flash"&&g.flashCd<=0){const dx=mouse.x-g.p.x,dy=mouse.y-g.p.y,d=Math.hypot(dx,dy)||1,s=Math.min(150,d);
+      g.fx.push({x:g.p.x,y:g.p.y,t:0,k:"flash"});g.p.x=clamp(g.p.x+dx/d*s,14,W-14);g.p.y=clamp(g.p.y+dy/d*s,14,H-14);g.p.tx=g.p.x;g.p.ty=g.p.y;g.flashCd=8;g.fx.push({x:g.p.x,y:g.p.y,t:0,k:"flash"})}};
+  g.update=dt=>{
+    g.t+=dt;g.inv=Math.max(0,g.inv-dt);g.flashCd=Math.max(0,g.flashCd-dt);
+    const p=g.p,dx=p.tx-p.x,dy=p.ty-p.y,d=Math.hypot(dx,dy);
+    if(d>2){const s=Math.min(d,p.v*dt);p.vx=dx/d*p.v;p.vy=dy/d*p.v;p.x+=dx/d*s;p.y+=dy/d*s}else{p.vx=p.vy=0}
+    const lvl=Math.min(1,g.t/50);
+    g.spawn-=dt;
+    if(g.spawn<=0){g.spawn=1.05-0.6*lvl+Math.random()*0.25;
+      if(Math.random()<0.62)spawnShot(g,lvl);else spawnZone(g,lvl);
+      if(lvl>0.55&&Math.random()<0.35)spawnShot(g,lvl)}
+    for(const s of g.shots){
+      if(s.warn>0){s.warn-=dt;continue}
+      s.x+=s.dx*s.sp*dt;s.y+=s.dy*s.sp*dt;s.life-=dt;
+      if(!s.hit&&g.inv<=0&&segDist(p.x,p.y,s.x-s.dx*s.len,s.y-s.dy*s.len,s.x,s.y)<p.r+s.w/2){s.hit=true;hurt(g)}
+      if(!s.counted&&(s.x<-60||s.x>W+60||s.y<-60||s.y>H+60)){s.counted=true;s.life=0;if(!s.hit)g.dodged++}}
+    g.shots=g.shots.filter(s=>s.life>0);
+    for(const z of g.zones){z.t+=dt;if(!z.done&&z.t>=z.delay){z.done=true;if(g.inv<=0&&Math.hypot(p.x-z.x,p.y-z.y)<z.r+p.r*0.4)hurt(g);else g.dodged++}}
+    g.zones=g.zones.filter(z=>z.t<z.delay+0.35);
+    g.fx.forEach(f=>f.t+=dt);g.fx=g.fx.filter(f=>f.t<0.5);
+    if(g.lives<=0||g.t>=g.dur)g.over=true;
+    hud(`❤ ${"●".repeat(g.lives)}${"○".repeat(3-g.lives)}`,`${Math.max(0,Math.ceil(g.dur-g.t))} s`,`Esquives ${g.dodged} · Flash ${g.flashCd>0?Math.ceil(g.flashCd)+" s":"prêt"}`);
+  };
+  g.draw=()=>{drawGround();
+    for(const z of g.zones){const k=Math.min(1,z.t/z.delay);
+      ctx.beginPath();ctx.arc(z.x,z.y,z.r,0,7);ctx.fillStyle=z.done?"rgba(232,64,87,.55)":"rgba(232,64,87,.12)";ctx.fill();ctx.strokeStyle=C.red;ctx.lineWidth=2;ctx.stroke();
+      if(!z.done){ctx.beginPath();ctx.arc(z.x,z.y,z.r*k,0,7);ctx.fillStyle="rgba(232,64,87,.25)";ctx.fill()}}
+    for(const s of g.shots){
+      if(s.warn>0){ctx.strokeStyle="rgba(232,64,87,.35)";ctx.lineWidth=s.w;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(s.x+s.dx*1400,s.y+s.dy*1400);ctx.globalAlpha=.25;ctx.stroke();ctx.globalAlpha=1;continue}
+      const gr=ctx.createLinearGradient(s.x-s.dx*s.len,s.y-s.dy*s.len,s.x,s.y);gr.addColorStop(0,"rgba(163,92,255,0)");gr.addColorStop(1,s.col);
+      ctx.strokeStyle=gr;ctx.lineWidth=s.w;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(s.x-s.dx*s.len,s.y-s.dy*s.len);ctx.lineTo(s.x,s.y);ctx.stroke()}
+    for(const f of g.fx){ctx.globalAlpha=1-f.t/0.5;if(f.k==="click"){ctx.strokeStyle=C.ok;ctx.lineWidth=2;ctx.beginPath();ctx.arc(f.x,f.y,6+f.t*20,0,7);ctx.stroke()}
+      else{ctx.fillStyle="rgba(255,230,120,.6)";ctx.beginPath();ctx.arc(f.x,f.y,10+f.t*40,0,7);ctx.fill()}ctx.globalAlpha=1}
+    const p=g.p;if(!(g.inv>0&&Math.floor(g.inv*12)%2)){
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r+5,0,7);ctx.strokeStyle=C.hex;ctx.lineWidth=2;ctx.stroke();
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fillStyle=C.gold;ctx.fill();ctx.strokeStyle=C.void;ctx.stroke()}
+  };
+  g.result=()=>({score:g.dodged+(g.lives>0?20:0)+g.lives*10,lines:[[g.dodged,"esquives"],[Math.floor(Math.min(g.t,g.dur))+" s","survie"],[g.lives,"vies restantes"]],
+    tip:g.lives===0?"Bouge en permanence par petits clics, et garde Flash pour les zones.":"Propre. Tu peux enchaîner sur une vraie partie."});
+  g.intro=`<h3>Esquive</h3><p>Clique pour te déplacer (clic droit ou gauche) et évite les skillshots violets et les zones rouges. Tu as 3 vies et 60 secondes.</p><div class="keys"><span><kbd>Clic</kbd> se déplacer</span><span><kbd>D</kbd> / <kbd>F</kbd> Flash vers la souris</span></div>`;
+  return g;
+}
+function spawnShot(g,lvl){const e=Math.floor(Math.random()*4),p=g.p;let x,y;
+  if(e===0){x=Math.random()*W;y=-30}else if(e===1){x=W+30;y=Math.random()*H}else if(e===2){x=Math.random()*W;y=H+30}else{x=-30;y=Math.random()*H}
+  const lead=0.25+Math.random()*0.35,tx=p.x+p.vx*lead*(Math.random()<0.6?1:0),ty=p.y+p.vy*lead*(Math.random()<0.6?1:0);
+  const dx=tx-x,dy=ty-y,d=Math.hypot(dx,dy)||1;
+  g.shots.push({x,y,dx:dx/d,dy:dy/d,sp:330+220*lvl+Math.random()*80,len:46,w:16+Math.random()*8,warn:0.38-0.15*lvl,life:8,col:Math.random()<0.5?C.purple:"#5ad1ff"})}
+function spawnZone(g,lvl){const p=g.p,a=Math.random()*7,o=Math.random()*45;
+  g.zones.push({x:clamp(p.x+Math.cos(a)*o,30,W-30),y:clamp(p.y+Math.sin(a)*o,30,H-30),r:52+Math.random()*28,delay:0.95-0.3*lvl,t:0})}
+function hurt(g){g.lives--;g.inv=1.1}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function segDist(px,py,ax,ay,bx,by){const vx=bx-ax,vy=by-ay,l=vx*vx+vy*vy||1,t=clamp(((px-ax)*vx+(py-ay)*vy)/l,0,1);return Math.hypot(px-(ax+t*vx),py-(ay+t*vy))}
+
+// ================== Exercice 2 : Last-hit ==================
+function LastHit(){
+  const g={name:"cs",t:0,waves:4,wave:0,next:0.6,minions:[],cs:0,missed:0,total:0,gold:0,cd:0,AD:68,AS:0.85,fx:[],over:false,end:null};
+  const TYPES={melee:{hp:470,r:20,gold:21,col:"#4b7bd6"},caster:{hp:290,r:16,gold:14,col:"#8a63d2"},siege:{hp:900,r:26,gold:60,col:"#d6a64b"}};
+  function spawnWave(){g.wave++;const list=["melee","melee","melee","caster","caster","caster"];if(g.wave===3)list.splice(3,0,"siege");
+    const n=list.length,startX=W/2-(n-1)*62;
+    list.forEach((k,i)=>{const T=TYPES[k];g.minions.push({k,x:startX+i*124,y:H/2+(i%2?40:-30),r:T.r,hp:T.hp,max:T.hp,gold:T.gold,col:T.col,tick:0.6+Math.random()*1.4,dead:false,fade:0})});
+    g.total+=n}
+  g.input=(type,pt)=>{if(type!=="move"&&type!=="tap")return;if(g.cd>0){g.fx.push({x:pt.x,y:pt.y,t:0,txt:"Attaque en recharge",c:C.muted});return}
+    const m=g.minions.find(m=>!m.dead&&Math.hypot(m.x-pt.x,m.y-pt.y)<m.r+14);if(!m)return;
+    g.cd=g.AS;m.hp-=g.AD;g.fx.push({x:m.x,y:m.y-m.r-18,t:0,txt:"-"+g.AD,c:C.ink});
+    if(m.hp<=0){m.dead=true;m.mine=true;g.cs++;g.gold+=m.gold;g.fx.push({x:m.x,y:m.y-m.r-36,t:0,txt:"+"+m.gold+" or",c:C.gold})}};
+  g.update=dt=>{g.t+=dt;g.cd=Math.max(0,g.cd-dt);
+    if(g.wave<g.waves){g.next-=dt;if(g.next<=0&&g.minions.every(m=>m.dead)){spawnWave();g.next=1.4}}
+    for(const m of g.minions){if(m.dead){m.fade+=dt;continue}
+      m.tick-=dt;if(m.tick<=0){m.tick=0.55+Math.random()*0.9;const dmg=(m.k==="siege"?30:22)+Math.random()*(m.k==="siege"?60:48);m.hp-=dmg;
+        if(m.hp<=0){m.dead=true;g.missed++;g.fx.push({x:m.x,y:m.y-m.r-18,t:0,txt:"Raté",c:C.red})}}}
+    g.minions=g.minions.filter(m=>!m.dead||m.fade<0.6);
+    g.fx.forEach(f=>f.t+=dt);g.fx=g.fx.filter(f=>f.t<0.8);
+    if(g.wave>=g.waves&&g.minions.every(m=>m.dead)){g.end=(g.end??0)+dt;if(g.end>0.6)g.over=true}
+    hud(`Vague ${Math.max(1,g.wave)}/${g.waves}`,`CS ${g.cs}/${g.total}`,`${g.gold} or · Attaque ${g.cd>0?"…":"prête"}`)};
+  g.draw=()=>{drawGround();
+    ctx.fillStyle="rgba(10,200,185,.05)";ctx.fillRect(0,H/2-120,W,240);
+    for(const m of g.minions){ctx.globalAlpha=m.dead?Math.max(0,1-m.fade/0.6):1;
+      ctx.beginPath();ctx.arc(m.x,m.y,m.r,0,7);ctx.fillStyle=m.col;ctx.fill();ctx.strokeStyle=C.void;ctx.lineWidth=2;ctx.stroke();
+      if(!m.dead){const bw=m.r*2+18,bx=m.x-bw/2,by=m.y-m.r-12,f=Math.max(0,m.hp/m.max);
+        ctx.fillStyle="#000";ctx.fillRect(bx-1,by-1,bw+2,7);ctx.fillStyle=f<g.AD/m.max+0.001?"#ff5d6c":"#e8484f";ctx.fillRect(bx,by,bw*f,5);
+        ctx.fillStyle="rgba(0,0,0,.6)";for(let s=100;s<m.max;s+=100)ctx.fillRect(bx+bw*s/m.max,by,1,5)}
+      ctx.globalAlpha=1}
+    for(const f of g.fx){ctx.globalAlpha=1-f.t/0.8;ctx.fillStyle=f.c;ctx.font="700 16px Barlow, sans-serif";ctx.textAlign="center";ctx.fillText(f.txt,f.x,f.y-f.t*30);ctx.globalAlpha=1}
+    const cx=mouse.x,cy=mouse.y;ctx.strokeStyle=g.cd>0?C.muted:C.hex;ctx.lineWidth=2;ctx.beginPath();ctx.arc(cx,cy,10,-Math.PI/2,-Math.PI/2+Math.PI*2*(1-g.cd/g.AS));ctx.stroke()};
+  g.result=()=>{const pct=g.total?Math.round(100*g.cs/g.total):0;return{score:g.cs*10+Math.round(g.gold/10),lines:[[g.cs+"/"+g.total,"CS"],[pct+"%","précision"],[g.gold,"or"]],
+    tip:pct>=80?"Excellent last-hit, tes CS sont prêts.":"Attends que la barre de vie passe sous tes dégâts (68) avant de cliquer, et ne gaspille pas ton attaque."}};
+  g.intro=`<h3>Last-hit</h3><p>Les sbires perdent de la vie tout seuls. Clique sur un sbire pour l'attaquer (68 dégâts, une attaque toutes les 0,85 s) et donne le <b>dernier coup</b> pour gagner l'or. Un sbire qui meurt sans toi est un CS raté.</p><div class="keys"><span>Les traits de la barre de vie = 100 PV</span></div>`;
+  return g;
+}
+
+// ================== Exercice 3 : Combos ==================
+function Combo(){
+  const KEYS=["Q","W","E","R","D","F"];
+  const g={name:"combo",t:0,dur:40,seq:[],pos:0,done:0,errors:0,streak:0,bestStreak:0,shown:0,times:[],flash:0,flashOk:true,over:false};
+  function newSeq(){const n=Math.min(6,2+Math.floor(g.done/3));g.seq=[];for(let i=0;i<n;i++){let k;do{k=KEYS[Math.floor(Math.random()*KEYS.length)]}while(k===g.seq[i-1]);g.seq.push(k)}g.pos=0;g.shown=g.t}
+  newSeq();
+  g.input=(type,key)=>{if(type!=="key")return;key=key.toUpperCase();if(!KEYS.includes(key))return;
+    if(key===g.seq[g.pos]){g.pos++;if(g.pos>=g.seq.length){g.done++;g.streak++;g.bestStreak=Math.max(g.bestStreak,g.streak);g.times.push(g.t-g.shown);g.flash=0.25;g.flashOk=true;newSeq()}}
+    else{g.errors++;g.streak=0;g.pos=0;g.flash=0.25;g.flashOk=false}};
+  g.update=dt=>{g.t+=dt;g.flash=Math.max(0,g.flash-dt);if(g.t>=g.dur)g.over=true;
+    hud(`Combos ${g.done}`,`${Math.max(0,Math.ceil(g.dur-g.t))} s`,`Série ${g.streak} · Erreurs ${g.errors}`)};
+  g.draw=()=>{drawGround();
+    if(g.flash>0){ctx.fillStyle=g.flashOk?"rgba(47,191,113,.12)":"rgba(232,64,87,.15)";ctx.fillRect(0,0,W,H)}
+    const n=g.seq.length,size=86,gap=16,total=n*size+(n-1)*gap,x0=W/2-total/2,y=H/2-size/2;
+    g.seq.forEach((k,i)=>{const x=x0+i*(size+gap),done=i<g.pos,cur=i===g.pos;
+      ctx.fillStyle=done?"rgba(47,191,113,.25)":C.void;ctx.fillRect(x,y,size,size);
+      ctx.strokeStyle=done?C.ok:cur?C.hex:C.gold2;ctx.lineWidth=cur?3:2;ctx.strokeRect(x,y,size,size);
+      ctx.fillStyle=done?C.ok:C.ink;ctx.font="900 44px Cinzel, Georgia, serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(k,x+size/2,y+size/2+2)});
+    ctx.textBaseline="alphabetic";ctx.fillStyle=C.muted;ctx.font="600 16px Barlow, sans-serif";ctx.textAlign="center";
+    ctx.fillText("Tape la séquence dans l'ordre",W/2,y+size+40)};
+  g.result=()=>{const avg=g.times.length?g.times.reduce((a,b)=>a+b,0)/g.times.length:0;
+    return{score:Math.max(0,g.done*10+g.bestStreak*2-g.errors*3),lines:[[g.done,"combos"],[avg?avg.toFixed(2).replace(".",",")+" s":"–","par combo"],[g.errors,"erreurs"]],
+    tip:g.errors>4?"Vise la précision d'abord, la vitesse suit.":"Tes doigts sont chauds."}};
+  g.intro=`<h3>Combos</h3><p>Une séquence de touches apparaît : tape-la dans l'ordre le plus vite possible. Les séquences s'allongent au fil des réussites. Une erreur remet la séquence à zéro.</p><div class="keys"><kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd><kbd>R</kbd><kbd>D</kbd><kbd>F</kbd></div>`;
+  g.pad=true;
+  return g;
+}
+
+// ================== Boucle ==================
+const MAKERS={dodge:Dodge,cs:LastHit,combo:Combo};
+let last=0,raf=0,countdown=0;
+function loop(ts){const dt=Math.min(0.05,(ts-last)/1000||0);last=ts;
+  if(game){if(countdown>0){countdown-=dt;game.draw();ctx.fillStyle="rgba(1,10,19,.55)";ctx.fillRect(0,0,W,H);ctx.fillStyle=C.goldhi||"#f0e6d2";ctx.font="900 96px Cinzel, Georgia, serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(Math.ceil(countdown),W/2,H/2);ctx.textBaseline="alphabetic"}
+    else{game.update(dt);game.draw();if(game.over){finish();}}}
+  raf=requestAnimationFrame(loop)}
+function idle(){drawGround();ctx.fillStyle=C.gold2;ctx.font="900 54px Cinzel, Georgia, serif";ctx.textAlign="center";ctx.fillText("ÉCHAUFFEMENT",W/2,H/2)}
+function showIntro(){
+  cancelAnimationFrame(raf);game=null;$("hud").hidden=true;$("pad").classList.remove("show");idle();
+  if(selected==="routine"){overlay(`<h3>Échauffement complet</h3><p>Esquive, puis last-hit, puis combos. Environ deux minutes et demie pour arriver chaud en partie. Ton total compte pour ton record personnel.</p><button class="btn" id="go">Commencer</button>`)}
+  else{overlay(MAKERS[selected]().intro+`<button class="btn" id="go">Commencer</button>`)}
+  $("go").onclick=()=>{if(selected==="routine"){routineQueue=["dodge","cs","combo"];routineScores={};startDrill(routineQueue.shift())}else{routineQueue=null;startDrill(selected)}};
+}
+function startDrill(name){
+  game=MAKERS[name]();overlay("");
+  if(routineQueue&&name!=="dodge"){overlay(game.intro+`<button class="btn" id="go2">Exercice suivant</button>`);$("hud").hidden=true;
+    $("go2").onclick=()=>{overlay("");begin()};cancelAnimationFrame(raf);idle();return}
+  begin();
+}
+function begin(){$("pad").classList.toggle("show",!!game.pad);countdown=3;last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)}
+function finish(){
+  const g=game,r=g.result();cancelAnimationFrame(raf);game=null;$("pad").classList.remove("show");
+  const isRecord=r.score>(best[g.name]||0);if(isRecord){best[g.name]=r.score;lsSet("warmup-best",best);renderBest()}
+  saveScore(g.name,r.score);
+  const res=`<div class="res">${r.lines.map(([v,l])=>`<div><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join("")}</div>`;
+  if(routineQueue){routineScores[g.name]=r.score;
+    if(routineQueue.length){const nxt=routineQueue.shift();overlay(`<h3>${DRILLS[g.name]} : ${r.score} pts${isRecord?" · record !":""}</h3>${res}<p class="note">${esc(r.tip)}</p><button class="btn" id="nx">Suivant : ${DRILLS[nxt]}</button>`);$("nx").onclick=()=>startDrill(nxt);return}
+    const tot=Object.values(routineScores).reduce((a,b)=>a+b,0),rec=tot>(best.routine||0);if(rec){best.routine=tot;lsSet("warmup-best",best);renderBest()}
+    overlay(`<h3>Échauffement terminé${rec?" · record !":""}</h3><div class="res">${Object.entries(routineScores).map(([k,v])=>`<div><b>${v}</b><span>${DRILLS[k]}</span></div>`).join("")}</div><p>Total : <b style="color:var(--gold)">${tot} pts</b>. Tu es chaud, lance ta partie !</p><button class="btn" id="again">Recommencer</button>`);
+    $("again").onclick=showIntro;routineQueue=null;return}
+  overlay(`<h3>${DRILLS[g.name]} : ${r.score} pts${isRecord?" · record !":""}</h3>${res}<p class="note">${esc(r.tip)}</p><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="btn" id="again">Rejouer</button><button class="btn ghost" id="back">Changer d'exercice</button></div>`);
+  $("again").onclick=()=>startDrill(g.name);$("back").onclick=showIntro;
+}
+
+// ================== Entrées ==================
+cv.addEventListener("contextmenu",e=>e.preventDefault());
+cv.addEventListener("pointermove",e=>{mouse=toGame(e)});
+cv.addEventListener("pointerdown",e=>{const pt=toGame(e);mouse=pt;if(game&&countdown<=0){e.preventDefault();game.input("move",pt)}});
+window.addEventListener("keydown",e=>{if(!game||countdown>0)return;if(["INPUT","TEXTAREA"].includes(document.activeElement?.tagName))return;
+  const k=e.key.toUpperCase();
+  if(game.name==="dodge"&&(k==="D"||k==="F")){e.preventDefault();game.input("flash")}
+  else if(game.name==="combo"&&k.length===1){e.preventDefault();game.input("key",k)}});
+$("pad").innerHTML=["Q","W","E","R","D","F"].map(k=>`<button data-k="${k}">${k}</button>`).join("");
+$("pad").querySelectorAll("button").forEach(b=>b.addEventListener("pointerdown",e=>{e.preventDefault();if(game&&countdown<=0)game.input("key",b.dataset.k)}));
+document.querySelectorAll(".drills button").forEach(b=>b.onclick=()=>{if(game)return;selected=b.dataset.d;document.querySelectorAll(".drills button").forEach(x=>x.setAttribute("aria-pressed",x===b));showIntro()});
+renderBest();showIntro();
+
+// ================== Classement ==================
+let lbDrill="dodge";
+document.querySelectorAll("#lbTabs button").forEach(b=>b.onclick=()=>{lbDrill=b.dataset.d;document.querySelectorAll("#lbTabs button").forEach(x=>x.setAttribute("aria-pressed",x===b));renderBoard()});
+function myPseudo(){return scores[uid]?.pseudo||pseudoSrc.picks?.[uid]?.pseudo||pseudoSrc.riot?.[uid]?.pseudo||pseudoSrc.tiers?.[uid]?.pseudo||""}
+async function saveScore(drill,score){
+  if(!db||!uid)return;const pseudo=myPseudo();if(!pseudo)return;
+  const cur=scores[uid]||{};if((cur[drill]||0)>=score&&cur.pseudo)return;
+  try{await db.doc("warmup/"+uid).set({pseudo,[drill]:Math.max(score,cur[drill]||0),updated:new Date().toISOString()},{merge:true})}catch(e){console.warn(e)}
+}
+function renderReg(){const box=$("regBox");
+  if(box.contains(document.activeElement)&&document.activeElement.tagName==="INPUT")return;
+  if(!db){box.innerHTML="";return}
+  if(myPseudo()){box.innerHTML=`<p class="note">Tes meilleurs scores sont enregistrés sous <b style="color:var(--hex)">${esc(myPseudo())}</b>.</p>`;return}
+  box.innerHTML=`<form class="reg" id="wf"><input type="text" id="wp" maxlength="20" placeholder="Ton pseudo pour le classement" aria-label="Pseudo" required><button class="btn" type="submit">Enregistrer</button></form>`;
+  $("wf").onsubmit=async e=>{e.preventDefault();const v=$("wp").value.trim().slice(0,20);if(!v)return;
+    const b=lsGet("warmup-best",{});const d={pseudo:v,updated:new Date().toISOString()};for(const k of ["dodge","cs","combo"])if(b[k])d[k]=b[k];
+    try{await db.doc("warmup/"+uid).set(d,{merge:true})}catch(x){}}}
+function renderBoard(){
+  if(!db){$("board").innerHTML=`<div class="note">${connErr?"Classement indisponible.":"Chargement…"}</div>`;return}
+  const rows=Object.entries(scores).filter(([,s])=>s.pseudo&&s[lbDrill]).map(([id,s])=>({id,n:s.pseudo,v:s[lbDrill]})).sort((a,b)=>b.v-a.v).slice(0,15);
+  $("board").innerHTML=rows.length?rows.map((r,i)=>`<div class="lrow ${r.id===uid?"mine":""}"><span class="rk">${i+1}</span><b>${esc(r.n)}${conseilCampTag(r.id)}${r.id===uid?' <span class="note">(toi)</span>':""}</b><span class="sc">${r.v}</span></div>`).join("")
+    :`<div class="note">Aucun score en ${DRILLS[lbDrill]} pour l'instant. Termine un exercice pour ouvrir le classement.</div>`}
+function renderSide(){const p=myPseudo();$("me").innerHTML=!db?(connErr?"Hors ligne":"Connexion au Conseil…"):p?`Connecté : <b>${esc(p)}</b>`:"Sage anonyme";renderReg();renderBoard()}
+renderSide();
+(async()=>{
+  const c=await conseilConnect();if(!c.db){connErr=true;renderSide();return}
+  db=c.db;uid=c.uid;
+  db.collection("warmup").onSnapshot(q=>{scores={};q.docs.forEach(d=>scores[d.id]=d.data());renderSide()},e=>console.warn(e));
+  for(const col of ["picks","riot","tiers"])db.doc(col+"/"+uid).get().then(s=>{if(s.exists){pseudoSrc[col]={[uid]:s.data()};renderSide()}}).catch(()=>{});
+  renderSide();
+})();
+
+window.addEventListener("conseil-camps",()=>{try{renderSide()}catch(e){}});
+</script>
+</body>
+</html>
