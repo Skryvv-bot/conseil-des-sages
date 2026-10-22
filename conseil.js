@@ -293,43 +293,70 @@ function conseilStars(kind,key){
 (function(){
   const FIRST_MIN=3, EVERY_MIN=7;
   if(/echauffement/.test(location.pathname))return;   // pas pendant les exercices
-  const T1_LINES=[
+  // Phrases fixes : 2 sur Faker, le reste pour troller les sages et culpabiliser les Déserteurs
+  const BASE_LINES=[
     "Faker est-il le plus grand joueur de tous les temps ?",
-    "Faker a 6 titres de champion du monde. Toi, tu as validé ta tier list ?",
-    "Faker a commencé en 2013, quand certains sages jouaient encore à Club Penguin. Ça te met un coup de vieux ?",
-    "T1 en finale des Worlds, c'est devenu une tradition, comme la raclette en hiver. D'accord ?",
-    "Si Faker sort Ryze, tout le Conseil se lève. C'est noté ?",
-    "Pronostiquer contre T1, c'est un choix. Un mauvais choix. On est d'accord ?",
-    "Le Conseil des Sages nomme Faker membre d'honneur à vie. Tu approuves ?",
-    "Keria a plus de titres que ton support n'a posé de balises cette saison. Tu valides ?",
-    "Gumayusi est parti chez HLE, mais son cœur est resté chez T1. Tu y crois ?",
-    "Peyz doit remplacer un triple champion du monde. Tu lui envoies de la force ?",
-    "Six étoiles sur le maillot de T1. C'est plus que le nombre de fois où ton ADC a suivi ton engage. Vrai ?",
-    "Doran est arrivé chez T1 et a gagné les Worlds direct. Tu veux aussi être recruté par T1 ?",
-    "Easyhoon était le remplaçant de Faker chez SKT en 2015. Le nôtre est plus fort ?",
-    "Oner a 3 étoiles. Ton jungler a 3 pings « ? » sur la tête. Même chose ?",
-    "Faker ne fait jamais tilt. Toi non plus, évidemment ?"
+    "Faker a 6 titres de champion du monde. Toi, tu as au moins validé ta tier list ?",
+    "Ton KDA ressemble à un numéro de téléphone. Tu veux en parler ?",
+    "Ta dernière balise date de 2019. Tu comptes en poser une ce soir ?",
+    "Tu as encore flash dans un mur aujourd'hui ?",
+    "Ton CS à 10 minutes est plus bas que ton âge. On peut en parler ?",
+    "Tu dis « je suis bloqué à cause de mes mates » depuis trois saisons. C'est toujours vrai ?",
+    "Tu as accusé ton jungler cette semaine ?",
+    "Tu vas encore lancer « juste une dernière » après trois défaites ?",
+    "Tu as mute tout le monde dès l'écran de chargement ?",
+    "Le 5 novembre, des sages vont abandonner leurs potes pour WoW. Toi, tu restes sur la Faille ?"
+  ];
+  const WOW_ME=[
+    "Tu pars sur WoW et tu laisses tes potes seuls sur la Faille. Tu te sens fier ?",
+    "Faker n'a jamais quitté LoL. Toi, si. Tu y réfléchis encore ?",
+    "Tes potes vont devoir faire leurs flex avec un random parce que tu pars sur WoW. Tu assumes ?",
+    "Azeroth ne t'a jamais offert de pentakill. Tu es sûr de ton choix ?",
+    "Tu pourrais encore revenir chez les Fidèles de la Faille. Tu y penses ?"
   ];
   const pick=a=>a[Math.floor(Math.random()*a.length)];
-  async function resultLines(){
+  const TFR={IRON:"Fer",BRONZE:"Bronze",SILVER:"Argent",GOLD:"Or",PLATINUM:"Platine",EMERALD:"Émeraude",DIAMOND:"Diamant",MASTER:"Maître",GRANDMASTER:"Grand Maître",CHALLENGER:"Challenger"};
+  async function dynamicLines(){
+    const out=[];
     try{
-      if(!window.firebase||!firebase.apps.length)return [];
-      const q=await firebase.firestore().collection("bets").where("status","==","done").get();
-      const since=Date.now()-3*864e5,out=[];
-      q.docs.map(d=>d.data()).filter(b=>b.match&&Date.parse(b.settledAt||0)>since&&!(window.conseilIsClaimed&&conseilIsClaimed(b.target))).forEach(b=>{
+      if(!window.firebase||!firebase.apps.length)return out;
+      const fs=firebase.firestore(),claimed=id=>window.conseilIsClaimed&&conseilIsClaimed(id);
+      const [bq,lq,wq]=await Promise.all([fs.collection("bets").where("status","==","done").get().catch(()=>null),fs.doc("ladder/current").get().catch(()=>null),fs.collection("wow").get().catch(()=>null)]);
+      // résultats des parties des 3 derniers jours
+      const since=Date.now()-3*864e5;
+      (bq?.docs||[]).map(d=>d.data()).filter(b=>b.match&&Date.parse(b.settledAt||0)>since&&!claimed(b.target)).forEach(b=>{
         const m=b.match,p=b.targetPseudo||"Un sage",c=m.championName||"son champion",kda=`${m.kills}/${m.deaths}/${m.assists}`,min=Math.round((m.duration||0)/60),lbl=b.label||"partie";
         if(b.result==="win"){
-          out.push(`${p} a gagné sa ${lbl} sur ${c} en ${kda}. C'est le nouveau Faker ?`);
-          if(m.kills>=10)out.push(`${p} a fait ${m.kills} kills sur ${c}. T1 l'appelle demain ?`);
-          if(m.deaths===0)out.push(`${p} n'est pas mort une seule fois sur ${c}. On lui offre une étoile ?`);
+          out.push(`${p} a gagné une ${lbl} sur ${c}. Il a sûrement été carry par ses mates. On est d'accord ?`);
+          if(m.kills+m.assists<=5)out.push(`${p} a gagné en ${kda} sur ${c}. Il était là, ou il regardait ?`);
         }else{
-          out.push(`${p} a perdu sa ${lbl} sur ${c} en ${kda}. C'était la faute du jungle ?`);
+          out.push(`${p} a perdu sa ${lbl} sur ${c} en ${kda}. C'était la faute du jungle, bien sûr ?`);
           if(m.deaths>=8)out.push(`${p} est mort ${m.deaths} fois sur ${c}. On lui retire son siège au Conseil ?`);
+          if(m.deaths>m.kills+m.assists)out.push(`${p} a fini en ${kda}. Il jouait pour l'équipe d'en face ?`);
           if(min&&min<=22)out.push(`${p} a perdu en ${min} minutes. Le FF à 15 était mérité ?`);
         }
       });
-      return out;
-    }catch(e){return []}
+      // classements
+      const L=Object.entries(lq?.data()?.players||{}).filter(([id])=>!claimed(id)).map(([id,v])=>({...v,id}));
+      const val=s=>window.conseilRankValue?conseilRankValue(s):0,rk=s=>`${TFR[s.tier]||s.tier}${["MASTER","GRANDMASTER","CHALLENGER"].includes(s.tier)?"":" "+s.rank}`;
+      const ranked=L.filter(v=>v.solo&&v.solo.tier).sort((a,b)=>val(a.solo)-val(b.solo));
+      if(ranked.length>1){
+        const low=ranked[0],top=ranked[ranked.length-1];
+        out.push(`${low.pseudo} est ${rk(low.solo)}, le plus bas du Conseil. On organise une collecte pour lui payer un coach ?`);
+        out.push(`${top.pseudo} est ${rk(top.solo)}, le meilleur du Conseil… et T1 ne l'a toujours pas appelé. Ça veut tout dire ?`);
+      }
+      for(const v of ranked){const n=v.solo.w+v.solo.l,wr=n?Math.round(100*v.solo.w/n):0;
+        if(n>=20&&wr<48)out.push(`${v.pseudo} tourne à ${wr} % de victoires en solo. Il le fait exprès ?`);
+        if(n>=300)out.push(`${v.pseudo} a joué ${n} classées cette saison. Quelqu'un devrait aller vérifier qu'il voit encore la lumière du jour ?`);
+        if(["IRON","BRONZE"].includes(v.solo.tier))out.push(`${v.pseudo} est en ${TFR[v.solo.tier]}. Même les bots de l'intro auraient peur pour lui. On l'aide ?`);}
+      L.filter(v=>v.riotId&&!v.solo&&!v.err).slice(0,3).forEach(v=>out.push(`${v.pseudo} n'est même pas classé en solo. Il a peur de voir son vrai niveau ?`));
+      // les Déserteurs partis sur WoW
+      (wq?.docs||[]).filter(d=>!claimed(d.id)).map(d=>d.data()).filter(w=>w.pseudo&&(w.side==="wow"||(!w.side&&w.going))).forEach(w=>{
+        out.push(`${w.pseudo} abandonne ses potes pour Azeroth le 5 novembre. On le pardonnera un jour ?`);
+        out.push(`${w.pseudo} préfère farmer des sangliers sur WoW plutôt que de jouer avec vous. Ça te fait de la peine ?`);
+      });
+    }catch(e){}
+    return out;
   }
   function css(){if(document.getElementById("cpop-css"))return;const st=document.createElement("style");st.id="cpop-css";st.textContent=`
 .cpop{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:20px;background:rgba(8,9,11,.82);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);animation:cpopf .2s ease-out}
@@ -345,10 +372,14 @@ html[data-camp="wow"] .cpop-yes{background:#ffb400;color:#08090b}
   async function show(){
     if(open)return;
     if(document.hidden){document.addEventListener("visibilitychange",function v(){if(!document.hidden){document.removeEventListener("visibilitychange",v);show()}});return}
-    const res=await resultLines(),useRes=res.length&&Math.random()<.5,q=useRes?pick(res):pick(T1_LINES);
+    const dyn=await dynamicLines(),meWow=document.documentElement.dataset.camp==="wow",r=Math.random();
+    let q,tag="Question obligatoire du Conseil";
+    if(meWow&&r<.35){q=pick(WOW_ME);tag="Message pour les Déserteurs"}
+    else if(dyn.length&&r<.75){q=pick(dyn);tag="Le Conseil a vu les stats"}
+    else q=pick(BASE_LINES);
     css();open=true;
     const el=document.createElement("div");el.className="cpop";el.setAttribute("role","alertdialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-labelledby","cpopQ");
-    el.innerHTML=`<div class="cpop-box"><span class="cpop-tag">${useRes?"Résultat du Conseil":"Question obligatoire du Conseil"}</span><p class="cpop-q" id="cpopQ"></p><button class="cpop-yes" type="button">Oui</button></div>`;
+    el.innerHTML=`<div class="cpop-box"><span class="cpop-tag">${tag}</span><p class="cpop-q" id="cpopQ"></p><button class="cpop-yes" type="button">Oui</button></div>`;
     el.querySelector(".cpop-q").textContent=q;
     const prevOverflow=document.documentElement.style.overflow;document.documentElement.style.overflow="hidden";
     const btn=el.querySelector(".cpop-yes");
