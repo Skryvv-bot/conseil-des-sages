@@ -126,7 +126,7 @@ window.conseilLogoErr=function(img){
   if(TEAM_LOGOS[t]===img.src){delete TEAM_LOGOS[t];LS.set("team-logos-ok2",TEAM_LOGOS)}
   if(i<list.length){img.dataset.i=i;img.src=list[i]}else{img.parentNode.outerHTML=decodeURIComponent(img.dataset.fb)}
 };
-const DARK_LOGOS=["IG","TSW"];   // logos noirs : posés sur une pastille claire pour rester lisibles sur fond sombre
+const DARK_LOGOS=["IG","TSW","DK"];   // logos noirs : posés sur une pastille claire pour rester lisibles sur fond sombre
 window.conseilTeamLogo=function(tag,fallbackHTML,size=30){
   const list=[TEAM_LOGOS[tag],...(TEAM_LOGO_CANDIDATES[tag]||[])].filter(Boolean);
   if(!list.length)return fallbackHTML;
