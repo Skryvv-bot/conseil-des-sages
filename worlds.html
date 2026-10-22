@@ -7,7 +7,12 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png?v=2">
 <link rel="apple-touch-icon" href="icon-192.png?v=2">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}.live-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}.live-head h2{margin:0}
+.live-wrap{position:relative;width:100%;aspect-ratio:16/9;max-width:100%;background:#000 radial-gradient(circle at 50% 50%,#1d2027,#08090b 70%);display:grid;place-items:center}
+.live-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.live-start{display:flex;align-items:center;gap:12px;background:#9146ff;color:#fff;border:0;padding:14px 22px;font:700 1.1rem var(--body,system-ui);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.live-start span{font-size:1.4rem}.live-start:hover,.live-start:focus-visible{background:#a970ff;outline:2px solid #fff}
+</style>
 <title>Worlds 2026 du Conseil</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Barlow:wght@400;500;600;700&display=swap">
@@ -166,6 +171,14 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
     </div>
   </header>
 
+  <!-- LIVE TWITCH -->
+  <section class="frame panel" id="live" aria-labelledby="liveT">
+    <div class="live-head"><h2 id="liveT">Regarder les Worlds</h2><span class="note" id="liveNote"></span></div>
+    <div class="chips" id="liveCh" role="group" aria-label="Chaîne Twitch"></div>
+    <div class="live-wrap" id="liveWrap"><button class="live-start" id="liveStart" type="button"><span>▶</span> Lancer le live</button></div>
+    <p class="note">Le lecteur Twitch s'ouvre ici, sans quitter le site. <a id="liveOut" href="https://www.twitch.tv/kamet0" target="_blank" rel="noopener">Ouvrir sur Twitch avec le chat ↗</a></p>
+  </section>
+
   <div class="tabs" role="tablist">
     <button role="tab" id="tab-matchs" aria-selected="true">Matchs & pronos</button>
     <button role="tab" id="tab-classement" aria-selected="false">Classement</button>
@@ -205,6 +218,21 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
 
 <script>
 conseilNav("worlds");
+// ---------- Live Twitch (lecteur intégré, lancé au clic pour ne rien charger inutilement) ----------
+(function(){
+  const CH=[["kamet0","Kameto (FR)"],["otplol_","OTP LoL (FR)"],["riotgames","Riot Games (EN)"],["skyyart","Skyyart (FR)"]];
+  let ch="kamet0",on=false;try{ch=localStorage.getItem("live-ch")||ch}catch(e){}
+  const host=location.hostname||"conseil-des-sages.pages.dev",parents=[...new Set([host,"conseil-des-sages.pages.dev"])].map(p=>"&parent="+encodeURIComponent(p)).join("");
+  function render(){
+    const c=document.getElementById("liveCh");if(!c)return;
+    c.innerHTML=CH.map(([id,n])=>`<button class="chip" data-ch="${id}" aria-pressed="${id===ch}">${n}</button>`).join("");
+    c.querySelectorAll("[data-ch]").forEach(b=>b.onclick=()=>{ch=b.dataset.ch;try{localStorage.setItem("live-ch",ch)}catch(e){}render();if(on)play()});
+    document.getElementById("liveOut").href="https://www.twitch.tv/"+ch;
+  }
+  function play(){on=true;document.getElementById("liveWrap").innerHTML=`<iframe src="https://player.twitch.tv/?channel=${ch}${parents}&autoplay=true&muted=false" allowfullscreen allow="autoplay; fullscreen" title="Live Twitch : ${ch}"></iframe>`}
+  document.addEventListener("DOMContentLoaded",()=>{render();document.getElementById("liveStart").onclick=play;if(location.hash==="#live")play()});
+  window.liveNote=t=>{const n=document.getElementById("liveNote");if(n)n.innerHTML=t};
+})();
 let connErr=false,lpErr="";
 const TEAMS={
  GEN:{n:"Gen.G",r:"LCK",c:"#b8932f",p:["Kiin","Canyon","Chovy","Ruler","Duro"]},
@@ -377,7 +405,9 @@ function renderTeams(){
 function renderFresh(){const f=$("fresh");
   if(!state){f.innerHTML="<i></i>Chargement des résultats…";return}
   f.innerHTML=`<i></i>${state.offline?(lpErr?`Leaguepedia : ${esc(lpErr)} · calendrier de secours`:"Chargement des résultats…"):""}${state.offline?"":"Mis à jour à "+new Date(state.updatedAt).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})+((state.retryAfter||0)>Date.now()?" · Leaguepedia limite les requêtes, prochain essai à "+new Date(state.retryAfter).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}):"")}`;}
-function renderAll(){renderMe();renderFresh();renderChamp();renderMatches();renderBoard();renderTeams()}
+function renderLiveNote(){const ms=(state?.matches||[]).filter(m=>m.a!=="TBD");const l=ms.find(m=>m.status==="live"),n=ms.filter(m=>m.status==="upcoming").sort((a,b)=>Date.parse(a.date)-Date.parse(b.date))[0];
+  window.liveNote&&liveNote(l?`<b style="color:#ff4d6a">● En direct : ${esc(l.a)} – ${esc(l.b)}</b>`:n?`Prochain match : ${esc(n.a)} – ${esc(n.b)}, ${new Date(n.date).toLocaleString("fr-FR",{weekday:"long",hour:"2-digit",minute:"2-digit"})}`:"")}
+function renderAll(){renderLiveNote();renderMe();renderFresh();renderChamp();renderMatches();renderBoard();renderTeams()}
 renderAll();
 conseilLoadLogos(()=>renderAll());conseilDD().then(()=>renderAll());
 

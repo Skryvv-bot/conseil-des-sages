@@ -534,7 +534,7 @@ function renderFeat(){
       <div class="lg">${conseilTeamLogo(m.a,"",56)}<span class="tn">${m.a}</span></div><span class="sm">${n?pa+" % des votes du Conseil":"Pas encore de vote"}</span></div>
     <div class="mid"><span class="vs">${live?m.sa+" – "+m.sb:"VS"}</span><span class="when">${live?"● En direct":new Date(m.date).toLocaleString("fr-FR",{weekday:"short",day:"numeric",month:"short"})}</span>
       <span style="font-weight:700">${live?"":new Date(m.date).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})+" · "}BO${m.bo}</span>
-      <a class="btn" href="worlds.html" style="margin-top:8px">${live?"Suivre":"Pronostiquer"}</a></div>
+      <a class="btn" href="${live?"worlds.html#live":"worlds.html"}" style="margin-top:8px">${live?"▶ Regarder en direct":"Pronostiquer"}</a></div>
     <div class="fb" style="background:${col(m.b)};color:${fg(m.b)}"><span class="sm">Worlds 2026</span>
       <div class="lg" style="flex-direction:row-reverse">${conseilTeamLogo(m.b,"",56)}<span class="tn">${m.b}</span></div><span class="sm">${n?(100-pa)+" % des votes":""}</span></div>`;
   // bandeau direct avec les infos du moment
