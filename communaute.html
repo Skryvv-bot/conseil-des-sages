@@ -100,6 +100,10 @@
       <label class="f">Pseudo<input type="text" id="pPseudo" maxlength="20" required></label>
       <label class="f">Riot ID (optionnel)<input type="text" id="pRiot" maxlength="40" placeholder="Pseudo#TAG"></label>
       <label class="f">Région<select id="pRegion"></select></label>
+      <label class="f">2e compte Riot (optionnel)<input type="text" id="pAlt1" maxlength="40" placeholder="Smurf#TAG"></label>
+      <label class="f">Région<select id="pAlt1Reg" class="regsel"></select></label>
+      <label class="f">3e compte Riot (optionnel)<input type="text" id="pAlt2" maxlength="40" placeholder="Smurf#TAG"></label>
+      <label class="f">Région<select id="pAlt2Reg" class="regsel"></select></label>
       <label class="f">Rang actuel <span id="autoRank" class="note"></span><select id="pRank"></select></label>
       <div style="grid-column:1/-1"><p class="note riot-optin" style="font-size:.8rem">Ajouter ton Riot ID est facultatif et se fait uniquement par toi. En l'ajoutant, tu acceptes que ton Riot ID et ta partie en cours (champion, mode, durée) soient visibles par tous les visiteurs du site. Tu peux le retirer à tout moment dans Le Conseil › Mon profil (vide le champ Riot ID).</p></div>
       <label class="f">Pseudo Discord (pour détecter tes parties)<input type="text" id="pDiscord" maxlength="40" placeholder="Ton nom affiché sur le serveur"></label>
@@ -133,18 +137,24 @@ const ms=v=>v&&typeof v.toMillis==="function"?v.toMillis():+v||0;
 
 // ---------- Profil ----------
 $("pRegion").innerHTML=Object.entries(REGIONS).map(([k,v])=>`<option value="${k}">${v}</option>`).join("");
+document.querySelectorAll(".regsel").forEach(s=>s.innerHTML=$("pRegion").innerHTML);
 $("pRank").innerHTML=RANKS.map(r=>`<option>${r}</option>`).join("");
 function renderRoleChips(){$("pRoles").innerHTML=ROLES.map(r=>{const i=profRoles.indexOf(r);return `<button type="button" class="chip" data-r="${r}" aria-pressed="${i>=0}">${i>=0?(i+1)+". ":""}${r}</button>`}).join("");
   $("pRoles").querySelectorAll(".chip").forEach(c=>c.onclick=()=>{const r=c.dataset.r,i=profRoles.indexOf(r);i>=0?profRoles.splice(i,1):profRoles.push(r);renderRoleChips()})}
 let profFilled=false;
-function fillProfile(){if(profFilled||!db)return;const m=me()||{};profFilled=true;
-  $("pPseudo").value=m.pseudo||"";$("pRiot").value=m.riotId||"";$("pRegion").value=m.region||"euw1";$("pRank").value=m.rank||"Non classé";$("pDiscord").value=m.discord||"";profRoles=(m.roles||[]).slice();renderRoleChips()}
+function fillProfile(){if(profFilled||!db||!window.__membersLoaded)return;const m=me()||{};profFilled=true;
+  $("pPseudo").value=m.pseudo||"";$("pRiot").value=m.riotId||"";$("pRegion").value=m.region||"euw1";$("pRank").value=m.rank||"Non classé";$("pDiscord").value=m.discord||"";profRoles=(m.roles||[]).slice();renderRoleChips();
+  const al=Array.isArray(m.alts)?m.alts:[];[1,2].forEach(i=>{$("pAlt"+i).value=al[i-1]?.riotId||"";$("pAlt"+i+"Reg").value=al[i-1]?.region||m.region||"euw1"})}
 renderRoleChips();
 $("profForm").onsubmit=async e=>{e.preventDefault();if(!db)return;const msg=$("profMsg");
   const pseudo=$("pPseudo").value.trim().slice(0,20),riotId=$("pRiot").value.replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u2069\uFEFF]/g,"").trim().replace(/\s*#\s*/,"#");
   if(riotId&&!/^.{3,16}#[A-Za-z0-9]{2,5}$/.test(riotId)){msg.className="err";msg.textContent="Le Riot ID doit avoir la forme Pseudo#TAG.";return}
+  const alts=[];for(const i of [1,2]){const a=$("pAlt"+i).value.replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u2069\uFEFF]/g,"").trim().replace(/\s*#\s*/,"#");if(!a)continue;
+    if(!/^.{3,16}#[A-Za-z0-9]{2,5}$/.test(a)){msg.className="err";msg.textContent=`Le ${i+1}e compte doit avoir la forme Pseudo#TAG.`;return}
+    if(!riotId){msg.className="err";msg.textContent="Indique d'abord ton compte principal.";return}
+    if(a.toLowerCase()!==riotId.toLowerCase()&&!alts.some(x=>x.riotId.toLowerCase()===a.toLowerCase()))alts.push({riotId:a,region:$("pAlt"+i+"Reg").value})}
   {const t=Object.entries(members).find(([id,m])=>id!==uid&&m.pseudo?.toLowerCase()===pseudo.toLowerCase());if(t){msg.className="err";conseilTakeover(msg,db,uid,t[0],t[1].pseudo);return}}
-  try{await db.doc("riot/"+uid).set({pseudo,riotId,region:$("pRegion").value,rank:$("pRank").value,discord:$("pDiscord").value.trim().slice(0,40),roles:profRoles.slice(),updated:new Date().toISOString()},{merge:true});
+  try{await db.doc("riot/"+uid).set({pseudo,riotId,region:$("pRegion").value,rank:$("pRank").value,discord:$("pDiscord").value.trim().slice(0,40),roles:profRoles.slice(),alts,updated:new Date().toISOString()},{merge:true});
     msg.className="okmsg";msg.textContent="Profil enregistré."}catch(x){msg.className="err";msg.textContent="Enregistrement impossible, réessaie."}};
 
 // ---------- Pronos entre potes ----------
@@ -152,7 +162,7 @@ $("profForm").onsubmit=async e=>{e.preventDefault();if(!db)return;const msg=$("p
 fetch("https://ddragon.leagueoflegends.com/api/versions.json").then(r=>r.json()).then(v=>fetch(`https://ddragon.leagueoflegends.com/cdn/${v[0]}/data/fr_FR/champion.json`)).then(r=>r.json()).then(d=>{for(const k in d.data)champNames[d.data[k].key]=d.data[k].name;renderBets()}).catch(()=>{});
 async function loadLive(){
   const ps=Object.values(members).filter(p=>p.riotId);if(!ps.length){liveGames={};renderBets();return}
-  try{const r=await fetch(RIOT_RELAY+"/live?players="+encodeURIComponent(ps.map(p=>p.riotId+"|"+(p.region||"euw1")).join(",")));const j=await r.json();liveGames=j.games||{}}catch(e){liveGames=null}
+  try{const r=await fetch(RIOT_RELAY+"/live?players="+encodeURIComponent(conseilAllAccounts(members).join(",")));const j=await r.json();liveGames={};for(const [k,g] of Object.entries(j.games||{}))if(g)liveGames[k.toLowerCase()]=g}catch(e){liveGames=null}
   renderBets();
 }
 setInterval(loadLive,90000);
@@ -168,10 +178,10 @@ function renderBets(){
   const sc=scores();$("bal").textContent=(sc[uid]?.pts||0).toLocaleString("fr-FR");
   const now=Date.now(),openTargets=new Set(Object.values(bets).filter(b=>b.status==="open").map(b=>b.target));
   // en partie maintenant
-  const inGame=Object.entries(members).filter(([,m])=>m.riotId&&liveGames&&liveGames[m.riotId.toLowerCase()]);
+  const inGame=Object.entries(members).filter(([,m])=>conseilLiveOf(m,liveGames));
   $("inGame").innerHTML=liveGames===null?`<div class="note">Détection des parties indisponible pour le moment.</div>`:
     !Object.values(members).some(m=>m.riotId)?`<div class="note">Aucun sage n'a encore ajouté son Riot ID (onglet Mon profil).</div>`:
-    inGame.length?inGame.map(([id,m])=>{const g=liveGames[m.riotId.toLowerCase()];return `<div class="item"><span class="tag live">En partie</span>${conseilChampHTML(champNames[g.championId]||"?",30)}<div class="grow"><b>${esc(m.pseudo)}</b>${conseilCampTag(id)}<div class="note">${esc(champNames[g.championId]||"Champion")} · ${esc(QUEUES[g.queueId]||"Partie")} · depuis ${ago(g.start)}</div></div>
+    inGame.length?inGame.map(([id,m])=>{const lv=conseilLiveOf(m,liveGames),g=lv.g;return `<div class="item"><span class="tag live">En partie</span>${conseilChampHTML(champNames[g.championId]||"?",30)}<div class="grow"><b>${esc(m.pseudo)}</b>${conseilCampTag(id)}<div class="note">${esc(champNames[g.championId]||"Champion")} · ${esc(QUEUES[g.queueId]||"Partie")} · depuis ${ago(g.start)}${lv.acc.main?"":` · sur ${esc(lv.acc.riotId)}`}</div></div>
       ${openTargets.has(id)?'<span class="note">prono ouvert</span>':id===uid?'<span class="note">c\'est toi</span>':`<button class="btn small" data-quick="${id}">Ouvrir un prono</button>`}</div>`}).join(""):`<div class="note">Personne du Conseil n'est en partie pour l'instant.</div>`;
   $("inGame").querySelectorAll("[data-quick]").forEach(b=>b.onclick=()=>openBet(b.dataset.quick));
   // pronos en cours
@@ -196,9 +206,9 @@ function renderBets(){
 }
 async function openBet(target){
   if(!myPseudo()){showTab("profil");return}
-  const m=members[target];if(!m)return;const g=liveGames?.[m.riotId?.toLowerCase()];
+  const m=members[target];if(!m)return;const lv=conseilLiveOf(m,liveGames),g=lv?.g,acc=lv?.acc||{riotId:m.riotId,region:m.region||"euw1"};
   if(Object.values(bets).some(b=>b.status==="open"&&b.target===target))return;
-  try{await db.collection("bets").add({target,targetPseudo:m.pseudo,riotId:m.riotId,region:m.region||"euw1",gameId:g?.gameId||null,
+  try{await db.collection("bets").add({target,targetPseudo:m.pseudo,riotId:acc.riotId,region:acc.region||"euw1",gameId:g?.gameId||null,
     label:QUEUES[g?.queueId]||"Partie",championName:g?champNames[g.championId]||"":"",openedBy:uid,openedPseudo:myPseudo(),created:new Date().toISOString(),
     closesAt:firebase.firestore.Timestamp.fromMillis(Date.now()+OPEN_MIN*60000),status:"open",result:null})}catch(e){console.warn(e)}}
 async function placeStake(id,side){if(!myPseudo()){showTab("profil");return}
@@ -259,7 +269,7 @@ function renderAll(){$("me").innerHTML=!db?(connErr?"Hors ligne":"Connexion au C
 renderAll();
 (async()=>{const c=await conseilConnect();if(!c.db){connErr=true;renderAll();return}db=c.db;uid=c.uid;
   const sub=(col,fn)=>db.collection(col).onSnapshot(q=>{const o={};q.docs.filter(d=>!conseilIsClaimed(d.id)).forEach(d=>o[d.id]=d.data());fn(o);renderAll()},e=>console.warn(col,e));
-  let firstRiot=true;sub("riot",o=>{members=o;if(firstRiot){firstRiot=false;loadLive();conseilLadder(db,o).then(l=>{ladder=l;showAutoRank()});if(!location.hash&&!o[uid])showTab("profil")}});sub("bets",o=>{bets=o;conseilResolvePronos(db,o)});sub("stakes",o=>stakes=o);sub("trials",o=>trials=o);sub("sageVotes",o=>sage=o);
+  let firstRiot=true;sub("riot",o=>{members=o;window.__membersLoaded=true;if(firstRiot){firstRiot=false;loadLive();conseilLadder(db,o).then(l=>{ladder=l;showAutoRank()});if(!location.hash&&!o[uid])showTab("profil")}});sub("bets",o=>{bets=o;conseilResolvePronos(db,o)});sub("stakes",o=>stakes=o);sub("trials",o=>trials=o);sub("sageVotes",o=>sage=o);
   renderAll()})();
 
 window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});

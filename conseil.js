@@ -8,15 +8,20 @@ const FIREBASE_CONFIG={
   appId:"1:909258807221:web:2e1d7feb3dfab11a33abfc"
 };
 
-// Renvoie {db, uid} une fois le visiteur connecté anonymement, ou {db:null, error} si la connexion échoue.
+// Renvoie {db, uid} une fois le visiteur connecté (avec son identifiant s'il en a un, sinon en anonyme),
+// ou {db:null, error} si la connexion échoue. Une seule connexion par page, partagée par tous les appels.
 window.conseilConnect=function(){
-  return new Promise(resolve=>{
+  if(window.__conseilConn)return window.__conseilConn;
+  return window.__conseilConn=new Promise(resolve=>{
     try{
       if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
       const auth=firebase.auth(), db=firebase.firestore();
-      let done=false;
-      auth.onAuthStateChanged(async u=>{if(u&&!done){done=true;window.CONSEIL_UID=u.uid;await loadClaims(db);watchCamps(db,u.uid);resolve({db,uid:u.uid});offerClaim(db,u.uid);conseilBank(db,u.uid)}});
-      auth.signInAnonymously().catch(e=>{if(!done){done=true;console.error(e);resolve({db:null,error:e})}});
+      let done=false,tried=false;
+      auth.onAuthStateChanged(async u=>{
+        if(u&&!done){done=true;window.CONSEIL_UID=u.uid;renderAccount(u);await loadClaims(db);watchCamps(db,u.uid);resolve({db,uid:u.uid});offerClaim(db,u.uid);conseilBank(db,u.uid)}
+        else if(u)renderAccount(u);
+        else if(!done&&!tried){tried=true;auth.signInAnonymously().catch(e=>{if(!done){done=true;console.error(e);resolve({db:null,error:e})}})}   // pas de session : compte anonyme
+      });
     }catch(e){console.error(e);resolve({db:null,error:e})}
   });
 };
@@ -57,6 +62,7 @@ window.conseilNav=function(active){
   nav.innerHTML=`<div class="cnav-in"><a class="cnav-brand" href="index.html" aria-label="Conseil des Sages, accueil"><span>CDS<b>.</b>TV</span></a>
     <div class="cnav-links">${CONSEIL_NAV.map(n=>`<a href="${n.href}" ${n.id===group?'aria-current="page"':""}>${n.label}</a>`).join("")}</div>
     <a class="cnav-po" id="cnavPO" href="banque.html" title="Tes Pièces d'or : voir la banque" hidden><i>PO</i><b></b></a>
+    <button class="cnav-acc" id="cnavAcc" type="button" hidden>Connexion</button>
     <button class="cnav-install" id="cnavInstall" hidden>Installer l'appli</button></div>`;
   document.body.prepend(nav);
   const tk=document.createElement("div");tk.className="tv-ticker";tk.setAttribute("aria-label","Bandeau d'infos");
@@ -241,12 +247,13 @@ const weekStart=()=>{const d=new Date();const day=(d.getDay()+6)%7;d.setDate(d.g
 window.conseilLadder=async function(db,riotProfiles,{force=false}={}){
   const players=Object.entries(riotProfiles||{}).filter(([id,p])=>p.riotId&&p.pseudo&&!conseilIsClaimed(id));
   let cur=null;try{const d=await db.doc("ladder/current").get();cur=d.exists?d.data():null}catch(e){}
-  const stale=!cur||Date.now()-Date.parse(cur.updatedAt||0)>15*60e3||players.some(([id])=>!cur.players?.[id]);
+  const stale=!cur||Date.now()-Date.parse(cur.updatedAt||0)>15*60e3||players.some(([id,p])=>!cur.players?.[id]||cur.players[id].riotId!==p.riotId||(cur.players[id].alts||[]).length!==conseilAccounts(p).length-1);
   if((stale||force)&&players.length){
     try{
-      const r=await fetch(RIOT_RELAY+"/ranks?players="+encodeURIComponent(players.map(([,p])=>p.riotId+"|"+(p.region||"euw1")).join(",")));
+      const r=await fetch(RIOT_RELAY+"/ranks?players="+encodeURIComponent(conseilAllAccounts(Object.fromEntries(players)).join(",")));
       if(r.ok){const j=await r.json();const out={};
-        for(const [id,p] of players){const rk=j.ranks?.[p.riotId.toLowerCase()];out[id]={pseudo:p.pseudo,riotId:p.riotId,solo:rk?.solo||null,flex:rk?.flex||null,err:rk?null:(j.errors?.[p.riotId.toLowerCase()]||null)}}
+        for(const [id,p] of players){const rk=j.ranks?.[p.riotId.toLowerCase()];out[id]={pseudo:p.pseudo,riotId:p.riotId,solo:rk?.solo||null,flex:rk?.flex||null,err:rk?null:(j.errors?.[p.riotId.toLowerCase()]||null),
+          alts:conseilAccounts(p).filter(a=>!a.main).map(a=>{const x=j.ranks?.[a.riotId.toLowerCase()];return {riotId:a.riotId,solo:x?.solo||null,flex:x?.flex||null}})}}
         cur={updatedAt:new Date().toISOString(),players:out};
         await db.doc("ladder/current").set(cur);
         const today=isoDay(Date.now()),snap=await db.doc("ladderSnap/"+today).get();
@@ -480,3 +487,92 @@ window.conseilTakeover=function(el,db,uid,old,pseudo){
     try{await conseilClaim(db,uid,old,pseudo);el.textContent="C'est fait ! Rechargement…";setTimeout(()=>location.reload(),900)}
     catch(err){console.warn(err);el.textContent="Récupération impossible (compte déjà récupéré ?). Choisis un autre pseudo ou demande à Ivan."}};
 };
+
+
+// ---------- Compte : identifiant + mot de passe (Firebase), sans adresse mail ----------
+// L'identifiant devient une adresse technique « identifiant@conseil-des-sages.app » que personne ne voit.
+const ACC_DOMAIN="conseil-des-sages.app";
+const accSlug=id=>String(id||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+const accName=u=>u&&!u.isAnonymous?(u.displayName||(u.email||"").split("@")[0]):null;
+function renderAccount(u){const b=document.getElementById("cnavAcc");if(!b)return;b.hidden=false;const n=accName(u);
+  b.textContent=n?n:"Connexion";b.classList.toggle("on",!!n);b.title=n?"Ton compte du Conseil":"Crée ton identifiant ou connecte-toi pour retrouver tes données sur tous tes appareils";b.onclick=()=>openAccount()}
+function accErr(e){const c=e&&e.code||"";
+  if(/email-already-in-use|credential-already-in-use/.test(c))return "Cet identifiant est déjà pris. Choisis-en un autre, ou connecte-toi s'il est à toi.";
+  if(/invalid-credential|wrong-password|user-not-found|invalid-login-credentials|invalid-email/.test(c))return "Identifiant ou mot de passe incorrect.";
+  if(/weak-password/.test(c))return "Mot de passe trop court : 6 caractères minimum.";
+  if(/operation-not-allowed|admin-restricted/.test(c))return "La connexion par mot de passe n'est pas encore activée sur le site. Préviens Skryvv.";
+  if(/too-many-requests/.test(c))return "Trop d'essais. Attends quelques minutes.";
+  if(/network/.test(c))return "Pas de connexion internet.";
+  return "Ça n'a pas marché ("+(c||"erreur")+"). Réessaie.";}
+function openAccount(){
+  const auth=firebase.auth(),u=auth.currentUser,name=accName(u);let tab=name?"me":"create";
+  let known="";try{known=localStorage.getItem("potes-pseudo")||""}catch(e){}
+  const el=document.createElement("div");el.className="cpop cacc";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-labelledby","caccT");
+  const draw=()=>{
+    el.innerHTML=`<div class="cpop-box"><button class="cacc-x" type="button" aria-label="Fermer">×</button>
+      ${name?`<span class="cpop-tag">Ton compte</span><p class="cpop-q" id="caccT">${conseilEsc(name)}</p>
+        <p class="cacc-txt">Tu es connecté avec ton identifiant : tu retrouves tes pronos, ta tier list, tes Pièces d'or et ton camp sur tous tes appareils.</p>
+        <button class="cpop-yes cacc-out" type="button" data-out>Se déconnecter</button>`
+      :`<div class="cacc-tabs" role="tablist"><button role="tab" type="button" data-t="create" aria-selected="${tab==="create"}">Créer mon identifiant</button><button role="tab" type="button" data-t="login" aria-selected="${tab==="login"}">J'ai déjà un identifiant</button></div>
+        <p class="cacc-txt">${tab==="create"?"Ajoute un identifiant et un mot de passe à ton compte actuel. Tu gardes tout (pronos, tier list, Pièces d'or, camp) et tu pourras te connecter sur n'importe quel appareil.":"Connecte-toi pour retrouver ton compte sur cet appareil."}</p>
+        <form class="cacc-form" novalidate>
+          <label>Identifiant<input id="caccId" autocomplete="username" maxlength="20" required value="${tab==="create"?conseilEsc(known):""}"></label>
+          <label>Mot de passe<input id="caccPw" type="password" autocomplete="${tab==="create"?"new-password":"current-password"}" minlength="6" required></label>
+          ${tab==="create"?`<label>Confirme le mot de passe<input id="caccPw2" type="password" autocomplete="new-password" minlength="6" required></label>`:""}
+          <p class="cacc-msg" role="status"></p>
+          <button class="cpop-yes" type="submit">${tab==="create"?"Créer mon identifiant":"Se connecter"}</button>
+        </form>`}</div>`;
+    el.querySelector(".cacc-x").onclick=close;
+    el.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{tab=b.dataset.t;draw()});
+    const out=el.querySelector("[data-out]");if(out)out.onclick=async()=>{try{await auth.signOut()}catch(e){}location.reload()};
+    const f=el.querySelector("form");if(f)f.onsubmit=async e=>{e.preventDefault();const msg=el.querySelector(".cacc-msg"),btn=f.querySelector("button[type=submit]");
+      const id=el.querySelector("#caccId").value.trim(),pw=el.querySelector("#caccPw").value,slug=accSlug(id);
+      if(slug.length<3){msg.textContent="Identifiant trop court : 3 caractères minimum (lettres ou chiffres).";return}
+      if(pw.length<6){msg.textContent="Mot de passe trop court : 6 caractères minimum.";return}
+      if(tab==="create"&&pw!==el.querySelector("#caccPw2").value){msg.textContent="Les deux mots de passe ne sont pas identiques.";return}
+      btn.disabled=true;msg.textContent=tab==="create"?"Création…":"Connexion…";const email=slug+"@"+ACC_DOMAIN;
+      try{
+        if(tab==="create"){const cur=auth.currentUser;const cred=firebase.auth.EmailAuthProvider.credential(email,pw);
+          if(cur&&cur.isAnonymous){await cur.linkWithCredential(cred)}else{await auth.createUserWithEmailAndPassword(email,pw)}
+          await auth.currentUser.updateProfile({displayName:id.slice(0,20)});try{localStorage.setItem("potes-pseudo",id.slice(0,20))}catch(x){}
+          msg.textContent="C'est fait ! Tu es connecté.";setTimeout(()=>location.reload(),800)}
+        else{await auth.signInWithEmailAndPassword(email,pw);msg.textContent="Connecté ! Rechargement…";setTimeout(()=>location.reload(),600)}
+      }catch(err){console.warn(err);msg.textContent=accErr(err);btn.disabled=false}};
+    const first=el.querySelector("input,button[data-out]");if(first)first.focus();
+  };
+  const prev=document.documentElement.style.overflow;
+  function close(){el.remove();document.documentElement.style.overflow=prev}
+  el.addEventListener("keydown",e=>{if(e.key==="Escape")close()});el.addEventListener("click",e=>{if(e.target===el)close()});
+  document.documentElement.style.overflow="hidden";draw();document.body.appendChild(el);
+}
+window.conseilOpenAccount=openAccount;
+(function(){const st=document.createElement("style");st.textContent=`
+.cnav-acc{white-space:nowrap;font:700 .9rem "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.06em;color:#fff;background:#e4002b;border:0;padding:7px 12px;cursor:pointer}
+.cnav-acc.on{background:transparent;border:1px solid #3a3e48;color:#fff}.cnav-acc.on::before{content:"● ";color:#2fbf71}
+.cnav-acc:hover,.cnav-acc:focus-visible{outline:2px solid #fff;outline-offset:1px}
+.cacc{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:20px;background:rgba(8,9,11,.82);backdrop-filter:blur(4px)}
+.cacc .cpop-box{width:min(440px,100%);background:#15171c;border-top:6px solid #e4002b;padding:22px;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.cacc .cpop-tag{font:700 .78rem "Barlow Condensed",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#ffb400}
+.cacc .cpop-q{margin:0;font:400 1.6rem/1.1 "Anton","Impact",sans-serif;text-transform:uppercase;color:#fff}
+.cacc .cpop-yes{padding:13px;border:0;background:#e4002b;color:#fff;font:700 1.05rem "Barlow Condensed",sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.cacc .cpop-yes:disabled{opacity:.6}
+.cacc .cpop-box{position:relative;gap:12px}
+.cacc-x{position:absolute;top:6px;right:8px;background:none;border:0;color:#a7abb6;font-size:1.6rem;cursor:pointer;line-height:1;padding:4px 8px}
+.cacc-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-right:28px}
+.cacc-tabs button{background:#08090b;border:0;border-bottom:3px solid transparent;color:#a7abb6;padding:10px 6px;font:700 .9rem "Barlow Condensed",sans-serif;letter-spacing:.04em;cursor:pointer}
+.cacc-tabs button[aria-selected="true"]{color:#fff;border-bottom-color:#e4002b;background:#1d2027}
+.cacc-txt{margin:0;color:#a7abb6;font:500 1rem/1.35 "Barlow Condensed",sans-serif}
+.cacc-form{display:flex;flex-direction:column;gap:10px}.cacc-form label{display:flex;flex-direction:column;gap:4px;font:700 .78rem "Barlow Condensed",sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#ffb400}
+.cacc-form input{padding:10px;background:#08090b;border:1px solid #3a3e48;color:#fff;font:600 1.05rem "Barlow Condensed",sans-serif;text-transform:none;letter-spacing:0}
+.cacc-form input:focus{border-color:#ffb400;outline:none}
+.cacc-msg{margin:0;min-height:1.2em;color:#ffb400;font:600 .95rem "Barlow Condensed",sans-serif}
+.cacc-out{background:transparent!important;border:2px solid #3a3e48!important}`;document.head.appendChild(st)})();
+
+
+// ---------- Plusieurs comptes Riot par sage (1 principal + 2 secondaires au maximum) ----------
+const cleanRiot=r=>String(r||"").replace(/[​-‏‪-‮⁠-⁩﻿]/g,"").trim().replace(/\s*#\s*/,"#");
+window.conseilAccounts=function(p){if(!p)return [];const out=[];if(p.riotId)out.push({riotId:p.riotId,region:p.region||"euw1",main:true});
+  for(const a of (Array.isArray(p.alts)?p.alts:[]).slice(0,2))if(a&&a.riotId)out.push({riotId:a.riotId,region:a.region||p.region||"euw1",main:false});return out};
+// premier compte du sage actuellement en partie : {acc, g} ou null
+window.conseilLiveOf=function(p,games){if(!games)return null;for(const acc of conseilAccounts(p)){const g=games[acc.riotId.toLowerCase()]||games[cleanRiot(acc.riotId).toLowerCase()];if(g)return {acc,g}}return null};
+window.conseilAllAccounts=function(profiles){return [...new Set(Object.values(profiles||{}).flatMap(p=>conseilAccounts(p)).map(a=>a.riotId+"|"+a.region))]};

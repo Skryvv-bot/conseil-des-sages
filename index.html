@@ -472,14 +472,14 @@ function renderRiotReg(){
 function renderPlayers(){
   // un même Riot ID sur plusieurs appareils : une seule ligne (le profil le plus récent)
   const uniq=new Map();for(const [id,p] of Object.entries(riot).filter(([,p])=>p.riotId&&p.pseudo).sort((a,b)=>String(a[1].updated||"").localeCompare(String(b[1].updated||""))))uniq.set(p.riotId.toLowerCase(),[id,p]);
-  const list=[...uniq.values()].map(([id,p])=>({id,...p,lv:live[p.riotId.toLowerCase()]}));
+  const list=[...uniq.values()].map(([id,p])=>{const L=conseilLiveOf(p,live);return {id,...p,lv:L?.g||null,lvAcc:L&&!L.acc.main?L.acc.riotId:null}});
   if(!db&&!list.length){$("players").innerHTML=`<div class="note">${connErr?"Liste indisponible.":"Chargement des invocateurs…"}</div>`;return}
   if(!list.length){$("players").innerHTML=`<div class="note">Aucun invocateur inscrit. Ajoute ton Riot ID ci-dessus pour apparaître ici.</div>`;return}
   list.sort((a,b)=>(b.lv?1:0)-(a.lv?1:0)||a.pseudo.localeCompare(b.pseudo));
   $("players").innerHTML=list.map(p=>{
     const g=p.lv, mins=g?Math.max(0,Math.floor((Date.now()-g.start)/60000)):0;
     const status=LIVE_API?(g?`<span class="st on">En partie</span>`:`<span class="st">Hors partie</span>`):`<span class="st">${REGIONS[p.region]||""}</span>`;
-    const detail=g?`${esc(champNames[g.championId]||"Champion")} · ${esc(QUEUES[g.queueId]||"Partie")} · ${mins} min`:esc(p.riotId);
+    const detail=g?`${esc(champNames[g.championId]||"Champion")} · ${esc(QUEUES[g.queueId]||"Partie")} · ${mins} min${p.lvAcc?` · sur ${esc(p.lvAcc)}`:""}`:esc(p.riotId)+(p.alts?.length?` <span style="opacity:.7">+${p.alts.length} compte${p.alts.length>1?"s":""}</span>`:"");
     return `<div class="pl ${g?"ingame":""}">${status}<div class="pinfo"><b>${esc(p.pseudo)}${conseilCampTag(p.id)}</b><small>${detail}</small></div>
       <div class="plinks"><a class="btn ghost small" href="${poro(p)}" target="_blank" rel="noopener">Live</a><a class="btn ghost small" href="${opgg(p)}" target="_blank" rel="noopener">op.gg</a></div></div>`}).join("");
   const n=list.filter(p=>p.lv).length;
@@ -492,7 +492,7 @@ async function loadChampNames(){
 }
 async function loadLive(){
   if(!LIVE_API)return;
-  const ps=[...new Set(Object.values(riot).filter(p=>p.riotId).map(p=>p.riotId+"|"+(p.region||"euw1")))];if(!ps.length)return;
+  const ps=conseilAllAccounts(riot);if(!ps.length)return;
   try{const r=await fetch(LIVE_API.replace(/\/$/,"")+"/live?players="+encodeURIComponent(ps.join(",")));
     if(!r.ok)throw new Error("HTTP "+r.status);const j=await r.json();live={};
     for(const [id,g] of Object.entries(j.games||{}))if(g)live[id.toLowerCase()]=g;renderPlayers()}catch(e){console.warn("live",e)}
@@ -541,7 +541,7 @@ function renderFeat(){
       <div class="lg" style="flex-direction:row-reverse">${conseilTeamLogo(m.b,"",56)}<span class="tn">${m.b}</span></div><span class="sm">${n?(100-pa)+" % des votes":""}</span></div>`;
   // bandeau direct avec les infos du moment
   const items=[];
-  for(const p of Object.values(riot))if(p.riotId&&live[p.riotId.toLowerCase()]){const g=live[p.riotId.toLowerCase()];items.push(`${p.pseudo} en partie sur ${champNames[g.championId]||"un champion"}`)}
+  for(const p of Object.values(riot))if(conseilLiveOf(p,live)){const g=conseilLiveOf(p,live).g;items.push(`${p.pseudo} en partie sur ${champNames[g.championId]||"un champion"}`)}
   const ob=Object.values(bets||{}).filter(b=>b.status==="open");for(const b of ob)items.push(`Prono ouvert sur la partie de ${b.targetPseudo}`);
   items.push(`Worlds : ${m.a} – ${m.b} ${live?"en direct":new Date(m.date).toLocaleString("fr-FR",{weekday:"long",hour:"2-digit",minute:"2-digit"})}`);
   if(Date.now()<CDS_GAME_START+CDS_GAME_HOURS*3600e3)items.unshift(Date.now()<CDS_GAME_START?"Soirée CDS Game jeudi 22 octobre à 20 h 30 sur le Discord":"Soirée CDS Game en cours sur le Discord");

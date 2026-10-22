@@ -71,7 +71,7 @@ function render(){
   const ranked=rows.filter(r=>r.v);
   $("podium").innerHTML=ranked.slice(0,3).map((r,i)=>`<div class="pod p${i+1}" style="--rk:${TIER_COLOR[r.v.tier]}"><span class="pl">${i+1}</span>${conseilRankEmblem(r.v.tier,i===0?110:84)}<b>${esc(r.p.pseudo)}${conseilCampTag(r.id)}</b>${conseilRankBadge(r.v,0)}<span class="note">${r.v.lp} LP · ${r.v.w}V ${r.v.l}D</span></div>`).join("");
   $("tbl").innerHTML=`<thead><tr><th>#</th><th>Sage</th><th>Rang</th><th class="num">LP</th><th class="num">V-D</th><th class="num">Winrate</th><th>Semaine</th></tr></thead><tbody>${
-    rows.map((r,i)=>{const n=r.v?r.v.w+r.v.l:0;return `<tr class="${r.id===uid?"mine":""}"><td class="pos">${r.v?i+1:"–"}</td><td><b>${esc(r.p.pseudo)}</b>${conseilCampTag(r.id)}<div class="note" style="font-size:.8rem">${esc(r.p.riotId)}</div></td>
+    rows.map((r,i)=>{const n=r.v?r.v.w+r.v.l:0;return `<tr class="${r.id===uid?"mine":""}"><td class="pos">${r.v?i+1:"–"}</td><td><b>${esc(r.p.pseudo)}</b>${conseilCampTag(r.id)}<div class="note" style="font-size:.8rem">${esc(r.p.riotId)}</div>${(r.p.alts||[]).filter(a=>a.riotId).map(a=>{const v=a[q]||null;return `<div class="note alt" style="font-size:.78rem">+ ${esc(a.riotId)} · ${v?esc(conseilRankLabel(v,false))+" "+v.lp+" LP":"non classé"}</div>`}).join("")}</td>
       <td>${conseilRankBadge(r.v)}${r.v?.hot?' <span class="hot">EN FEU</span>':""}</td><td class="num">${r.v?r.v.lp:"—"}</td><td class="num">${r.v?r.v.w+"-"+r.v.l:"—"}</td>
       <td class="num">${n?Math.round(100*r.v.w/n)+" %":"—"}</td><td>${delta(r.d)}</td></tr>`}).join("")}</tbody>`;
 }
