@@ -35,6 +35,9 @@
 .vote{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;font-size:.9rem}
 .form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 @media (max-width:640px){.form{grid-template-columns:1fr}}
+.voters{display:flex;flex-direction:column;gap:4px;font-size:.92rem}.voters div{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.voters b{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;min-width:72px}.voters .vw{color:var(--ok,#2fbf71)}.voters .vl{color:#ff4d6a}
+.vn{padding:2px 8px;background:var(--void,#08090b);border:1px solid var(--line2,#2a2d35)}.vn.me{border-color:var(--gold,#ffb400);color:var(--gold,#ffb400)}
 </style>
 </head>
 <body>
@@ -179,8 +182,8 @@ function renderBets(){
       <span class="tag ${open?"live":""}">${open?"Votes ouverts · "+Math.max(1,Math.ceil((closes-now)/60000))+" min":"Résultat dès la fin de la partie"}</span></div>
       <div class="bar"><i style="width:${pw}%;background:var(--ok)"></i><i style="width:${100-pw}%;background:var(--red)"></i></div>
       <div class="between note"><span>Victoire : ${v.w.length}</span><span>${n} prono${n>1?"s":""}</span><span>Défaite : ${v.l.length}</span></div>
+      ${n?`<div class="voters"><div><b class="vw">Victoire</b> ${v.w.map(s=>`<span class="vn${s.uid===uid?" me":""}">${esc(s.pseudo)}</span>`).join("")||'<span class="note">personne</span>'}</div><div><b class="vl">Défaite</b> ${v.l.map(s=>`<span class="vn${s.uid===uid?" me":""}">${esc(s.pseudo)}</span>`).join("")||'<span class="note">personne</span>'}</div></div>`:""}
       ${open&&uid!==b.target?`<div class="sides"><button class="side win" data-side="win" aria-pressed="${mine?.side==="win"}"><b>Victoire</b><span class="note">${mine?.side==="win"?"Ton prono":"Il va gagner"}</span></button><button class="side loss" data-side="loss" aria-pressed="${mine?.side==="loss"}"><b>Défaite</b><span class="note">${mine?.side==="loss"?"Ton prono":"Il va perdre"}</span></button></div>`:open?`<p class="note">Tu ne peux pas pronostiquer ta propre partie.</p>`:""}
-      ${!open?`<p class="note">Votants : ${v.ss.map(s=>esc(s.pseudo)+" ("+(s.side==="win"?"V":"D")+")").join(", ")||"aucun"}</p>`:""}
       ${canCancel?`<div><button class="btn ghost small" data-cancel>Annuler le prono (partie annulée, remake…)</button></div>`:""}</div>`}).join(""):`<div class="empty">Aucun prono en cours.</div>`;
   $("openBets").querySelectorAll(".bet").forEach(el=>{const id=el.dataset.b;
     el.querySelectorAll("[data-side]").forEach(s=>s.onclick=()=>placeStake(id,s.dataset.side));
@@ -199,7 +202,8 @@ async function openBet(target){
     label:QUEUES[g?.queueId]||"Partie",championName:g?champNames[g.championId]||"":"",openedBy:uid,openedPseudo:myPseudo(),created:new Date().toISOString(),
     closesAt:firebase.firestore.Timestamp.fromMillis(Date.now()+OPEN_MIN*60000),status:"open",result:null})}catch(e){console.warn(e)}}
 async function placeStake(id,side){if(!myPseudo()){showTab("profil");return}
-  try{await db.doc("stakes/"+id+"_"+uid).set({bet:id,uid,pseudo:myPseudo(),side,updated:new Date().toISOString()})}catch(e){const el=document.querySelector(`.bet[data-b="${id}"]`);if(el){let p=el.querySelector(".err");if(!p){p=document.createElement("p");p.className="err";el.appendChild(p)}p.textContent="Les votes sont fermés."}}}
+  const prev=stakes[id+"_"+uid];stakes[id+"_"+uid]={bet:id,uid,pseudo:myPseudo(),side,updated:new Date().toISOString()};if(document.activeElement)document.activeElement.blur();renderBets();   // affichage immédiat
+  try{await db.doc("stakes/"+id+"_"+uid).set({bet:id,uid,pseudo:myPseudo(),side,updated:new Date().toISOString()})}catch(e){if(prev)stakes[id+"_"+uid]=prev;else delete stakes[id+"_"+uid];renderBets();const el=document.querySelector(`.bet[data-b="${id}"]`);if(el){let p=el.querySelector(".err");if(!p){p=document.createElement("p");p.className="err";el.appendChild(p)}p.textContent="Les votes sont fermés."}}}
 setInterval(()=>{if(db){conseilResolvePronos(db,bets);if(!$("v-paris").hidden)renderBets()}},30000);
 
 function showAutoRank(){const v=ladder?.current?.players?.[uid];const r=v?.solo||v?.flex;const el=$("autoRank");if(!el)return;
@@ -251,7 +255,7 @@ function renderSage(){
 
 // ---------- Données ----------
 function renderAll(){$("me").innerHTML=!db?(connErr?"Hors ligne":"Connexion au Conseil…"):myPseudo()?`Connecté : <b>${esc(myPseudo())}</b>`:"Sage anonyme · crée ton profil";
-  if(!document.activeElement||!document.activeElement.closest(".bet,.trial,.cat"))renderBets();renderTrials();renderSage();fillProfile()}
+  {const ae=document.activeElement;if(!ae||!ae.matches("input,textarea,select")||!ae.closest(".bet,.trial,.cat"))renderBets()}renderTrials();renderSage();fillProfile()}
 renderAll();
 (async()=>{const c=await conseilConnect();if(!c.db){connErr=true;renderAll();return}db=c.db;uid=c.uid;
   const sub=(col,fn)=>db.collection(col).onSnapshot(q=>{const o={};q.docs.filter(d=>!conseilIsClaimed(d.id)).forEach(d=>o[d.id]=d.data());fn(o);renderAll()},e=>console.warn(col,e));
