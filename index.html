@@ -276,6 +276,7 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
         <span class="note" id="liveInfo"></span>
       </div>
       <div id="riotReg"></div>
+      <p class="note riot-optin" style="font-size:.8rem">Ajouter ton Riot ID est facultatif et se fait uniquement par toi. En l'ajoutant, tu acceptes que ton Riot ID et ta partie en cours (champion, mode, durée) soient visibles par tous les visiteurs du site. Tu peux le retirer à tout moment dans Le Conseil › Mon profil (vide le champ Riot ID).</p>
       <div class="players" id="players"><div class="note">Chargement des invocateurs…</div></div>
     </section>
   </div>
@@ -423,7 +424,7 @@ function renderRiotReg(){
     catch(x){err("Enregistrement impossible pour le moment, réessaie.")}};
 }
 function renderPlayers(){
-  const list=Object.entries(riot).map(([id,p])=>({id,...p,lv:live[p.riotId?.toLowerCase()]}));
+  const list=Object.entries(riot).filter(([,p])=>p.riotId&&p.pseudo).map(([id,p])=>({id,...p,lv:live[p.riotId.toLowerCase()]}));
   if(!db&&!list.length){$("players").innerHTML=`<div class="note">${connErr?"Liste indisponible.":"Chargement des invocateurs…"}</div>`;return}
   if(!list.length){$("players").innerHTML=`<div class="note">Aucun invocateur inscrit. Ajoute ton Riot ID ci-dessus pour apparaître ici.</div>`;return}
   list.sort((a,b)=>(b.lv?1:0)-(a.lv?1:0)||a.pseudo.localeCompare(b.pseudo));
