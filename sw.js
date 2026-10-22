@@ -1,6 +1,6 @@
 // Service worker du Conseil : rend le site installable et utilisable hors connexion (pages déjà visitées).
-const CACHE="conseil-v15";
-const CORE=["index.html","worlds.html","tierlist.html","jeux.html","devinettes.html","echauffement.html","customs.html","communaute.html","patch.html","conseil.js","conseil.css","theme-tv.css","champions.js","icon-192.png","icon-512.png","manifest.webmanifest"];
+const CACHE="conseil-v16";
+const CORE=["index.html","worlds.html","tierlist.html","jeux.html","devinettes.html","echauffement.html","customs.html","communaute.html","patch.html","ladder.html","conseil.js","conseil.css","theme-tv.css","champions.js","icon-192.png","icon-512.png","manifest.webmanifest"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting()))});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener("fetch",e=>{

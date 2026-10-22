@@ -170,6 +170,14 @@ input[type=text],select{font:500 1rem var(--body);color:var(--ink);background:va
 .ev-txt{margin:0;font-size:.95rem;color:var(--muted);line-height:1.45}
 .ev-cd{font:700 .95rem var(--body);color:#fff;letter-spacing:.04em}
 .ev-cd b{font:400 1.3rem var(--display);color:var(--gold);margin:0 2px}
+.recap{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;background:#2a2d35}
+@media (max-width:860px){.recap{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.recap>div{background:#15171c;padding:16px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.recap .k{font:700 .78rem var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.recap .v{font:400 2rem/1 var(--display);color:#fff}
+.recap .s{font-size:.88rem;color:var(--muted)}
+.recap .top{grid-column:1/-1;display:flex;flex-direction:row;flex-wrap:wrap;gap:14px;align-items:center}
+.recap .top a{margin-left:auto}
 footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margin:0 auto}
 @media (prefers-reduced-motion:reduce){.logo .glow{animation:none}.tile{transition:none}}
 </style>
@@ -285,9 +293,10 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
   <!-- Cette semaine au Conseil -->
   <section aria-labelledby="weekT" style="display:flex;flex-direction:column;gap:12px">
     <h2 id="weekT">Cette semaine au Conseil</h2>
+    <div class="recap" id="recap" aria-label="Récap de la semaine"><div class="note">Récap de la semaine : chargement des rangs officiels…</div></div>
     <div class="wk">
       <a class="wkc frame" href="communaute.html#sage"><span class="wki" aria-hidden="true">👑</span><b>Sage de la semaine</b><span id="wSage" class="wkt">Votes en cours</span></a>
-      <a class="wkc frame" href="communaute.html#paris"><span class="wki" aria-hidden="true">🎲</span><b>Paris</b><span id="wBets" class="wkt">Aucun pari en cours</span></a>
+      <a class="wkc frame" href="communaute.html#paris"><span class="wki" aria-hidden="true">🎯</span><b>Pronos entre potes</b><span id="wBets" class="wkt">Aucun prono en cours</span></a>
       <a class="wkc frame" href="communaute.html#banc"><span class="wki" aria-hidden="true">⚖</span><b>Banc des accusés</b><span id="wTrial" class="wkt">Le tribunal est vide</span></a>
       <a class="wkc frame" href="customs.html#clash"><span class="wki" aria-hidden="true">🛡</span><b>Prochain Clash</b><span id="wClash" class="wkt">Aucune session prévue</span></a>
       <a class="wkc frame" href="patch.html"><span class="wki" aria-hidden="true">📜</span><b>Patch 26.21</b><span class="wkt">Nerfs pour Caitlyn, Jinx et Lee Sin ; Varus retravaillé ; ARAM Mayhem fait peau neuve.</span></a>
@@ -310,7 +319,7 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
       <span class="ic" aria-hidden="true">⚔</span><b>Customs & Clash</b><span>Équipes 5v5 équilibrées, roue des champions, inscriptions au Clash.</span>
     </a>
     <a class="tile frame" href="communaute.html">
-      <span class="ic" aria-hidden="true">◆</span><b>Le Conseil</b><span>Paris entre potes, banc des accusés, sage de la semaine et ton profil.</span>
+      <span class="ic" aria-hidden="true">◆</span><b>Le Conseil</b><span>Pronos entre potes, banc des accusés, sage de la semaine et ton profil.</span>
     </a>
   </section>
 
@@ -494,7 +503,7 @@ function renderFeat(){
   // bandeau direct avec les infos du moment
   const items=[];
   for(const p of Object.values(riot))if(p.riotId&&live[p.riotId.toLowerCase()]){const g=live[p.riotId.toLowerCase()];items.push(`${p.pseudo} en partie sur ${champNames[g.championId]||"un champion"}`)}
-  const ob=Object.values(bets||{}).filter(b=>b.status==="open");for(const b of ob)items.push(`Pari ouvert sur ${b.targetPseudo}`);
+  const ob=Object.values(bets||{}).filter(b=>b.status==="open");for(const b of ob)items.push(`Prono ouvert sur la partie de ${b.targetPseudo}`);
   items.push(`Worlds : ${m.a} – ${m.b} ${live?"en direct":new Date(m.date).toLocaleString("fr-FR",{weekday:"long",hour:"2-digit",minute:"2-digit"})}`);
   if(Date.now()<CDS_GAME_START+CDS_GAME_HOURS*3600e3)items.unshift(Date.now()<CDS_GAME_START?"Soirée CDS Game jeudi 22 octobre à 20 h 30 sur le Discord":"Soirée CDS Game en cours sur le Discord");
   items.push("Un skin LoL à gagner pour le n°1 du pick'em");
@@ -515,7 +524,25 @@ function renderSummary(){renderFeat();
 }
 $("dailyInfo").textContent="Nouveau défi chaque jour dans les 5 modes.";
 
-let bets={},trials={},sage={},clash={};
+let bets={},trials={},sage={},clash={},ladder=null;
+function renderRecap(){
+  const box=$("recap");if(!ladder?.current){box.innerHTML=`<div class="note" style="grid-column:1/-1">Récap de la semaine : ajoute ton Riot ID (Le Conseil › Mon profil) pour entrer dans le ladder.</div>`;return}
+  const P=ladder.current.players||{},ids=Object.keys(P).filter(id=>!conseilIsClaimed(id));
+  let games=0,wins=0;const per=[];
+  for(const id of ids){let g=0,w=0,lp=0;for(const q of ["solo","flex"]){const d=conseilWeekDelta(ladder.current,ladder.base,id,q);if(d&&!d.fresh){g+=d.games;w+=d.wins;if(q==="solo")lp=d.lp}}
+    games+=g;wins+=w;per.push({id,name:P[id].pseudo,g,w,lp,solo:P[id].solo})}
+  const best=per.filter(p=>p.g).sort((a,b)=>b.lp-a.lp)[0],worst=per.filter(p=>p.g).sort((a,b)=>a.lp-b.lp)[0],active=per.sort((a,b)=>b.g-a.g)[0];
+  const wr=per.filter(p=>p.g>=5).sort((a,b)=>b.w/b.g-a.w/a.g)[0];
+  const top=Object.entries(P).filter(([id,p])=>p.solo&&!conseilIsClaimed(id)).sort((a,b)=>conseilRankValue(b[1].solo)-conseilRankValue(a[1].solo)).slice(0,3);
+  const nm=p=>esc(p.name)+conseilCampTag(p.id);
+  box.innerHTML=`<div><span class="k">Parties classées</span><span class="v">${games}</span><span class="s">jouées par le Conseil depuis lundi</span></div>
+    <div><span class="k">Winrate du Conseil</span><span class="v">${games?Math.round(100*wins/games)+" %":"—"}</span><span class="s">${wins} victoires, ${games-wins} défaites</span></div>
+    <div><span class="k">Meilleure grimpe</span><span class="v">${best&&best.lp>0?"+"+best.lp+" LP":"—"}</span><span class="s">${best&&best.lp>0?nm(best):"Personne n'a encore grimpé"}</span></div>
+    <div><span class="k">Le plus tilté</span><span class="v">${worst&&worst.lp<0?worst.lp+" LP":"—"}</span><span class="s">${worst&&worst.lp<0?nm(worst)+' · <a href="communaute.html#banc">l\'accuser ?</a>':"Personne n'a chuté"}</span></div>
+    <div><span class="k">Le plus actif</span><span class="v">${active&&active.g?active.g:"—"}</span><span class="s">${active&&active.g?nm(active)+" (parties)":"Pas encore de partie"}</span></div>
+    <div><span class="k">Meilleur winrate</span><span class="v">${wr?Math.round(100*wr.w/wr.g)+" %":"—"}</span><span class="s">${wr?nm(wr)+" · "+wr.g+" parties":"5 parties minimum"}</span></div>
+    <div class="top"><span class="k">Ladder Solo/Duo</span>${top.length?top.map(([id,p],i)=>`<span><b style="color:var(--gold)">${i+1}.</b> ${esc(p.pseudo)}${conseilCampTag(id)} ${conseilRankBadge(p.solo)}</span>`).join(""):'<span class="s">Pas encore de sage classé</span>'}<a href="ladder.html">Voir le ladder</a></div>`;
+}
 function renderWeek(){
   const nm=id=>riot[id]?.pseudo||"un sage";
   const last=conseilWeek(new Date(Date.now()-7*864e5)),cnt={};
@@ -523,13 +550,13 @@ function renderWeek(){
   const lab={carry:"carry",drole:"drôle",tilt:"tilté"},w=Object.entries(cnt).map(([k,o])=>{const e=Object.entries(o).sort((a,b)=>b[1]-a[1])[0];return `Le plus ${lab[k]} : <strong>${esc(nm(e[0]))}</strong>`});
   $("wSage").innerHTML=w.length?w.join("<br>"):"Votes en cours pour cette semaine";
   const ob=Object.values(bets).filter(b=>b.status==="open");
-  $("wBets").innerHTML=ob.length?`<strong>${ob.length}</strong> pari${ob.length>1?"s":""} ouvert${ob.length>1?"s":""} · ${ob.slice(0,2).map(b=>esc(b.targetPseudo)).join(", ")}`:"Aucun pari en cours";
+  $("wBets").innerHTML=ob.length?`<strong>${ob.length}</strong> prono${ob.length>1?"s":""} ouvert${ob.length>1?"s":""} · ${ob.slice(0,2).map(b=>esc(b.targetPseudo)).join(", ")}`:"Aucun prono en cours";
   const tr=Object.values(trials).filter(t=>t.closesAt>Date.now()).sort((a,b)=>b.created.localeCompare(a.created))[0];
   $("wTrial").innerHTML=tr?`<strong>${esc(tr.accusedPseudo)}</strong> est accusé : « ${esc(tr.charge.slice(0,70))}${tr.charge.length>70?"…":""} »`:"Le tribunal est vide";
   const cl=Object.values(clash).filter(e=>Date.parse(e.date)>Date.now()).sort((a,b)=>Date.parse(a.date)-Date.parse(b.date))[0];
   $("wClash").innerHTML=cl?`<strong>${new Date(cl.date).toLocaleString("fr-FR",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</strong> · ${esc(cl.title)}`:"Aucune session prévue";
 }
-function renderAll(){renderWeek();
+function renderAll(){renderWeek();if(ladder)renderRecap();
   const me=riot[uid]?.pseudo||picks[uid]?.pseudo||wow[uid]?.pseudo;
   $("me").innerHTML=!db?(connErr?"Hors ligne":"Connexion au Conseil…"):me?`Bienvenue, <b>${esc(me)}</b>`:"Bienvenue, sage anonyme";
   renderRiotReg();renderPlayers();renderWow();renderSummary();
@@ -545,7 +572,7 @@ conseilLoadLogos(()=>renderAll());conseilDD().then(()=>renderAll());
   sub("wow",o=>wow=o);
   sub("picks",o=>picks=o);
   sub("tiers",o=>tiersN=Object.values(o).filter(t=>t.complete).length);
-  sub("bets",o=>bets=o);sub("trials",o=>trials=o);sub("sageVotes",o=>sage=o);sub("clash",o=>clash=o);
+  sub("bets",o=>{bets=o;conseilResolvePronos(db,o)});let ladderAsked=false;sub("riot",o=>{if(!ladderAsked){ladderAsked=true;conseilLadder(db,o).then(l=>{ladder=l;renderRecap()})}});sub("trials",o=>trials=o);sub("sageVotes",o=>sage=o);sub("clash",o=>clash=o);
   db.doc("results/state").onSnapshot(s=>{results=s.exists?s.data():null;renderAll()},()=>{});
   renderAll();
 })();

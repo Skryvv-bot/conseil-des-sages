@@ -28,6 +28,7 @@ const CONSEIL_NAV=[
   {id:"jeux",href:"jeux.html",label:"Jeux",sub:[{id:"jeux",href:"jeux.html",label:"Tous les jeux"},{id:"devinettes",href:"devinettes.html",label:"Devinettes"},{id:"echauffement",href:"echauffement.html",label:"Échauffement"}]},
   {id:"customs",href:"customs.html",label:"Customs & Clash"},
   {id:"conseil",href:"communaute.html",label:"Le Conseil"},
+  {id:"ladder",href:"ladder.html",label:"Ladder"},
   {id:"patch",href:"patch.html",label:"Patch"}
 ];
 const NAV_GROUP={tierlist:"worlds",devinettes:"jeux",echauffement:"jeux"};
@@ -137,7 +138,7 @@ window.conseilTeamLogo=function(tag,fallbackHTML,size=30){
   const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-tv.css";document.head.appendChild(l)};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();
 function defaultTicker(){const d=Math.ceil((Date.parse("2026-11-04T23:00:00Z")-Date.now())/864e5);
-  return [...(window.CAMP_TRAITORS||[]).slice(0,3).map(TRAITOR_TXT),"Worlds 2026 : phase suisse du 23 au 31 octobre, finale le 14 novembre","Un skin LoL à gagner pour le n°1 du pick'em",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Paris, tribunal et sage de la semaine dans Le Conseil"]}
+  return [...(window.CAMP_TRAITORS||[]).slice(0,3).map(TRAITOR_TXT),"Worlds 2026 : phase suisse du 23 au 31 octobre, finale le 14 novembre","Un skin LoL à gagner pour le n°1 du pick'em",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Pronos entre potes, tribunal et sage de la semaine dans Le Conseil","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes"]}
 window.conseilTicker=function(items){const el=document.getElementById("tvRun");if(!el||!items||!items.length)return;
   const html=items.map(t=>`<span>${conseilEsc(t)}</span>`).join("");el.innerHTML=html+html};
 
@@ -211,3 +212,63 @@ async function offerClaim(db,uid){
       }catch(e){console.warn(e);msg.textContent="Récupération impossible pour le moment, réessaie dans un instant."}};
   }catch(e){console.warn("claim",e)}
 }
+
+// ---------- Données Riot officielles (via le relais Cloudflare) ----------
+window.RIOT_RELAY="https://conseil-riot.perrotinyvanpro.workers.dev";
+const RIOT_TIERS=["IRON","BRONZE","SILVER","GOLD","PLATINUM","EMERALD","DIAMOND","MASTER","GRANDMASTER","CHALLENGER"];
+window.TIER_FR={IRON:"Fer",BRONZE:"Bronze",SILVER:"Argent",GOLD:"Or",PLATINUM:"Platine",EMERALD:"Émeraude",DIAMOND:"Diamant",MASTER:"Maître",GRANDMASTER:"Grand Maître",CHALLENGER:"Challenger"};
+window.TIER_COLOR={IRON:"#6b6f76",BRONZE:"#a0674b",SILVER:"#9aa4ae",GOLD:"#d4a640",PLATINUM:"#3fb6a8",EMERALD:"#2fbf71",DIAMOND:"#6f8cff",MASTER:"#b45cff",GRANDMASTER:"#e4002b",CHALLENGER:"#ffd54a"};
+const APEX=new Set(["MASTER","GRANDMASTER","CHALLENGER"]);
+// Valeur servant uniquement à trier les rangs officiels et à mesurer les LP gagnés ou perdus
+window.conseilRankValue=v=>{if(!v||!v.tier)return -1;const t=RIOT_TIERS.indexOf(v.tier);if(APEX.has(v.tier))return 2800+(v.lp||0);return t*400+Math.max(0,["IV","III","II","I"].indexOf(v.rank))*100+(v.lp||0)};
+window.conseilRankLabel=(v,withLp=true)=>!v||!v.tier?"Non classé":`${TIER_FR[v.tier]||v.tier}${APEX.has(v.tier)?"":" "+v.rank}${withLp?" · "+(v.lp||0)+" LP":""}`;
+window.conseilRankBadge=v=>!v||!v.tier?`<span class="rkb none">Non classé</span>`:`<span class="rkb" style="--rk:${TIER_COLOR[v.tier]}">${conseilEsc(conseilRankLabel(v,false))}</span>`;
+(function(){const st=document.createElement("style");st.textContent=`.rkb{display:inline-block;padding:2px 8px;font:700 .78rem "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#08090b;background:var(--rk,#a7abb6);white-space:nowrap}.rkb.none{background:transparent;color:#a7abb6;border:1px solid #3a3e48}`;document.head.appendChild(st)})();
+const isoDay=d=>{const x=new Date(d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`};
+const weekStart=()=>{const d=new Date();const day=(d.getDay()+6)%7;d.setDate(d.getDate()-day);d.setHours(0,0,0,0);return d};
+// Ladder partagé : un seul visiteur interroge Riot toutes les 15 minutes, les autres lisent Firebase.
+window.conseilLadder=async function(db,riotProfiles,{force=false}={}){
+  const players=Object.entries(riotProfiles||{}).filter(([id,p])=>p.riotId&&p.pseudo&&!conseilIsClaimed(id));
+  let cur=null;try{const d=await db.doc("ladder/current").get();cur=d.exists?d.data():null}catch(e){}
+  const stale=!cur||Date.now()-Date.parse(cur.updatedAt||0)>15*60e3||players.some(([id])=>!cur.players?.[id]);
+  if((stale||force)&&players.length){
+    try{
+      const r=await fetch(RIOT_RELAY+"/ranks?players="+encodeURIComponent(players.map(([,p])=>p.riotId+"|"+(p.region||"euw1")).join(",")));
+      if(r.ok){const j=await r.json();const out={};
+        for(const [id,p] of players){const rk=j.ranks?.[p.riotId.toLowerCase()];out[id]={pseudo:p.pseudo,riotId:p.riotId,solo:rk?.solo||null,flex:rk?.flex||null,err:rk?null:(j.errors?.[p.riotId.toLowerCase()]||null)}}
+        cur={updatedAt:new Date().toISOString(),players:out};
+        await db.doc("ladder/current").set(cur);
+        const today=isoDay(Date.now()),snap=await db.doc("ladderSnap/"+today).get();
+        if(!snap.exists){const sp={};for(const [id,v] of Object.entries(out))sp[id]={solo:v.solo,flex:v.flex};await db.doc("ladderSnap/"+today).set({day:today,players:sp})}
+      }
+    }catch(e){console.warn("ladder",e)}
+  }
+  // point de départ de la semaine : premier relevé depuis lundi
+  let base=null;
+  try{const q=await db.collection("ladderSnap").where("day",">=",isoDay(weekStart())).orderBy("day").limit(1).get();base=q.docs[0]?.data()||null}catch(e){console.warn("snap",e)}
+  return{current:cur,base};
+};
+// Évolution de la semaine pour un joueur et une file (solo/flex)
+window.conseilWeekDelta=function(cur,base,id,q="solo"){
+  const a=cur?.players?.[id]?.[q],b=base?.players?.[id]?.[q];
+  if(!a)return null;
+  if(!b)return{games:0,wins:0,lp:0,fresh:true};
+  return{games:(a.w+a.l)-(b.w+b.l),wins:a.w-b.w,lp:conseilRankValue(a)-conseilRankValue(b)};
+};
+// Résolution automatique des pronos entre potes : on demande à Riot le résultat de la partie.
+const resolving=new Set();
+window.conseilResolvePronos=async function(db,bets){
+  for(const [id,b] of Object.entries(bets||{})){
+    if(b.status!=="open"||!b.riotId||resolving.has(id))continue;
+    const closes=b.closesAt?.toMillis?b.closesAt.toMillis():+b.closesAt||0;
+    if(Date.now()<closes)continue;
+    resolving.add(id);
+    try{
+      const u=RIOT_RELAY+"/result?"+new URLSearchParams({player:b.riotId+"|"+(b.region||"euw1"),after:String(Date.parse(b.created)||Date.now()),...(b.gameId?{gameId:String(b.gameId)}:{})});
+      const r=await (await fetch(u)).json();
+      if(r.done)await db.doc("bets/"+id).update({status:"done",result:r.win?"win":"loss",settledBy:"riot",settledAt:new Date().toISOString(),
+        match:{championName:r.championName||"",kills:r.kills||0,deaths:r.deaths||0,assists:r.assists||0,duration:r.duration||0,matchId:r.matchId||""}});
+    }catch(e){console.warn("prono",e)}
+    finally{setTimeout(()=>resolving.delete(id),60000)}
+  }
+};
