@@ -102,3 +102,11 @@ html[data-camp="wow"] .tv-ticker .dot{background:#08090b;color:#ffb400}
 html[data-camp="wow"] .cnav-brand b{color:#ffb400}
 html[data-camp="wow"] .tag.live,html[data-camp="wow"] .st.on{background:#ffb400!important;color:#08090b!important}
 html[data-camp="wow"] .camp-lol .btn{background:#e4002b!important;color:#fff!important}
+
+/* Bandeau de récupération de compte */
+.claim{display:flex;flex-direction:column;gap:10px;padding:16px 18px;background:#1d2027;border-left:6px solid var(--tv-amber,#ffb400)}
+.claim b{display:block;font:400 1.3rem var(--display);text-transform:uppercase;color:#fff}
+.claim span{color:var(--muted)}
+.claim-row{display:flex;gap:8px;flex-wrap:wrap}
+.claim-row select{flex:1 1 200px}
+.claim-msg{margin:0;color:var(--gold);font-weight:600}

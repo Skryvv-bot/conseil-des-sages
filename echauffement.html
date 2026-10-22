@@ -345,7 +345,7 @@ renderSide();
 (async()=>{
   const c=await conseilConnect();if(!c.db){connErr=true;renderSide();return}
   db=c.db;uid=c.uid;
-  db.collection("warmup").onSnapshot(q=>{scores={};q.docs.forEach(d=>scores[d.id]=d.data());renderSide()},e=>console.warn(e));
+  db.collection("warmup").onSnapshot(q=>{scores={};q.docs.filter(d=>!conseilIsClaimed(d.id)).forEach(d=>scores[d.id]=d.data());renderSide()},e=>console.warn(e));
   for(const col of ["picks","riot","tiers"])db.doc(col+"/"+uid).get().then(s=>{if(s.exists){pseudoSrc[col]={[uid]:s.data()};renderSide()}}).catch(()=>{});
   renderSide();
 })();

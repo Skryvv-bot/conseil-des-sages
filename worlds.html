@@ -457,7 +457,7 @@ setInterval(refresh,60000);
   let first=true;
   db.doc("results/state").onSnapshot(s=>{if(s.exists&&Array.isArray(s.data().matches)){state=s.data();renderAll()}
     if(first){first=false;refresh()}},e=>{console.error(e);if(first){first=false;refresh()}});
-  db.collection("picks").onSnapshot(q=>{picks={};q.docs.forEach(d=>picks[d.id]=d.data());myDoc=uid&&picks[uid]?picks[uid]:null;renderAll()},e=>console.error(e));
+  db.collection("picks").onSnapshot(q=>{picks={};q.docs.filter(d=>!conseilIsClaimed(d.id)).forEach(d=>picks[d.id]=d.data());myDoc=uid&&picks[uid]?picks[uid]:null;renderAll()},e=>console.error(e));
   renderAll();
 })();
 

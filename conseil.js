@@ -15,7 +15,7 @@ window.conseilConnect=function(){
       if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
       const auth=firebase.auth(), db=firebase.firestore();
       let done=false;
-      auth.onAuthStateChanged(u=>{if(u&&!done){done=true;window.CONSEIL_UID=u.uid;watchCamps(db,u.uid);resolve({db,uid:u.uid})}});
+      auth.onAuthStateChanged(async u=>{if(u&&!done){done=true;window.CONSEIL_UID=u.uid;await loadClaims(db);watchCamps(db,u.uid);resolve({db,uid:u.uid});offerClaim(db,u.uid)}});
       auth.signInAnonymously().catch(e=>{if(!done){done=true;console.error(e);resolve({db:null,error:e})}});
     }catch(e){console.error(e);resolve({db:null,error:e})}
   });
@@ -148,7 +148,7 @@ const campSide=w=>w&&(w.side||(w.going?"wow":null));
 function watchCamps(db,uid){
   if(campsWatched)return;campsWatched=true;
   db.collection("wow").onSnapshot(q=>{
-    const docs={};q.docs.forEach(d=>docs[d.id]=d.data());
+    const docs={};q.docs.filter(d=>!conseilIsClaimed(d.id)).forEach(d=>docs[d.id]=d.data());
     CAMPS={};CAMP_BY_PSEUDO={};
     for(const [id,w] of Object.entries(docs)){const s=campSide(w);if(!s)continue;CAMPS[id]=s;if(w.pseudo)CAMP_BY_PSEUDO[w.pseudo.toLowerCase()]=s}
     const mine=CAMPS[uid]||"";
@@ -176,3 +176,38 @@ window.conseilCampTag=function(idOrPseudo,byPseudo){
   p.textContent="Conseil des Sages isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.";
   const f=document.querySelector("footer");(f&&f.parentNode?f.parentNode:document.body).appendChild(p)};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();
+
+// ---------- Récupération des comptes de l'ancienne adresse (Netlify) ----------
+// Chaque navigateur a une nouvelle identité sur la nouvelle adresse. Un sage peut « réclamer » son ancien pseudo :
+// ses données sont recopiées sur sa nouvelle identité et l'ancienne est masquée partout (collection claims).
+window.CLAIMED=new Set();window.CLAIM_BY={};
+window.conseilIsClaimed=function(id){if(!CLAIMED.size)return false;if(CLAIMED.has(id))return true;const i=id.lastIndexOf("_");return i>0&&CLAIMED.has(id.slice(i+1))};
+async function loadClaims(db){try{const q=await db.collection("claims").get();q.docs.forEach(d=>{CLAIMED.add(d.id);CLAIM_BY[d.data().by]=d.id})}catch(e){console.warn("claims",e)}}
+const CLAIM_COLS=["picks","tiers","riot","wow","warmup"];
+async function offerClaim(db,uid){
+  try{
+    if(CLAIM_BY[uid])return;                                   // déjà récupéré
+    for(const c of CLAIM_COLS){const d=await db.doc(c+"/"+uid).get();if(d.exists)return}   // a déjà des données ici
+    try{if(localStorage.getItem("claim-dismissed"))return}catch(e){}
+    const people={};
+    for(const c of CLAIM_COLS){const q=await db.collection(c).get();q.docs.forEach(d=>{if(d.id===uid||CLAIMED.has(d.id))return;const p=d.data().pseudo;if(p&&!people[d.id])people[d.id]=p})}
+    const list=Object.entries(people).sort((a,b)=>a[1].localeCompare(b[1]));
+    if(!list.length)return;
+    const box=document.createElement("section");box.className="claim";box.setAttribute("aria-label","Récupérer mon ancien compte");
+    box.innerHTML=`<div><b>Nouvelle adresse du site !</b><span>Tu avais déjà un compte (pronos, tier list, profil, camp) ? Choisis ton pseudo pour tout récupérer.</span></div>
+      <div class="claim-row"><select aria-label="Mon ancien pseudo"><option value="">Mon ancien pseudo…</option>${list.map(([id,p])=>`<option value="${id}">${conseilEsc(p)}</option>`).join("")}</select>
+      <button type="button" class="btn" data-go>Récupérer</button><button type="button" class="btn ghost" data-no>Je suis nouveau</button></div><p class="claim-msg" role="status"></p>`;
+    const wrap=document.querySelector(".wrap")||document.body;wrap.prepend(box);
+    const msg=box.querySelector(".claim-msg");
+    box.querySelector("[data-no]").onclick=()=>{try{localStorage.setItem("claim-dismissed","1")}catch(e){}box.remove()};
+    box.querySelector("[data-go]").onclick=async()=>{
+      const old=box.querySelector("select").value;if(!old){msg.textContent="Choisis ton pseudo dans la liste.";return}
+      msg.textContent="Récupération en cours…";
+      try{
+        const c0=await db.doc("claims/"+old).get();if(c0.exists){msg.textContent="Ce compte a déjà été récupéré.";return}
+        for(const c of CLAIM_COLS){const d=await db.doc(c+"/"+old).get();if(d.exists)await db.doc(c+"/"+uid).set(d.data())}
+        await db.doc("claims/"+old).set({by:uid,pseudo:people[old],at:new Date().toISOString()});
+        msg.textContent="C'est fait ! Rechargement…";setTimeout(()=>location.reload(),900);
+      }catch(e){console.warn(e);msg.textContent="Récupération impossible pour le moment, réessaie dans un instant."}};
+  }catch(e){console.warn("claim",e)}
+}

@@ -539,7 +539,7 @@ conseilLoadLogos(()=>renderAll());conseilDD().then(()=>renderAll());
   const c=await conseilConnect();
   if(!c.db){connErr=true;renderAll();return}
   db=c.db;uid=c.uid;
-  const sub=(col,fn)=>db.collection(col).onSnapshot(q=>{const o={};q.docs.forEach(d=>o[d.id]=d.data());fn(o);renderAll()},e=>console.warn(col,e));
+  const sub=(col,fn)=>db.collection(col).onSnapshot(q=>{const o={};q.docs.filter(d=>!conseilIsClaimed(d.id)).forEach(d=>o[d.id]=d.data());fn(o);renderAll()},e=>console.warn(col,e));
   sub("riot",o=>{riot=o;loadLive()});
   sub("wow",o=>wow=o);
   sub("picks",o=>picks=o);

@@ -242,7 +242,7 @@ $("clashForm").onsubmit=async e=>{e.preventDefault();const err=$("clashErr");err
 function renderAll(){$("me").innerHTML=!db?(connErr?"Hors ligne":"Connexion au Conseil…"):myPseudo()?`Connecté : <b>${esc(myPseudo())}</b>`:`<a href="communaute.html#profil">Crée ton profil</a>`;renderPool();renderClash()}
 renderAll();
 (async()=>{const c=await conseilConnect();if(!c.db){connErr=true;renderAll();return}db=c.db;uid=c.uid;
-  const sub=(col,fn)=>db.collection(col).onSnapshot(q=>{const o={};q.docs.forEach(d=>o[d.id]=d.data());fn(o);renderAll()},e=>console.warn(col,e));
+  const sub=(col,fn)=>db.collection(col).onSnapshot(q=>{const o={};q.docs.filter(d=>!conseilIsClaimed(d.id)).forEach(d=>o[d.id]=d.data());fn(o);renderAll()},e=>console.warn(col,e));
   sub("riot",o=>members=o);sub("clash",o=>events=o);sub("clashReg",o=>regs=o);renderAll()})();
 
 window.addEventListener("conseil-camps",()=>{try{renderAll();renderTeams()}catch(e){}});

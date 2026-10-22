@@ -259,7 +259,7 @@ conseilLoadLogos(()=>renderAll());conseilDD().then(()=>renderAll());
   const c=await conseilConnect();
   if(!c.db){connErr=true;renderAll();return}
   db=c.db;uid=c.uid;
-  db.collection("tiers").onSnapshot(q=>{all={};q.docs.forEach(d=>all[d.id]=d.data());
+  db.collection("tiers").onSnapshot(q=>{all={};q.docs.filter(d=>!conseilIsClaimed(d.id)).forEach(d=>all[d.id]=d.data());
     const fresh=uid&&all[uid]?all[uid]:null;
     if(!mine||!dirty||!fresh)mine=fresh;else mine={...fresh,ratings:mine.ratings,complete:mine.complete};
     renderAll()},e=>console.error(e));
