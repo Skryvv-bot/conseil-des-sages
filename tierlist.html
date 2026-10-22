@@ -92,6 +92,17 @@ input[type=text]{font:500 1rem var(--body);color:var(--ink);background:var(--voi
 .card{display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--panel);border:1px solid var(--line2);font-size:.88rem}
 .card .avg{font:700 .8rem var(--body);color:var(--gold);font-variant-numeric:tabular-nums}
 .card .rk{font:700 .74rem var(--display);color:var(--hex)}
+.rlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+.rrow{display:grid;grid-template-columns:52px auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:8px 14px 8px 0;background:var(--panel);border-left:4px solid var(--line2)}
+.rpos{font:400 1.5rem var(--display);text-align:center;color:var(--muted)}
+.rname{display:flex;flex-direction:column;min-width:0}.rname b{font-size:1.05rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rname small{color:var(--muted);font-size:.8rem}
+.ravg{font:400 1.2rem var(--display);color:var(--gold);font-variant-numeric:tabular-nums}.ravg small{font:600 .75rem var(--body);color:var(--muted);margin-left:2px}
+.rrow.top1{border-left-color:var(--tv-red,#e4002b)}.rrow.top1 .rpos{color:#fff}.rrow.top2 .rpos,.rrow.top3 .rpos{color:#fff}
+.rrow.top2,.rrow.top3{border-left-color:#3a3e48}
+.rrow.hc{background:linear-gradient(90deg,rgba(255,180,0,.16),var(--panel) 70%);border-left-color:var(--tv-amber,#ffb400);margin-bottom:8px}
+.hc-tag{font:700 .85rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:#08090b;background:var(--tv-amber,#ffb400);padding:4px 10px;white-space:nowrap}
+.item.hc{border-left:4px solid var(--tv-amber,#ffb400)}
+@media (max-width:480px){.rrow{grid-template-columns:40px auto minmax(0,1fr) auto;gap:8px}.hc-tag{font-size:.72rem;padding:3px 6px}}
 .empty{color:var(--muted);text-align:center;padding:22px;border:1px dashed var(--line2)}
 .saved{font-size:.82rem;color:var(--hex)}
 footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margin:0 auto}
@@ -143,7 +154,7 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
     <div class="actions"><h2>Classement du Conseil</h2><span class="note" id="voters"></span></div>
     <div class="chips" id="catsCouncil" role="group" aria-label="Catégorie affichée"></div>
     <div id="council"></div>
-    <p class="note">Barème : G = 5, S = 4, A = 3, B = 2, F = 0. Un C (pas de data) ne compte pas dans la moyenne. Le tier du Conseil est la moyenne arrondie : 4,5 et plus = G, 3,5 = S, 2,5 = A, 1,5 = B, moins = F. Un joueur classé C par tout le monde reste en C. Seules les tier lists validées comptent.</p>
+    <p class="note">Classement du premier au dernier selon la moyenne des tier lists validées (G = 5, S = 4, A = 3, B = 2, F = 0 ; un C ne compte pas). Faker est hors catégorie 🐐 : il ne se classe pas.</p>
   </section>
 
   <footer>Page de fan non officielle du Conseil des Sages, sans lien avec Riot Games.</footer>
@@ -174,7 +185,10 @@ const ROLES=["Top","Jungle","Mid","Bot","Support"];
 const CATS=[...ROLES.map((r,i)=>({id:r,label:r,items:Object.entries(TEAMS).map(([k,t])=>({key:t.p[i],name:t.p[i],team:k}))})),
   {id:"Equipes",label:"Équipes",items:Object.entries(TEAMS).map(([k,t])=>({key:k,name:t.n,team:k}))}];
 const TIERS=["G","S","A","B","C","F"], VAL={G:5,S:4,A:3,B:2,F:0}, CAP={G:1,S:4,A:5,B:5};
-const TOTAL=CATS.reduce((n,c)=>n+c.items.length,0);
+// Hors catégorie : Faker ne se classe pas, il est au-dessus de tout le monde 🐐
+const isHC=(c,i)=>c.id!=="Equipes"&&i.name==="Faker";
+const rankable=c=>c.items.filter(i=>!isHC(c,i));
+const TOTAL=CATS.reduce((n,c)=>n+rankable(c).length,0);
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function ink(hex){const n=parseInt(hex.slice(1),16),r=n>>16,g=n>>8&255,b=n&255;return (r*299+g*587+b*114)/1000>150?"#010a13":"#fff"}
@@ -187,8 +201,8 @@ document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{document.que
   $("v-mine").hidden=b.id!=="tab-mine";$("v-council").hidden=b.id!=="tab-council"});
 
 const ratings=()=>mine?.ratings||{};
-const ratedCount=r=>CATS.reduce((n,c)=>n+c.items.filter(i=>r[c.id+":"+i.key]).length,0);
-const catDone=(r,c)=>c.items.every(i=>r[c.id+":"+i.key]);
+const ratedCount=r=>CATS.reduce((n,c)=>n+rankable(c).filter(i=>r[c.id+":"+i.key]).length,0);
+const catDone=(r,c)=>rankable(c).every(i=>r[c.id+":"+i.key]);
 
 function renderMe(){
   const box=$("regBox");
@@ -213,9 +227,10 @@ function renderEditor(){
   $("catsMine").innerHTML=CATS.map(c=>`<button data-c="${c.id}" aria-pressed="${c.id===catMine}">${c.label}${catDone(r,c)?'<span class="ok">✓</span>':""}</button>`).join("");
   $("catsMine").querySelectorAll("button").forEach(b=>b.onclick=()=>{catMine=b.dataset.c;renderEditor()});
   const cat=CATS.find(c=>c.id===catMine),gHolder=cat.items.find(i=>r[cat.id+":"+i.key]==="G");
-  const cnt=t=>cat.items.filter(i=>r[cat.id+":"+i.key]===t).length;
+  const cnt=t=>rankable(cat).filter(i=>r[cat.id+":"+i.key]===t).length;
   $("gNote").innerHTML=Object.entries(CAP).map(([k,c])=>`<span class="${cnt(k)>=c?"full":""}">${k} <b>${cnt(k)} / ${c}</b></span>`).join("")+`<span>C <b>${cnt("C")}</b></span><span>F <b>${cnt("F")}</b></span>`;
-  $("items").innerHTML=cat.items.map(i=>{const v=r[cat.id+":"+i.key];
+  $("items").innerHTML=[...cat.items].sort((x,y)=>isHC(cat,y)-isHC(cat,x)).map(i=>{const v=r[cat.id+":"+i.key];
+    if(isHC(cat,i))return `<div class="item hc"><div class="who">${badge(i.team)}<b>${esc(i.name)}</b><small>${esc(TEAMS[i.team].n)}</small></div><div class="hc-tag" title="Faker ne se classe pas">🐐 Hors catégorie</div></div>`;
     return `<div class="item"><div class="who">${badge(i.team)}<b>${esc(i.name)}</b>${cat.id!=="Equipes"?`<small>${esc(TEAMS[i.team].n)}</small>`:""}</div>
       <div class="tb" role="group" aria-label="Tier de ${esc(i.name)}">${TIERS.map(t=>{const full=CAP[t]&&v!==t&&cnt(t)>=CAP[t];return `<button data-k="${esc(i.key)}" data-t="${t}" aria-pressed="${v===t}" ${full?`disabled title="Déjà ${CAP[t]} ${t} à ce poste"`:""}>${t}</button>`}).join("")}</div></div>`}).join("");
   $("items").querySelectorAll(".tb button").forEach(b=>b.onclick=()=>setTier(cat,b.dataset.k,b.dataset.t));
@@ -225,7 +240,7 @@ function renderEditor(){
 function setTier(cat,key,t){
   const r={...ratings()},id=cat.id+":"+key;
   if(r[id]===t)delete r[id];else{
-    if(CAP[t]&&cat.items.filter(i=>cat.id+":"+i.key!==id&&r[cat.id+":"+i.key]===t).length>=CAP[t])return;
+    if(CAP[t]&&rankable(cat).filter(i=>cat.id+":"+i.key!==id&&r[cat.id+":"+i.key]===t).length>=CAP[t])return;
     r[id]=t}
   const complete=mine.complete&&ratedCount(r)===TOTAL;
   mine={...mine,ratings:r,complete};dirty=true;renderEditor();
@@ -246,10 +261,10 @@ function renderCouncil(){
   if(!db){$("council").innerHTML=`<div class="empty">Chargement du classement…</div>`;return}
   if(!valid.length){$("council").innerHTML=`<div class="empty">Aucune tier list validée pour l'instant. Le classement apparaîtra dès que le premier sage aura validé la sienne.</div>`;return}
   const cat=CATS.find(c=>c.id===catCouncil);
-  const rows=cat.items.map(i=>{const vs=valid.map(p=>VAL[p.ratings[cat.id+":"+i.key]]).filter(v=>v!==undefined);const avg=vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;return{...i,avg,n:vs.length}}).sort((a,b)=>(b.avg??-1)-(a.avg??-1)||a.name.localeCompare(b.name));
-  rows.forEach((r,i)=>r.rank=i+1);
-  $("council").innerHTML=`<div class="tierlist">${TIERS.map(t=>{const list=rows.filter(r=>tierOf(r.avg)===t);
-    return `<div class="trow"><div class="tl ${t}">${t}</div><div class="tcards">${list.length?list.map(r=>`<span class="card"><span class="rk">#${r.rank}</span>${badge(r.team)}<b>${esc(r.name)}</b><span class="avg">${r.avg==null?"—":r.avg.toFixed(2).replace(".",",")}</span></span>`).join(""):'<span class="note" style="padding:8px">—</span>'}</div></div>`}).join("")}</div>`;
+  const rows=rankable(cat).map(i=>{const vs=valid.map(p=>VAL[p.ratings[cat.id+":"+i.key]]).filter(v=>v!==undefined);const avg=vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;return{...i,avg,n:vs.length}}).sort((a,b)=>(b.avg??-1)-(a.avg??-1)||a.name.localeCompare(b.name));
+  const hc=cat.items.filter(i=>isHC(cat,i));
+  $("council").innerHTML=`<ol class="rlist">${hc.map(i=>`<li class="rrow hc"><span class="rpos">🐐</span>${badge(i.team)}<span class="rname"><b>${esc(i.name)}</b><small>${esc(TEAMS[i.team].n)}</small></span><span class="hc-tag">Hors catégorie</span></li>`).join("")}
+    ${rows.map((r,k)=>`<li class="rrow${k<3&&r.avg!=null?" top"+(k+1):""}"><span class="rpos">${r.avg==null?"–":k+1}</span>${badge(r.team)}<span class="rname"><b>${esc(r.name)}</b>${cat.id!=="Equipes"?`<small>${esc(TEAMS[r.team].n)}</small>`:""}</span><span class="ravg">${r.avg==null?"pas de note":r.avg.toFixed(2).replace(".",",")+'<small>/5</small>'}</span></li>`).join("")}</ol>`;
 }
 
 function renderAll(){renderMe();renderEditor();renderCouncil()}
