@@ -248,7 +248,7 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
     <div class="kick-grid">
       <div class="kick-card"><div class="kick-top"><b>Pick'em · Ronde 1</b><span id="kickPicks"></span></div>
         <ul class="kick-list" id="kickList"></ul>
-        <p class="note">Chaque prono se verrouille au début du match. Un skin LoL à gagner pour le n°1.</p>
+        <p class="note">Chaque prono se verrouille au début du match. Deux skins LoL à gagner : pour le 1er (offert par Skryvv) et le 2e (offert par Tabaskoh).</p>
         <a class="btn" href="worlds.html">Faire mes pronos</a></div>
       <div class="kick-card"><div class="kick-top"><b>Tier list du Conseil</b><span id="kickTierTag"></span></div>
         <div class="kick-prog"><i id="kickBar"></i></div>
@@ -343,7 +343,7 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
   <section class="tiles" aria-label="Rubriques du Conseil">
     <a class="tile frame" href="worlds.html">
       <span class="ic" aria-hidden="true">🏆</span><b>Worlds 2026</b><span>Matchs, pronos, classement, winrates et tier list.</span>
-      <span class="extra" style="color:var(--gold)">◆ Un skin LoL à gagner pour le n°1 du pick'em</span>
+      <span class="extra" style="color:var(--gold)">◆ 2 skins LoL à gagner : 1er et 2e du pick'em</span>
       <div id="nextMatch" class="nextm"></div>
       <div id="top3" class="top3"></div>
       <span class="extra" id="tierCount"></span>
@@ -543,7 +543,7 @@ function renderFeat(){
   const ob=Object.values(bets||{}).filter(b=>b.status==="open");for(const b of ob)items.push(`Prono ouvert sur la partie de ${b.targetPseudo}`);
   items.push(`Worlds : ${m.a} – ${m.b} ${live?"en direct":new Date(m.date).toLocaleString("fr-FR",{weekday:"long",hour:"2-digit",minute:"2-digit"})}`);
   if(Date.now()<CDS_GAME_START+CDS_GAME_HOURS*3600e3)items.unshift(Date.now()<CDS_GAME_START?"Soirée CDS Game jeudi 22 octobre à 20 h 30 sur le Discord":"Soirée CDS Game en cours sur le Discord");
-  items.push("Un skin LoL à gagner pour le n°1 du pick'em");
+  items.push("Pick'em : un skin pour le 1er (offert par Skryvv) et un skin pour le 2e (offert par Tabaskoh)");
   window.CUSTOM_TICKER=true;
   for(const w of (window.CAMP_TRAITORS||[]).slice(0,2))items.unshift(`Trahison ! ${w.pseudo} ${campOf(w)==="wow"?"a quitté la Faille pour Azeroth":"est revenu sur la Faille"}`);
   conseilTicker(items);

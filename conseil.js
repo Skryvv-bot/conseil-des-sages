@@ -139,7 +139,7 @@ window.conseilTeamLogo=function(tag,fallbackHTML,size=30){
   const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-tv.css";document.head.appendChild(l)};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();
 function defaultTicker(){const d=Math.ceil((Date.parse("2026-11-04T23:00:00Z")-Date.now())/864e5);
-  return [...(window.CAMP_TRAITORS||[]).slice(0,3).map(TRAITOR_TXT),"Worlds 2026 : phase suisse du 23 au 31 octobre, finale le 14 novembre","Un skin LoL à gagner pour le n°1 du pick'em",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Pronos entre potes, tribunal et sage de la semaine dans Le Conseil","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes"]}
+  return [...(window.CAMP_TRAITORS||[]).slice(0,3).map(TRAITOR_TXT),"Worlds 2026 : phase suisse du 23 au 31 octobre, finale le 14 novembre","Pick'em : un skin pour le 1er (offert par Skryvv) et un skin pour le 2e (offert par Tabaskoh)",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Pronos entre potes, tribunal et sage de la semaine dans Le Conseil","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes"]}
 window.conseilTicker=function(items){const el=document.getElementById("tvRun");if(items)window.__tickerItems=items;items=window.__tickerItems||[];
   const paid=(window.PAID_TICKER||[]).map(e=>`💬 ${e.byPseudo} : ${e.text}`);const all=[...paid,...items];if(!el||!all.length)return;
   const html=all.map(t=>`<span>${conseilEsc(t)}</span>`).join("");el.innerHTML=html+html};
