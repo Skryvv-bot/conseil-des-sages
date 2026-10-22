@@ -15,7 +15,7 @@ window.conseilConnect=function(){
       if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
       const auth=firebase.auth(), db=firebase.firestore();
       let done=false;
-      auth.onAuthStateChanged(async u=>{if(u&&!done){done=true;window.CONSEIL_UID=u.uid;await loadClaims(db);watchCamps(db,u.uid);resolve({db,uid:u.uid});offerClaim(db,u.uid)}});
+      auth.onAuthStateChanged(async u=>{if(u&&!done){done=true;window.CONSEIL_UID=u.uid;await loadClaims(db);watchCamps(db,u.uid);resolve({db,uid:u.uid});offerClaim(db,u.uid);conseilBank(db,u.uid)}});
       auth.signInAnonymously().catch(e=>{if(!done){done=true;console.error(e);resolve({db:null,error:e})}});
     }catch(e){console.error(e);resolve({db:null,error:e})}
   });
@@ -27,11 +27,11 @@ const CONSEIL_NAV=[
   {id:"ladder",href:"ladder.html",label:"Ladder"},
   {id:"worlds",href:"worlds.html",label:"Worlds 2026",sub:[{id:"worlds",href:"worlds.html",label:"Matchs & pronos"},{id:"tierlist",href:"tierlist.html",label:"Tier list"}]},
   {id:"jeux",href:"jeux.html",label:"Jeux",sub:[{id:"jeux",href:"jeux.html",label:"Tous les jeux"},{id:"devinettes",href:"devinettes.html",label:"Devinettes"},{id:"echauffement",href:"echauffement.html",label:"Échauffement"},{id:"potes",href:"potes.html",label:"Entre potes"}]},
-  {id:"conseil",href:"communaute.html",label:"Le Conseil"},
+  {id:"conseil",href:"communaute.html",label:"Le Conseil",sub:[{id:"conseil",href:"communaute.html",label:"Le Conseil"},{id:"banque",href:"banque.html",label:"Banque · Pièces d'or"}]},
   {id:"customs",href:"customs.html",label:"Customs & Clash"},
   {id:"patch",href:"patch.html",label:"Patch"}
 ];
-const NAV_GROUP={tierlist:"worlds",devinettes:"jeux",echauffement:"jeux",potes:"jeux"};
+const NAV_GROUP={tierlist:"worlds",devinettes:"jeux",echauffement:"jeux",potes:"jeux",banque:"conseil"};
 (function navStyles(){
   const css=`
 .cnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;margin:-20px calc(-1*max(16px,env(safe-area-inset-left,0px))) 0;padding:10px max(16px,env(safe-area-inset-left,0px));
@@ -56,6 +56,7 @@ window.conseilNav=function(active){
   const nav=document.createElement("nav");nav.className="cnav";nav.setAttribute("aria-label","Navigation du site");
   nav.innerHTML=`<div class="cnav-in"><a class="cnav-brand" href="index.html" aria-label="Conseil des Sages, accueil"><span>CDS<b>.</b>TV</span></a>
     <div class="cnav-links">${CONSEIL_NAV.map(n=>`<a href="${n.href}" ${n.id===group?'aria-current="page"':""}>${n.label}</a>`).join("")}</div>
+    <a class="cnav-po" id="cnavPO" href="banque.html" title="Tes Pièces d'or : voir la banque" hidden><i>PO</i><b></b></a>
     <button class="cnav-install" id="cnavInstall" hidden>Installer l'appli</button></div>`;
   document.body.prepend(nav);
   const tk=document.createElement("div");tk.className="tv-ticker";tk.setAttribute("aria-label","Bandeau d'infos");
@@ -139,8 +140,9 @@ window.conseilTeamLogo=function(tag,fallbackHTML,size=30){
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();
 function defaultTicker(){const d=Math.ceil((Date.parse("2026-11-04T23:00:00Z")-Date.now())/864e5);
   return [...(window.CAMP_TRAITORS||[]).slice(0,3).map(TRAITOR_TXT),"Worlds 2026 : phase suisse du 23 au 31 octobre, finale le 14 novembre","Un skin LoL à gagner pour le n°1 du pick'em",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Pronos entre potes, tribunal et sage de la semaine dans Le Conseil","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes"]}
-window.conseilTicker=function(items){const el=document.getElementById("tvRun");if(!el||!items||!items.length)return;
-  const html=items.map(t=>`<span>${conseilEsc(t)}</span>`).join("");el.innerHTML=html+html};
+window.conseilTicker=function(items){const el=document.getElementById("tvRun");if(items)window.__tickerItems=items;items=window.__tickerItems||[];
+  const paid=(window.PAID_TICKER||[]).map(e=>`💬 ${e.byPseudo} : ${e.text}`);const all=[...paid,...items];if(!el||!all.length)return;
+  const html=all.map(t=>`<span>${conseilEsc(t)}</span>`).join("");el.innerHTML=html+html};
 
 // ---------- Camps : Fidèles de la Faille (lol) contre Déserteurs d'Azeroth (wow) ----------
 window.CAMPS={};window.CAMP_BY_PSEUDO={};let campsWatched=false;
@@ -166,8 +168,9 @@ const TRAITOR_TXT=w=>`Trahison ! ${w.pseudo} ${campSide(w)==="wow"?"a quitté la
 // petit badge de camp à côté d'un pseudo (par identifiant ou par pseudo)
 window.conseilCampTag=function(idOrPseudo,byPseudo){
   const s=byPseudo?CAMP_BY_PSEUDO[String(idOrPseudo||"").toLowerCase()]:CAMPS[idOrPseudo];
-  if(!s)return "";
-  return s==="wow"?`<span class="camptag ct-wow" title="Déserteur d'Azeroth">WoW</span>`:`<span class="camptag ct-lol" title="Fidèle de la Faille">LoL</span>`;
+  const nk=!byPseudo&&window.NICKS&&NICKS[idOrPseudo]?`<span class="nick" title="Surnom offert par ${conseilEsc(NICKS[idOrPseudo].by)} (Pièces d'or)">« ${conseilEsc(NICKS[idOrPseudo].text)} »</span>`:"";
+  if(!s)return nk;
+  return nk+(s==="wow"?`<span class="camptag ct-wow" title="Déserteur d'Azeroth">WoW</span>`:`<span class="camptag ct-lol" title="Fidèle de la Faille">LoL</span>`);
 };
 
 // ---------- Mention légale Riot Games (obligatoire pour les sites de fans) ----------
@@ -392,14 +395,15 @@ html[data-camp="wow"] .cpop-yes{background:#ffb400;color:#08090b}
 @keyframes cpopf{from{opacity:0}}@keyframes cpopz{from{transform:scale(.85);opacity:0}}
 @media (prefers-reduced-motion:reduce){.cpop,.cpop-box{animation:none}}`;document.head.appendChild(st)}
   let open=false;
-  async function show(){
-    if(open)return;
+  async function show(forced){
+    if(open){if(forced)setTimeout(()=>show(forced),4000);return}
     if(document.hidden){document.addEventListener("visibilitychange",function v(){if(!document.hidden){document.removeEventListener("visibilitychange",v);show()}});return}
     const camp=document.documentElement.dataset.camp||"";
-    if(camp==="lol"&&Math.random()<.3){toast(pick(LOL_THANKS));setTimeout(show,nextDelay());return}
-    const dyn=await dynamicLines(),meWow=document.documentElement.dataset.camp==="wow",r=Math.random();
+    if(!forced&&camp==="lol"&&Math.random()<.3){toast(pick(LOL_THANKS));setTimeout(show,nextDelay());return}
+    const dyn=forced?[]:await dynamicLines(),meWow=document.documentElement.dataset.camp==="wow",r=Math.random();
     let q,tag="Question obligatoire du Conseil";
-    if(meWow&&r<.35){q=pick(WOW_ME);tag="Message pour les Déserteurs"}
+    if(forced){q=forced.q;tag=forced.tag}
+    else if(meWow&&r<.35){q=pick(WOW_ME);tag="Message pour les Déserteurs"}
     else if(dyn.length&&r<.75){q=pick(dyn);tag="Le Conseil a vu les stats"}
     else q=pick(BASE_LINES);
     css();open=true;
@@ -409,9 +413,44 @@ html[data-camp="wow"] .cpop-yes{background:#ffb400;color:#08090b}
     const prevOverflow=document.documentElement.style.overflow;document.documentElement.style.overflow="hidden";
     const btns=[...el.querySelectorAll(".cpop-yes")],btn=btns[0];
     el.addEventListener("keydown",e=>{if(e.key==="Escape")e.preventDefault();if(e.key==="Tab"){e.preventDefault();const i=btns.indexOf(document.activeElement);btns[(i+(e.shiftKey?btns.length-1:1))%btns.length].focus()}});
-    btns.forEach(b=>b.onclick=()=>{el.remove();document.documentElement.style.overflow=prevOverflow;open=false;setTimeout(show,nextDelay())});
+    btns.forEach(b=>b.onclick=()=>{el.remove();document.documentElement.style.overflow=prevOverflow;open=false;if(forced){try{localStorage.setItem("seen-eff-"+forced.id,"1")}catch(e){}}else setTimeout(show,nextDelay())});
     document.body.appendChild(el);btn.focus();
   }
   setTimeout(show,nextDelay());
-  window.conseilPopupTest=show;   // pour tester : conseilPopupTest() dans la console
+  window.conseilPopupTest=show;
+  window.conseilPaidPopup=f=>show(f);   // pour tester : conseilPopupTest() dans la console
 })();
+
+
+// ---------- Pièces d'or : solde dans la barre, passage du jour, effets achetés (bandeau, épingles, popups, surnoms) ----------
+window.NICKS={};window.PAID_TICKER=[];window.PAID_PINS=[];window.MY_WALLET=null;
+const PO_DAY=()=>new Date().toLocaleDateString("sv-SE",{timeZone:"Europe/Paris"});
+function conseilBank(db,uid){
+  // passage du jour (le robot crédite)
+  try{const k="visit-"+uid+"-"+PO_DAY();if(!localStorage.getItem(k)){let ps="";try{ps=localStorage.getItem("potes-pseudo")||""}catch(e){}
+    db.doc("visits/"+uid).set({day:PO_DAY(),at:Date.now(),...(ps?{pseudo:ps.slice(0,20)}:{})}).then(()=>{try{localStorage.setItem(k,"1")}catch(e){}}).catch(()=>{})}}catch(e){}
+  // solde dans la barre
+  let last=null;
+  db.doc("wallets/"+uid).onSnapshot(d=>{const w=d.exists?d.data():null;window.MY_WALLET=w;const po=w?w.po||0:null;
+    const a=document.getElementById("cnavPO");if(a){a.hidden=po===null;a.querySelector("b").textContent=po===null?"":po.toLocaleString("fr-FR");
+      if(last!==null&&po!==null&&po!==last){const f=document.createElement("span");f.className="po-fly"+(po<last?" neg":"");f.textContent=(po>last?"+":"")+(po-last);a.appendChild(f);setTimeout(()=>f.remove(),1800)}}
+    last=po;window.dispatchEvent(new Event("conseil-wallet"))},()=>{});
+  // effets actifs
+  db.collection("effects").where("until",">",new Date()).onSnapshot(q=>{const now=Date.now(),ms=x=>x?.toMillis?x.toMillis():Date.parse(x)||0,act=q.docs.map(d=>({id:d.id,...d.data()})).filter(e=>ms(e.until)>now);
+    NICKS={};act.filter(e=>e.kind==="nickname").forEach(e=>NICKS[e.target]={text:e.text,by:e.byPseudo});
+    PAID_TICKER=act.filter(e=>e.kind==="ticker");PAID_PINS=act.filter(e=>e.kind==="pin");conseilTicker();renderPins();
+    for(const e of act.filter(e=>e.kind==="popup"||(e.kind==="popupTarget"&&e.target===uid))){let seen=false;try{seen=!!localStorage.getItem("seen-eff-"+e.id)}catch(x){}
+      if(!seen&&e.by!==uid&&window.conseilPaidPopup)setTimeout(()=>conseilPaidPopup({id:e.id,q:e.text,tag:`Message de ${e.byPseudo}${e.kind==="popupTarget"?" rien que pour toi":""} · payé en Pièces d'or`}),12000+Math.random()*8000)}
+    window.dispatchEvent(new Event("conseil-camps"))},()=>{});
+}
+function renderPins(){const box=document.getElementById("pins");if(!box)return;
+  box.innerHTML=PAID_PINS.map(e=>`<div class="pin"><span class="pin-tag">📌 Message de ${conseilEsc(e.byPseudo)}</span><p>${conseilEsc(e.text)}</p></div>`).join("");box.hidden=!PAID_PINS.length}
+(function(){const st=document.createElement("style");st.textContent=`
+.cnav-po{position:relative;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;text-decoration:none;color:#ffb400;font:700 .95rem "Barlow Condensed","Arial Narrow",sans-serif;padding:6px 10px;border:1px solid #3a3e48;margin-left:auto}
+.cnav-po:hover{border-color:#ffb400}.cnav-po i{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe08a,#ffb400 55%,#b07800);color:#5a3d00;font:800 .62rem sans-serif;font-style:normal}
+.po-fly{position:absolute;right:4px;top:-4px;font:800 .9rem "Barlow Condensed",sans-serif;color:#2fbf71;animation:pofly 1.8s ease-out forwards;pointer-events:none}.po-fly.neg{color:#ff4d6a}
+@keyframes pofly{to{transform:translateY(-26px);opacity:0}}
+.nick{margin-left:6px;font:600 italic .85em "Barlow Condensed","Arial Narrow",sans-serif;color:#ffb400;white-space:nowrap}
+#pins{display:flex;flex-direction:column;gap:8px}.pin{background:#1d2027;border-left:6px solid #ffb400;padding:12px 16px}.pin p{margin:4px 0 0;color:#fff;font:600 1.15rem "Barlow Condensed",sans-serif}
+.pin-tag{font:700 .78rem "Barlow Condensed",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#ffb400}
+@media (prefers-reduced-motion:reduce){.po-fly{animation:none;display:none}}`;document.head.appendChild(st)})();

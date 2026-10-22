@@ -37,7 +37,7 @@
   <footer>Site de fan du Conseil des Sages, sans lien avec Riot Games.</footer>
 </div>
 <script>
-conseilNav("jeux");
+conseilNav("jeux");conseilConnect().catch(()=>{});
 (function(){
   const esc=conseilEsc;let b={};try{b=JSON.parse(localStorage.getItem("warmup-best")||"{}")}catch(e){}
   const rows=[];
