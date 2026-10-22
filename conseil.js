@@ -260,6 +260,10 @@ window.conseilLadder=async function(db,riotProfiles,{force=false}={}){
   try{const q=await db.collection("ladderSnap").where("day",">=",isoDay(weekStart())).orderBy("day").get();const players={},since={};
     q.docs.map(d=>d.data()).forEach(sn=>{for(const [id,v] of Object.entries(sn.players||{}))if(!players[id]&&(v.solo||v.flex)){players[id]=v;since[id]=sn.day}});
     base=q.docs.length?{day:q.docs[0].data().day,players,since}:null}catch(e){console.warn("snap",e)}
+  // nouveau dans le Ladder cette semaine : on enregistre son point de départ maintenant (une seule fois, impossible à réécrire)
+  try{const today=isoDay(Date.now());for(const [id,v] of Object.entries(cur?.players||{})){if((v.solo||v.flex)&&!base?.players?.[id]&&!(CLAIM_BY[id]&&base?.players?.[CLAIM_BY[id]])){
+    await db.doc(`ladderSnap/${today}_${id}`).set({day:today,join:id,players:{[id]:{solo:v.solo,flex:v.flex}}}).catch(()=>{});
+    base=base||{day:today,players:{},since:{}};base.players[id]={solo:v.solo,flex:v.flex};base.since[id]=today}}}catch(e){}
   return{current:cur,base};
 };
 // Évolution de la semaine pour un joueur et une file (solo/flex)
