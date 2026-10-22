@@ -133,6 +133,24 @@ input[type=text],select{font:500 1rem var(--body);color:var(--ink);background:va
 .wkc b{font:700 .88rem var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
 .wkt{font-size:.88rem;color:var(--muted)}
 .wkt strong{color:var(--goldhi)}
+.kick{background:#15171c;border-top:4px solid var(--tv-red,#e4002b);padding:20px;display:flex;flex-direction:column;gap:16px}
+.kick-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.kick-head h2{margin:4px 0 0;font-size:clamp(1.6rem,4vw,2.4rem)}
+.kick-clock{display:flex;gap:6px}.kick-clock div{background:#08090b;padding:6px 10px;text-align:center;min-width:58px}
+.kick-clock b{display:block;font:400 1.8rem var(--display);color:#fff;line-height:1}.kick-clock span{font:700 .7rem var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--tv-amber,#ffb400)}
+.kick-grid{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:12px}
+.kick-card{background:#1d2027;padding:16px;display:flex;flex-direction:column;gap:10px}
+.kick-card .btn{align-self:flex-start}
+.kick-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.kick-top b{font:400 1.25rem var(--display);text-transform:uppercase;color:#fff}
+.kick-top span{font:700 .85rem var(--body);color:var(--tv-amber,#ffb400);letter-spacing:.06em}
+.kick-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.kick-list li{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:6px;background:#08090b;padding:6px 8px;font:700 .9rem var(--body)}
+.kick-list .t{display:flex;align-items:center;gap:5px;min-width:0;color:#a7abb6}.kick-list .t.b{justify-content:flex-end}
+.kick-list .t.on{color:#fff}.kick-list .t.on::after{content:"✓";color:var(--tv-amber,#ffb400)}.kick-list .t.b.on::after{content:none}.kick-list .t.b.on::before{content:"✓";color:var(--tv-amber,#ffb400)}
+.kick-list .h{font:600 .72rem var(--body);color:#6f7480;text-align:center}
+.kick-prog{height:8px;background:#08090b}.kick-prog i{display:block;height:100%;width:0;background:var(--tv-amber,#ffb400);transition:width .4s}
+.kick-big{margin:0;font:400 2rem var(--display);color:#fff}
+@media (max-width:760px){.kick-grid{grid-template-columns:1fr}.kick-list{grid-template-columns:1fr}.kick{padding:16px}.kick-clock div{min-width:48px}}
 .feat{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,2fr) minmax(0,5fr);background:#15171c;min-height:200px}
 .feat .fa,.feat .fb{padding:24px 28px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;color:#08090b}
 .feat .fa{clip-path:polygon(0 0,100% 0,90% 100%,0 100%)}
@@ -220,6 +238,24 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
       <span class="me" id="me">Connexion au Conseil…</span>
     </div>
   </header>
+  <!-- Avant le début des Worlds : pronos et tier list à faire -->
+  <section class="kick" id="kick" aria-labelledby="kickT" hidden>
+    <div class="kick-head">
+      <div><span class="eyebrow">Worlds 2026 · avant le coup d'envoi</span><h2 id="kickT">Fais tes pronos et ta tier list</h2></div>
+      <div class="kick-clock" id="kickClock" aria-live="off"></div>
+    </div>
+    <div class="kick-grid">
+      <div class="kick-card"><div class="kick-top"><b>Pick'em · Ronde 1</b><span id="kickPicks"></span></div>
+        <ul class="kick-list" id="kickList"></ul>
+        <p class="note">Chaque prono se verrouille au début du match. Un skin LoL à gagner pour le n°1.</p>
+        <a class="btn" href="worlds.html">Faire mes pronos</a></div>
+      <div class="kick-card"><div class="kick-top"><b>Tier list du Conseil</b><span id="kickTierTag"></span></div>
+        <div class="kick-prog"><i id="kickBar"></i></div>
+        <p id="kickTier" class="kick-big"></p>
+        <p class="note" id="kickTierNote"></p>
+        <a class="btn ghost" href="tierlist.html" id="kickTierBtn">Faire ma tier list</a></div>
+    </div>
+  </section>
   <section class="feat" id="feat" aria-label="Match à la une" hidden></section>
 
   <!-- Compte à rebours WoW Forever -->
@@ -369,7 +405,7 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 function ink(hex){const n=parseInt(hex.slice(1),16);return ((n>>16)*299+((n>>8)&255)*587+(n&255)*114)/1000>150?"#010a13":"#fff"}
 const badge0=t=>TEAMC[t]?`<span class="badge" style="background:${TEAMC[t]};color:${ink(TEAMC[t])}">${t}</span>`:`<span class="badge" style="background:var(--line2);color:var(--muted)">?</span>`;
 const badge=t=>conseilTeamLogo(t,badge0(t));
-let db=null,uid=null,connErr=false,riot={},wow={},picks={},results=null,tiersN=0,live={},champNames={};
+let db=null,uid=null,connErr=false,riot={},wow={},picks={},results=null,tiersN=0,myTiers=null,live={},champNames={};
 
 // ===== Compte à rebours =====
 function tick(){
@@ -556,7 +592,28 @@ function renderWeek(){
   const cl=Object.values(clash).filter(e=>Date.parse(e.date)>Date.now()).sort((a,b)=>Date.parse(a.date)-Date.parse(b.date))[0];
   $("wClash").innerHTML=cl?`<strong>${new Date(cl.date).toLocaleString("fr-FR",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</strong> · ${esc(cl.title)}`:"Aucune session prévue";
 }
-function renderAll(){renderWeek();if(ladder)renderRecap();
+// ---------- Avant le coup d'envoi des Worlds ----------
+const KICK_FALLBACK=Date.parse("2026-10-23T17:00:00Z"),TIER_TOTAL=95;
+function kickStart(){const ms=(results?.matches||[]).map(m=>Date.parse(m.date)).filter(Boolean);return ms.length?Math.min(...ms):KICK_FALLBACK}
+function renderKick(){
+  const box=$("kick"),start=kickStart(),now=Date.now();
+  if(now>=start){box.hidden=true;return}box.hidden=false;
+  const d=start-now,parts=[[Math.floor(d/864e5),"jours"],[Math.floor(d/36e5)%24,"heures"],[Math.floor(d/6e4)%60,"min"],[Math.floor(d/1e3)%60,"s"]];
+  $("kickClock").innerHTML=parts.map(([v,l])=>`<div><b>${String(v).padStart(2,"0")}</b><span>${l}</span></div>`).join("");
+  const first=(results?.matches||[]).filter(m=>m.a!=="TBD"&&m.b!=="TBD").sort((a,b)=>Date.parse(a.date)-Date.parse(b.date));
+  const r1=first.filter(m=>m.round===first[0]?.round).slice(0,8),mine=(picks[uid]||{}).picks||{};
+  const done=r1.filter(m=>mine[m.id]).length;
+  $("kickPicks").textContent=r1.length?`${done} / ${r1.length} pronostiqués`:"";
+  $("kickList").innerHTML=r1.length?r1.map(m=>`<li><span class="t${mine[m.id]===m.a?" on":""}">${conseilTeamLogo(m.a,"",20)}${esc(m.a)}</span><span class="h">${new Date(m.date).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}</span><span class="t b${mine[m.id]===m.b?" on":""}">${esc(m.b)}${conseilTeamLogo(m.b,"",20)}</span></li>`).join(""):`<li style="grid-template-columns:1fr">Chargement du calendrier…</li>`;
+  const r=myTiers?.ratings||{},n=Math.min(TIER_TOTAL,Object.keys(r).filter(k=>!/:Faker$/.test(k)).length),ok=!!myTiers?.complete;
+  $("kickBar").style.width=Math.round(100*n/TIER_TOTAL)+"%";
+  $("kickTier").textContent=ok?"Validée ✓":`${n} / ${TIER_TOTAL}`;
+  $("kickTierTag").textContent=tiersN?`${tiersN} validée${tiersN>1?"s":""} au Conseil`:"";
+  $("kickTierNote").textContent=ok?"Elle compte dans le classement du Conseil. Tu peux encore la modifier.":n?"Termine-la et valide-la pour qu'elle compte dans le classement du Conseil.":"Classe les 80 joueurs poste par poste et les 16 équipes. Faker est hors catégorie 🐐";
+  $("kickTierBtn").textContent=ok?"Voir le classement":n?"Finir ma tier list":"Faire ma tier list";
+}
+setInterval(()=>{try{renderKick()}catch(e){}},1000);
+function renderAll(){renderKick();renderWeek();if(ladder)renderRecap();
   const me=riot[uid]?.pseudo||picks[uid]?.pseudo||wow[uid]?.pseudo;
   $("me").innerHTML=!db?(connErr?"Hors ligne":"Connexion au Conseil…"):me?`Bienvenue, <b>${esc(me)}</b>`:"Bienvenue, sage anonyme";
   renderRiotReg();renderPlayers();renderWow();renderSummary();
@@ -571,7 +628,7 @@ conseilLoadLogos(()=>renderAll());conseilDD().then(()=>renderAll());
   sub("riot",o=>{riot=o;loadLive()});
   sub("wow",o=>wow=o);
   sub("picks",o=>picks=o);
-  sub("tiers",o=>tiersN=Object.values(o).filter(t=>t.complete).length);
+  sub("tiers",o=>{tiersN=Object.values(o).filter(t=>t.complete).length;myTiers=o[uid]||null});
   sub("bets",o=>{bets=o;conseilResolvePronos(db,o)});let ladderAsked=false;sub("riot",o=>{if(!ladderAsked){ladderAsked=true;conseilLadder(db,o).then(l=>{ladder=l;renderRecap()})}});sub("trials",o=>trials=o);sub("sageVotes",o=>sage=o);sub("clash",o=>clash=o);
   db.doc("results/state").onSnapshot(s=>{results=s.exists?s.data():null;renderAll()},()=>{});
   renderAll();
