@@ -470,7 +470,9 @@ function renderRiotReg(){
     catch(x){err("Enregistrement impossible pour le moment, réessaie.")}};
 }
 function renderPlayers(){
-  const list=Object.entries(riot).filter(([,p])=>p.riotId&&p.pseudo).map(([id,p])=>({id,...p,lv:live[p.riotId.toLowerCase()]}));
+  // un même Riot ID sur plusieurs appareils : une seule ligne (le profil le plus récent)
+  const uniq=new Map();for(const [id,p] of Object.entries(riot).filter(([,p])=>p.riotId&&p.pseudo).sort((a,b)=>String(a[1].updated||"").localeCompare(String(b[1].updated||""))))uniq.set(p.riotId.toLowerCase(),[id,p]);
+  const list=[...uniq.values()].map(([id,p])=>({id,...p,lv:live[p.riotId.toLowerCase()]}));
   if(!db&&!list.length){$("players").innerHTML=`<div class="note">${connErr?"Liste indisponible.":"Chargement des invocateurs…"}</div>`;return}
   if(!list.length){$("players").innerHTML=`<div class="note">Aucun invocateur inscrit. Ajoute ton Riot ID ci-dessus pour apparaître ici.</div>`;return}
   list.sort((a,b)=>(b.lv?1:0)-(a.lv?1:0)||a.pseudo.localeCompare(b.pseudo));
@@ -490,8 +492,8 @@ async function loadChampNames(){
 }
 async function loadLive(){
   if(!LIVE_API)return;
-  const ps=Object.values(riot).filter(p=>p.riotId);if(!ps.length)return;
-  try{const r=await fetch(LIVE_API.replace(/\/$/,"")+"/live?players="+encodeURIComponent(ps.map(p=>p.riotId+"|"+p.region).join(",")));
+  const ps=[...new Set(Object.values(riot).filter(p=>p.riotId).map(p=>p.riotId+"|"+(p.region||"euw1")))];if(!ps.length)return;
+  try{const r=await fetch(LIVE_API.replace(/\/$/,"")+"/live?players="+encodeURIComponent(ps.join(",")));
     if(!r.ok)throw new Error("HTTP "+r.status);const j=await r.json();live={};
     for(const [id,g] of Object.entries(j.games||{}))if(g)live[id.toLowerCase()]=g;renderPlayers()}catch(e){console.warn("live",e)}
 }
