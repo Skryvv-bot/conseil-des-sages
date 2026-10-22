@@ -272,3 +272,15 @@ window.conseilResolvePronos=async function(db,bets){
     finally{setTimeout(()=>resolving.delete(id),60000)}
   }
 };
+
+// ---------- Titres de champion du monde (une étoile par titre, Worlds 2011-2025) ----------
+const WORLDS_TITLES={
+  players:{Faker:[2013,2015,2016,2023,2024,2025],Oner:[2023,2024,2025],Keria:[2023,2024,2025],Gumayusi:[2023,2024,2025],Zeus:[2023,2024],Doran:[2025],
+    Ruler:[2017],CoreJJ:[2017],Canyon:[2020],ShowMaker:[2020],Zeka:[2022],Viper:[2021],Meiko:[2021],Tian:[2019],JackeyLove:[2018],TheShy:[2018],Rookie:[2018]},
+  teams:{T1:[2013,2015,2016,2023,2024,2025],GEN:[2017],DK:[2020],IG:[2018]}
+};
+function conseilStars(kind,key){
+  const y=(WORLDS_TITLES[kind==="team"?"teams":"players"]||{})[key];if(!y||!y.length)return "";
+  const t=`${y.length} titre${y.length>1?"s":""} de champion du monde : ${y.join(", ")}`;
+  return `<span class="wstars" title="${t}" aria-label="${t}">${"★".repeat(y.length)}</span>`;
+}

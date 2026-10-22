@@ -230,8 +230,8 @@ function renderEditor(){
   const cnt=t=>rankable(cat).filter(i=>r[cat.id+":"+i.key]===t).length;
   $("gNote").innerHTML=Object.entries(CAP).map(([k,c])=>`<span class="${cnt(k)>=c?"full":""}">${k} <b>${cnt(k)} / ${c}</b></span>`).join("")+`<span>C <b>${cnt("C")}</b></span><span>F <b>${cnt("F")}</b></span>`;
   $("items").innerHTML=[...cat.items].sort((x,y)=>isHC(cat,y)-isHC(cat,x)).map(i=>{const v=r[cat.id+":"+i.key];
-    if(isHC(cat,i))return `<div class="item hc"><div class="who">${badge(i.team)}<b>${esc(i.name)}</b><small>${esc(TEAMS[i.team].n)}</small></div><div class="hc-tag" title="Faker ne se classe pas">🐐 Hors catégorie</div></div>`;
-    return `<div class="item"><div class="who">${badge(i.team)}<b>${esc(i.name)}</b>${cat.id!=="Equipes"?`<small>${esc(TEAMS[i.team].n)}</small>`:""}</div>
+    if(isHC(cat,i))return `<div class="item hc"><div class="who">${badge(i.team)}<b>${esc(i.name)}</b>${conseilStars("player",i.name)}<small>${esc(TEAMS[i.team].n)}</small></div><div class="hc-tag" title="Faker ne se classe pas">🐐 Hors catégorie</div></div>`;
+    return `<div class="item"><div class="who">${badge(i.team)}<b>${esc(i.name)}</b>${conseilStars(cat.id==="Equipes"?"team":"player",cat.id==="Equipes"?i.team:i.name)}${cat.id!=="Equipes"?`<small>${esc(TEAMS[i.team].n)}</small>`:""}</div>
       <div class="tb" role="group" aria-label="Tier de ${esc(i.name)}">${TIERS.map(t=>{const full=CAP[t]&&v!==t&&cnt(t)>=CAP[t];return `<button data-k="${esc(i.key)}" data-t="${t}" aria-pressed="${v===t}" ${full?`disabled title="Déjà ${CAP[t]} ${t} à ce poste"`:""}>${t}</button>`}).join("")}</div></div>`}).join("");
   $("items").querySelectorAll(".tb button").forEach(b=>b.onclick=()=>setTier(cat,b.dataset.k,b.dataset.t));
   $("validate").disabled=n<TOTAL;
@@ -263,8 +263,8 @@ function renderCouncil(){
   const cat=CATS.find(c=>c.id===catCouncil);
   const rows=rankable(cat).map(i=>{const vs=valid.map(p=>VAL[p.ratings[cat.id+":"+i.key]]).filter(v=>v!==undefined);const avg=vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;return{...i,avg,n:vs.length}}).sort((a,b)=>(b.avg??-1)-(a.avg??-1)||a.name.localeCompare(b.name));
   const hc=cat.items.filter(i=>isHC(cat,i));
-  $("council").innerHTML=`<ol class="rlist">${hc.map(i=>`<li class="rrow hc"><span class="rpos">🐐</span>${badge(i.team)}<span class="rname"><b>${esc(i.name)}</b><small>${esc(TEAMS[i.team].n)}</small></span><span class="hc-tag">Hors catégorie</span></li>`).join("")}
-    ${rows.map((r,k)=>`<li class="rrow${k<3&&r.avg!=null?" top"+(k+1):""}"><span class="rpos">${r.avg==null?"–":k+1}</span>${badge(r.team)}<span class="rname"><b>${esc(r.name)}</b>${cat.id!=="Equipes"?`<small>${esc(TEAMS[r.team].n)}</small>`:""}</span><span class="ravg">${r.avg==null?"pas de note":r.avg.toFixed(2).replace(".",",")+'<small>/5</small>'}</span></li>`).join("")}</ol>`;
+  $("council").innerHTML=`<ol class="rlist">${hc.map(i=>`<li class="rrow hc"><span class="rpos">🐐</span>${badge(i.team)}<span class="rname"><b>${esc(i.name)}${conseilStars("player",i.name)}</b><small>${esc(TEAMS[i.team].n)}</small></span><span class="hc-tag">Hors catégorie</span></li>`).join("")}
+    ${rows.map((r,k)=>`<li class="rrow${k<3&&r.avg!=null?" top"+(k+1):""}"><span class="rpos">${r.avg==null?"–":k+1}</span>${badge(r.team)}<span class="rname"><b>${esc(r.name)}${conseilStars(cat.id==="Equipes"?"team":"player",cat.id==="Equipes"?r.team:r.name)}</b>${cat.id!=="Equipes"?`<small>${esc(TEAMS[r.team].n)}</small>`:""}</span><span class="ravg">${r.avg==null?"pas de note":r.avg.toFixed(2).replace(".",",")+'<small>/5</small>'}</span></li>`).join("")}</ol>`;
 }
 
 function renderAll(){renderMe();renderEditor();renderCouncil()}

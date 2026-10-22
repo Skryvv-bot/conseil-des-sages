@@ -355,14 +355,14 @@ function renderTeams(){
   const st=stats();
   const order=Object.keys(TEAMS).sort((a,b)=>{const A=st[a],B=st[b],wa=A.gw+A.gl?A.gw/(A.gw+A.gl):-1,wb=B.gw+B.gl?B.gw/(B.gw+B.gl):-1;return wb-wa||B.sw-A.sw||a.localeCompare(b)});
   $("teams").innerHTML=order.map(k=>{const t=TEAMS[k],s=st[k],w=s.gw+s.gl?s.gw/(s.gw+s.gl):0,h=THIST[k]||[0,0],se=SEASON[k]||{w:0,l:0,res:[]};
-    return `<div class="team frame"><div class="thead"><div style="display:flex;gap:10px;align-items:center;min-width:0">${badge(k)}<span class="nm">${esc(t.n)}</span></div><span class="reg-tag">${t.r}</span></div>
+    return `<div class="team frame"><div class="thead"><div style="display:flex;gap:10px;align-items:center;min-width:0">${badge(k)}<span class="nm">${esc(t.n)}${conseilStars("team",k)}</span></div><span class="reg-tag">${t.r}</span></div>
     <div class="stats3">
       <div><span class="lbl3">Worlds 2026</span><b>${wrTxt(s.gw,s.gl)}</b><span>${s.gw}-${s.gl} · séries ${s.sw}-${s.sl}</span></div>
       <div><span class="lbl3">Saison 2026</span><b>${wrTxt(se.w,se.l)}</b><span>${se.w}-${se.l}</span></div>
       <div><span class="lbl3">Worlds 2012-25</span><b>${h[1]?wrTxt(h[0],h[1]-h[0]):"—"}</b><span>${h[1]?h[0]+"-"+(h[1]-h[0]):"1re participation"}</span></div>
     </div>${h[2]?`<span class="note" style="font-size:.76rem">Historique ${esc(h[2])}</span>`:""}
     <details class="res"><summary>Résultats 2026 (${se.res.length})</summary><ul>${se.res.map(([p,n])=>`<li><span class="pl ${String(p)==="1"?"gold":""}">${place(p)}</span>${esc(n)}</li>`).join("")}</ul></details>
-    <div class="roster">${t.p.map((p,i)=>{const ph=PHIST[p]||[0,0];return `<div><span class="role">${ROLES[i]}</span><span>${esc(p)}</span><span class="muted" title="Winrate historique aux Worlds">${ph[1]?wrTxt(ph[0],ph[1]-ph[0])+" · "+ph[1]+" p.":"débutant"}</span></div>`}).join("")}</div></div>`}).join("");
+    <div class="roster">${t.p.map((p,i)=>{const ph=PHIST[p]||[0,0];return `<div><span class="role">${ROLES[i]}</span><span>${esc(p)}${conseilStars("player",p)}</span><span class="muted" title="Winrate historique aux Worlds">${ph[1]?wrTxt(ph[0],ph[1]-ph[0])+" · "+ph[1]+" p.":"débutant"}</span></div>`}).join("")}</div></div>`}).join("");
   const sort=$("sortSel").value;let pl=[];
   for(const k in TEAMS)TEAMS[k].p.forEach((p,i)=>pl.push({p,k,i,w:st[k].gw,l:st[k].gl}));
   const ov=state?.playerStats||{};
@@ -371,7 +371,7 @@ function renderTeams(){
   pl.sort(sort==="champs"?(a,b)=>b.ch.length-a.ch.length||a.p.localeCompare(b.p):sort==="team"?(a,b)=>a.k.localeCompare(b.k)||a.i-b.i:sort==="role"?(a,b)=>a.i-b.i||a.p.localeCompare(b.p):sort==="hist"?(a,b)=>r(b.hw,b.hl)-r(a.hw,a.hl)||(b.hw+b.hl)-(a.hw+a.hl)||a.p.localeCompare(b.p):(a,b)=>r(b.w,b.l)-r(a.w,a.l)||(b.w+b.l)-(a.w+a.l)||r(b.hw,b.hl)-r(a.hw,a.hl));
   const cellWR=(w,l)=>{const n=w+l,q=n?w/n:0;return `<div class="wr"><span>${wrTxt(w,l)}</span><span class="bar"><i style="width:${Math.round(q*100)}%"></i></span></div>`};
   $("playersTbl").innerHTML=`<thead><tr><th>Joueur</th><th>Équipe</th><th>Poste</th><th>Champions joués aux Worlds 2026</th><th class="num">KDA</th><th class="num">Historique V-D</th><th class="num">Winrate historique</th></tr></thead><tbody>${
-    pl.map(x=>`<tr><td><b>${esc(x.p)}</b></td><td>${badge(x.k)}</td><td class="muted">${ROLES[x.i]}</td><td class="champs">${x.ch.length?x.ch.map(([c,n])=>`<span class="champ-chip">${conseilChampHTML(c,22)} ${esc(c)}${n>1?` <i>×${n}</i>`:""}</span>`).join(""):'<span class="muted">Aucune partie jouée</span>'}</td><td class="num">${x.kda??"—"}</td><td class="num">${x.hw+x.hl?x.hw+"-"+x.hl:'<span class="muted">débutant</span>'}</td><td class="num">${x.hw+x.hl?cellWR(x.hw,x.hl):"—"}</td></tr>`).join("")}</tbody>`;
+    pl.map(x=>`<tr><td><b>${esc(x.p)}</b>${conseilStars("player",x.p)}</td><td>${badge(x.k)}</td><td class="muted">${ROLES[x.i]}</td><td class="champs">${x.ch.length?x.ch.map(([c,n])=>`<span class="champ-chip">${conseilChampHTML(c,22)} ${esc(c)}${n>1?` <i>×${n}</i>`:""}</span>`).join(""):'<span class="muted">Aucune partie jouée</span>'}</td><td class="num">${x.kda??"—"}</td><td class="num">${x.hw+x.hl?x.hw+"-"+x.hl:'<span class="muted">débutant</span>'}</td><td class="num">${x.hw+x.hl?cellWR(x.hw,x.hl):"—"}</td></tr>`).join("")}</tbody>`;
 }
 
 function renderFresh(){const f=$("fresh");

@@ -110,3 +110,6 @@ html[data-camp="wow"] .camp-lol .btn{background:#e4002b!important;color:#fff!imp
 .claim-row{display:flex;gap:8px;flex-wrap:wrap}
 .claim-row select{flex:1 1 200px}
 .claim-msg{margin:0;color:var(--gold);font-weight:600}
+
+/* Étoiles de champion du monde */
+.wstars{display:inline-block;margin-left:6px;color:#ffb400;font-size:.8em;letter-spacing:1px;line-height:1;white-space:nowrap;vertical-align:.08em;cursor:help;text-shadow:0 0 6px rgba(255,180,0,.35)}
