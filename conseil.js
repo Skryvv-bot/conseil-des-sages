@@ -291,7 +291,7 @@ function conseilStars(kind,key){
 
 // ---------- Popups du Conseil : il faut cliquer « Oui » pour continuer ----------
 (function(){
-  const FIRST_MIN=3, EVERY_MIN=7;
+  const MIN_MIN=2, MAX_MIN=10, nextDelay=()=>(MIN_MIN+Math.random()*(MAX_MIN-MIN_MIN))*60e3;
   if(/echauffement/.test(location.pathname))return;   // pas pendant les exercices
   // Phrases fixes : 2 sur Faker, le reste pour troller les sages et culpabiliser les Déserteurs
   const BASE_LINES=[
@@ -314,7 +314,22 @@ function conseilStars(kind,key){
     "Azeroth ne t'a jamais offert de pentakill. Tu es sûr de ton choix ?",
     "Tu pourrais encore revenir chez les Fidèles de la Faille. Tu y penses ?"
   ];
+  // Félicitations pour les Fidèles de la Faille (sans validation, disparaît tout seul)
+  const LOL_THANKS=[
+    "Merci d'être resté sur la Faille. Le Conseil ne t'oubliera pas.",
+    "Fidèle de la Faille : tu as choisi tes potes plutôt qu'Azeroth. Respect.",
+    "Faker serait fier de toi. Lui non plus n'a jamais quitté LoL.",
+    "Pendant que d'autres farment des sangliers, toi tu restes avec l'équipe. Bien joué.",
+    "Le Conseil te décerne la médaille de la loyauté. Elle ne sert à rien, mais elle brille.",
+    "Grâce à toi, il y aura encore 5 joueurs pour la flex. Merci, sage."
+  ];
   const pick=a=>a[Math.floor(Math.random()*a.length)];
+  function toast(msg){
+    css();const t=document.createElement("div");t.className="ctoast";t.setAttribute("role","status");
+    t.innerHTML=`<span class="cpop-tag">Fidèles de la Faille</span><p></p><button type="button" aria-label="Fermer">×</button>`;
+    t.querySelector("p").textContent=msg;const close=()=>{t.classList.add("out");setTimeout(()=>t.remove(),300)};
+    t.querySelector("button").onclick=close;document.body.appendChild(t);setTimeout(close,9000);
+  }
   const TFR={IRON:"Fer",BRONZE:"Bronze",SILVER:"Argent",GOLD:"Or",PLATINUM:"Platine",EMERALD:"Émeraude",DIAMOND:"Diamant",MASTER:"Maître",GRANDMASTER:"Grand Maître",CHALLENGER:"Challenger"};
   async function dynamicLines(){
     const out=[];
@@ -366,12 +381,19 @@ function conseilStars(kind,key){
 .cpop-yes{align-self:stretch;padding:14px;border:0;background:var(--tv-red,#e4002b);color:#fff;font:700 1.15rem "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
 .cpop-yes:hover,.cpop-yes:focus-visible{background:#ff1744;outline:2px solid #fff;outline-offset:2px}
 html[data-camp="wow"] .cpop-yes{background:#ffb400;color:#08090b}
+.ctoast{position:fixed;right:16px;bottom:16px;z-index:9998;width:min(360px,calc(100% - 32px));background:#15171c;border-left:6px solid #e4002b;padding:14px 40px 14px 16px;box-shadow:0 12px 40px rgba(0,0,0,.55);animation:ctin .35s ease-out;transition:opacity .3s,transform .3s}
+.ctoast p{margin:6px 0 0;color:#fff;font:600 1.05rem/1.3 "Barlow Condensed","Arial Narrow",sans-serif}
+.ctoast button{position:absolute;top:6px;right:8px;background:none;border:0;color:#a7abb6;font-size:1.4rem;cursor:pointer;line-height:1;padding:4px}
+.ctoast.out{opacity:0;transform:translateY(12px)}
+@keyframes ctin{from{opacity:0;transform:translateY(20px)}}
 @keyframes cpopf{from{opacity:0}}@keyframes cpopz{from{transform:scale(.85);opacity:0}}
 @media (prefers-reduced-motion:reduce){.cpop,.cpop-box{animation:none}}`;document.head.appendChild(st)}
   let open=false;
   async function show(){
     if(open)return;
     if(document.hidden){document.addEventListener("visibilitychange",function v(){if(!document.hidden){document.removeEventListener("visibilitychange",v);show()}});return}
+    const camp=document.documentElement.dataset.camp||"";
+    if(camp==="lol"&&Math.random()<.3){toast(pick(LOL_THANKS));setTimeout(show,nextDelay());return}
     const dyn=await dynamicLines(),meWow=document.documentElement.dataset.camp==="wow",r=Math.random();
     let q,tag="Question obligatoire du Conseil";
     if(meWow&&r<.35){q=pick(WOW_ME);tag="Message pour les Déserteurs"}
@@ -384,9 +406,9 @@ html[data-camp="wow"] .cpop-yes{background:#ffb400;color:#08090b}
     const prevOverflow=document.documentElement.style.overflow;document.documentElement.style.overflow="hidden";
     const btn=el.querySelector(".cpop-yes");
     el.addEventListener("keydown",e=>{if(e.key==="Escape")e.preventDefault();if(e.key==="Tab"){e.preventDefault();btn.focus()}});
-    btn.onclick=()=>{el.remove();document.documentElement.style.overflow=prevOverflow;open=false;setTimeout(show,EVERY_MIN*60e3)};
+    btn.onclick=()=>{el.remove();document.documentElement.style.overflow=prevOverflow;open=false;setTimeout(show,nextDelay())};
     document.body.appendChild(el);btn.focus();
   }
-  setTimeout(show,FIRST_MIN*60e3);
+  setTimeout(show,nextDelay());
   window.conseilPopupTest=show;   // pour tester : conseilPopupTest() dans la console
 })();
