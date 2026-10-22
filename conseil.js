@@ -288,3 +288,74 @@ function conseilStars(kind,key){
   const t=`${y.length} titre${y.length>1?"s":""} de champion du monde : ${y.join(", ")}`;
   return `<span class="wstars" title="${t}" aria-label="${t}">${"★".repeat(y.length)}</span>`;
 }
+
+// ---------- Popups du Conseil : il faut cliquer « Oui » pour continuer ----------
+(function(){
+  const FIRST_MIN=3, EVERY_MIN=7;
+  if(/echauffement/.test(location.pathname))return;   // pas pendant les exercices
+  const T1_LINES=[
+    "Faker est-il le plus grand joueur de tous les temps ?",
+    "Faker a 6 titres de champion du monde. Toi, tu as validé ta tier list ?",
+    "Faker a commencé en 2013, quand certains sages jouaient encore à Club Penguin. Ça te met un coup de vieux ?",
+    "T1 en finale des Worlds, c'est devenu une tradition, comme la raclette en hiver. D'accord ?",
+    "Si Faker sort Ryze, tout le Conseil se lève. C'est noté ?",
+    "Pronostiquer contre T1, c'est un choix. Un mauvais choix. On est d'accord ?",
+    "Le Conseil des Sages nomme Faker membre d'honneur à vie. Tu approuves ?",
+    "Keria a plus de titres que ton support n'a posé de balises cette saison. Tu valides ?",
+    "Gumayusi est parti chez HLE, mais son cœur est resté chez T1. Tu y crois ?",
+    "Peyz doit remplacer un triple champion du monde. Tu lui envoies de la force ?",
+    "Six étoiles sur le maillot de T1. C'est plus que le nombre de fois où ton ADC a suivi ton engage. Vrai ?",
+    "Doran est arrivé chez T1 et a gagné les Worlds direct. Tu veux aussi être recruté par T1 ?",
+    "Easyhoon était le remplaçant de Faker chez SKT en 2015. Le nôtre est plus fort ?",
+    "Oner a 3 étoiles. Ton jungler a 3 pings « ? » sur la tête. Même chose ?",
+    "Faker ne fait jamais tilt. Toi non plus, évidemment ?"
+  ];
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  async function resultLines(){
+    try{
+      if(!window.firebase||!firebase.apps.length)return [];
+      const q=await firebase.firestore().collection("bets").where("status","==","done").get();
+      const since=Date.now()-3*864e5,out=[];
+      q.docs.map(d=>d.data()).filter(b=>b.match&&Date.parse(b.settledAt||0)>since&&!(window.conseilIsClaimed&&conseilIsClaimed(b.target))).forEach(b=>{
+        const m=b.match,p=b.targetPseudo||"Un sage",c=m.championName||"son champion",kda=`${m.kills}/${m.deaths}/${m.assists}`,min=Math.round((m.duration||0)/60),lbl=b.label||"partie";
+        if(b.result==="win"){
+          out.push(`${p} a gagné sa ${lbl} sur ${c} en ${kda}. C'est le nouveau Faker ?`);
+          if(m.kills>=10)out.push(`${p} a fait ${m.kills} kills sur ${c}. T1 l'appelle demain ?`);
+          if(m.deaths===0)out.push(`${p} n'est pas mort une seule fois sur ${c}. On lui offre une étoile ?`);
+        }else{
+          out.push(`${p} a perdu sa ${lbl} sur ${c} en ${kda}. C'était la faute du jungle ?`);
+          if(m.deaths>=8)out.push(`${p} est mort ${m.deaths} fois sur ${c}. On lui retire son siège au Conseil ?`);
+          if(min&&min<=22)out.push(`${p} a perdu en ${min} minutes. Le FF à 15 était mérité ?`);
+        }
+      });
+      return out;
+    }catch(e){return []}
+  }
+  function css(){if(document.getElementById("cpop-css"))return;const st=document.createElement("style");st.id="cpop-css";st.textContent=`
+.cpop{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:20px;background:rgba(8,9,11,.82);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);animation:cpopf .2s ease-out}
+.cpop-box{width:min(440px,100%);background:#15171c;border-top:6px solid var(--tv-red,#e4002b);padding:22px 22px 20px;display:flex;flex-direction:column;gap:16px;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:cpopz .25s cubic-bezier(.2,1.4,.4,1)}
+.cpop-tag{font:700 .78rem "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--tv-amber,#ffb400)}
+.cpop-q{margin:0;font:400 1.55rem/1.15 "Anton","Impact",sans-serif;text-transform:uppercase;color:#fff}
+.cpop-yes{align-self:stretch;padding:14px;border:0;background:var(--tv-red,#e4002b);color:#fff;font:700 1.15rem "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+.cpop-yes:hover,.cpop-yes:focus-visible{background:#ff1744;outline:2px solid #fff;outline-offset:2px}
+html[data-camp="wow"] .cpop-yes{background:#ffb400;color:#08090b}
+@keyframes cpopf{from{opacity:0}}@keyframes cpopz{from{transform:scale(.85);opacity:0}}
+@media (prefers-reduced-motion:reduce){.cpop,.cpop-box{animation:none}}`;document.head.appendChild(st)}
+  let open=false;
+  async function show(){
+    if(open)return;
+    if(document.hidden){document.addEventListener("visibilitychange",function v(){if(!document.hidden){document.removeEventListener("visibilitychange",v);show()}});return}
+    const res=await resultLines(),useRes=res.length&&Math.random()<.5,q=useRes?pick(res):pick(T1_LINES);
+    css();open=true;
+    const el=document.createElement("div");el.className="cpop";el.setAttribute("role","alertdialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-labelledby","cpopQ");
+    el.innerHTML=`<div class="cpop-box"><span class="cpop-tag">${useRes?"Résultat du Conseil":"Question obligatoire du Conseil"}</span><p class="cpop-q" id="cpopQ"></p><button class="cpop-yes" type="button">Oui</button></div>`;
+    el.querySelector(".cpop-q").textContent=q;
+    const prevOverflow=document.documentElement.style.overflow;document.documentElement.style.overflow="hidden";
+    const btn=el.querySelector(".cpop-yes");
+    el.addEventListener("keydown",e=>{if(e.key==="Escape")e.preventDefault();if(e.key==="Tab"){e.preventDefault();btn.focus()}});
+    btn.onclick=()=>{el.remove();document.documentElement.style.overflow=prevOverflow;open=false;setTimeout(show,EVERY_MIN*60e3)};
+    document.body.appendChild(el);btn.focus();
+  }
+  setTimeout(show,FIRST_MIN*60e3);
+  window.conseilPopupTest=show;   // pour tester : conseilPopupTest() dans la console
+})();
