@@ -24,11 +24,11 @@ window.conseilConnect=function(){
 // ---------- Navigation commune ----------
 const CONSEIL_NAV=[
   {id:"accueil",href:"index.html",label:"Accueil"},
+  {id:"ladder",href:"ladder.html",label:"Ladder"},
   {id:"worlds",href:"worlds.html",label:"Worlds 2026",sub:[{id:"worlds",href:"worlds.html",label:"Matchs & pronos"},{id:"tierlist",href:"tierlist.html",label:"Tier list"}]},
   {id:"jeux",href:"jeux.html",label:"Jeux",sub:[{id:"jeux",href:"jeux.html",label:"Tous les jeux"},{id:"devinettes",href:"devinettes.html",label:"Devinettes"},{id:"echauffement",href:"echauffement.html",label:"Échauffement"}]},
-  {id:"customs",href:"customs.html",label:"Customs & Clash"},
   {id:"conseil",href:"communaute.html",label:"Le Conseil"},
-  {id:"ladder",href:"ladder.html",label:"Ladder"},
+  {id:"customs",href:"customs.html",label:"Customs & Clash"},
   {id:"patch",href:"patch.html",label:"Patch"}
 ];
 const NAV_GROUP={tierlist:"worlds",devinettes:"jeux",echauffement:"jeux"};
@@ -222,8 +222,12 @@ const APEX=new Set(["MASTER","GRANDMASTER","CHALLENGER"]);
 // Valeur servant uniquement à trier les rangs officiels et à mesurer les LP gagnés ou perdus
 window.conseilRankValue=v=>{if(!v||!v.tier)return -1;const t=RIOT_TIERS.indexOf(v.tier);if(APEX.has(v.tier))return 2800+(v.lp||0);return t*400+Math.max(0,["IV","III","II","I"].indexOf(v.rank))*100+(v.lp||0)};
 window.conseilRankLabel=(v,withLp=true)=>!v||!v.tier?"Non classé":`${TIER_FR[v.tier]||v.tier}${APEX.has(v.tier)?"":" "+v.rank}${withLp?" · "+(v.lp||0)+" LP":""}`;
-window.conseilRankBadge=v=>!v||!v.tier?`<span class="rkb none">Non classé</span>`:`<span class="rkb" style="--rk:${TIER_COLOR[v.tier]}">${conseilEsc(conseilRankLabel(v,false))}</span>`;
-(function(){const st=document.createElement("style");st.textContent=`.rkb{display:inline-block;padding:2px 8px;font:700 .78rem "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#08090b;background:var(--rk,#a7abb6);white-space:nowrap}.rkb.none{background:transparent;color:#a7abb6;border:1px solid #3a3e48}`;document.head.appendChild(st)})();
+// Anciens emblèmes de rang Riot (style 2019-2022). Émeraude n'existait pas à l'époque : badge de couleur seul.
+const RANK_EMBLEM={IRON:"0/03",BRONZE:"f/f4",SILVER:"7/70",GOLD:"9/96",PLATINUM:"7/74",DIAMOND:"9/91",MASTER:"1/11",GRANDMASTER:"7/76",CHALLENGER:"5/5f"};
+window.conseilRankEmblem=(tier,size=28)=>{const h=RANK_EMBLEM[tier];if(!h||!size)return "";const n=tier[0]+tier.slice(1).toLowerCase();
+  return `<img class="rke" width="${size}" height="${size}" style="width:${size}px;height:${size}px" alt="" loading="lazy" src="https://static.wikia.nocookie.net/leagueoflegends/images/${h}/Season_2019_-_${n}_1.png/revision/latest/scale-to-width-down/${Math.min(256,size*2)}" onerror="this.remove()">`};
+window.conseilRankBadge=(v,size=28)=>!v||!v.tier?`<span class="rkb none">Non classé</span>`:`<span class="rkw">${conseilRankEmblem(v.tier,size)}<span class="rkb" style="--rk:${TIER_COLOR[v.tier]}">${conseilEsc(conseilRankLabel(v,false))}</span></span>`;
+(function(){const st=document.createElement("style");st.textContent=`.rkb{display:inline-block;padding:2px 8px;font:700 .78rem "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#08090b;background:var(--rk,#a7abb6);white-space:nowrap}.rkb.none{background:transparent;color:#a7abb6;border:1px solid #3a3e48}.rkw{display:inline-flex;align-items:center;gap:6px;vertical-align:middle}.rke{object-fit:contain;flex:none;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6))}`;document.head.appendChild(st)})();
 const isoDay=d=>{const x=new Date(d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`};
 const weekStart=()=>{const d=new Date();const day=(d.getDay()+6)%7;d.setDate(d.getDate()-day);d.setHours(0,0,0,0);return d};
 // Ladder partagé : un seul visiteur interroge Riot toutes les 15 minutes, les autres lisent Firebase.

@@ -20,6 +20,7 @@
 @media (max-width:640px){.podium{grid-template-columns:1fr}}
 .pod{background:#15171c;padding:18px;display:flex;flex-direction:column;gap:6px;border-top:4px solid var(--rk,#3a3e48)}
 .pod .pl{font:400 2.4rem/1 var(--display);color:var(--gold)}
+.pod .rke{align-self:center;margin:-4px 0 2px}
 .pod b{font:400 1.5rem var(--display);text-transform:uppercase;color:#fff}
 .pod.p1{min-height:190px}.pod.p2{min-height:160px}.pod.p3{min-height:140px}
 .tw{overflow-x:auto}
@@ -68,7 +69,7 @@ function render(){
     .sort((a,b)=>conseilRankValue(b.v)-conseilRankValue(a.v)||a.p.pseudo.localeCompare(b.p.pseudo));
   $("upd").textContent="Mis à jour à "+new Date(data.current.updatedAt).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
   const ranked=rows.filter(r=>r.v);
-  $("podium").innerHTML=ranked.slice(0,3).map((r,i)=>`<div class="pod p${i+1}" style="--rk:${TIER_COLOR[r.v.tier]}"><span class="pl">${i+1}</span><b>${esc(r.p.pseudo)}${conseilCampTag(r.id)}</b>${conseilRankBadge(r.v)}<span class="note">${r.v.lp} LP · ${r.v.w}V ${r.v.l}D</span></div>`).join("");
+  $("podium").innerHTML=ranked.slice(0,3).map((r,i)=>`<div class="pod p${i+1}" style="--rk:${TIER_COLOR[r.v.tier]}"><span class="pl">${i+1}</span>${conseilRankEmblem(r.v.tier,i===0?110:84)}<b>${esc(r.p.pseudo)}${conseilCampTag(r.id)}</b>${conseilRankBadge(r.v,0)}<span class="note">${r.v.lp} LP · ${r.v.w}V ${r.v.l}D</span></div>`).join("");
   $("tbl").innerHTML=`<thead><tr><th>#</th><th>Sage</th><th>Rang</th><th class="num">LP</th><th class="num">V-D</th><th class="num">Winrate</th><th>Semaine</th></tr></thead><tbody>${
     rows.map((r,i)=>{const n=r.v?r.v.w+r.v.l:0;return `<tr class="${r.id===uid?"mine":""}"><td class="pos">${r.v?i+1:"–"}</td><td><b>${esc(r.p.pseudo)}</b>${conseilCampTag(r.id)}<div class="note" style="font-size:.8rem">${esc(r.p.riotId)}</div></td>
       <td>${conseilRankBadge(r.v)}${r.v?.hot?' <span class="hot">EN FEU</span>':""}</td><td class="num">${r.v?r.v.lp:"—"}</td><td class="num">${r.v?r.v.w+"-"+r.v.l:"—"}</td>
