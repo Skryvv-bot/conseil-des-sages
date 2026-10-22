@@ -273,7 +273,7 @@ function renderMe(){
   if(!myDoc){$("me").innerHTML="Pas encore inscrit";
     box.innerHTML=`<h3>Rejoindre le pick'em</h3><form class="reg" id="regForm"><input type="text" id="pseudo" maxlength="20" placeholder="Ton pseudo d'invocateur" required><button class="btn" type="submit">S'inscrire</button></form><p class="err" id="regErr" hidden></p>`;
     $("regForm").onsubmit=async e=>{e.preventDefault();const v=$("pseudo").value.trim().slice(0,20);if(!v)return;
-      if(Object.entries(picks).some(([id,p])=>id!==uid&&p.pseudo?.toLowerCase()===v.toLowerCase())){showErr("Ce pseudo est déjà pris au Conseil.");return}
+      {const t=Object.entries(picks).find(([id,p])=>id!==uid&&p.pseudo?.toLowerCase()===v.toLowerCase());if(t){conseilTakeover($("regErr"),db,uid,t[0],t[1].pseudo);return}}
       try{await db.doc("picks/"+uid).set({pseudo:v,picks:{},champion:null,joined:new Date().toISOString()})}catch(err){showErr("Inscription impossible pour le moment, réessaie.")}};
   }else{$("me").innerHTML=`Connecté : <b>${esc(myDoc.pseudo)}</b>`;
     box.innerHTML=`<div class="toolbar"><span>Bienvenue <b style="color:var(--hex)">${esc(myDoc.pseudo)}</b>. Clique sur une équipe pour la pronostiquer.</span><button class="btn ghost" id="rename">Changer de pseudo</button></div>`;

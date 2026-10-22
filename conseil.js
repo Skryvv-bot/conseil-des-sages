@@ -454,3 +454,18 @@ function renderPins(){const box=document.getElementById("pins");if(!box)return;
 #pins{display:flex;flex-direction:column;gap:8px}.pin{background:#1d2027;border-left:6px solid #ffb400;padding:12px 16px}.pin p{margin:4px 0 0;color:#fff;font:600 1.15rem "Barlow Condensed",sans-serif}
 .pin-tag{font:700 .78rem "Barlow Condensed",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#ffb400}
 @media (prefers-reduced-motion:reduce){.po-fly{animation:none;display:none}}`;document.head.appendChild(st)})();
+
+
+// ---------- Pseudo déjà pris : c'est peut-être le même sage sur un autre appareil ou navigateur ----------
+window.conseilClaim=async function(db,uid,old,pseudo){
+  const c0=await db.doc("claims/"+old).get();if(c0.exists)throw new Error("déjà récupéré");
+  for(const c of CLAIM_COLS){const d=await db.doc(c+"/"+old).get();if(d.exists)await db.doc(c+"/"+uid).set(d.data())}
+  await db.doc("claims/"+old).set({by:uid,pseudo:pseudo||"",at:new Date().toISOString()});
+};
+window.conseilTakeover=function(el,db,uid,old,pseudo){
+  if(!el)return;el.hidden=false;
+  el.innerHTML=`Le pseudo <b>${conseilEsc(pseudo)}</b> est déjà pris. Si c'est toi sur un autre téléphone ou navigateur, récupère ton compte (pronos, tier list, profil, camp) : <button type="button" class="btn small" data-take>C'est moi, récupérer</button>`;
+  el.querySelector("[data-take]").onclick=async e=>{e.target.disabled=true;e.target.textContent="Récupération…";
+    try{await conseilClaim(db,uid,old,pseudo);el.textContent="C'est fait ! Rechargement…";setTimeout(()=>location.reload(),900)}
+    catch(err){console.warn(err);el.textContent="Récupération impossible (compte déjà récupéré ?). Choisis un autre pseudo ou demande à Ivan."}};
+};

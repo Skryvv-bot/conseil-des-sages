@@ -211,7 +211,7 @@ function renderMe(){
   if(!mine){$("me").textContent="Pas encore inscrit";$("editor").hidden=true;
     box.innerHTML=`<h3>Entre ton pseudo pour commencer</h3><form class="reg" id="regForm" style="margin-top:8px"><input type="text" id="pseudo" maxlength="20" placeholder="Ton pseudo d'invocateur" required><button class="btn" type="submit">Commencer</button></form><p class="err" id="regErr" hidden></p>`;
     $("regForm").onsubmit=async e=>{e.preventDefault();const v=$("pseudo").value.trim().slice(0,20);if(!v)return;
-      if(Object.entries(all).some(([id,p])=>id!==uid&&p.pseudo?.toLowerCase()===v.toLowerCase())){showErr("Ce pseudo est déjà pris au Conseil.");return}
+      {const t=Object.entries(all).find(([id,p])=>id!==uid&&p.pseudo?.toLowerCase()===v.toLowerCase());if(t){conseilTakeover($("regErr"),db,uid,t[0],t[1].pseudo);return}}
       try{await db.doc("tiers/"+uid).set({pseudo:v,ratings:{},complete:false,updated:new Date().toISOString()})}
       catch(err){showErr("Impossible de t'inscrire pour le moment, réessaie.")}};
     return}
