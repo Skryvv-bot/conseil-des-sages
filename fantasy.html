@@ -154,6 +154,9 @@ tr.click{cursor:pointer}tr.click:hover td{background:var(--panel2)}
 .stage{width:100%;display:flex;flex-direction:column;gap:14px;align-items:center}
 .stage .after{width:100%;display:flex;justify-content:center}
 .it.win{outline:3px solid var(--amber);outline-offset:-3px;box-shadow:0 0 30px var(--amber)}
+.teampop{position:fixed;inset:0;z-index:60;background:rgba(4,5,7,.88);display:flex;align-items:center;justify-content:center;padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));overflow-y:auto}
+.tp-in{background:var(--panel);border-top:4px solid var(--amber);padding:20px;max-width:1100px;width:100%;display:flex;flex-direction:column;gap:14px;animation:pop .5s cubic-bezier(.2,1.5,.4,1)}
+.tp-in h2{font-size:clamp(1.6rem,4vw,2.4rem)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:20;background:var(--panel2);border-left:6px solid var(--amber);padding:12px 16px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 
 .band{margin-top:0}
@@ -168,7 +171,7 @@ tr.click{cursor:pointer}tr.click:hover td{background:var(--panel2)}
   <header>
     <span class="eyebrow">Fantasy league</span>
     <h1>Fantasy <b>du</b> Conseil</h1>
-    <p class="lead">À chaque phase des Worlds, un tirage au sort donne à chaque sage un joueur par poste. Tes joueurs marquent des points à chaque partie, ton capitaine compte double, le MVP officiel de chaque game gagne un bonus et le Conseil vote le MVKK.</p>
+    <p class="lead">À chaque phase des Worlds, un tirage au sort donne à chaque sage un joueur par poste. Tes joueurs marquent des points à chaque partie, ton capitaine compte double et le MVP officiel de chaque game gagne un bonus.</p>
   </header>
   <nav class="tabs" aria-label="Sections" id="tabs"></nav>
   <main id="view"></main>
@@ -183,7 +186,7 @@ const PHASES=[
   {id:"demis",label:"Demi-finales",start:"2026-11-07T22:00:00Z"},
   {id:"finale",label:"Finale",start:"2026-11-14T19:00:00Z"}];
 // barème validé par le Conseil : règles communes + bonus propres à chaque poste
-const PTS={win:3,d:-1,clean:2,solo:2,fb:2,triple:2,quadra:5,penta:10,mvp:5,kk:-5,captain:2};
+const PTS={win:3,d:-1,clean:2,solo:2,fb:2,triple:2,quadra:5,penta:10,mvp:5,captain:2};
 const ROLE_PTS={
   Top:{k:3,a:2,cs:50,dmg:[.25,3]},
   Jungle:{k:3,a:1,cs:50,drag:.5,baron:1,kp:[.70,2]},
@@ -229,15 +232,11 @@ function detail(st,role,g){const R=ROLE_PTS[role]||ROLE_PTS.Mid,o=[],add=(l,v)=>
   return o}
 function base(st,role,g){return detail(st,role,g).reduce((t,x)=>t+x[1],0)}
 function voteDeadline(g){const day=parisDay(g.at);const next=games.filter(x=>parisDay(x.at)>day).sort((a,b)=>a.at-b.at)[0];return next?next.at:g.at+36*3600e3}
-// MVP : le choix officiel (Player of the Game relevé sur Leaguepedia), posé dans la partie par le robot (g.mvp).
-// MVKK : voté par le Conseil.
-function voteResult(g){const dl=voteDeadline(g),t={kk:{}};
-  for(const v of Object.values(votes)){const x=v["g_"+g.id];if(!x||x.at>dl)continue;if(x.kk)t.kk[x.kk]=(t.kk[x.kk]||0)+1}
-  const top=o=>{const m=Math.max(0,...Object.values(o));return m?Object.keys(o).filter(k=>o[k]===m):[]};
-  return {mvp:g.mvp?[g.mvp]:[],kk:top(t.kk),tally:t,open:Date.now()<dl,deadline:dl}}
+// MVP : le choix officiel (Player of the Game relevé sur Leaguepedia), posé dans la partie par le robot (g.mvp). Plus de vote.
+function voteResult(g){return {mvp:g.mvp?[g.mvp]:[]}}
 const VR={};function vr(g){return VR[g.id]||(VR[g.id]=voteResult(g))}
-function gamePts(g,name){const st=g.players?.[name];if(!st)return null;const r=vr(g);let s=base(st,P[name]?.role,g);if(r.mvp.includes(name))s+=PTS.mvp;if(!r.open&&r.kk.includes(name))s+=PTS.kk;return Math.round(s*10)/10}
-function gameDetail(g,name){const st=g.players[name],r=vr(g),o=detail(st,P[name]?.role,g);if(r.mvp.includes(name))o.push(["MVP officiel de la game",PTS.mvp]);if(!r.open&&r.kk.includes(name))o.push(["Élu MVKK par le Conseil",PTS.kk]);return o}
+function gamePts(g,name){const st=g.players?.[name];if(!st)return null;const r=vr(g);let s=base(st,P[name]?.role,g);if(r.mvp.includes(name))s+=PTS.mvp;return Math.round(s*10)/10}
+function gameDetail(g,name){const st=g.players[name],r=vr(g),o=detail(st,P[name]?.role,g);if(r.mvp.includes(name))o.push(["MVP officiel de la game",PTS.mvp]);return o}
 function playerPts(name,phase){let t=0,n=0;for(const g of games){if(phase&&g.phase!==phase)continue;const s=gamePts(g,name);if(s!=null){t+=s;n++}}return {t,n}}
 function teamOf(id,phase){const d=phases[phase];if(!d?.picks)return null;const o={};for(const x of d.picks)if(x.uid===id)o[x.role]=x.name;return o}
 function sagePts(id,phase){let t=0;for(const ph of phase?[phase]:PHASES.map(p=>p.id)){const tm=teamOf(id,ph);if(!tm)continue;const cap=captains[id]?.[ph];
@@ -259,7 +258,7 @@ function card(p,o={}){const t=team(p),r=rarity(p),goat=p.rank===0,pts=o.pts!=nul
       ${o.extra||""}</div></${tag}>`}
 
 // ---------- navigation ----------
-const VIEWS=[["accueil","Accueil"],["tirage","Tirage"],["classement","Classement"],["joueurs","Joueurs"],["votes","Vote MVKK"],["regles","Règles"]];
+const VIEWS=[["accueil","Accueil"],["tirage","Tirage"],["classement","Classement"],["joueurs","Joueurs"],["regles","Règles"]];
 let view="accueil",param=null;
 function route(){const h=(location.hash||"").slice(1);const m=h.match(/^(joueur|sage)-(.+)$/);
   if(m){view=m[1];param=decodeURIComponent(m[2])}else{view=VIEWS.some(v=>v[0]===h)?h:"accueil";param=null}render()}
@@ -270,7 +269,8 @@ function render(){
   $("tabs").innerHTML=VIEWS.map(([k,n])=>`<a href="#${k}" ${k===view||(view==="joueur"&&k==="joueurs")||(view==="sage"&&k==="classement")?'aria-current="page"':""}>${n}</a>`).join("");
   const n=Object.keys(sages).length;$("bandInfo").textContent=`${n} sage${n>1?"s":""} inscrit${n>1?"s":""} · ${games.length} partie${games.length>1?"s":""} jouée${games.length>1?"s":""}`;
   const v=$("view");v.setAttribute("data-view",view);
-  ({accueil:vAccueil,tirage:vTirage,classement:vClassement,joueurs:vJoueurs,votes:vVotes,regles:vRegles,joueur:vJoueur,sage:vSage})[view](v);
+  ({accueil:vAccueil,tirage:vTirage,classement:vClassement,joueurs:vJoueurs,regles:vRegles,joueur:vJoueur,sage:vSage})[view](v);
+  teamReveal();
 }
 
 // ---------- ACCUEIL ----------
@@ -279,7 +279,7 @@ function vAccueil(v){
   let h=`<section class="panel"><div class="between"><h2>${me?`Salut ${esc(me.pseudo)}`:"Rejoindre la fantasy"}</h2><span class="note">${n2(Object.keys(sages).length,"sage inscrit","sages inscrits")}</span></div>`;
   if(!db)h+=`<div class="state">Connexion au site en cours… Si rien ne bouge, recharge la page.</div>`;
   else if(!me)h+=`<p class="note">Inscris-toi pour être dans le prochain tirage${next?` (${next.label}, avant le ${fmtDate(phaseStart(next.id))})`:""}.</p>
-    <form class="row" id="join"><input type="text" id="pseudo" maxlength="20" placeholder="Ton pseudo du Conseil" required><button class="btn">Je participe</button></form><span class="note" id="joinMsg"></span>`;
+    <form class="row" id="join"><input type="text" id="pseudo" maxlength="20" placeholder="Ton pseudo du Conseil" value="${esc(myProfile?.pseudo||"")}" required><button class="btn">Je participe</button></form><span class="note" id="joinMsg"></span>`;
   else h+=`<div class="row"><span class="note">Inscrit depuis le ${fmtDate(me.at)}.</span><a class="chip" href="#sage-${encodeURIComponent(uid)}">Voir ma page</a></div>`;
   h+=`</section>`;
   if(me&&d?.picks&&teamOf(uid,ph)&&Object.keys(teamOf(uid,ph)).length){h+=teamPanel(uid,ph,true)}
@@ -291,6 +291,17 @@ function vAccueil(v){
   bindCaptains(v);
 }
 const n2=(n,one,many)=>`${n} ${n>1?many:one}`;
+// Quand toutes les caisses d'une phase sont ouvertes, chaque inscrit voit apparaître son équipe (une fois par tirage)
+function teamReveal(){if(!uid||busy)return;for(const ph of PHASES){const d=phases[ph.id];if(!d||!d.picks||d.picks.length<totalSteps(d)||!d.order.includes(uid))continue;
+  const k=`fx-team-${ph.id}-${d.drawnAt}`;let seen=false;try{seen=!!localStorage.getItem(k)}catch(e){}if(seen||document.getElementById("teamPop"))continue;
+  const tm=teamOf(uid,ph.id),pop=document.createElement("div");pop.id="teamPop";pop.className="teampop";pop.setAttribute("role","dialog");pop.setAttribute("aria-label","Ton équipe");
+  pop.innerHTML=`<div class="tp-in"><span class="eyebrow">${esc(ph.label)} · tirage terminé</span><h2>Ton équipe, ${esc(sageName(uid))}</h2>
+    <div class="squad">${ROLES.map(r=>{const p=P[tm[r]];return `<div class="slot"><span class="lane">${r}</span>${p?card(p,{glow:true}):'<div class="empty">—</div>'}</div>`}).join("")}</div>
+    <p class="note">Choisis ton capitaine avant le ${fmtDate(phaseStart(ph.id))} : ses points comptent double.</p>
+    <div class="row" style="justify-content:center"><button class="btn" id="tpCap">Choisir mon capitaine</button><button class="btn ghost" id="tpClose">Fermer</button></div></div>`;
+  document.body.appendChild(pop);const close=()=>{try{localStorage.setItem(k,"1")}catch(e){}pop.remove()};
+  pop.querySelector("#tpClose").onclick=close;pop.querySelector("#tpCap").onclick=()=>{close();go("accueil")};pop.onclick=e=>{if(e.target===pop)close()};
+  ROLES.forEach((r,i)=>{const p=P[tm[r]];if(p)setTimeout(()=>rankSound(p),300+i*450)});break}}
 function teamPanel(id,ph,mine){const tm=teamOf(id,ph),cap=captains[id]?.[ph],locked=Date.now()>=phaseStart(ph),label=PHASES.find(p=>p.id===ph).label;
   return `<section class="panel"><div class="between"><h2>${mine?"Mon équipe":"Équipe"} · ${label}</h2><span class="note">${fr(sagePts(id,ph))} points cette phase${mine&&!locked?` · capitaine modifiable jusqu'au ${fmtDate(phaseStart(ph))}`:""}</span></div>
     <div class="squad">${ROLES.map(r=>{const n=tm[r],p=P[n];if(!p)return `<div class="slot"><span class="lane">${r}</span><div class="empty">—</div></div>`;
@@ -368,7 +379,6 @@ async function prepare(){const ph=PHASES.find(p=>p.id===tPhase);const teams=ph.u
 async function openBox(){if(busy)return;const ph=tPhase,d=phases[ph];const n=d.picks.length;if(n>=totalSteps(d))return;
   const st=stepInfo(d,n),pool=poolFor(ph,st.role),name=pool[rnd(pool.length)],seq=reelSeq(pool,name),pick={uid:st.uid,role:st.role,name,at:Date.now()};
   busy=true;$("open").disabled=true;
-  try{room&&room.emit("open",{phase:ph,step:n,pick,style,seq})}catch(e){}
   await play(style,pick,seq,$("stage"));
   try{await db.doc("phases/"+ph).set({...d,picks:[...d.picks,pick]})}catch(e){$("who").textContent="Échec de l'enregistrement : rouvre la caisse."}
   busy=false;render()}
@@ -386,6 +396,15 @@ function play(kind,pick,seq,box,isDemo){return playCsgo(pick,seq,box,isDemo)}
 
 // --- Roulette CS:GO ---
 let audio=null;function tick(f=1400,len=.05,vol=.04){try{audio=audio||new (window.AudioContext||window.webkitAudioContext)();const o=audio.createOscillator(),g=audio.createGain();o.frequency.value=f;g.gain.value=vol;o.connect(g);g.connect(audio.destination);o.start();g.gain.exponentialRampToValueAtTime(.0001,audio.currentTime+len);o.stop(audio.currentTime+len+.01)}catch(e){}}
+// Son de révélation selon la rareté : Commun une note, Rare deux, Épique un arpège, Légendaire une fanfare, Faker une entrée à part
+function note(f,at,len,type="triangle",vol=.08){try{audio=audio||new (window.AudioContext||window.webkitAudioContext)();const t=audio.currentTime+at,o=audio.createOscillator(),g=audio.createGain();
+  o.type=type;o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+len);o.connect(g);g.connect(audio.destination);o.start(t);o.stop(t+len+.05)}catch(e){}}
+function rankSound(p){if(!p)return;const r=p.rank;
+  if(r===0){note(65,0,1.4,"sine",.25);note(98,0,1.4,"sine",.12);[392,523,659,784,1047].forEach((f,i)=>note(f,.25+i*.11,.5,"sawtooth",.04));[523,659,784,1047].forEach(f=>note(f,.85,1.8,"triangle",.07));note(1568,.85,1.8,"sine",.03);return}
+  if(r<=3){[523,659,784].forEach((f,i)=>note(f,i*.12,.35,"square",.04));[523,659,784,1047].forEach(f=>note(f,.4,1.2,"triangle",.07));return}
+  if(r<=7){[440,554,659,880].forEach((f,i)=>note(f,i*.09,.45,"triangle",.08));return}
+  if(r<=11){note(523,0,.3);note(784,.13,.45);return}
+  note(392,0,.35,"sine",.1)}
 function itemHTML(n){const p=P[n],t=team(p),r=rarity(p);return `<div class="it" style="--tc:${t.c};--rc:${r.c}">${p.img?`<img class="ph" src="${p.img}" alt="">`:""}${t.logo?`<img class="lg" src="${t.logo}" alt="">`:""}<span>${esc(n)}</span></div>`}
 function playCsgo(pick,seq,box,isDemo){return new Promise(res=>{if(!box)return res();
   box.innerHTML=`<div class="reel"><div class="marker"></div><div class="strip">${seq.map(itemHTML).join("")}</div></div><div class="after"></div>`;
@@ -394,7 +413,7 @@ function playCsgo(pick,seq,box,isDemo){return new Promise(res=>{if(!box)return r
   const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches,dur=reduce?0:5600,target=-(40*W)+rw/2-W/2+(Math.random()-.5)*W*.6;
   requestAnimationFrame(()=>requestAnimationFrame(()=>{s.style.transition=`transform ${dur}ms cubic-bezier(.08,.6,.12,1)`;s.style.transform=`translateX(${target}px)`;
     let last=null;const t0=performance.now();(function loop(){const m=new DOMMatrix(getComputedStyle(s).transform).m41,idx=Math.floor((rw/2-m)/W);if(idx!==last){last=idx;tick()}if(performance.now()-t0<dur)requestAnimationFrame(loop)})();
-    setTimeout(()=>{s.children[40]?.classList.add("win");tick(880,.25,.06);box.querySelector(".after").innerHTML=revealHTML(pick);res()},dur+200)}))})}
+    setTimeout(()=>{s.children[40]?.classList.add("win");rankSound(P[pick.name]);box.querySelector(".after").innerHTML=revealHTML(pick);res()},dur+200)}))})}
 
 
 // ---------- CLASSEMENT ----------
@@ -427,14 +446,14 @@ function vJoueurs(v){const ph=currentPhase();
 }
 function vJoueur(v){const p=P[param];if(!p){v.innerHTML=`<div class="empty">Joueur introuvable.</div>`;return}
   const tot=playerPts(p.name),gs=games.filter(g=>g.players?.[p.name]).sort((a,b)=>b.at-a.at),r=rarity(p);
-  let mv=0,kk=0;for(const g of gs){const x=vr(g);if(x.mvp.includes(p.name))mv++;if(!x.open&&x.kk.includes(p.name))kk++}
+  let mv=0;for(const g of gs){if(vr(g).mvp.includes(p.name))mv++}
   v.innerHTML=`<a class="chip" href="#joueurs" style="align-self:flex-start">← Tous les joueurs</a>
   <section class="panel"><div class="hero">${card(p,{glow:true})}<div style="display:flex;flex-direction:column;gap:12px;min-width:0">
     <div><span class="rar" style="--rc:${r.c}">${r.n}</span><h2 style="font-size:2.4rem">${esc(p.name)}</h2><span class="note">${esc(team(p).n)} · ${p.role} · ${p.rank===0?"hors catégorie au Conseil 🐐":`#${p.rank} de la tier list du Conseil`}${p.avg!=null?` (${p.avg.toFixed(2).replace(".",",")}/5, ${p.n} votes)`:""}</span></div>
-    <div class="kv"><div><b>${fr(tot.t)}</b><span>points</span></div><div><b>${tot.n}</b><span>parties</span></div><div><b>${tot.n?(tot.t/tot.n).toFixed(1).replace(".",","):"–"}</b><span>points / partie</span></div><div><b class="pos">${mv}</b><span>fois MVP</span></div><div><b class="neg">${kk}</b><span>fois MVKK</span></div></div>
+    <div class="kv"><div><b>${fr(tot.t)}</b><span>points</span></div><div><b>${tot.n}</b><span>parties</span></div><div><b>${tot.n?(tot.t/tot.n).toFixed(1).replace(".",","):"–"}</b><span>points / partie</span></div><div><b class="pos">${mv}</b><span>fois MVP</span></div></div>
     <div><span class="eyebrow">Chez</span><div class="row" style="margin-top:6px">${PHASES.map(ph=>{const o=ownersOf(p.name,ph.id);return o.length?`<span class="chip">${ph.label} : ${o.map(id=>`<a href="#sage-${encodeURIComponent(id)}">${esc(sageName(id))}</a>`).join(", ")}</span>`:""}).join("")||'<span class="note">Pas encore tiré.</span>'}</div></div></div></div></section>
-  <section class="panel"><h2>Ses parties</h2>${gs.length?`<div class="tw"><table><thead><tr><th>Date</th><th>Match</th><th class="num">K / D / A</th><th>Résultat</th><th>Vote</th><th class="num">Points (clique pour le détail)</th></tr></thead><tbody>${gs.map(g=>{const st=g.players[p.name],x=vr(g);
-    return `<tr><td>${fmtDate(g.at)}</td><td>${esc(g.teams?.join(" – ")||"")}${st.champ?` · ${esc(st.champ)}`:""}</td><td class="num">${st.k} / ${st.d} / ${st.a}</td><td class="${st.win?"pos":"neg"}">${st.win?"Victoire":"Défaite"}</td><td>${x.mvp.includes(p.name)?'<b class="pos">MVP</b> ':""}${x.open?'<span class="note">MVKK en cours</span>':x.kk.includes(p.name)?'<b class="neg">MVKK</b>':x.mvp.includes(p.name)?"":"–"}</td><td class="num"><details class="det"><summary><b>${fr(gamePts(g,p.name))}</b></summary><ul>${gameDetail(g,p.name).map(([l,v])=>`<li><span>${esc(l)}</span><b class="${v<0?"neg":"pos"}">${v>0?"+":""}${fr(v)}</b></li>`).join("")}</ul></details></td></tr>`}).join("")}</tbody></table></div>`:`<div class="empty">Pas encore de partie jouée.</div>`}</section>`}
+  <section class="panel"><h2>Ses parties</h2>${gs.length?`<div class="tw"><table><thead><tr><th>Date</th><th>Match</th><th class="num">K / D / A</th><th>Résultat</th><th>MVP</th><th class="num">Points (clique pour le détail)</th></tr></thead><tbody>${gs.map(g=>{const st=g.players[p.name],x=vr(g);
+    return `<tr><td>${fmtDate(g.at)}</td><td>${esc(g.teams?.join(" – ")||"")}${st.champ?` · ${esc(st.champ)}`:""}</td><td class="num">${st.k} / ${st.d} / ${st.a}</td><td class="${st.win?"pos":"neg"}">${st.win?"Victoire":"Défaite"}</td><td>${x.mvp.includes(p.name)?'<b class="pos">MVP</b>':"–"}</td><td class="num"><details class="det"><summary><b>${fr(gamePts(g,p.name))}</b></summary><ul>${gameDetail(g,p.name).map(([l,v])=>`<li><span>${esc(l)}</span><b class="${v<0?"neg":"pos"}">${v>0?"+":""}${fr(v)}</b></li>`).join("")}</ul></details></td></tr>`}).join("")}</tbody></table></div>`:`<div class="empty">Pas encore de partie jouée.</div>`}</section>`}
 function vSage(v){const id=param,s=sages[id];if(!s){v.innerHTML=`<div class="empty">Sage introuvable.</div>`;return}
   const all=Object.keys(sages).map(x=>({x,t:sagePts(x)})).sort((a,b)=>b.t-a.t),rk=all.findIndex(o=>o.x===id)+1;
   let h=`<a class="chip" href="#classement" style="align-self:flex-start">← Classement</a><section class="panel"><span class="eyebrow">Sage du Conseil</span><h2 style="font-size:2.4rem">${esc(s.pseudo)}</h2>
@@ -444,24 +463,10 @@ function vSage(v){const id=param,s=sages[id];if(!s){v.innerHTML=`<div class="emp
   v.innerHTML=h;bindCaptains(v)}
 
 // ---------- VOTES ----------
-function vVotes(v){const gs=[...games].sort((a,b)=>b.at-a.at),open=gs.filter(g=>vr(g).open),closed=gs.filter(g=>!vr(g).open).slice(0,12);
-  const myv=votes[uid]||{};
-  let h=`<section class="panel"><h2>Vote MVKK</h2><p class="note">Après chaque partie, vote pour le pire joueur de la game (MVKK, ${PTS.kk} points). Le vote ferme au début de la première partie du jour suivant. Le MVP, lui, est le choix officiel (+${PTS.mvp} points), relevé automatiquement à la fin de la game.</p>${!db?`<div class="state">Ouvre la page sur claude.ai pour voter.</div>`:!sages[uid]?`<div class="state">Inscris-toi depuis l'accueil pour voter.</div>`:""}</section>`;
-  if(!open.length)h+=`<div class="empty">Aucun vote ouvert pour le moment.</div>`;
-  for(const g of open){const x=myv["g_"+g.id]||{},names=Object.keys(g.players||{}).sort((a,b)=>(g.players[a].team+a).localeCompare(g.players[b].team+b));
-    const btns=k=>`<div class="vote-grid">${names.map(n=>`<button class="${k}" data-g="${g.id}" data-k="${k}" data-n="${esc(n)}" aria-pressed="${x[k]===n}" ${!sages[uid]?"disabled":""}>${P[n]?.img?`<img src="${P[n].img}" alt="">`:""}<span>${esc(n)}</span></button>`).join("")}</div>`;
-    h+=`<div class="game"><div class="between"><b>${esc(g.teams?.join(" – ")||"Partie")} · ${esc(g.label||"")}</b><span class="note">${fmtDate(g.at)} · vote jusqu'au ${fmtDate(vr(g).deadline)} · ${Object.values(votes).filter(o=>o["g_"+g.id]).length} votant(s)</span></div>
-      ${g.mvp?`<span class="note">MVP officiel : <b class="pos">${esc(g.mvp)}</b></span>`:""}<span class="eyebrow" style="color:var(--bad)">MVKK</span>${btns("kk")}</div>`}
-  if(closed.length)h+=`<section class="panel"><h2>Résultats</h2><div class="tw"><table><thead><tr><th>Partie</th><th>MVP officiel</th><th>MVKK du Conseil</th></tr></thead><tbody>${closed.map(g=>{const x=vr(g);return `<tr><td>${esc(g.teams?.join(" – ")||"")} <span class="note">${fmtDate(g.at)}</span></td><td class="pos">${x.mvp.map(esc).join(", ")||"–"}</td><td class="neg">${x.kk.map(esc).join(", ")||"–"}</td></tr>`}).join("")}</tbody></table></div></section>`;
-  v.innerHTML=h;
-  v.querySelectorAll("[data-g]").forEach(b=>b.onclick=async()=>{const k="g_"+b.dataset.g,cur={...(votes[uid]?.[k]||{})};cur[b.dataset.k]=cur[b.dataset.k]===b.dataset.n?null:b.dataset.n;cur.at=Date.now();
-    const doc={...(votes[uid]||{}),[k]:cur};votes[uid]=doc;render();try{await db.doc("votes/"+uid).set(doc)}catch(e){}})}
-
-// ---------- RÈGLES ----------
 function vRegles(v){v.innerHTML=`<section class="panel"><h2>Règles</h2><div class="rules">
   <div><span class="eyebrow">Inscription et tirage</span><ul><li>Inscris-toi depuis l'accueil avant le tirage.</li><li>Un tirage à <b>chaque phase</b> : suisse, quarts, demies, finale.</li><li>Lane par lane : chaque sage reçoit un Top, puis un Jungle, un Mid, un Bot, un Support.</li><li>En phase suisse, un joueur ne va qu'à <b>un seul</b> sage.</li></ul></div>
 
-  <div><span class="eyebrow">Capitaine et votes</span><ul><li>Un <b>capitaine</b> par phase : ses points comptent <b>double</b>. Modifiable jusqu'au premier match de la phase.</li><li>Le <b>MVP</b> est le choix officiel de chaque game, relevé automatiquement.</li><li>Après chaque partie, chacun vote le <b>MVKK</b> jusqu'au début de la première partie du lendemain.</li></ul></div>
+  <div><span class="eyebrow">Capitaine et MVP</span><ul><li>Un <b>capitaine</b> par phase : ses points comptent <b>double</b>. Modifiable jusqu'au premier match de la phase.</li><li>Le <b>MVP</b> est le choix officiel de chaque game, relevé automatiquement.</li></ul></div>
   <div><span class="eyebrow">Raretés des cartes</span><ul><li><b style="color:var(--r-leg)">Légendaire</b> : top 3 du Conseil à son poste</li><li><b style="color:var(--r-epic)">Épique</b> : 4e à 7e</li><li><b style="color:var(--r-rare)">Rare</b> : 8e à 11e</li><li><b style="color:var(--r-com)">Commun</b> : 12e à 16e</li><li><b style="color:var(--r-goat)">Hors catégorie</b> : Faker 🐐</li></ul></div></div></section>
   <section class="panel"><h2>Points communs à tous les postes</h2><div class="tw"><table class="pts"><tbody>
     <tr><td>Victoire</td><td class="num pos">+${PTS.win}</td></tr>
@@ -471,7 +476,6 @@ function vRegles(v){v.innerHTML=`<section class="panel"><h2>Règles</h2><div cla
     <tr><td>Premier sang</td><td class="num pos">+${PTS.fb}</td></tr>
     <tr><td>Triple / Quadra / Penta kill</td><td class="num pos">+${PTS.triple} / +${PTS.quadra} / +${PTS.penta}</td></tr>
     <tr><td>MVP officiel de la game</td><td class="num pos">+${PTS.mvp}</td></tr>
-    <tr><td>Élu MVKK par le Conseil</td><td class="num neg">${PTS.kk}</td></tr>
     <tr><td>Capitaine</td><td class="num">tous ses points ×${PTS.captain}</td></tr></tbody></table></div></section>
   <section class="panel"><h2>Barème par poste</h2><div class="tw"><table class="pts"><thead><tr><th></th>${ROLES.map(r=>`<th>${r}</th>`).join("")}</tr></thead><tbody>
     <tr><td>Kill</td>${ROLES.map(r=>`<td>+${fr(ROLE_PTS[r].k)}</td>`).join("")}</tr>
@@ -491,7 +495,7 @@ window.addEventListener("load",()=>{});
 // ---------- base partagée (Firestore de CDS.TV) ----------
 const FANTASY_ADMIN="7ggyIoUpvlRrJCpqKkgdYlsMhcp2";           // seul compte qui prépare et ouvre les caisses (Skryvv)
 const COL={sages:"fantasySages",phases:"fantasyPhases",captains:"fantasyCaptains",votes:"fantasyVotes",games:"fantasyGames"};
-let isPublic=false,cfgLoaded=false,myProfile=null;
+let isPublic=true,cfgLoaded=true,myProfile=null;   // fantasy ouverte à tous ; seul FANTASY_ADMIN prépare et ouvre les caisses
 function fsDb(f){const ref=p=>{const [c,id]=p.split("/");return f.collection(COL[c]||c).doc(id)};
   return {doc:p=>{const r=ref(p);return{get:()=>r.get().then(s=>({id:s.id,exists:s.exists,data:()=>s.data()})),set:d=>r.set(JSON.parse(JSON.stringify(d))),delete:()=>r.delete()}},
     collection:c=>({onSnapshot:(fn,err)=>f.collection(COL[c]||c).onSnapshot(q=>fn({docs:q.docs.map(d=>({id:d.id,data:()=>d.data()}))}),err)})}}
@@ -504,7 +508,7 @@ const fullRender=render;
 render=function(){
   const show=isOwner||isPublic;
   $("tabs").hidden=!show;
-  if(show){fullRender();if(isOwner)ownerBar();return}
+  if(show){fullRender();return}
   const n=Object.keys(sages).length;$("bandInfo").textContent=`${n} sage${n>1?"s":""} inscrit${n>1?"s":""}`;
   const me=uid&&sages[uid],v=$("view");v.removeAttribute("data-view");
   let h=`<section class="panel"><div class="between"><h2>${me?`Tu es inscrit, ${esc(me.pseudo)} !`:"Inscriptions ouvertes"}</h2><span class="note">${n2(n,"sage inscrit","sages inscrits")}</span></div>`;
@@ -516,7 +520,7 @@ render=function(){
   h+=`<section class="panel"><h2>Le principe</h2><div class="rules">
     <div><span class="eyebrow">Tirage</span><ul><li>Pas de draft : chaque sage reçoit au hasard un Top, un Jungle, un Mid, un Bot et un Support.</li><li>Un nouveau tirage à chaque phase : suisse, quarts, demies, finale.</li></ul></div>
     <div><span class="eyebrow">Points</span><ul><li>Kills, assists, farm, dégâts, objectifs : un barème propre à chaque poste.</li><li>Ton capitaine compte double.</li></ul></div>
-    <div><span class="eyebrow">MVP et MVKK</span><ul><li>Le MVP officiel de chaque game gagne +5.</li><li>Le Conseil vote le MVKK de la game (-5).</li></ul></div></div></section>`;
+    <div><span class="eyebrow">MVP</span><ul><li>Le MVP officiel de chaque game gagne +5.</li></ul></div></div></section>`;
   v.innerHTML=h;
   const f=$("join");if(f)f.onsubmit=async e=>{e.preventDefault();const p=$("pseudo").value.trim().slice(0,20);if(!p)return;
     try{await db.doc("sages/"+uid).set({pseudo:p,at:Date.now()})}catch(err){$("joinMsg").textContent="Inscription impossible : recharge la page et réessaie."}};
@@ -536,8 +540,7 @@ let fdb=null;
   render();
   const c=await conseilConnect();
   if(!c.db){render();return}
-  fdb=c.db;db=fsDb(fdb);uid=c.uid;isOwner=uid===FANTASY_ADMIN;room=fsRoom(fdb);room.on("open",m=>{if(isPublic||isOwner)onRoomOpen(m)});
-  fdb.collection("fantasy").doc("config").onSnapshot(s=>{isPublic=!!s.data()?.public;cfgLoaded=true;if(!busy)render()},()=>{cfgLoaded=true;render()});
+  fdb=c.db;db=fsDb(fdb);uid=c.uid;isOwner=uid===FANTASY_ADMIN;
   fdb.collection("riot").doc(uid).get().then(s=>{myProfile=s.data()||null;if(!busy)render()}).catch(()=>{});
   const sub=(col,fn)=>db.collection(col).onSnapshot(s=>{fn(s);if(!busy)render()},e=>console.error(e));
   sub("sages",s=>{sages={};s.docs.forEach(d=>sages[d.id]=d.data())});
