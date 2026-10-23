@@ -1,0 +1,386 @@
+{
+ "TEAM:GEN": {
+  "file": "TEAM_GEN.png",
+  "from": "Gen.G Esports"
+ },
+ "TEAM:HLE": {
+  "file": "TEAM_HLE.png",
+  "from": "Hanwha Life Esports"
+ },
+ "TEAM:T1": {
+  "file": "TEAM_T1.png",
+  "from": "T1"
+ },
+ "TEAM:DK": {
+  "file": "TEAM_DK.png",
+  "from": "Dplus KIA"
+ },
+ "TEAM:AL": {
+  "file": "TEAM_AL.png",
+  "from": "Anyone's Legend"
+ },
+ "TEAM:BLG": {
+  "file": "TEAM_BLG.png",
+  "from": "BILIBILI GAMING"
+ },
+ "TEAM:TES": {
+  "file": "TEAM_TES.png",
+  "from": "TOP ESPORTS"
+ },
+ "TEAM:IG": {
+  "file": "TEAM_IG.png",
+  "from": "Invictus Gaming"
+ },
+ "TEAM:G2": {
+  "file": "TEAM_G2.png",
+  "from": "G2 Esports"
+ },
+ "TEAM:MKOI": {
+  "file": "TEAM_MKOI.png",
+  "from": "Movistar KOI"
+ },
+ "TEAM:KC": {
+  "file": "TEAM_KC.png",
+  "from": "Karmine Corp"
+ },
+ "TEAM:TL": {
+  "file": "TEAM_TL.png",
+  "from": "Team Liquid Alienware"
+ },
+ "TEAM:LYON": {
+  "file": "TEAM_LYON.png",
+  "from": "LYON"
+ },
+ "TEAM:TSW": {
+  "file": "TEAM_TSW.png",
+  "from": "Team Secret Whales"
+ },
+ "TEAM:CFO": {
+  "file": "TEAM_CFO.png",
+  "from": "CTBC Flying Oyster"
+ },
+ "TEAM:LOS": {
+  "file": "TEAM_LOS.png",
+  "from": "LOS"
+ },
+ "Zeus": {
+  "file": "HLE_Zeus.png",
+  "from": "Hanwha Life Esports"
+ },
+ "Bin": {
+  "file": "BLG_Bin.png",
+  "from": "BILIBILI GAMING"
+ },
+ "Kiin": {
+  "file": "GEN_Kiin.png",
+  "from": "Gen.G Esports"
+ },
+ "Breathe": {
+  "file": "AL_Breathe.png",
+  "from": "Anyone's Legend"
+ },
+ "BrokenBlade": {
+  "file": "G2_BrokenBlade.png",
+  "from": "G2 Esports"
+ },
+ "Siwoo": {
+  "file": "DK_Siwoo.png",
+  "from": "Dplus KIA"
+ },
+ "369": {
+  "file": "TES_369.png",
+  "from": "TOP ESPORTS"
+ },
+ "Canna": {
+  "file": "KC_Canna.png",
+  "from": "Karmine Corp"
+ },
+ "Doran": {
+  "file": "T1_Doran.png",
+  "from": "T1"
+ },
+ "TheShy": {
+  "file": "IG_TheShy.png",
+  "from": "Invictus Gaming"
+ },
+ "Myrwn": {
+  "file": "MKOI_Myrwn.png",
+  "from": "Movistar KOI"
+ },
+ "Dhokla": {
+  "file": "LYON_Dhokla.png",
+  "from": "LYON"
+ },
+ "Morgan": {
+  "file": "TL_Morgan.png",
+  "from": "Team Liquid Alienware"
+ },
+ "Pun": {
+  "file": "TSW_Pun.png",
+  "from": "Team Secret Whales"
+ },
+ "Rest": {
+  "file": "CFO_Rest.png",
+  "from": "CTBC Flying Oyster"
+ },
+ "Zest": {
+  "file": "LOS_Zest.png",
+  "from": "LOS"
+ },
+ "Canyon": {
+  "file": "GEN_Canyon.png",
+  "from": "Gen.G Esports"
+ },
+ "Oner": {
+  "file": "T1_Oner.png",
+  "from": "T1"
+ },
+ "Kanavi": {
+  "file": "HLE_Kanavi.png",
+  "from": "Hanwha Life Esports"
+ },
+ "SkewMond": {
+  "file": "G2_SkewMond.png",
+  "from": "G2 Esports"
+ },
+ "Xun": {
+  "file": "BLG_Xun.png",
+  "from": "BILIBILI GAMING"
+ },
+ "Tarzan": {
+  "file": "AL_Tarzan.png",
+  "from": "Anyone's Legend"
+ },
+ "Wei": {
+  "file": "IG_Wei.png",
+  "from": "Invictus Gaming"
+ },
+ "Inspired": {
+  "file": "LYON_Inspired.png",
+  "from": "LYON"
+ },
+ "Yike": {
+  "file": "KC_Yike.png",
+  "from": "Karmine Corp"
+ },
+ "Elyoya": {
+  "file": "MKOI_Elyoya.png",
+  "from": "Movistar KOI"
+ },
+ "Lucid": {
+  "file": "DK_Lucid.png",
+  "from": "Dplus KIA"
+ },
+ "Tian": {
+  "file": "TES_Tian.png",
+  "from": "TOP ESPORTS"
+ },
+ "Josedeodo": {
+  "file": "TL_Josedeodo.png",
+  "from": "Team Liquid Alienware"
+ },
+ "Hizto": {
+  "file": "TSW_Hizto.png",
+  "from": "Team Secret Whales"
+ },
+ "Shad0w": {
+  "file": "CFO_Shad0w.png",
+  "from": "CTBC Flying Oyster"
+ },
+ "Curse": {
+  "file": "LOS_Curse.png",
+  "from": "LOS"
+ },
+ "Faker": {
+  "file": "T1_Faker.png",
+  "from": "T1"
+ },
+ "Caps": {
+  "file": "G2_Caps.png",
+  "from": "G2 Esports"
+ },
+ "Chovy": {
+  "file": "GEN_Chovy.png",
+  "from": "Gen.G Esports"
+ },
+ "Knight": {
+  "file": "BLG_Knight.png",
+  "from": "BILIBILI GAMING"
+ },
+ "Zeka": {
+  "file": "HLE_Zeka.png",
+  "from": "Hanwha Life Esports"
+ },
+ "Kyeahoo": {
+  "file": "KC_Kyeahoo.png",
+  "from": "Karmine Corp"
+ },
+ "ShowMaker": {
+  "file": "DK_ShowMaker.png",
+  "from": "Dplus KIA"
+ },
+ "Creme": {
+  "file": "TES_Creme.png",
+  "from": "TOP ESPORTS"
+ },
+ "Rookie": {
+  "file": "IG_Rookie.png",
+  "from": "Invictus Gaming"
+ },
+ "Shanks": {
+  "file": "AL_Shanks.png",
+  "from": "Anyone's Legend"
+ },
+ "Jojopyun": {
+  "file": "MKOI_Jojopyun.png",
+  "from": "Movistar KOI"
+ },
+ "Quid": {
+  "file": "TL_Quid.png",
+  "from": "Team Liquid Alienware"
+ },
+ "Dire": {
+  "file": "TSW_Dire.png",
+  "from": "Team Secret Whales"
+ },
+ "Pout": {
+  "file": "CFO_Pout.png",
+  "from": "CTBC Flying Oyster"
+ },
+ "Saint": {
+  "file": "LYON_Saint.png",
+  "from": "LYON"
+ },
+ "Feisty": {
+  "file": "LOS_Feisty.png",
+  "from": "LOS"
+ },
+ "Peyz": {
+  "file": "T1_Peyz.png",
+  "from": "T1"
+ },
+ "Gumayusi": {
+  "file": "HLE_Gumayusi.png",
+  "from": "Hanwha Life Esports"
+ },
+ "Viper": {
+  "file": "BLG_Viper.png",
+  "from": "BILIBILI GAMING"
+ },
+ "Ruler": {
+  "file": "GEN_Ruler.png",
+  "from": "Gen.G Esports"
+ },
+ "Hans Sama": {
+  "file": "G2_Hans_Sama.png",
+  "from": "G2 Esports"
+ },
+ "Smash": {
+  "file": "DK_Smash.png",
+  "from": "Dplus KIA"
+ },
+ "Hope": {
+  "file": "AL_Hope.png",
+  "from": "Anyone's Legend"
+ },
+ "JiaQi": {
+  "file": "IG_JiaQi.png",
+  "from": "Invictus Gaming"
+ },
+ "Doggo": {
+  "file": "CFO_Doggo.png",
+  "from": "CTBC Flying Oyster"
+ },
+ "Caliste": {
+  "file": "KC_Caliste.png",
+  "from": "Karmine Corp"
+ },
+ "JackeyLove": {
+  "file": "TES_JackeyLove.png",
+  "from": "TOP ESPORTS"
+ },
+ "Berserker": {
+  "file": "LYON_Berserker.png",
+  "from": "LYON"
+ },
+ "Eddie": {
+  "file": "TSW_Eddie.png",
+  "from": "Team Secret Whales"
+ },
+ "Supa": {
+  "file": "MKOI_Supa.png",
+  "from": "Movistar KOI"
+ },
+ "Yeon": {
+  "file": "TL_Yeon.png",
+  "from": "Team Liquid Alienware"
+ },
+ "Duduhh": {
+  "file": "LOS_Duduhh.png",
+  "from": "LOS"
+ },
+ "Keria": {
+  "file": "T1_Keria.png",
+  "from": "T1"
+ },
+ "Duro": {
+  "file": "GEN_Duro.png",
+  "from": "Gen.G Esports"
+ },
+ "ON": {
+  "file": "BLG_ON.png",
+  "from": "BILIBILI GAMING"
+ },
+ "Delight": {
+  "file": "HLE_Delight.png",
+  "from": "Hanwha Life Esports"
+ },
+ "Labrov": {
+  "file": "G2_Labrov.png",
+  "from": "G2 Esports"
+ },
+ "Kael": {
+  "file": "AL_Kael.png",
+  "from": "Anyone's Legend"
+ },
+ "Career": {
+  "file": "DK_Career.png",
+  "from": "Dplus KIA"
+ },
+ "Meiko": {
+  "file": "IG_Meiko.png",
+  "from": "Invictus Gaming"
+ },
+ "Zhuo": {
+  "file": "TES_Zhuo.png",
+  "from": "TOP ESPORTS"
+ },
+ "Busio": {
+  "file": "KC_Busio.png",
+  "from": "Karmine Corp"
+ },
+ "CoreJJ": {
+  "file": "TL_CoreJJ.png",
+  "from": "Team Liquid Alienware"
+ },
+ "Alvaro": {
+  "file": "MKOI_Alvaro.png",
+  "from": "Movistar KOI"
+ },
+ "Bie": {
+  "file": "TSW_Bie.png",
+  "from": "Team Secret Whales"
+ },
+ "Isles": {
+  "file": "LYON_Isles.png",
+  "from": "LYON"
+ },
+ "Kino": {
+  "file": "CFO_Kino.png",
+  "from": "CTBC Flying Oyster"
+ },
+ "Ackerman": {
+  "file": "LOS_Ackerman.png",
+  "from": "LOS"
+ }
+}
