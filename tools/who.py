@@ -16,4 +16,12 @@ for d in lst("riot"):
     res["riot"].append({"id":d["name"].split("/")[-1],"pseudo":p,"riotId":val(f.get("riotId",{})),"upd":d.get("updateTime")})
 for d in lst("claims"):
     f=d.get("fields",{});res["claims"].append({"old":d["name"].split("/")[-1],"by":val(f.get("by",{}))})
+def conv(v):
+    if "mapValue" in v:return {k:conv(x) for k,x in v["mapValue"].get("fields",{}).items()}
+    if "arrayValue" in v:return [conv(x) for x in v["arrayValue"].get("values",[])]
+    if "nullValue" in v:return None
+    return val(v)
+res["snaps"]={d["name"].split("/")[-1]:{"upd":d.get("updateTime"),"create":d.get("createTime"),**{k:conv(x) for k,x in d.get("fields",{}).items()}} for d in lst("ladderSnap")}
+res["ladder"]={d["name"].split("/")[-1]:{"upd":d.get("updateTime"),**{k:conv(x) for k,x in d.get("fields",{}).items()}} for d in lst("ladder")}
+res["riotFull"]={d["name"].split("/")[-1]:{"upd":d.get("updateTime"),**{k:conv(x) for k,x in d.get("fields",{}).items()}} for d in lst("riot")}
 os.makedirs("out",exist_ok=True);json.dump(res,open("out/who.json","w"),indent=1,ensure_ascii=False)
