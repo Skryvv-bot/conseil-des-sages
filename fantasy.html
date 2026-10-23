@@ -292,7 +292,7 @@ function vAccueil(v){
 }
 const n2=(n,one,many)=>`${n} ${n>1?many:one}`;
 // Quand toutes les caisses d'une phase sont ouvertes, chaque inscrit voit apparaître son équipe (une fois par tirage)
-function teamReveal(){if(!uid||busy)return;for(const ph of PHASES){const d=phases[ph.id];if(!d||!d.picks||d.picks.length<totalSteps(d)||!d.order.includes(uid))continue;
+function teamReveal(){if(!uid||busy)return;for(const ph of PHASES){const d=phases[ph.id];if(!d||!d.picks||d.picks.length<totalSteps(d)||!drawOrder(d).includes(uid))continue;
   const k=`fx-team-${ph.id}-${d.drawnAt}`;let seen=false;try{seen=!!localStorage.getItem(k)}catch(e){}if(seen||document.getElementById("teamPop"))continue;
   const tm=teamOf(uid,ph.id),pop=document.createElement("div");pop.id="teamPop";pop.className="teampop";pop.setAttribute("role","dialog");pop.setAttribute("aria-label","Ton équipe");
   pop.innerHTML=`<div class="tp-in"><span class="eyebrow">${esc(ph.label)} · tirage terminé</span><h2>Ton équipe, ${esc(sageName(uid))}</h2>
@@ -320,7 +320,12 @@ const FLAG={"South Korea":"🇰🇷","China":"🇨🇳","Vietnam":"🇻🇳","Sp
 const COUNTRY_FR={"South Korea":"Corée du Sud","China":"Chine","Vietnam":"Viêt Nam","Spain":"Espagne","Taiwan":"Taïwan","France":"France","United States":"États-Unis","Argentina":"Argentine","Brazil":"Brésil","Italy":"Italie","Germany":"Allemagne","Denmark":"Danemark","Greece":"Grèce","Sweden":"Suède","India":"Inde","Poland":"Pologne","Australia":"Australie","Canada":"Canada"};
 let tPhase=null,busy=false,room=null,style="csgo";
 const stepInfo=(d,i)=>({role:ROLES[Math.floor(i/d.order.length)],uid:d.order[i%d.order.length]});
-const totalSteps=d=>d.order.length*ROLES.length;
+// Inscrits ajoutés après le tirage (d.late) : on leur ouvre une caisse par poste, avec les joueurs restants, sans toucher aux équipes déjà tirées
+const lateOf=d=>d.late||[];
+const drawOrder=d=>[...d.order,...lateOf(d)];
+const totalSteps=d=>drawOrder(d).length*ROLES.length;
+function nextStep(d){const n=d.picks.length,base=d.order.length*ROLES.length;if(n<base)return stepInfo(d,n);
+  for(const u of lateOf(d))for(const r of ROLES)if(!d.picks.some(p=>p.uid===u&&p.role===r))return {uid:u,role:r};return null}
 function poolFor(ph,role){const d=phases[ph],teams=d.teams||Object.keys(DATA.teams);
   let pool=DATA.players[role].filter(p=>teams.includes(p.team)).map(p=>p.name);
   if(PHASES.find(p=>p.id===ph).unique){const used=new Set(d.picks.filter(y=>y.role===role).map(y=>y.name));const left=pool.filter(n=>!used.has(n));if(left.length)pool=left}
@@ -336,7 +341,7 @@ function vTirage(v){
       <p class="note">${n2(Object.keys(sages).length,"sage inscrit","sages inscrits")} : ${Object.values(sages).map(s=>esc(s.pseudo)).join(", ")||"personne pour l'instant"}.</p>
       ${isOwner?ownerStart(ph):""}</section>`;
     h+=demoPanel();v.innerHTML=h;bindTirage(v);return}
-  const n=d.picks.length,N=totalSteps(d),next=n<N?stepInfo(d,n):null,last=d.picks[n-1];
+  const n=d.picks.length,N=totalSteps(d),next=n<N?nextStep(d):null,last=d.picks[n-1];
   h+=`<section class="caisse" aria-live="polite">
     <div class="who" id="who">${next?`Prochaine caisse : ${esc(next.role)} pour <b>${esc(sageName(next.uid))}</b>`:"Tirage terminé !"}</div>
     <div class="stage" id="stage">${last?revealHTML(last):`<div class="empty" style="width:100%">${isOwner?"Ouvre la première caisse quand tout le monde est prêt sur Discord.":"En attente de la première ouverture par Skryvv…"}</div>`}</div>
@@ -344,9 +349,9 @@ function vTirage(v){
     ${isOwner&&next?`<div class="row" style="justify-content:center">
       <button class="btn" id="open">Ouvrir : ${esc(next.role)} pour ${esc(sageName(next.uid))} (${n+1}/${N})</button></div>`:""}
     <span class="note">${n}/${N} caisses ouvertes · ${ph.unique?"un joueur ne va qu'à un seul sage pendant cette phase":"chaque joueur n'est tiré qu'une fois tant qu'il en reste"}${room?" · l'animation s'affiche en direct chez tout le monde":""}</span></section>`;
-  h+=`<section class="panel"><h2>Résultat en direct</h2><div class="tw"><table class="drawtbl"><thead><tr><th>Sage</th>${ROLES.map(r=>`<th>${r}</th>`).join("")}</tr></thead><tbody>${d.order.map(id=>`<tr class="${id===uid?"me":""}"><td><a href="#sage-${encodeURIComponent(id)}">${esc(sageName(id))}</a></td>${ROLES.map(r=>{const x=d.picks.find(y=>y.uid===id&&y.role===r),isLast=x&&x===last;
+  h+=`<section class="panel"><h2>Résultat en direct</h2><div class="tw"><table class="drawtbl"><thead><tr><th>Sage</th>${ROLES.map(r=>`<th>${r}</th>`).join("")}</tr></thead><tbody>${drawOrder(d).map(id=>`<tr class="${id===uid?"me":""}"><td><a href="#sage-${encodeURIComponent(id)}">${esc(sageName(id))}</a></td>${ROLES.map(r=>{const x=d.picks.find(y=>y.uid===id&&y.role===r),isLast=x&&x===last;
     return `<td class="${isLast?"new":""}">${x?`<a class="mini" href="#joueur-${encodeURIComponent(x.name)}">${P[x.name]?.img?`<img src="${P[x.name].img}" alt="">`:""}${esc(x.name)}${tlg(x.name)}</a>`:'<span class="note">?</span>'}</td>`}).join("")}</tr>`).join("")}</tbody></table></div></section>`;
-  if(isOwner)h+=`<section class="panel"><h3>Administration</h3><p class="note">Recommencer efface toutes les caisses ouvertes de cette phase et l'ordre des sages. Le prochain « Préparer le tirage » reprendra la liste des inscrits à ce moment-là.</p><div class="row"><button class="btn ghost small" id="redo">Recommencer le tirage</button><span class="note" id="redoMsg"></span></div></section>`;
+  if(isOwner)h+=`<section class="panel"><h3>Administration</h3><p class="note">Recommencer efface toutes les caisses ouvertes de cette phase et l'ordre des sages. Le prochain « Préparer le tirage » reprendra la liste des inscrits à ce moment-là.</p><div class="row"><button class="btn ghost small" id="redo">Recommencer le tirage</button><span class="note" id="redoMsg"></span></div>${(()=>{const out=Object.entries(sages).filter(([id])=>!drawOrder(d).includes(id));return out.length?`<p class="note">Inscrits après le tirage : ajoute-les pour leur ouvrir une caisse par poste avec les joueurs qui restent. Les équipes déjà tirées ne bougent pas.</p><div class="row">${out.map(([id,x])=>`<button class="btn small" data-late="${esc(id)}">Ajouter ${esc(x.pseudo)} au tirage</button>`).join("")}</div>`:""})()}</section>`;
   h+=demoPanel();
   v.innerHTML=h;bindTirage(v);
 }
@@ -368,6 +373,8 @@ function bindTirage(v){
     v.querySelectorAll("[data-demo]").forEach(b=>b.onclick=()=>demo(b.dataset.demo));
   $("open")&&($("open").onclick=openBox);
   $("prep")&&($("prep").onclick=prepare);
+  v.querySelectorAll("[data-late]").forEach(b=>b.onclick=async()=>{const d=phases[tPhase];if(!d||busy)return;const id=b.dataset.late;if(drawOrder(d).includes(id))return;
+    b.disabled=true;try{await db.doc("phases/"+tPhase).set({...d,late:[...lateOf(d),id]})}catch(e){b.disabled=false;b.textContent="Échec : réessaie"}});
   $("redo")&&($("redo").onclick=()=>{const b=$("redo");if(b.dataset.sure){db.doc("phases/"+tPhase).delete().catch(()=>{});return}b.dataset.sure=1;b.textContent="Confirmer : tout recommencer";$("redoMsg").textContent="Clique encore une fois pour confirmer."});
 }
 async function prepare(){const ph=PHASES.find(p=>p.id===tPhase);const teams=ph.unique?Object.keys(DATA.teams):[...document.querySelectorAll(".dTeam:checked")].map(x=>x.value);
@@ -378,7 +385,7 @@ async function prepare(){const ph=PHASES.find(p=>p.id===tPhase);const teams=ph.u
 
 // --- ouverture réelle (compte de Skryvv) ---
 async function openBox(){if(busy)return;const ph=tPhase,d=phases[ph];const n=d.picks.length;if(n>=totalSteps(d))return;
-  const st=stepInfo(d,n),pool=poolFor(ph,st.role),name=pool[rnd(pool.length)],seq=reelSeq(pool,name),pick={uid:st.uid,role:st.role,name,at:Date.now()};
+  const st=nextStep(d);if(!st)return;const pool=poolFor(ph,st.role),name=pool[rnd(pool.length)],seq=reelSeq(pool,name),pick={uid:st.uid,role:st.role,name,at:Date.now()};
   busy=true;$("open").disabled=true;
   await play(style,pick,seq,$("stage"));
   try{await db.doc("phases/"+ph).set({...d,picks:[...d.picks,pick]})}catch(e){$("who").textContent="Échec de l'enregistrement : rouvre la caisse."}
