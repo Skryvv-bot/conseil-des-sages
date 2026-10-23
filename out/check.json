@@ -1,15 +1,49 @@
 {
- "list": {
-  "s": 429,
-  "t": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"Quota exceeded.\",\n    \"status\": \"RESOURCE_EXHAUSTED\"\n  }\n}\n"
- },
- "doc": {
-  "s": 429,
-  "t": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"Quota exceeded.\",\n    \"status\": \"RESOURCE_EXHAUSTED\"\n  }\n}\n"
- },
- "sages": {
-  "s": 429,
-  "t": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"Quota exceeded.\",\n    \"status\": \"RESOURCE_EXHAUSTED\"\n  }\n}\n"
- },
- "time": "2026-10-23T22:02:08.388Z"
+ "time": "2026-10-23T22:13:57.880Z",
+ "before": [
+  {
+   "id": "lol_115660540726095006",
+   "winner": "GEN"
+  },
+  {
+   "id": "lol_115660540726095010",
+   "winner": "KC"
+  },
+  {
+   "id": "lol_115660540726095012",
+   "winner": "DK"
+  },
+  {
+   "id": "lol_115660540726095014",
+   "winner": "HLE"
+  },
+  {
+   "id": "lol_115660540726095020",
+   "winner": "MKOI"
+  }
+ ],
+ "run": "{\n \"log\": []\n}",
+ "after": [
+  {
+   "id": "lol_115660540726095006",
+   "winner": "GEN"
+  },
+  {
+   "id": "lol_115660540726095010",
+   "winner": "KC"
+  },
+  {
+   "id": "lol_115660540726095012",
+   "winner": "DK"
+  },
+  {
+   "id": "lol_115660540726095014",
+   "winner": "HLE"
+  },
+  {
+   "id": "lol_115660540726095020",
+   "winner": "MKOI"
+  }
+ ],
+ "stateUpd": "2026-10-23T22:13:37.392541Z"
 }
