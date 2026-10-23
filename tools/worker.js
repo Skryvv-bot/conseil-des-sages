@@ -559,7 +559,7 @@ async function fxMvps(env, games, tk, log) {
 
 
 // Résultats des matchs (Matchs & pronos, Pick'em) depuis lolesports, sans dépendre de Leaguepedia
-async function resultsRun(env, tk, sch, log) {
+async function resultsRun(env, tk, sch, log, games) {
   const raw = await fsGetRaw("results/state", tk); if (!raw?.fields?.matches) return;
   const matches = fromFs(raw.fields.matches) || []; let changed = 0; const used = new Set();
   const evs = (sch.data?.schedule?.events || []).filter(e => e.type === "match" && Math.abs(Date.parse(e.startTime) - Date.now()) < 12 * 86400e3);
@@ -578,15 +578,22 @@ async function resultsRun(env, tk, sch, log) {
       bo: ev.match.strategy?.count || m.bo || 1 };
     if (Object.keys(upd).some(k => String(m[k] ?? "") !== String(upd[k] ?? ""))) { Object.assign(m, upd); changed++; }
   }
-  if (!changed) return;
-  const res = await fsPatch("results/state", { matches, updatedAt: new Date().toISOString() }, tk);
+  // Stats des joueurs aux Worlds 2026 (onglet Équipes & winrates) : victoires, KDA, champions joués, d'après les games enregistrées
+  const CH = { MonkeyKing: "Wukong", JarvanIV: "Jarvan IV", XinZhao: "Xin Zhao", LeeSin: "Lee Sin", MissFortune: "Miss Fortune", TwistedFate: "Twisted Fate", KSante: "K'Sante", Kaisa: "Kai'Sa", KogMaw: "Kog'Maw", RekSai: "Rek'Sai", Khazix: "Kha'Zix", Chogath: "Cho'Gath", Velkoz: "Vel'Koz", Belveth: "Bel'Veth", AurelionSol: "Aurelion Sol", DrMundo: "Dr. Mundo", MasterYi: "Master Yi", TahmKench: "Tahm Kench", Nunu: "Nunu et Willump", RenataGlasc: "Renata Glasc", Renata: "Renata Glasc" };
+  const acc = {};
+  for (const g of games || []) { if (g.src !== "lolesports") continue;
+    for (const [n, p] of Object.entries(g.players || {})) { const o = acc[n] || (acc[n] = { w: 0, l: 0, k: 0, d: 0, a: 0, champs: {} });
+      p.win ? o.w++ : o.l++; o.k += p.k || 0; o.d += p.d || 0; o.a += p.a || 0; const c = CH[p.champ] || p.champ; if (c) o.champs[c] = (o.champs[c] || 0) + 1; } }
+  const playerStats = Object.fromEntries(Object.entries(acc).map(([n, o]) => [n, { w: o.w, l: o.l, kda: ((o.k + o.a) / Math.max(1, o.d)).toFixed(1), champs: o.champs }]));
+  const nGames = (games || []).filter(g => g.src === "lolesports").length, prevGames = fromFs(raw.fields.games);
+  if (!changed && +prevGames === nGames) return;
+  const res = await fsPatch("results/state", { matches, playerStats, games: nGames, updatedAt: new Date().toISOString() }, tk);
   log.push(`Résultats : ${changed} match(s) mis à jour${res.ok ? "" : " (échec " + res.status + ")"}`);
 }
 
 async function fantasyRun(env, log = []) {
   const tk = (await fbToken(env)).token;
   const sch = await leGet(`/getSchedule?hl=en-US&leagueId=${FX_LEAGUE}`);
-  await resultsRun(env, tk, sch, log).catch(e => log.push("Résultats : " + e.message));
   const evs = (sch.data?.schedule?.events || []).filter(e => e.type === "match" && e.state !== "unstarted" && Date.now() - Date.parse(e.startTime) < 3 * 86400e3 && Date.parse(e.startTime) < Date.now());
   let budget = 4;
   for (const ev of evs) {
@@ -615,6 +622,7 @@ async function fantasyRun(env, log = []) {
     if (allDone && env.CDS_KV) await env.CDS_KV.put(kDone, "1", { expirationTtl: 30 * 86400 });
   }
   const games = await fsList("fantasyGames", tk);
+  await resultsRun(env, tk, sch, log, games).catch(e => log.push("Résultats : " + e.message));
   await fxMvps(env, games, tk, log).catch(e => log.push("MVP : " + e.message));
   return log;
 }
