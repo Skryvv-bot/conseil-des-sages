@@ -15,6 +15,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="conseil.js"></script>
+<script src="fantasy/score.js"></script>
 <style>
 /* Layout: QG du Conseil — emblème + titre, compte à rebours WoW en bandeau, grille 2 colonnes (Discord / parties LoL), tuiles vers les pages, résumé Worlds */
 :root{
@@ -163,6 +164,16 @@ input[type=text],select{font:500 1rem var(--body);color:var(--ink);background:va
 .feat .lg{display:flex;align-items:center;gap:10px}
 @media (max-width:640px){.feat{grid-template-columns:1fr}.feat .fa,.feat .fb{clip-path:none;align-items:flex-start;text-align:left}}
 .fan{background:#15171c;border-top:4px solid var(--tv-red,#e4002b);padding:20px;display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:20px;align-items:center}
+.fan-rank{background:#08090b;border:1px solid #2a2d35;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.fr-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}.fr-head h3{margin:0;font-size:1.4rem}
+.fr-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.fr-list li{display:grid;grid-template-columns:2.2rem minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 10px;background:#15171c}
+.fr-list li.me{outline:2px solid #ffb400}
+.fr-pos{font:400 1.3rem var(--display,Impact,sans-serif);color:#ffb400;text-align:center}
+.fr-n{display:flex;flex-direction:column;min-width:0}.fr-n b{font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fr-n small{color:var(--muted,#a7abb6);font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fr-pts{font:400 1.4rem var(--display,Impact,sans-serif);color:#fff;font-variant-numeric:tabular-nums}.fr-pts small{font:600 .7rem var(--body,system-ui);color:var(--muted,#a7abb6);margin-left:3px}
+.fr-all{align-self:flex-start;font-weight:700}
 .fan-txt{display:flex;flex-direction:column;gap:10px;min-width:0}.fan-txt h2{margin:0;font-size:clamp(1.8rem,4.5vw,2.8rem)}.fan-txt p{margin:0}.fan-txt .btn{align-self:flex-start}
 @media (max-width:760px){.fan{grid-template-columns:1fr}}
 .trailer{margin:0;display:flex;flex-direction:column;gap:8px}
@@ -262,10 +273,11 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
   </section>
   <!-- Fantasy du Conseil : vidéo + accès -->
   <section class="fan" aria-labelledby="fanT">
-    <figure class="trailer fan-vid">
-      <video id="fanVid" src="cds-fantasy.mp4" poster="cds-fantasy.jpg" muted loop playsinline autoplay preload="none" controls aria-label="Vidéo CDS Fantasy Worlds 26"></video>
-      <figcaption><span class="tag live">Nouveau</span> CDS Fantasy · Worlds 26 <button type="button" class="sound" id="fanSound">Activer le son</button></figcaption>
-    </figure>
+    <div class="fan-rank" aria-labelledby="fanRankT">
+      <div class="fr-head"><h3 id="fanRankT">Classement Fantasy</h3><span class="note" id="fanRankNote"></span></div>
+      <ol class="fr-list" id="fanRank"><li class="note">Chargement du classement…</li></ol>
+      <a class="fr-all" href="fantasy.html#classement">Classement complet et équipes →</a>
+    </div>
     <div class="fan-txt">
       <span class="eyebrow">Worlds 2026 · Fantasy league</span>
       <h2 id="fanT">CDS Fantasy</h2>
@@ -407,10 +419,6 @@ tickEvent();setInterval(tickEvent,1000);
 (function(){const v=document.getElementById("trailer"),b=document.getElementById("soundBtn");
   if(matchMedia("(prefers-reduced-motion: reduce)").matches){v.removeAttribute("autoplay");v.pause()}
   b.onclick=()=>{v.muted=!v.muted;if(!v.muted){v.currentTime=0;v.play().catch(()=>{})}b.textContent=v.muted?"Activer le son":"Couper le son"};
-  v.addEventListener("volumechange",()=>b.textContent=v.muted?"Activer le son":"Couper le son");})();
-(function(){const v=document.getElementById("fanVid"),b=document.getElementById("fanSound");if(!v)return;
-  if(matchMedia("(prefers-reduced-motion: reduce)").matches){v.removeAttribute("autoplay");v.pause()}
-  b.onclick=()=>{v.muted=!v.muted;if(!v.muted){v.currentTime=0;v.play().catch(()=>{})}};
   v.addEventListener("volumechange",()=>b.textContent=v.muted?"Activer le son":"Couper le son");})();
 if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!navigator.standalone)document.getElementById("iosHint").hidden=false;
 // ===== Réglages =====
@@ -637,7 +645,17 @@ function renderKick(){
   $("kickTierBtn").textContent=ok?"Voir le classement":n?"Finir ma tier list":"Faire ma tier list";
 }
 setInterval(()=>{try{renderKick()}catch(e){}},1000);
-function renderAll(){renderKick();renderWeek();if(ladder)renderRecap();
+// Classement de la Fantasy (mêmes règles de points que la page Fantasy, via fantasy/score.js)
+let fanD={sages:{},phases:{},captains:{},games:[]};
+function renderFanRank(){const box=$("fanRank");if(!box||!window.FantasyScore)return;const F=window.FantasyScore;
+  const ids=Object.keys(fanD.sages);if(!db){return}
+  if(!ids.length){box.innerHTML=`<li class="note" style="display:block">Personne n'est encore inscrit.</li>`;$("fanRankNote").textContent="";return}
+  const ph=["finale","demis","quarts","swiss"].find(p=>fanD.phases[p]?.picks?.length);
+  const rows=ids.map(id=>({id,p:fanD.sages[id].pseudo||"Un sage",t:F.sagePts(fanD.phases,fanD.captains,fanD.games,id),cap:ph?fanD.captains[id]?.[ph]:null})).sort((a,b)=>b.t-a.t||a.p.localeCompare(b.p));
+  const n=fanD.games.length;$("fanRankNote").textContent=n?`${n} game${n>1?"s":""} comptée${n>1?"s":""}`:"les points arrivent après chaque game";
+  let k=0,prev=null;box.innerHTML=rows.slice(0,10).map((r,i)=>{if(r.t!==prev){k=i+1;prev=r.t}
+    return `<li class="${r.id===uid?"me":""}"><span class="fr-pos">${k}</span><span class="fr-n"><b>${esc(r.p)}</b><small>${r.cap?"Capitaine : "+esc(r.cap):"Pas de capitaine"}</small></span><span class="fr-pts">${F.fr(r.t)}<small>pts</small></span></li>`}).join("")}
+function renderAll(){renderKick();renderFanRank();renderWeek();if(ladder)renderRecap();
   const me=riot[uid]?.pseudo||picks[uid]?.pseudo||wow[uid]?.pseudo;
   $("me").innerHTML=!db?(connErr?"Hors ligne":"Connexion au Conseil…"):me?`Bienvenue, <b>${esc(me)}</b>`:"Bienvenue, sage anonyme";
   renderRiotReg();renderPlayers();renderWow();renderSummary();
@@ -653,6 +671,8 @@ conseilLoadLogos(()=>renderAll());conseilDD().then(()=>renderAll());
   sub("wow",o=>wow=o);
   sub("picks",o=>picks=o);
   sub("tiers",o=>{tiersN=Object.values(o).filter(t=>t.complete).length;myTiers=o[uid]||null});
+  sub("fantasySages",o=>fanD.sages=o);sub("fantasyPhases",o=>fanD.phases=o);sub("fantasyCaptains",o=>fanD.captains=o);
+  db.collection("fantasyGames").onSnapshot(q=>{fanD.games=q.docs.map(d=>({id:d.id,...d.data()}));renderFanRank()},e=>console.warn("fantasyGames",e));
   sub("bets",o=>{bets=o;conseilResolvePronos(db,o)});let ladderAsked=false;sub("riot",o=>{if(!ladderAsked){ladderAsked=true;conseilLadder(db,o).then(l=>{ladder=l;renderRecap()})}});sub("trials",o=>trials=o);sub("sageVotes",o=>sage=o);sub("clash",o=>clash=o);
   db.doc("results/state").onSnapshot(s=>{results=s.exists?s.data():null;renderAll()},()=>{});
   renderAll();
