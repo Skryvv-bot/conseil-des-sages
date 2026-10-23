@@ -1,7 +1,14 @@
 {
- "root": "{\"ok\":true,\"routes\":[\"/live\",\"/ranks\",\"/week\",\"/result\",\"/clash\"]}",
- "gamesBefore": [],
- "fantasyStatus": 200,
- "fantasyRun": "{\n \"log\": [\n  \"IG-GEN game 1 : enregistrée\"\n ]\n}",
- "gamesAfter": []
+ "list": {
+  "s": 429,
+  "t": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"Quota exceeded.\",\n    \"status\": \"RESOURCE_EXHAUSTED\"\n  }\n}\n"
+ },
+ "doc": {
+  "s": 429,
+  "t": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"Quota exceeded.\",\n    \"status\": \"RESOURCE_EXHAUSTED\"\n  }\n}\n"
+ },
+ "sages": {
+  "s": 429,
+  "t": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"Quota exceeded.\",\n    \"status\": \"RESOURCE_EXHAUSTED\"\n  }\n}\n"
+ }
 }
