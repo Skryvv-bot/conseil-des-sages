@@ -1,0 +1,1591 @@
+{
+  "name": "projects/conseil-des-sages/databases/(default)/documents/results/state",
+  "fields": {
+    "games": {
+      "integerValue": "0"
+    },
+    "playerStats": {
+      "mapValue": {}
+    },
+    "matches": {
+      "arrayValue": {
+        "values": [
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R1-1"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 1"
+                },
+                "date": {
+                  "stringValue": "2026-10-23T17:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "1"
+                },
+                "a": {
+                  "stringValue": "GEN"
+                },
+                "b": {
+                  "stringValue": "IG"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "live"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R1-2"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 1"
+                },
+                "date": {
+                  "stringValue": "2026-10-23T18:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "1"
+                },
+                "a": {
+                  "stringValue": "HLE"
+                },
+                "b": {
+                  "stringValue": "TES"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R1-3"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 1"
+                },
+                "date": {
+                  "stringValue": "2026-10-23T19:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "1"
+                },
+                "a": {
+                  "stringValue": "BLG"
+                },
+                "b": {
+                  "stringValue": "MKOI"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R1-4"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 1"
+                },
+                "date": {
+                  "stringValue": "2026-10-23T20:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "1"
+                },
+                "a": {
+                  "stringValue": "AL"
+                },
+                "b": {
+                  "stringValue": "KC"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R1-5"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 1"
+                },
+                "date": {
+                  "stringValue": "2026-10-23T21:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "1"
+                },
+                "a": {
+                  "stringValue": "G2"
+                },
+                "b": {
+                  "stringValue": "DK"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R1-6"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 1"
+                },
+                "date": {
+                  "stringValue": "2026-10-23T22:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "1"
+                },
+                "a": {
+                  "stringValue": "TL"
+                },
+                "b": {
+                  "stringValue": "CFO"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R1-7"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 1"
+                },
+                "date": {
+                  "stringValue": "2026-10-23T23:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "1"
+                },
+                "a": {
+                  "stringValue": "LOS"
+                },
+                "b": {
+                  "stringValue": "T1"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R1-8"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 1"
+                },
+                "date": {
+                  "stringValue": "2026-10-24T00:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "1"
+                },
+                "a": {
+                  "stringValue": "TSW"
+                },
+                "b": {
+                  "stringValue": "LYON"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R2-1"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 2"
+                },
+                "date": {
+                  "stringValue": "2026-10-24T17:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "1"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R2-2"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 2"
+                },
+                "date": {
+                  "stringValue": "2026-10-24T18:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "1"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R2-3"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 2"
+                },
+                "date": {
+                  "stringValue": "2026-10-24T19:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "1"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R2-4"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 2"
+                },
+                "date": {
+                  "stringValue": "2026-10-24T20:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "1"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R2-5"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 2"
+                },
+                "date": {
+                  "stringValue": "2026-10-24T21:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "1"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R2-6"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 2"
+                },
+                "date": {
+                  "stringValue": "2026-10-24T22:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "1"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R2-7"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 2"
+                },
+                "date": {
+                  "stringValue": "2026-10-24T23:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "1"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R2-8"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 2"
+                },
+                "date": {
+                  "stringValue": "2026-10-25T00:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "1"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R3-1"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 3"
+                },
+                "date": {
+                  "stringValue": "2026-10-25T17:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "1"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R3-2"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 3"
+                },
+                "date": {
+                  "stringValue": "2026-10-25T18:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "1"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R3-3"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 3"
+                },
+                "date": {
+                  "stringValue": "2026-10-25T19:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "3"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R3-4"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 3"
+                },
+                "date": {
+                  "stringValue": "2026-10-25T22:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "3"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R3-5"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 3"
+                },
+                "date": {
+                  "stringValue": "2026-10-26T17:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "1"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R3-6"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 3"
+                },
+                "date": {
+                  "stringValue": "2026-10-26T18:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "1"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R3-7"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 3"
+                },
+                "date": {
+                  "stringValue": "2026-10-26T19:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "3"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R3-8"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 3"
+                },
+                "date": {
+                  "stringValue": "2026-10-26T22:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "3"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R4-1"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 4"
+                },
+                "date": {
+                  "stringValue": "2026-10-28T20:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "3"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R4-2"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 4"
+                },
+                "date": {
+                  "stringValue": "2026-10-28T23:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "3"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R4-3"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 4"
+                },
+                "date": {
+                  "stringValue": "2026-10-29T20:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "3"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R4-4"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 4"
+                },
+                "date": {
+                  "stringValue": "2026-10-29T23:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "3"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R4-5"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 4"
+                },
+                "date": {
+                  "stringValue": "2026-10-30T20:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "3"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R4-6"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 4"
+                },
+                "date": {
+                  "stringValue": "2026-10-30T23:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "3"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R5-1"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 5"
+                },
+                "date": {
+                  "stringValue": "2026-10-31T17:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "3"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R5-2"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 5"
+                },
+                "date": {
+                  "stringValue": "2026-10-31T20:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "3"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "R5-3"
+                },
+                "stage": {
+                  "stringValue": "Phase suisse"
+                },
+                "round": {
+                  "stringValue": "Ronde 5"
+                },
+                "date": {
+                  "stringValue": "2026-10-31T23:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "3"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "QF1"
+                },
+                "stage": {
+                  "stringValue": "Quarts de finale"
+                },
+                "round": {
+                  "stringValue": ""
+                },
+                "date": {
+                  "stringValue": "2026-11-03T22:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "5"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "QF2"
+                },
+                "stage": {
+                  "stringValue": "Quarts de finale"
+                },
+                "round": {
+                  "stringValue": ""
+                },
+                "date": {
+                  "stringValue": "2026-11-04T22:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "5"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "QF3"
+                },
+                "stage": {
+                  "stringValue": "Quarts de finale"
+                },
+                "round": {
+                  "stringValue": ""
+                },
+                "date": {
+                  "stringValue": "2026-11-05T22:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "5"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "QF4"
+                },
+                "stage": {
+                  "stringValue": "Quarts de finale"
+                },
+                "round": {
+                  "stringValue": ""
+                },
+                "date": {
+                  "stringValue": "2026-11-06T22:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "5"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "SF1"
+                },
+                "stage": {
+                  "stringValue": "Demi-finales"
+                },
+                "round": {
+                  "stringValue": ""
+                },
+                "date": {
+                  "stringValue": "2026-11-07T22:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "5"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "SF2"
+                },
+                "stage": {
+                  "stringValue": "Demi-finales"
+                },
+                "round": {
+                  "stringValue": ""
+                },
+                "date": {
+                  "stringValue": "2026-11-08T22:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "5"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          },
+          {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "F"
+                },
+                "stage": {
+                  "stringValue": "Finale"
+                },
+                "round": {
+                  "stringValue": ""
+                },
+                "date": {
+                  "stringValue": "2026-11-14T19:00:00.000Z"
+                },
+                "bo": {
+                  "integerValue": "5"
+                },
+                "a": {
+                  "stringValue": "TBD"
+                },
+                "b": {
+                  "stringValue": "TBD"
+                },
+                "sa": {
+                  "integerValue": "0"
+                },
+                "sb": {
+                  "integerValue": "0"
+                },
+                "winner": {
+                  "nullValue": null
+                },
+                "status": {
+                  "stringValue": "upcoming"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "retryAfter": {
+      "integerValue": "1792794267918"
+    },
+    "championLock": {
+      "stringValue": "2026-11-03T22:00:00.000Z"
+    },
+    "updatedAt": {
+      "stringValue": "2026-10-23T17:17:56.188Z"
+    },
+    "champion": {
+      "nullValue": null
+    }
+  },
+  "createTime": "2026-10-21T14:44:04.277108Z",
+  "updateTime": "2026-10-23T22:14:24.596514Z"
+}
