@@ -162,6 +162,9 @@ input[type=text],select{font:500 1rem var(--body);color:var(--ink);background:va
 .feat .when{font:700 .95rem var(--body);color:var(--gold);text-transform:uppercase;letter-spacing:.06em}
 .feat .lg{display:flex;align-items:center;gap:10px}
 @media (max-width:640px){.feat{grid-template-columns:1fr}.feat .fa,.feat .fb{clip-path:none;align-items:flex-start;text-align:left}}
+.fan{background:#15171c;border-top:4px solid var(--tv-red,#e4002b);padding:20px;display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:20px;align-items:center}
+.fan-txt{display:flex;flex-direction:column;gap:10px;min-width:0}.fan-txt h2{margin:0;font-size:clamp(1.8rem,4.5vw,2.8rem)}.fan-txt p{margin:0}.fan-txt .btn{align-self:flex-start}
+@media (max-width:760px){.fan{grid-template-columns:1fr}}
 .trailer{margin:0;display:flex;flex-direction:column;gap:8px}
 .trailer video{width:100%;aspect-ratio:16/9;display:block;background:#000;border:1px solid #2a2d35;object-fit:cover}
 .trailer figcaption{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.88rem;color:var(--muted)}
@@ -255,6 +258,20 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
         <p id="kickTier" class="kick-big"></p>
         <p class="note" id="kickTierNote"></p>
         <a class="btn ghost" href="tierlist.html" id="kickTierBtn">Faire ma tier list</a></div>
+    </div>
+  </section>
+  <!-- Fantasy du Conseil : vidéo + accès -->
+  <section class="fan" aria-labelledby="fanT">
+    <figure class="trailer fan-vid">
+      <video id="fanVid" src="cds-fantasy.mp4" poster="cds-fantasy.jpg" muted loop playsinline autoplay preload="none" controls aria-label="Vidéo CDS Fantasy Worlds 26"></video>
+      <figcaption><span class="tag live">Nouveau</span> CDS Fantasy · Worlds 26 <button type="button" class="sound" id="fanSound">Activer le son</button></figcaption>
+    </figure>
+    <div class="fan-txt">
+      <span class="eyebrow">Worlds 2026 · Fantasy league</span>
+      <h2 id="fanT">CDS Fantasy</h2>
+      <p>Pas de draft : chaque sage reçoit au hasard un Top, un Jungle, un Mid, un Bot et un Support. Tes joueurs marquent des points à chaque game, ton capitaine compte double, et le Conseil vote le MVP et le MVKK.</p>
+      <p class="note">Skryvv ouvre les caisses en direct sur Discord avant le premier match de chaque phase.</p>
+      <a class="btn" href="fantasy.html">S'inscrire à la Fantasy</a>
     </div>
   </section>
   <section class="feat" id="feat" aria-label="Match à la une" hidden></section>
@@ -390,6 +407,10 @@ tickEvent();setInterval(tickEvent,1000);
 (function(){const v=document.getElementById("trailer"),b=document.getElementById("soundBtn");
   if(matchMedia("(prefers-reduced-motion: reduce)").matches){v.removeAttribute("autoplay");v.pause()}
   b.onclick=()=>{v.muted=!v.muted;if(!v.muted){v.currentTime=0;v.play().catch(()=>{})}b.textContent=v.muted?"Activer le son":"Couper le son"};
+  v.addEventListener("volumechange",()=>b.textContent=v.muted?"Activer le son":"Couper le son");})();
+(function(){const v=document.getElementById("fanVid"),b=document.getElementById("fanSound");if(!v)return;
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches){v.removeAttribute("autoplay");v.pause()}
+  b.onclick=()=>{v.muted=!v.muted;if(!v.muted){v.currentTime=0;v.play().catch(()=>{})}};
   v.addEventListener("volumechange",()=>b.textContent=v.muted?"Activer le son":"Couper le son");})();
 if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!navigator.standalone)document.getElementById("iosHint").hidden=false;
 // ===== Réglages =====
