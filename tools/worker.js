@@ -204,7 +204,7 @@ async function fbToken(env) {
 const fromFs = v => v == null ? null : "stringValue" in v ? v.stringValue : "integerValue" in v ? +v.integerValue : "doubleValue" in v ? v.doubleValue : "booleanValue" in v ? v.booleanValue
   : "nullValue" in v ? null : "timestampValue" in v ? Date.parse(v.timestampValue) : "mapValue" in v ? Object.fromEntries(Object.entries(v.mapValue.fields || {}).map(([k, x]) => [k, fromFs(x)])) : "arrayValue" in v ? (v.arrayValue.values || []).map(fromFs) : null;
 const toFs = v => v === null || v === undefined ? { nullValue: null } : typeof v === "boolean" ? { booleanValue: v } : typeof v === "number" ? (Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v })
-  : v instanceof Date ? { timestampValue: v.toISOString() } : typeof v === "object" ? { mapValue: { fields: Object.fromEntries(Object.entries(v).map(([k, x]) => [k, toFs(x)])) } } : { stringValue: String(v) };
+  : v instanceof Date ? { timestampValue: v.toISOString() } : Array.isArray(v) ? { arrayValue: { values: v.map(toFs) } } : typeof v === "object" ? { mapValue: { fields: Object.fromEntries(Object.entries(v).map(([k, x]) => [k, toFs(x)])) } } : { stringValue: String(v) };
 const docObj = d => ({ id: d.name.split("/").pop(), ...Object.fromEntries(Object.entries(d.fields || {}).map(([k, v]) => [k, fromFs(v)])) });
 async function fsList(col, tk) {
   const out = []; let page = "";
@@ -591,7 +591,7 @@ async function fantasyRun(env, log = []) {
   let budget = 4;
   for (const ev of evs) {
     if (budget <= 0) break;
-    const kDone = "fx-match-done:" + ev.match.id;
+    const kDone = "fx2-match-done:" + ev.match.id;
     if (env.CDS_KV && await env.CDS_KV.get(kDone)) continue;
     const det = await leGet(`/getEventDetails?hl=en-US&id=${ev.match.id}`);
     const match = det.data?.event?.match; if (!match) continue;
@@ -599,7 +599,7 @@ async function fantasyRun(env, log = []) {
     let allDone = ev.state === "completed";
     for (const game of match.games || []) {
       if (game.state === "unneeded") continue;
-      const kG = "fx-game:" + game.id;
+      const kG = "fx2-game:" + game.id;
       if (env.CDS_KV && await env.CDS_KV.get(kG)) continue;
       if (game.state !== "completed" && game.state !== "inProgress") { allDone = false; continue; }
       if (budget <= 0) { allDone = false; break; }
