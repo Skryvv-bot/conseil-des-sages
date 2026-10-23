@@ -1,10 +1,10 @@
 # Récupère (depuis GitHub Actions) : tier lists du Conseil, joueurs des Worlds 2026 et leurs photos Leaguepedia, logos d'équipes.
-import json, os, time, urllib.parse, urllib.request
+import hashlib, json, os, subprocess, time, urllib.parse, urllib.request
 
 UA = {"User-Agent": "CDS-fantasy/1.0 (projet de fans)"}
 
 
-def get(url, binary=False, tries=8):
+def get(url, binary=False, tries=5):
     for i in range(tries):
         try:
             with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=40) as r:
@@ -22,6 +22,11 @@ def get(url, binary=False, tries=8):
 
 
 os.makedirs("out/img", exist_ok=True)
+
+
+def push(msg):
+    subprocess.run("git config user.name cds-bot && git config user.email cds-bot@users.noreply.github.com && git add out && (git commit -qm '" + msg + "' || true) && git push -q", shell=True)
+
 open("out/log.txt", "w").write("")
 
 # 1) tier lists et comptes récupérés (lecture publique)
@@ -78,6 +83,7 @@ for i in range(0, len(links), 40):
     pi += part
     time.sleep(2)
 json.dump(pi, open("out/playerimages.json", "w"), ensure_ascii=False, indent=1)
+push("Images des joueurs : liste")
 teams = sorted(set(r["Team"] for r in tp if r.get("Team")))
 tm = cargo("Teams", "Name,Short,Image", "Name IN (" + q(teams) + ")") if teams else []
 json.dump(tm, open("out/teams.json", "w"), ensure_ascii=False, indent=1)
@@ -97,14 +103,26 @@ for t in tm:
     if t.get("Image"):
         files["TEAM:" + t["Name"]] = t["Image"]
 got = {}
+n = 0
 for k, f in files.items():
-    url = "https://lol.fandom.com/wiki/Special:FilePath/" + urllib.parse.quote(f.replace(" ", "_")) + "?width=320"
-    b = get(url, binary=True)
+    fn = f.replace(" ", "_")
+    h = hashlib.md5(fn.encode()).hexdigest()
+    # le CDN d'images n'a pas la limite de requêtes de l'API
+    url = f"https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/{h[0]}/{h[:2]}/{urllib.parse.quote(fn)}/revision/latest/scale-to-width-down/320"
+    b = get(url, binary=True, tries=2)
+    if not b or len(b) < 500:
+        b = get("https://lol.fandom.com/wiki/Special:FilePath/" + urllib.parse.quote(fn) + "?width=320", binary=True, tries=2)
     if b and len(b) > 500:
         ext = os.path.splitext(f)[1].lower() or ".png"
         name = "".join(c if c.isalnum() else "_" for c in k)[:60] + ext
         open("out/img/" + name, "wb").write(b)
         got[k] = {"file": name, "src": f}
-    time.sleep(1.5)
+    else:
+        open("out/log.txt", "a").write("image introuvable : " + k + " " + f + "\n")
+    n += 1
+    if n % 25 == 0:
+        json.dump(got, open("out/images.json", "w"), ensure_ascii=False, indent=1)
+        push(f"Images : {n}/{len(files)}")
+    time.sleep(0.3)
 json.dump(got, open("out/images.json", "w"), ensure_ascii=False, indent=1)
 print("joueurs", len(tp), "images", len(got))
