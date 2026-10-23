@@ -22,6 +22,7 @@ def get(url, binary=False, tries=8):
 
 
 os.makedirs("out/img", exist_ok=True)
+open("out/log.txt", "w").write("")
 
 # 1) tier lists et comptes récupérés (lecture publique)
 KEY = "AIzaSyBnmVwD79y26gs4dVjMEzYyOa7sxdhtR_I"
@@ -50,7 +51,7 @@ def cargo(tables, fields, where, join_on=""):
             q["join_on"] = join_on
         j = get(API + "?" + urllib.parse.urlencode(q))
         if not j or "cargoquery" not in j:
-            print("cargo error", str(j)[:400])
+            print("cargo error", str(j)[:400]); open("out/log.txt", "a").write(tables + " | " + str(j)[:600] + "\n")
             break
         rows = [r["title"] for r in j["cargoquery"]]
         out += rows
@@ -65,13 +66,16 @@ tp = json.load(open("tools/players.json")) if os.path.exists("tools/players.json
            "TP.OverviewPage LIKE '2026 Season World Championship%'", "TP.Link=PR.AllName,PR.OverviewPage=P.OverviewPage")
 json.dump(tp, open("out/players.json", "w"), ensure_ascii=False, indent=1)
 time.sleep(2)
-q = lambda xs: ",".join("'" + x.replace("'", "\\'") + "'" for x in xs)
+q = lambda xs: ",".join("'" + x.replace("'", "''") + "'" for x in xs)
 links = sorted(set(r["Link"] for r in tp if r.get("Link")))
 pi = []
-tp = [r for r in tp if r.get("OP", "").endswith("Main Event")]
+tp = [r for r in tp if r.get("OP", "").endswith("Main Event") and r.get("Role") in ("Top", "Jungle", "Mid", "Bot", "Support")]
 links = sorted(set(r["Link"] for r in tp if r.get("Link")))
 for i in range(0, len(links), 40):
-    pi += cargo("PlayerImages=PI", "PI.FileName=FileName,PI.Link=Link,PI.SortDate=SortDate,PI.Team=Team,PI.Tournament=Tournament", "PI.Link IN (" + q(links[i:i + 40]) + ")")
+    part = cargo("PlayerImages=PI", "PI.FileName=FileName,PI.Link=Link,PI.SortDate=SortDate,PI.Team=Team,PI.Tournament=Tournament", "PI.Link IN (" + q(links[i:i + 40]) + ")")
+    if not part:
+        part = cargo("PlayerImages", "FileName,Link,Team,Tournament", "Link IN (" + q(links[i:i + 40]) + ")")
+    pi += part
     time.sleep(2)
 json.dump(pi, open("out/playerimages.json", "w"), ensure_ascii=False, indent=1)
 teams = sorted(set(r["Team"] for r in tp if r.get("Team")))
