@@ -4,12 +4,17 @@ import json, os, time, urllib.parse, urllib.request
 UA = {"User-Agent": "CDS-fantasy/1.0 (projet de fans)"}
 
 
-def get(url, binary=False, tries=4):
+def get(url, binary=False, tries=8):
     for i in range(tries):
         try:
             with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=40) as r:
                 d = r.read()
-                return d if binary else json.loads(d)
+                if binary:
+                    return d
+                j = json.loads(d)
+                if isinstance(j, dict) and j.get("error", {}).get("code") == "ratelimited":
+                    print("limite Leaguepedia, pause"); time.sleep(75); continue
+                return j
         except Exception as e:
             print("retry", url[:140], e)
             time.sleep(5 * (i + 1))
@@ -17,7 +22,6 @@ def get(url, binary=False, tries=4):
 
 
 os.makedirs("out/img", exist_ok=True)
-open("out/log.txt", "w").write("")
 
 # 1) tier lists et comptes récupérés (lecture publique)
 KEY = "AIzaSyBnmVwD79y26gs4dVjMEzYyOa7sxdhtR_I"
@@ -46,7 +50,7 @@ def cargo(tables, fields, where, join_on=""):
             q["join_on"] = join_on
         j = get(API + "?" + urllib.parse.urlencode(q))
         if not j or "cargoquery" not in j:
-            print("cargo error", str(j)[:400]); open("out/log.txt", "a").write(tables + " | " + fields + " | " + str(j)[:800] + "\n")
+            print("cargo error", str(j)[:400])
             break
         rows = [r["title"] for r in j["cargoquery"]]
         out += rows
@@ -57,19 +61,17 @@ def cargo(tables, fields, where, join_on=""):
     return out
 
 
-tp = cargo("TournamentPlayers=TP,PlayerRedirects=PR,Players=P", "TP.Team=Team,TP.Link=Link,TP.Role=Role,P.Image=Image,P.ID=ID,P.Name=Name,P.Country=Country,TP.OverviewPage=OP",
+tp = json.load(open("tools/players.json")) if os.path.exists("tools/players.json") else cargo("TournamentPlayers=TP,PlayerRedirects=PR,Players=P", "TP.Team=Team,TP.Link=Link,TP.Role=Role,P.Image=Image,P.ID=ID,P.Name=Name,P.Country=Country,TP.OverviewPage=OP",
            "TP.OverviewPage LIKE '2026 Season World Championship%'", "TP.Link=PR.AllName,PR.OverviewPage=P.OverviewPage")
 json.dump(tp, open("out/players.json", "w"), ensure_ascii=False, indent=1)
 time.sleep(2)
-q = lambda xs: ",".join("'" + x.replace("'", "''") + "'" for x in xs)
-tp = [r for r in tp if r.get("Role") in ("Top", "Jungle", "Mid", "Bot", "Support")]
+q = lambda xs: ",".join("'" + x.replace("'", "\\'") + "'" for x in xs)
 links = sorted(set(r["Link"] for r in tp if r.get("Link")))
 pi = []
+tp = [r for r in tp if r.get("OP", "").endswith("Main Event")]
+links = sorted(set(r["Link"] for r in tp if r.get("Link")))
 for i in range(0, len(links), 40):
-    part = cargo("PlayerImages=PI", "PI.FileName=FileName,PI.Link=Link,PI.SortDate=SortDate,PI.Team=Team,PI.Tournament=Tournament", "PI.Link IN (" + q(links[i:i + 40]) + ")")
-    if not part:
-        part = cargo("PlayerImages", "FileName,Link,Team,Tournament", "Link IN (" + q(links[i:i + 40]) + ")")
-    pi += part
+    pi += cargo("PlayerImages=PI", "PI.FileName=FileName,PI.Link=Link,PI.SortDate=SortDate,PI.Team=Team,PI.Tournament=Tournament", "PI.Link IN (" + q(links[i:i + 40]) + ")")
     time.sleep(2)
 json.dump(pi, open("out/playerimages.json", "w"), ensure_ascii=False, indent=1)
 teams = sorted(set(r["Team"] for r in tp if r.get("Team")))
@@ -99,6 +101,6 @@ for k, f in files.items():
         name = "".join(c if c.isalnum() else "_" for c in k)[:60] + ext
         open("out/img/" + name, "wb").write(b)
         got[k] = {"file": name, "src": f}
-    time.sleep(0.6)
+    time.sleep(1.5)
 json.dump(got, open("out/images.json", "w"), ensure_ascii=False, indent=1)
 print("joueurs", len(tp), "images", len(got))
