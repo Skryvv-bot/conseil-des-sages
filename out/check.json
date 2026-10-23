@@ -1,0 +1,7 @@
+{
+ "root": "{\"ok\":true,\"routes\":[\"/live\",\"/ranks\",\"/week\",\"/result\",\"/clash\"]}",
+ "gamesBefore": [],
+ "fantasyStatus": 200,
+ "fantasyRun": "{\n \"log\": [\n  \"IG-GEN game 1 : enregistrée\"\n ]\n}",
+ "gamesAfter": []
+}
