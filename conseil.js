@@ -255,8 +255,11 @@ window.conseilLadder=async function(db,riotProfiles,{force=false}={}){
     try{
       const r=await fetch(RIOT_RELAY+"/ranks?players="+encodeURIComponent(conseilAllAccounts(Object.fromEntries(players)).join(",")));
       if(r.ok){const j=await r.json();const out={};
-        for(const [id,p] of players){const rk=j.ranks?.[p.riotId.toLowerCase()];out[id]={pseudo:p.pseudo,riotId:p.riotId,solo:rk?.solo||null,flex:rk?.flex||null,err:rk?null:(j.errors?.[p.riotId.toLowerCase()]||null),
-          alts:conseilAccounts(p).filter(a=>!a.main).map(a=>{const x=j.ranks?.[a.riotId.toLowerCase()];return {riotId:a.riotId,solo:x?.solo||null,flex:x?.flex||null}})}}
+        // Riot n'a pas répondu pour un compte (limite atteinte…) : on garde son dernier rang connu plutôt que de le faire disparaître du ladder
+        const prevOf=(id,riotId)=>{const pp=cur?.players?.[id];if(!pp)return null;if(pp.riotId?.toLowerCase()===riotId.toLowerCase())return pp;return (pp.alts||[]).find(x=>x.riotId?.toLowerCase()===riotId.toLowerCase())||null};
+        const keep=(id,riotId,x)=>{if(x)return {solo:x.solo||null,flex:x.flex||null};const pv=prevOf(id,riotId),e=j.errors?.[riotId.toLowerCase()]||"";return pv&&!/introuvable/i.test(e)?{solo:pv.solo||null,flex:pv.flex||null}:{solo:null,flex:null}};
+        for(const [id,p] of players){const rk=j.ranks?.[p.riotId.toLowerCase()],k=keep(id,p.riotId,rk);out[id]={pseudo:p.pseudo,riotId:p.riotId,solo:k.solo,flex:k.flex,err:rk?null:(j.errors?.[p.riotId.toLowerCase()]||null),
+          alts:conseilAccounts(p).filter(a=>!a.main).map(a=>{const x=j.ranks?.[a.riotId.toLowerCase()],ka=keep(id,a.riotId,x);return {riotId:a.riotId,solo:ka.solo,flex:ka.flex}})}}
         cur={updatedAt:new Date().toISOString(),players:out};
         await db.doc("ladder/current").set(cur);
         const today=isoDay(Date.now()),snap=await db.doc("ladderSnap/"+today).get();
