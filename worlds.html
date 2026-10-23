@@ -379,7 +379,7 @@ function votesRow(m){
   const n=va.length+vb.length;
   if(!n)return `<div class="votes"><span class="vnote">Aucun vote pour l'instant</span></div>`;
   const pa=Math.round(100*va.length/n),pb=100-pa,open=isLocked(m);
-  const names=(l,t)=>l.length?`<span class="vn"><b>${t}</b> ${l.sort((x,y)=>x.localeCompare(y)).map(n=>esc(n)+conseilCampTag(n,true)).join(", ")}</span>`:"";
+  const names=(l,t)=>l.length?`<span class="vn"><b>${t}</b> ${l.sort((x,y)=>x.localeCompare(y)).map(n=>esc(n)).join(", ")}</span>`:"";
   return `<div class="votes">
     <div class="vbar" role="img" aria-label="${pa}% ${m.a}, ${pb}% ${m.b}"><i style="width:${pa}%;background:${TEAMS[m.a].c}"></i><i style="width:${pb}%;background:${TEAMS[m.b].c}"></i></div>
     <div class="vline"><span>${pa}% · ${va.length} vote${va.length>1?"s":""}</span><span class="vnote">${n} sage${n>1?"s":""} ${open?"ont voté":"· noms révélés au début du match"}</span><span>${vb.length} vote${vb.length>1?"s":""} · ${pb}%</span></div>
