@@ -53,7 +53,7 @@ tr.mine td{background:rgba(255,255,255,.04)}
   <section class="frame panel">
     <div class="between"><h2>Classement</h2><span class="note" id="upd"></span></div>
     <div class="tw"><table id="tbl"></table></div>
-    <p class="note">Tu n'apparais pas ? Ajoute ton Riot ID dans <a href="communaute.html#profil">Le Conseil › Mon profil</a>. Le rang affiché est le rang officiel de Riot. « Semaine » compare avec le premier relevé depuis lundi.</p>
+    <p class="note">Tu n'apparais pas ? Ajoute ton Riot ID dans <a href="communaute.html#profil">Le Conseil › Mon profil</a>. Le rang affiché est le rang officiel de Riot. « Semaine » : victoires et défaites depuis lundi 00 h (historique Riot), LP depuis le premier relevé de la semaine.</p>
   </section>
   <footer>Site de fan du Conseil des Sages.</footer>
 </div>
@@ -62,7 +62,7 @@ conseilNav("ladder");
 const $=id=>document.getElementById(id),esc=conseilEsc;
 let db=null,uid=null,connErr=false,q="solo",data=null,riot={};
 for(const k of ["solo","flex"])$("q-"+k).onclick=()=>{q=k;for(const x of ["solo","flex"])$("q-"+x).setAttribute("aria-selected",x===k);render()};
-const delta=d=>!d?"—":d.fresh?'<span class="flat">nouveau</span>':!d.games?'<span class="flat">0 partie</span>':`<span class="${d.lp>0?"up":d.lp<0?"down":"flat"}">${d.lp>0?"▲ +":d.lp<0?"▼ ":""}${d.lp} LP</span> <span class="note">· ${d.wins}V ${d.games-d.wins}D</span>`;
+const delta=d=>!d?"—":d.fresh?'<span class="flat">nouveau</span>':!d.games?'<span class="flat">0 partie</span>':`${d.lp==null?"":`<span class="${d.lp>0?"up":d.lp<0?"down":"flat"}">${d.lp>0?"▲ +":d.lp<0?"▼ ":""}${d.lp} LP</span> `}<span class="note">${d.lp==null?"":"· "}${d.wins}V ${d.games-d.wins}D${d.pending?` <span title="Parties encore en cours de comptage">(+${d.pending}…)</span>`:""}</span>`;
 function render(){
   $("me").innerHTML=!db?(connErr?"Hors ligne":"Connexion au Conseil…"):riot[uid]?.pseudo?`Connecté : <b>${esc(riot[uid].pseudo)}</b>`:"Sage anonyme";
   if(!data?.current){$("tbl").innerHTML=`<tr><td class="note">${connErr?"Classement indisponible.":db?"Récupération des rangs chez Riot…":"Chargement…"}</td></tr>`;$("podium").innerHTML="";return}

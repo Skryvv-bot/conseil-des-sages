@@ -264,6 +264,12 @@ window.conseilLadder=async function(db,riotProfiles,{force=false}={}){
       }
     }catch(e){console.warn("ladder",e)}
   }
+  // victoires/défaites de la semaine (depuis lundi 00 h) : recomptées par le relais Riot, puis partagées via ladder/current
+  try{const ws=+weekStart(),w=cur?.week,pend=w&&Object.values(w.data||{}).some(x=>x&&((x.solo?.pending||0)+(x.flex?.pending||0))>0);
+    if(cur&&(!w||w.since!==ws||Date.now()-w.at>(pend?2:15)*60e3)){
+      const r=await fetch(RIOT_RELAY+"/week?since="+ws+"&players="+encodeURIComponent(conseilAllAccounts(Object.fromEntries(players)).join(",")));
+      if(r.ok){const j=await r.json(),data={...(w?.since===ws?w.data:{})};for(const [k,v] of Object.entries(j.week||{}))if(v)data[k]=v;
+        cur={...cur,week:{since:ws,at:Date.now(),data}};await db.doc("ladder/current").update({week:cur.week})}}}catch(e){console.warn("week",e)}
   // point de départ de la semaine : premier relevé depuis lundi
   let base=null;
   // pour chaque sage : son premier relevé de la semaine (ceux qui ont ajouté leur Riot ID en cours de semaine partent de ce jour-là)
@@ -290,10 +296,14 @@ window.conseilWeekDelta=function(cur,base,id,q="solo"){
   // compte récupéré sur un autre appareil : on reprend le relevé de début de semaine de l'ancien compte
   // on remonte jusqu'au plus ancien compte qui a un relevé cette semaine (un relevé "nouveau" posé après une récupération ne doit pas effacer la semaine)
   const key=x=>alt?x+"|"+alt:x;let opid=pid;{let o=pid;const seen=new Set();while(o&&!seen.has(o)){seen.add(o);if(base?.players?.[key(o)])opid=o;o=CLAIM_BY[o]}}
-  const a=curOf()?.[q],b=base?.players?.[key(opid)]?.[q];
+  const acc=curOf(),a=acc?.[q],b=base?.players?.[key(opid)]?.[q];
   if(!a)return null;
+  const lp=b?conseilRankValue(a)-conseilRankValue(b):null;
+  // victoires/défaites depuis lundi 00 h, recomptées partie par partie dans l'historique Riot
+  const wk=cur?.week?.since===+weekStart()?cur.week.data?.[String(acc.riotId||"").toLowerCase()]?.[q]:null;
+  if(wk)return{games:wk.w+wk.l,wins:wk.w,lp:wk.w+wk.l?lp:(lp||0),pending:wk.pending||0,lpSince:b?base.since?.[key(opid)]:null};
   if(!b)return{games:0,wins:0,lp:0,fresh:true};
-  return{games:(a.w+a.l)-(b.w+b.l),wins:a.w-b.w,lp:conseilRankValue(a)-conseilRankValue(b)};
+  return{games:(a.w+a.l)-(b.w+b.l),wins:a.w-b.w,lp};
 };
 // Résolution automatique des pronos entre potes : on demande à Riot le résultat de la partie.
 const resolving=new Set();

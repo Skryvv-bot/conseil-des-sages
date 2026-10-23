@@ -589,7 +589,7 @@ function renderRecap(){
   const box=$("recap");if(!ladder?.current){box.innerHTML=`<div class="note" style="grid-column:1/-1">Récap de la semaine : ajoute ton Riot ID (Le Conseil › Mon profil) pour entrer dans le ladder.</div>`;return}
   const P=ladder.current.players||{},ids=Object.keys(P).filter(id=>!conseilIsClaimed(id));
   let games=0,wins=0;const per=[];
-  for(const id of ids){let g=0,w=0,lp=0;for(const q of ["solo","flex"]){const d=conseilWeekDelta(ladder.current,ladder.base,id,q);if(d&&!d.fresh){g+=d.games;w+=d.wins;if(q==="solo")lp=d.lp}}
+  for(const id of ids){let g=0,w=0,lp=0;for(const q of ["solo","flex"]){const d=conseilWeekDelta(ladder.current,ladder.base,id,q);if(d&&!d.fresh){g+=d.games;w+=d.wins;if(q==="solo")lp=d.lp||0}}
     games+=g;wins+=w;per.push({id,name:P[id].pseudo,g,w,lp,solo:P[id].solo})}
   const best=per.filter(p=>p.g).sort((a,b)=>b.lp-a.lp)[0],worst=per.filter(p=>p.g).sort((a,b)=>a.lp-b.lp)[0],active=per.sort((a,b)=>b.g-a.g)[0];
   const wr=per.filter(p=>p.g>=5).sort((a,b)=>b.w/b.g-a.w/a.g)[0];
