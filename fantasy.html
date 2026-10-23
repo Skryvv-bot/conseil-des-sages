@@ -333,7 +333,7 @@ function vTirage(v){
     <span class="note">${n}/${N} caisses ouvertes · ${ph.unique?"un joueur ne va qu'à un seul sage pendant cette phase":"chaque joueur n'est tiré qu'une fois tant qu'il en reste"}${room?" · l'animation s'affiche en direct chez tout le monde":""}</span></section>`;
   h+=`<section class="panel"><h2>Résultat en direct</h2><div class="tw"><table class="drawtbl"><thead><tr><th>Sage</th>${ROLES.map(r=>`<th>${r}</th>`).join("")}</tr></thead><tbody>${d.order.map(id=>`<tr class="${id===uid?"me":""}"><td><a href="#sage-${encodeURIComponent(id)}">${esc(sageName(id))}</a></td>${ROLES.map(r=>{const x=d.picks.find(y=>y.uid===id&&y.role===r),isLast=x&&x===last;
     return `<td class="${isLast?"new":""}">${x?`<a class="mini" href="#joueur-${encodeURIComponent(x.name)}">${P[x.name]?.img?`<img src="${P[x.name].img}" alt="">`:""}${esc(x.name)}${tlg(x.name)}</a>`:'<span class="note">?</span>'}</td>`}).join("")}</tr>`).join("")}</tbody></table></div></section>`;
-  if(isOwner&&n<N)h+=`<section class="panel"><h3>Administration</h3><p class="note">Recommencer efface toutes les caisses déjà ouvertes de cette phase. À utiliser seulement en cas d'erreur.</p><div class="row"><button class="btn ghost small" id="redo">Recommencer le tirage</button><span class="note" id="redoMsg"></span></div></section>`;
+  if(isOwner)h+=`<section class="panel"><h3>Administration</h3><p class="note">Recommencer efface toutes les caisses ouvertes de cette phase et l'ordre des sages. Le prochain « Préparer le tirage » reprendra la liste des inscrits à ce moment-là.</p><div class="row"><button class="btn ghost small" id="redo">Recommencer le tirage</button><span class="note" id="redoMsg"></span></div></section>`;
   h+=demoPanel();
   v.innerHTML=h;bindTirage(v);
 }
