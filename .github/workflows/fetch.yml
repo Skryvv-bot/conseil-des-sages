@@ -11,10 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: python3 tools/who.py
+      - uses: actions/setup-node@v4
+        with: {node-version: 20}
+      - run: npm i --no-save firebase@10.12.2 && node tools/ladtest.mjs
       - run: |
           git config user.name "cds-bot"
           git config user.email "cds-bot@users.noreply.github.com"
           git add out
-          git commit -m "Données de la fantasy league" || echo "rien de nouveau"
+          git commit -m "Test ladder" || echo "rien de nouveau"
           git push
