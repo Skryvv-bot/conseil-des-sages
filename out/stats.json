@@ -1,0 +1,975 @@
+{
+ "leagues": [
+  {
+   "id": "98767975604431411",
+   "slug": "worlds",
+   "name": "Mondial"
+  }
+ ],
+ "events": [
+  {
+   "start": "2026-10-23T17:00:00Z",
+   "state": "completed",
+   "block": "Système suisse",
+   "id": "115660540726095005",
+   "teams": [
+    "IG:loss:0",
+    "GEN:win:1"
+   ],
+   "strategy": {
+    "type": "bestOf",
+    "count": 1
+   }
+  },
+  {
+   "start": "2026-10-23T18:00:00Z",
+   "state": "inProgress",
+   "block": "Système suisse",
+   "id": "115660540726095013",
+   "teams": [
+    "HLE::0",
+    "TES::0"
+   ],
+   "strategy": {
+    "type": "bestOf",
+    "count": 1
+   }
+  },
+  {
+   "start": "2026-10-23T19:00:00Z",
+   "state": "unstarted",
+   "block": "Système suisse",
+   "id": "115660540726095019",
+   "teams": [
+    "BLG::0",
+    "MKOI::0"
+   ],
+   "strategy": {
+    "type": "bestOf",
+    "count": 1
+   }
+  },
+  {
+   "start": "2026-10-23T20:00:00Z",
+   "state": "unstarted",
+   "block": "Système suisse",
+   "id": "115660540726095009",
+   "teams": [
+    "AL::0",
+    "KC::0"
+   ],
+   "strategy": {
+    "type": "bestOf",
+    "count": 1
+   }
+  },
+  {
+   "start": "2026-10-23T21:00:00Z",
+   "state": "unstarted",
+   "block": "Système suisse",
+   "id": "115660540726095011",
+   "teams": [
+    "G2::0",
+    "DK::0"
+   ],
+   "strategy": {
+    "type": "bestOf",
+    "count": 1
+   }
+  },
+  {
+   "start": "2026-10-23T22:00:00Z",
+   "state": "unstarted",
+   "block": "Système suisse",
+   "id": "115660540726095007",
+   "teams": [
+    "TLAW::0",
+    "CFO::0"
+   ],
+   "strategy": {
+    "type": "bestOf",
+    "count": 1
+   }
+  },
+  {
+   "start": "2026-10-23T23:00:00Z",
+   "state": "unstarted",
+   "block": "Système suisse",
+   "id": "115660540726095015",
+   "teams": [
+    "LOS::0",
+    "T1::0"
+   ],
+   "strategy": {
+    "type": "bestOf",
+    "count": 1
+   }
+  },
+  {
+   "start": "2026-10-24T00:00:00Z",
+   "state": "unstarted",
+   "block": "Système suisse",
+   "id": "115660540726095017",
+   "teams": [
+    "TSW::0",
+    "LYON::0"
+   ],
+   "strategy": {
+    "type": "bestOf",
+    "count": 1
+   }
+  }
+ ],
+ "games": [
+  {
+   "id": "115660540726095006",
+   "n": 1,
+   "state": "completed",
+   "teams": [
+    {
+     "id": "99566404848691211",
+     "side": "blue"
+    },
+    {
+     "id": "100205573495116443",
+     "side": "red"
+    }
+   ]
+  }
+ ],
+ "w0s": 200,
+ "meta": {
+  "patchVersion": "16.20.826.3891",
+  "blueTeamMetadata": {
+   "esportsTeamId": "99566404848691211",
+   "participantMetadata": [
+    {
+     "participantId": 1,
+     "esportsPlayerId": "99566404810113891",
+     "summonerName": "IG TheShy",
+     "championId": "Rumble",
+     "role": "top"
+    },
+    {
+     "participantId": 2,
+     "esportsPlayerId": "103461966880868232",
+     "summonerName": "IG Wei",
+     "championId": "JarvanIV",
+     "role": "jungle"
+    },
+    {
+     "participantId": 3,
+     "esportsPlayerId": "99566404811346612",
+     "summonerName": "IG Rookie",
+     "championId": "Aurora",
+     "role": "mid"
+    },
+    {
+     "participantId": 4,
+     "esportsPlayerId": "113662801804437510",
+     "summonerName": "IG JiaQi",
+     "championId": "Jhin",
+     "role": "bottom"
+    },
+    {
+     "participantId": 5,
+     "esportsPlayerId": "98767991785832912",
+     "summonerName": "IG Meiko",
+     "championId": "Alistar",
+     "role": "support"
+    }
+   ]
+  },
+  "redTeamMetadata": {
+   "esportsTeamId": "100205573495116443",
+   "participantMetadata": [
+    {
+     "participantId": 6,
+     "esportsPlayerId": "99566404532924465",
+     "summonerName": "GEN Kiin",
+     "championId": "Ornn",
+     "role": "top"
+    },
+    {
+     "participantId": 7,
+     "esportsPlayerId": "100725844994345151",
+     "summonerName": "GEN Canyon",
+     "championId": "Qiyana",
+     "role": "jungle"
+    },
+    {
+     "participantId": 8,
+     "esportsPlayerId": "99871276342168416",
+     "summonerName": "GEN Chovy",
+     "championId": "Akali",
+     "role": "mid"
+    },
+    {
+     "participantId": 9,
+     "esportsPlayerId": "98767975906852059",
+     "summonerName": "GEN Ruler",
+     "championId": "Corki",
+     "role": "bottom"
+    },
+    {
+     "participantId": 10,
+     "esportsPlayerId": "107454956790371682",
+     "summonerName": "GEN Duro",
+     "championId": "Nautilus",
+     "role": "support"
+    }
+   ]
+  }
+ },
+ "t0": "2026-10-23T17:21:19.869Z",
+ "stopAt": 55,
+ "lastWindowFrame": {
+  "rfc460Timestamp": "2026-10-23T17:52:48.114Z",
+  "gameState": "finished",
+  "blueTeam": {
+   "totalGold": 45802,
+   "inhibitors": 0,
+   "towers": 2,
+   "barons": 0,
+   "totalKills": 10,
+   "dragons": [],
+   "participants": [
+    {
+     "participantId": 1,
+     "totalGold": 8062,
+     "level": 15,
+     "kills": 1,
+     "deaths": 5,
+     "assists": 6,
+     "creepScore": 192,
+     "currentHealth": 18,
+     "maxHealth": 2937
+    },
+    {
+     "participantId": 2,
+     "totalGold": 9085,
+     "level": 13,
+     "kills": 0,
+     "deaths": 3,
+     "assists": 8,
+     "creepScore": 175,
+     "currentHealth": 0,
+     "maxHealth": 2243
+    },
+    {
+     "participantId": 3,
+     "totalGold": 10100,
+     "level": 14,
+     "kills": 4,
+     "deaths": 5,
+     "assists": 5,
+     "creepScore": 220,
+     "currentHealth": 0,
+     "maxHealth": 2401
+    },
+    {
+     "participantId": 4,
+     "totalGold": 12378,
+     "level": 13,
+     "kills": 5,
+     "deaths": 2,
+     "assists": 4,
+     "creepScore": 253,
+     "currentHealth": 0,
+     "maxHealth": 2126
+    },
+    {
+     "participantId": 5,
+     "totalGold": 6177,
+     "level": 10,
+     "kills": 0,
+     "deaths": 7,
+     "assists": 8,
+     "creepScore": 29,
+     "currentHealth": 0,
+     "maxHealth": 2378
+    }
+   ]
+  },
+  "redTeam": {
+   "totalGold": 59243,
+   "inhibitors": 1,
+   "towers": 9,
+   "barons": 1,
+   "totalKills": 22,
+   "dragons": [
+    "infernal",
+    "ocean",
+    "cloud",
+    "cloud"
+   ],
+   "participants": [
+    {
+     "participantId": 6,
+     "totalGold": 9595,
+     "level": 16,
+     "kills": 1,
+     "deaths": 3,
+     "assists": 11,
+     "creepScore": 210,
+     "currentHealth": 0,
+     "maxHealth": 3646
+    },
+    {
+     "participantId": 7,
+     "totalGold": 14925,
+     "level": 17,
+     "kills": 8,
+     "deaths": 1,
+     "assists": 10,
+     "creepScore": 248,
+     "currentHealth": 1465,
+     "maxHealth": 2712
+    },
+    {
+     "participantId": 8,
+     "totalGold": 14348,
+     "level": 16,
+     "kills": 8,
+     "deaths": 1,
+     "assists": 9,
+     "creepScore": 267,
+     "currentHealth": 2214,
+     "maxHealth": 3246
+    },
+    {
+     "participantId": 9,
+     "totalGold": 13344,
+     "level": 15,
+     "kills": 5,
+     "deaths": 2,
+     "assists": 12,
+     "creepScore": 244,
+     "currentHealth": 1599,
+     "maxHealth": 2569
+    },
+    {
+     "participantId": 10,
+     "totalGold": 7031,
+     "level": 12,
+     "kills": 0,
+     "deaths": 3,
+     "assists": 16,
+     "creepScore": 29,
+     "currentHealth": 1372,
+     "maxHealth": 2695
+    }
+   ]
+  }
+ },
+ "detailsStatus": 200,
+ "lastDetails": {
+  "rfc460Timestamp": "2026-10-23T17:52:45.436Z",
+  "participants": [
+   {
+    "participantId": 1,
+    "level": 15,
+    "kills": 1,
+    "deaths": 5,
+    "assists": 6,
+    "totalGoldEarned": 8056,
+    "creepScore": 192,
+    "killParticipation": 0.7,
+    "championDamageShare": 0.35038405818950474,
+    "wardsPlaced": 9,
+    "wardsDestroyed": 1,
+    "attackDamage": 106,
+    "abilityPower": 158,
+    "criticalChance": 0,
+    "attackSpeed": 124,
+    "lifeSteal": 0,
+    "armor": 98,
+    "magicResistance": 48,
+    "tenacity": 0,
+    "items": [
+     1056,
+     3158,
+     6653,
+     1082,
+     3363,
+     8010
+    ],
+    "perkMetadata": {
+     "styleId": 8200,
+     "subStyleId": 8300,
+     "perks": [
+      8992,
+      8224,
+      8234,
+      8237,
+      8347,
+      8313,
+      5007,
+      5010,
+      5011
+     ]
+    },
+    "abilities": [
+     "E",
+     "Q",
+     "W",
+     "Q",
+     "Q",
+     "R",
+     "Q",
+     "E",
+     "Q",
+     "E",
+     "E",
+     "R",
+     "E",
+     "W",
+     "W",
+     "W"
+    ]
+   },
+   {
+    "participantId": 2,
+    "level": 13,
+    "kills": 0,
+    "deaths": 3,
+    "assists": 8,
+    "totalGoldEarned": 9079,
+    "creepScore": 175,
+    "killParticipation": 0.8,
+    "championDamageShare": 0.10202113577721104,
+    "wardsPlaced": 11,
+    "wardsDestroyed": 7,
+    "attackDamage": 242,
+    "abilityPower": 0,
+    "criticalChance": 0,
+    "attackSpeed": 167,
+    "lifeSteal": 0,
+    "armor": 116,
+    "magicResistance": 54,
+    "tenacity": 0,
+    "items": [
+     6698,
+     3071,
+     2019,
+     1037,
+     2055
+    ],
+    "perkMetadata": {
+     "styleId": 8000,
+     "subStyleId": 8300,
+     "perks": [
+      8010,
+      9111,
+      9105,
+      8017,
+      8304,
+      8347,
+      5005,
+      5008,
+      5011
+     ]
+    },
+    "abilities": [
+     "E",
+     "Q",
+     "W",
+     "Q",
+     "Q",
+     "R",
+     "Q",
+     "E",
+     "Q",
+     "E",
+     "R",
+     "E",
+     "E"
+    ]
+   },
+   {
+    "participantId": 3,
+    "level": 14,
+    "kills": 4,
+    "deaths": 5,
+    "assists": 5,
+    "totalGoldEarned": 10094,
+    "creepScore": 220,
+    "killParticipation": 0.9,
+    "championDamageShare": 0.3027444490054994,
+    "wardsPlaced": 10,
+    "wardsDestroyed": 6,
+    "attackDamage": 89,
+    "abilityPower": 231,
+    "criticalChance": 0,
+    "attackSpeed": 134,
+    "lifeSteal": 0,
+    "armor": 77,
+    "magicResistance": 47,
+    "tenacity": 0,
+    "items": [
+     1082,
+     3152,
+     3364,
+     3020,
+     4645,
+     4630,
+     2055
+    ],
+    "perkMetadata": {
+     "styleId": 8100,
+     "subStyleId": 8200,
+     "perks": [
+      8112,
+      8143,
+      8137,
+      8106,
+      8226,
+      8237,
+      5005,
+      5010,
+      5011
+     ]
+    },
+    "abilities": [
+     "Q",
+     "E",
+     "W",
+     "Q",
+     "Q",
+     "R",
+     "Q",
+     "E",
+     "Q",
+     "E",
+     "R",
+     "E",
+     "E",
+     "W"
+    ]
+   },
+   {
+    "participantId": 4,
+    "level": 13,
+    "kills": 5,
+    "deaths": 2,
+    "assists": 4,
+    "totalGoldEarned": 12372,
+    "creepScore": 253,
+    "killParticipation": 0.9,
+    "championDamageShare": 0.1979118165790589,
+    "wardsPlaced": 14,
+    "wardsDestroyed": 8,
+    "attackDamage": 398,
+    "abilityPower": 0,
+    "criticalChance": 0,
+    "attackSpeed": 135,
+    "lifeSteal": 6,
+    "armor": 108,
+    "magicResistance": 53,
+    "tenacity": 0,
+    "items": [
+     1120,
+     6697,
+     3363,
+     3094,
+     3036,
+     1038
+    ],
+    "perkMetadata": {
+     "styleId": 8000,
+     "subStyleId": 8300,
+     "perks": [
+      8021,
+      8009,
+      9103,
+      8017,
+      8321,
+      8316,
+      5008,
+      5011
+     ]
+    },
+    "abilities": [
+     "Q",
+     "W",
+     "Q",
+     "E",
+     "Q",
+     "R",
+     "Q",
+     "W",
+     "Q",
+     "W",
+     "R",
+     "W",
+     "W"
+    ]
+   },
+   {
+    "participantId": 5,
+    "level": 10,
+    "kills": 0,
+    "deaths": 7,
+    "assists": 8,
+    "totalGoldEarned": 6168,
+    "creepScore": 29,
+    "killParticipation": 0.8,
+    "championDamageShare": 0.04693854044872593,
+    "wardsPlaced": 48,
+    "wardsDestroyed": 10,
+    "attackDamage": 91,
+    "abilityPower": 0,
+    "criticalChance": 0,
+    "attackSpeed": 116,
+    "lifeSteal": 0,
+    "armor": 116,
+    "magicResistance": 92,
+    "tenacity": 0,
+    "items": [
+     3364,
+     3050,
+     3009,
+     3067,
+     2055,
+     2055,
+     1033,
+     1029
+    ],
+    "perkMetadata": {
+     "styleId": 8400,
+     "subStyleId": 8200,
+     "perks": [
+      8439,
+      8463,
+      8473,
+      8242,
+      8275,
+      8234,
+      5007,
+      5010,
+      5011
+     ]
+    },
+    "abilities": [
+     "W",
+     "Q",
+     "E",
+     "Q",
+     "Q",
+     "R",
+     "Q",
+     "W",
+     "Q",
+     "W"
+    ]
+   },
+   {
+    "participantId": 6,
+    "level": 16,
+    "kills": 1,
+    "deaths": 3,
+    "assists": 11,
+    "totalGoldEarned": 9589,
+    "creepScore": 210,
+    "killParticipation": 0.5454545454545454,
+    "championDamageShare": 0.12726981540180776,
+    "wardsPlaced": 14,
+    "wardsDestroyed": 2,
+    "attackDamage": 128,
+    "abilityPower": 0,
+    "criticalChance": 0,
+    "attackSpeed": 138,
+    "lifeSteal": 0,
+    "armor": 248,
+    "magicResistance": 247,
+    "tenacity": 0,
+    "items": [
+     2504,
+     3158,
+     3143,
+     1057,
+     3364,
+     1031,
+     2055
+    ],
+    "perkMetadata": {
+     "styleId": 8400,
+     "subStyleId": 8300,
+     "perks": [
+      8437,
+      8446,
+      8444,
+      8242,
+      8345,
+      8347,
+      5005,
+      5008,
+      5011
+     ]
+    },
+    "abilities": [
+     "Q",
+     "W",
+     "E",
+     "W",
+     "W",
+     "R",
+     "W",
+     "E",
+     "W",
+     "E",
+     "R",
+     "E",
+     "E",
+     "Q",
+     "Q",
+     "R"
+    ]
+   },
+   {
+    "participantId": 7,
+    "level": 17,
+    "kills": 8,
+    "deaths": 1,
+    "assists": 10,
+    "totalGoldEarned": 14919,
+    "creepScore": 248,
+    "killParticipation": 0.8181818181818182,
+    "championDamageShare": 0.2689128862180067,
+    "wardsPlaced": 8,
+    "wardsDestroyed": 6,
+    "attackDamage": 343,
+    "abilityPower": 26,
+    "criticalChance": 0,
+    "attackSpeed": 168,
+    "lifeSteal": 0,
+    "armor": 101,
+    "magicResistance": 84,
+    "tenacity": 0,
+    "items": [
+     3364,
+     6699,
+     2520,
+     3814,
+     3111,
+     3035
+    ],
+    "perkMetadata": {
+     "styleId": 8300,
+     "subStyleId": 8100,
+     "perks": [
+      8369,
+      8321,
+      8313,
+      8347,
+      8143,
+      8106,
+      5008,
+      5011
+     ]
+    },
+    "abilities": [
+     "Q",
+     "W",
+     "Q",
+     "E",
+     "Q",
+     "R",
+     "Q",
+     "W",
+     "Q",
+     "W",
+     "W",
+     "R",
+     "W",
+     "E",
+     "E",
+     "E",
+     "R",
+     "E"
+    ]
+   },
+   {
+    "participantId": 8,
+    "level": 16,
+    "kills": 8,
+    "deaths": 1,
+    "assists": 9,
+    "totalGoldEarned": 14342,
+    "creepScore": 267,
+    "killParticipation": 0.7727272727272727,
+    "championDamageShare": 0.29122914247028964,
+    "wardsPlaced": 6,
+    "wardsDestroyed": 8,
+    "attackDamage": 130,
+    "abilityPower": 422,
+    "criticalChance": 0,
+    "attackSpeed": 146,
+    "lifeSteal": 0,
+    "armor": 141,
+    "magicResistance": 66,
+    "tenacity": 0,
+    "items": [
+     1054,
+     1082,
+     3152,
+     3364,
+     3020,
+     4645,
+     3157
+    ],
+    "perkMetadata": {
+     "styleId": 8000,
+     "subStyleId": 8400,
+     "perks": [
+      8021,
+      9101,
+      9105,
+      8017,
+      8444,
+      8451,
+      5008,
+      5010,
+      5011
+     ]
+    },
+    "abilities": [
+     "Q",
+     "W",
+     "E",
+     "Q",
+     "Q",
+     "R",
+     "Q",
+     "E",
+     "Q",
+     "E",
+     "R",
+     "E",
+     "E",
+     "W",
+     "W",
+     "R"
+    ]
+   },
+   {
+    "participantId": 9,
+    "level": 15,
+    "kills": 5,
+    "deaths": 2,
+    "assists": 12,
+    "totalGoldEarned": 13338,
+    "creepScore": 244,
+    "killParticipation": 0.7727272727272727,
+    "championDamageShare": 0.25629932046191506,
+    "wardsPlaced": 9,
+    "wardsDestroyed": 6,
+    "attackDamage": 261,
+    "abilityPower": 26,
+    "criticalChance": 0,
+    "attackSpeed": 177,
+    "lifeSteal": 6,
+    "armor": 119,
+    "magicResistance": 55,
+    "tenacity": 0,
+    "items": [
+     1120,
+     1083,
+     3078,
+     3363,
+     3047,
+     3134,
+     1018
+    ],
+    "perkMetadata": {
+     "styleId": 8000,
+     "subStyleId": 8300,
+     "perks": [
+      8010,
+      8009,
+      9103,
+      8017,
+      8316,
+      8321,
+      5005,
+      5008,
+      5011
+     ]
+    },
+    "abilities": [
+     "Q",
+     "E",
+     "W",
+     "Q",
+     "Q",
+     "R",
+     "Q",
+     "E",
+     "Q",
+     "E",
+     "R",
+     "E",
+     "E",
+     "W",
+     "W"
+    ]
+   },
+   {
+    "participantId": 10,
+    "level": 12,
+    "kills": 0,
+    "deaths": 3,
+    "assists": 16,
+    "totalGoldEarned": 7022,
+    "creepScore": 29,
+    "killParticipation": 0.7272727272727273,
+    "championDamageShare": 0.056288835447980856,
+    "wardsPlaced": 58,
+    "wardsDestroyed": 11,
+    "attackDamage": 109,
+    "abilityPower": 26,
+    "criticalChance": 0,
+    "attackSpeed": 119,
+    "lifeSteal": 0,
+    "armor": 117,
+    "magicResistance": 82,
+    "tenacity": 0,
+    "items": [
+     3364,
+     3190,
+     2055,
+     2525
+    ],
+    "perkMetadata": {
+     "styleId": 8400,
+     "subStyleId": 8300,
+     "perks": [
+      8439,
+      8463,
+      8473,
+      8242,
+      8347,
+      8304,
+      5005,
+      5010,
+      5011
+     ]
+    },
+    "abilities": [
+     "W",
+     "Q",
+     "E",
+     "Q",
+     "Q",
+     "R",
+     "Q",
+     "W",
+     "Q",
+     "W",
+     "R",
+     "W"
+    ]
+   }
+  ]
+ }
+}
