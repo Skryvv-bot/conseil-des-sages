@@ -74,6 +74,16 @@ input[type=text],select{font:500 1rem var(--body);color:var(--ink);background:va
 .reg-tag{font:600 .68rem var(--body);letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
 .days{display:flex;flex-direction:column;gap:18px}
 .day{display:flex;flex-direction:column;gap:8px}
+.compo{grid-column:1/-1;border-top:1px dashed var(--line2);padding-top:6px}
+.compo summary{cursor:pointer;font-size:.8rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px 0;min-height:32px}
+.cgrid{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:6px 10px;align-items:center;padding:6px 0 4px}
+.crole{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:center;min-width:56px}
+.cp{display:flex;align-items:center;gap:8px;min-width:0}.cgrid .cp:nth-child(3n){flex-direction:row-reverse;text-align:right}
+.cp img{width:34px;height:34px;border-radius:50%;object-fit:cover;object-position:top;background:var(--panel2,#1d2027);flex:none}
+.cpi{display:flex;flex-direction:column;min-width:0}.cpi b{font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cpo{display:flex;flex-wrap:wrap;gap:3px}.cgrid .cp:nth-child(3n) .cpo{justify-content:flex-end}
+.own{font-size:.72rem;font-weight:700;padding:1px 6px;border:1px solid var(--line2);color:var(--ink,#fff)}.own.me{border-color:#ffb400;color:#ffb400}
+.none{font-size:.72rem;color:var(--muted)}
 .votes{grid-column:1/-1;display:flex;flex-direction:column;gap:4px;padding-top:4px;border-top:1px dashed var(--line2)}
 .vbar{display:flex;height:6px;background:var(--line2);overflow:hidden}
 .vbar i{display:block;height:100%;opacity:.85}
@@ -336,6 +346,7 @@ function renderMatches(){
   box.innerHTML=Object.entries(groups).map(([k,list])=>{const [stage,round]=k.split("|");
     return `<div class="day"><h3>${esc(stage)}${round?" · "+esc(round):""} · ${fmtDay(list[0].date)}</h3>${list.map(matchRow).join("")}</div>`}).join("");
   box.querySelectorAll("button.side").forEach(b=>b.onclick=()=>pick(b.dataset.m,b.dataset.t));
+  box.querySelectorAll("details.compo").forEach(d=>d.addEventListener("toggle",()=>compoOpen.set(d.dataset.cm,d.open)));
 }
 function matchRow(m){
   const mine=myDoc?.picks?.[m.id], can=!!myDoc&&!isLocked(m)&&TEAMS[m.a]&&TEAMS[m.b];
@@ -344,7 +355,21 @@ function matchRow(m){
     return can?`<button class="${cls}" data-m="${m.id}" data-t="${t}" aria-pressed="${mine===t}" aria-label="Pronostiquer ${esc(TEAMS[t]?.n)}">${inner}</button>`:`<div class="${cls}">${inner}</div>`};
   const st=m.status==="live"?`<span class="live">● EN DIRECT</span>`:m.status==="done"?"Terminé":isLocked(m)?"Verrouillé":new Date(m.date).toLocaleDateString("fr-FR",{day:"numeric",month:"short"})+" · "+fmtTime(m.date);
   const sc=m.status==="upcoming"?`vs<small>BO${m.bo}</small>`:`${m.sa??0} – ${m.sb??0}<small>BO${m.bo}</small>`;
-  return `<div class="match"><div class="mmeta"><span>${st}</span></div>${side(m.a)}<div class="score">${sc}</div>${side(m.b,true)}${votesRow(m)}</div>`;
+  return `<div class="match"><div class="mmeta"><span>${st}</span></div>${side(m.a)}<div class="score">${sc}</div>${side(m.b,true)}${votesRow(m)}${compoRow(m)}</div>`;
+}
+// Compositions des deux équipes, poste par poste, avec les sages qui ont le joueur dans leur Fantasy (© = capitaine)
+const ROLES5=["Top","Jungle","Mid","Bot","Support"];
+let fan={sages:{},phases:{},captains:{}};const compoOpen=new Map();
+function fanPhase(){const order=["finale","demis","quarts","swiss"];return order.find(id=>fan.phases[id]?.picks?.length)||null}
+function fanOwners(name){const ph=fanPhase();if(!ph)return[];return fan.phases[ph].picks.filter(p=>p.name===name).map(p=>({uid:p.uid,cap:fan.captains[p.uid]?.[ph]===name}))}
+function compoRow(m){
+  if(!TEAMS[m.a]?.p||!TEAMS[m.b]?.p)return"";
+  const cell=(t,i)=>{const n=TEAMS[t].p[i],o=fanOwners(n);
+    return `<div class="cp"><img src="fantasy/img/${t}_${n.replace(/ /g,"_")}.webp" alt="" loading="lazy"><div class="cpi"><b>${esc(n)}</b><span class="cpo">${o.length?o.map(x=>`<span class="own${x.uid===uid?" me":""}">${esc(fan.sages[x.uid]?.pseudo||"Un sage")}${x.cap?" ©":""}</span>`).join(""):'<span class="none">personne</span>'}</span></div></div>`};
+  const today=new Date(m.date).toDateString()===new Date().toDateString();
+  const op=compoOpen.has(m.id)?compoOpen.get(m.id):(m.status==="live"||today);
+  return `<details class="compo" data-cm="${m.id}"${op?" open":""}><summary>Compositions et joueurs Fantasy</summary>
+    <div class="cgrid">${ROLES5.map((r,i)=>`${cell(m.a,i)}<span class="crole">${r}</span>${cell(m.b,i)}`).join("")}</div></details>`;
 }
 // Votes du Conseil : la répartition est visible tout de suite, les noms seulement une fois le match commencé
 function votesRow(m){
@@ -487,6 +512,8 @@ setInterval(refresh,60000);
   let first=true;
   db.doc("results/state").onSnapshot(s=>{if(s.exists&&Array.isArray(s.data().matches)){state=s.data();renderAll()}
     if(first){first=false;refresh()}},e=>{console.error(e);if(first){first=false;refresh()}});
+  const fsub=(col,key)=>db.collection(col).onSnapshot(q=>{const o={};q.docs.forEach(d=>o[d.id]=d.data());fan[key]=o;renderMatches()},e=>console.warn(col,e));
+  fsub("fantasySages","sages");fsub("fantasyPhases","phases");fsub("fantasyCaptains","captains");
   db.collection("picks").onSnapshot(q=>{picks={};q.docs.filter(d=>!conseilIsClaimed(d.id)).forEach(d=>picks[d.id]=d.data());myDoc=uid&&picks[uid]?picks[uid]:null;renderAll()},e=>console.error(e));
   renderAll();
 })();
