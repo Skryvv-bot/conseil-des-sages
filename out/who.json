@@ -22,7 +22,7 @@
    "id": "7ggyIoUpvlRrJCpqKkgdYlsMhcp2",
    "pseudo": "Skryvv",
    "riotId": "EUW Easyhoon#EUW",
-   "upd": "2026-10-22T10:47:40.456803Z"
+   "upd": "2026-10-23T12:50:21.435768Z"
   },
   {
    "id": "BsMlT28q4RU3R7mBuHOkJbJbrmj1",
@@ -73,6 +73,12 @@
    "upd": "2026-10-22T16:46:04.961178Z"
   },
   {
+   "id": "etddQT7rHJWJ6SFIpPbCXwJbqW23",
+   "pseudo": "Bapti",
+   "riotId": "Bxpt#zoo",
+   "upd": "2026-10-23T12:10:40.204462Z"
+  },
+  {
    "id": "mBGo8Mdo54WCgSOntD2woYJ2Z4h1",
    "pseudo": "audric",
    "riotId": "nunu enjoyer#1901",
@@ -115,6 +121,10 @@
    "by": "oRPLVNzuBnYVw2FmxARPDhGwLWB2"
   },
   {
+   "old": "FppP8olojSg9pyqhYqVb0h2H0113",
+   "by": "etddQT7rHJWJ6SFIpPbCXwJbqW23"
+  },
+  {
    "old": "HF1MWrAdoMY0XpptFmn9zzD7IOC3",
    "by": "0TitBmRO5zfx3MnrWViLb5fehKo2"
   },
@@ -134,5 +144,836 @@
    "old": "ylIcs70L5vO11aMx72AxOFBYfSv2",
    "by": "RVUC45fjsIdd588LYlbCoVWrFCY2"
   }
- ]
+ ],
+ "snaps": {
+  "2026-10-22": {
+   "upd": "2026-10-22T11:42:41.576522Z",
+   "create": "2026-10-22T11:42:41.576522Z",
+   "day": "2026-10-22",
+   "players": {
+    "BsMlT28q4RU3R7mBuHOkJbJbrmj1": {
+     "solo": {
+      "l": "342",
+      "w": "354",
+      "rank": "II",
+      "hot": false,
+      "lp": "89",
+      "tier": "EMERALD"
+     },
+     "flex": {
+      "rank": "I",
+      "l": "33",
+      "hot": true,
+      "lp": "19",
+      "tier": "PLATINUM",
+      "w": "42"
+     }
+    },
+    "DSHpmBJyD7NOh6l40G3L56jdhz93": {
+     "solo": {
+      "tier": "EMERALD",
+      "hot": false,
+      "rank": "IV",
+      "lp": "59",
+      "w": "79",
+      "l": "82"
+     },
+     "flex": {
+      "w": "40",
+      "lp": "15",
+      "l": "35",
+      "hot": false,
+      "tier": "PLATINUM",
+      "rank": "III"
+     }
+    },
+    "7ggyIoUpvlRrJCpqKkgdYlsMhcp2": {
+     "solo": {
+      "rank": "II",
+      "l": "251",
+      "tier": "PLATINUM",
+      "w": "235",
+      "lp": "65",
+      "hot": false
+     },
+     "flex": {
+      "lp": "6",
+      "w": "87",
+      "rank": "IV",
+      "hot": false,
+      "l": "70",
+      "tier": "DIAMOND"
+     }
+    },
+    "ylIcs70L5vO11aMx72AxOFBYfSv2": {
+     "solo": null,
+     "flex": null
+    },
+    "zl47wtlKy6dIWvh7mFy1mZohuiq2": {
+     "solo": null,
+     "flex": null
+    },
+    "CSxW5Yuj5MNQWfCxoL3PqhBMLco1": {
+     "solo": {
+      "l": "43",
+      "lp": "24",
+      "hot": false,
+      "w": "53",
+      "tier": "GOLD",
+      "rank": "I"
+     },
+     "flex": {
+      "lp": "80",
+      "w": "4",
+      "rank": "III",
+      "tier": "GOLD",
+      "l": "1",
+      "hot": true
+     }
+    },
+    "HF1MWrAdoMY0XpptFmn9zzD7IOC3": {
+     "solo": {
+      "rank": "I",
+      "lp": "62",
+      "tier": "EMERALD",
+      "l": "10",
+      "hot": false,
+      "w": "12"
+     },
+     "flex": {
+      "tier": "EMERALD",
+      "w": "3",
+      "lp": "70",
+      "hot": false,
+      "l": "9",
+      "rank": "III"
+     }
+    },
+    "FppP8olojSg9pyqhYqVb0h2H0113": {
+     "solo": {
+      "lp": "233",
+      "rank": "I",
+      "w": "354",
+      "l": "363",
+      "hot": true,
+      "tier": "MASTER"
+     },
+     "flex": {
+      "hot": false,
+      "lp": "10",
+      "w": "38",
+      "tier": "MASTER",
+      "l": "35",
+      "rank": "I"
+     }
+    }
+   }
+  },
+  "2026-10-23": {
+   "upd": "2026-10-22T22:04:40.442690Z",
+   "create": "2026-10-22T22:04:40.442690Z",
+   "day": "2026-10-23",
+   "players": {
+    "L8DtqXPQneOrVIrLZkaEJpJYfjK2": {
+     "solo": {
+      "w": "65",
+      "lp": "28",
+      "l": "61",
+      "hot": false,
+      "tier": "PLATINUM",
+      "rank": "II"
+     },
+     "flex": {
+      "rank": "IV",
+      "lp": "48",
+      "tier": "PLATINUM",
+      "l": "46",
+      "w": "46",
+      "hot": false
+     }
+    },
+    "RVUC45fjsIdd588LYlbCoVWrFCY2": {
+     "solo": null,
+     "flex": null
+    },
+    "oRPLVNzuBnYVw2FmxARPDhGwLWB2": {
+     "solo": {
+      "hot": false,
+      "l": "82",
+      "tier": "EMERALD",
+      "rank": "IV",
+      "w": "79",
+      "lp": "59"
+     },
+     "flex": {
+      "rank": "III",
+      "tier": "PLATINUM",
+      "l": "35",
+      "hot": false,
+      "lp": "15",
+      "w": "40"
+     }
+    },
+    "FppP8olojSg9pyqhYqVb0h2H0113": {
+     "solo": {
+      "tier": "MASTER",
+      "hot": false,
+      "w": "354",
+      "rank": "I",
+      "l": "367",
+      "lp": "113"
+     },
+     "flex": {
+      "hot": false,
+      "tier": "MASTER",
+      "l": "35",
+      "lp": "10",
+      "w": "38",
+      "rank": "I"
+     }
+    },
+    "CSxW5Yuj5MNQWfCxoL3PqhBMLco1": {
+     "solo": {
+      "lp": "24",
+      "tier": "GOLD",
+      "l": "43",
+      "hot": false,
+      "rank": "I",
+      "w": "53"
+     },
+     "flex": {
+      "lp": "80",
+      "l": "1",
+      "tier": "GOLD",
+      "hot": true,
+      "rank": "III",
+      "w": "4"
+     }
+    },
+    "7ggyIoUpvlRrJCpqKkgdYlsMhcp2": {
+     "solo": {
+      "w": "235",
+      "rank": "II",
+      "l": "251",
+      "tier": "PLATINUM",
+      "hot": false,
+      "lp": "65"
+     },
+     "flex": {
+      "rank": "IV",
+      "lp": "6",
+      "tier": "DIAMOND",
+      "l": "70",
+      "w": "87",
+      "hot": false
+     }
+    },
+    "zl47wtlKy6dIWvh7mFy1mZohuiq2": {
+     "solo": null,
+     "flex": null
+    },
+    "16RboeIIg5dzRUFyvvUZaYKCb112": {
+     "solo": {
+      "w": "355",
+      "l": "342",
+      "rank": "I",
+      "hot": false,
+      "lp": "8",
+      "tier": "EMERALD"
+     },
+     "flex": {
+      "lp": "19",
+      "hot": true,
+      "tier": "PLATINUM",
+      "w": "42",
+      "rank": "I",
+      "l": "33"
+     }
+    },
+    "mBGo8Mdo54WCgSOntD2woYJ2Z4h1": {
+     "solo": {
+      "l": "38",
+      "w": "31",
+      "lp": "32",
+      "rank": "III",
+      "hot": false,
+      "tier": "EMERALD"
+     },
+     "flex": null
+    },
+    "6ckjwIpiLUPUHckcigseHinfSwk2": {
+     "solo": null,
+     "flex": null
+    },
+    "0TitBmRO5zfx3MnrWViLb5fehKo2": {
+     "solo": {
+      "rank": "IV",
+      "w": "63",
+      "l": "50",
+      "tier": "DIAMOND",
+      "hot": true,
+      "lp": "15"
+     },
+     "flex": {
+      "l": "6",
+      "lp": "73",
+      "tier": "EMERALD",
+      "w": "9",
+      "hot": false,
+      "rank": "IV"
+     }
+    }
+   }
+  },
+  "2026-10-23_0TitBmRO5zfx3MnrWViLb5fehKo2_ewoloeuw": {
+   "upd": "2026-10-23T12:25:14.027039Z",
+   "create": "2026-10-23T12:25:14.027039Z",
+   "players": {
+    "0TitBmRO5zfx3MnrWViLb5fehKo2|ewolo#euw": {
+     "solo": {
+      "rank": "I",
+      "l": "10",
+      "hot": false,
+      "tier": "EMERALD",
+      "w": "12",
+      "lp": "62"
+     },
+     "flex": {
+      "w": "3",
+      "l": "9",
+      "hot": false,
+      "rank": "III",
+      "lp": "70",
+      "tier": "EMERALD"
+     }
+    }
+   },
+   "day": "2026-10-23",
+   "join": "0TitBmRO5zfx3MnrWViLb5fehKo2|ewolo#euw"
+  },
+  "2026-10-23_0TitBmRO5zfx3MnrWViLb5fehKo2_permiscamionmid": {
+   "upd": "2026-10-23T12:25:14.189088Z",
+   "create": "2026-10-23T12:25:14.189088Z",
+   "day": "2026-10-23",
+   "players": {
+    "0TitBmRO5zfx3MnrWViLb5fehKo2|permiscamion#mid": {
+     "solo": {
+      "tier": "EMERALD",
+      "hot": false,
+      "rank": "I",
+      "w": "59",
+      "l": "45",
+      "lp": "75"
+     },
+     "flex": {
+      "rank": "I",
+      "hot": false,
+      "l": "39",
+      "lp": "75",
+      "tier": "EMERALD",
+      "w": "43"
+     }
+    }
+   },
+   "join": "0TitBmRO5zfx3MnrWViLb5fehKo2|permiscamion#mid"
+  },
+  "2026-10-23_C1wPF34ebNPTAM7pHpvMNdnfG1v1": {
+   "upd": "2026-10-23T12:40:14.193331Z",
+   "create": "2026-10-23T12:40:14.193331Z",
+   "join": "C1wPF34ebNPTAM7pHpvMNdnfG1v1",
+   "day": "2026-10-23",
+   "players": {
+    "C1wPF34ebNPTAM7pHpvMNdnfG1v1": {
+     "solo": {
+      "l": "251",
+      "rank": "II",
+      "hot": false,
+      "tier": "PLATINUM",
+      "w": "235",
+      "lp": "65"
+     },
+     "flex": {
+      "l": "70",
+      "lp": "6",
+      "w": "87",
+      "rank": "IV",
+      "hot": false,
+      "tier": "DIAMOND"
+     }
+    }
+   }
+  },
+  "2026-10-23_etddQT7rHJWJ6SFIpPbCXwJbqW23": {
+   "upd": "2026-10-23T12:40:14.317409Z",
+   "create": "2026-10-23T12:40:14.317409Z",
+   "players": {
+    "etddQT7rHJWJ6SFIpPbCXwJbqW23": {
+     "solo": {
+      "hot": false,
+      "l": "372",
+      "w": "355",
+      "lp": "0",
+      "tier": "MASTER",
+      "rank": "I"
+     },
+     "flex": {
+      "tier": "MASTER",
+      "hot": false,
+      "w": "38",
+      "rank": "I",
+      "l": "35",
+      "lp": "10"
+     }
+    }
+   },
+   "join": "etddQT7rHJWJ6SFIpPbCXwJbqW23",
+   "day": "2026-10-23"
+  }
+ },
+ "ladder": {
+  "current": {
+   "upd": "2026-10-23T13:05:45.577859Z",
+   "updatedAt": "2026-10-23T13:05:42.956Z",
+   "players": {
+    "oRPLVNzuBnYVw2FmxARPDhGwLWB2": {
+     "flex": {
+      "w": "40",
+      "l": "35",
+      "rank": "III",
+      "lp": "15",
+      "hot": false,
+      "tier": "PLATINUM"
+     },
+     "err": null,
+     "pseudo": "Gurvan",
+     "solo": {
+      "w": "79",
+      "rank": "IV",
+      "lp": "59",
+      "tier": "EMERALD",
+      "hot": false,
+      "l": "82"
+     },
+     "alts": [],
+     "riotId": "Gurvan#EUW"
+    },
+    "7ggyIoUpvlRrJCpqKkgdYlsMhcp2": {
+     "riotId": "EUW Easyhoon#EUW",
+     "solo": {
+      "lp": "65",
+      "w": "235",
+      "l": "251",
+      "tier": "PLATINUM",
+      "rank": "II",
+      "hot": false
+     },
+     "err": null,
+     "alts": [
+      {
+       "riotId": "Mr Ratajkowski#EUW",
+       "solo": null,
+       "flex": null
+      },
+      {
+       "riotId": "IU Husband#EUW",
+       "solo": null,
+       "flex": null
+      }
+     ],
+     "pseudo": "Skryvv",
+     "flex": {
+      "w": "87",
+      "hot": false,
+      "rank": "IV",
+      "tier": "DIAMOND",
+      "lp": "6",
+      "l": "70"
+     }
+    },
+    "L8DtqXPQneOrVIrLZkaEJpJYfjK2": {
+     "pseudo": "Mort 2 Kaiser #BONK",
+     "alts": [],
+     "solo": {
+      "lp": "10",
+      "w": "65",
+      "tier": "PLATINUM",
+      "hot": false,
+      "rank": "II",
+      "l": "62"
+     },
+     "err": null,
+     "flex": {
+      "lp": "48",
+      "w": "46",
+      "hot": false,
+      "tier": "PLATINUM",
+      "l": "46",
+      "rank": "IV"
+     },
+     "riotId": "Mort 2 Kaiser#BONK"
+    },
+    "6ckjwIpiLUPUHckcigseHinfSwk2": {
+     "alts": [],
+     "solo": null,
+     "riotId": "Nera#06660",
+     "err": null,
+     "pseudo": "Gurvan 2",
+     "flex": null
+    },
+    "CSxW5Yuj5MNQWfCxoL3PqhBMLco1": {
+     "flex": {
+      "l": "1",
+      "tier": "GOLD",
+      "rank": "III",
+      "lp": "80",
+      "w": "4",
+      "hot": true
+     },
+     "riotId": "TrendySD#SCF",
+     "pseudo": "Trendy",
+     "solo": {
+      "w": "53",
+      "hot": false,
+      "rank": "I",
+      "tier": "GOLD",
+      "lp": "24",
+      "l": "43"
+     },
+     "err": null,
+     "alts": []
+    },
+    "mBGo8Mdo54WCgSOntD2woYJ2Z4h1": {
+     "solo": {
+      "l": "39",
+      "rank": "III",
+      "hot": false,
+      "tier": "EMERALD",
+      "lp": "13",
+      "w": "31"
+     },
+     "alts": [],
+     "riotId": "nunu enjoyer#1901",
+     "err": null,
+     "pseudo": "audric",
+     "flex": null
+    },
+    "etddQT7rHJWJ6SFIpPbCXwJbqW23": {
+     "alts": [],
+     "solo": {
+      "w": "356",
+      "rank": "I",
+      "tier": "MASTER",
+      "lp": "30",
+      "l": "372",
+      "hot": false
+     },
+     "pseudo": "Bapti",
+     "err": null,
+     "riotId": "Bxpt#zoo",
+     "flex": {
+      "w": "38",
+      "l": "35",
+      "rank": "I",
+      "tier": "MASTER",
+      "lp": "10",
+      "hot": false
+     }
+    },
+    "16RboeIIg5dzRUFyvvUZaYKCb112": {
+     "pseudo": "Berrry",
+     "solo": {
+      "l": "342",
+      "tier": "EMERALD",
+      "hot": false,
+      "lp": "8",
+      "rank": "I",
+      "w": "355"
+     },
+     "alts": [],
+     "flex": {
+      "lp": "19",
+      "l": "33",
+      "tier": "PLATINUM",
+      "rank": "I",
+      "w": "42",
+      "hot": true
+     },
+     "riotId": "Berrry#CDS",
+     "err": null
+    },
+    "RVUC45fjsIdd588LYlbCoVWrFCY2": {
+     "flex": null,
+     "riotId": "Tabaskoh#EUW",
+     "err": "Compte introuvable",
+     "pseudo": "Tabaskoh",
+     "solo": null,
+     "alts": []
+    },
+    "0TitBmRO5zfx3MnrWViLb5fehKo2": {
+     "flex": {
+      "lp": "73",
+      "hot": false,
+      "tier": "EMERALD",
+      "rank": "IV",
+      "l": "6",
+      "w": "9"
+     },
+     "pseudo": "Ewolo",
+     "err": null,
+     "solo": {
+      "hot": true,
+      "l": "50",
+      "rank": "IV",
+      "tier": "DIAMOND",
+      "lp": "36",
+      "w": "64"
+     },
+     "alts": [
+      {
+       "riotId": "ewolo#euw",
+       "solo": {
+        "tier": "EMERALD",
+        "rank": "I",
+        "lp": "62",
+        "w": "12",
+        "l": "10",
+        "hot": false
+       },
+       "flex": {
+        "tier": "EMERALD",
+        "rank": "III",
+        "lp": "70",
+        "w": "3",
+        "l": "9",
+        "hot": false
+       }
+      },
+      {
+       "riotId": "PERMISCAMION#MID",
+       "solo": {
+        "tier": "EMERALD",
+        "rank": "I",
+        "lp": "75",
+        "w": "59",
+        "l": "45",
+        "hot": false
+       },
+       "flex": {
+        "tier": "EMERALD",
+        "rank": "I",
+        "lp": "75",
+        "w": "43",
+        "l": "39",
+        "hot": false
+       }
+      }
+     ],
+     "riotId": "ultrabanana#euw"
+    },
+    "zl47wtlKy6dIWvh7mFy1mZohuiq2": {
+     "solo": null,
+     "err": null,
+     "alts": [],
+     "pseudo": "HOOtHOOtsHiNy",
+     "riotId": "⁦HOOtHOOtsHiNy⁩⁩#EUW",
+     "flex": null
+    }
+   }
+  }
+ },
+ "riotFull": {
+  "0TitBmRO5zfx3MnrWViLb5fehKo2": {
+   "upd": "2026-10-22T22:24:24.250305Z",
+   "updated": "2026-10-22T22:24:24.060Z",
+   "discord": "",
+   "region": "euw1",
+   "pseudo": "Ewolo",
+   "riotId": "ultrabanana#euw",
+   "roles": [],
+   "alts": [
+    {
+     "riotId": "ewolo#euw",
+     "region": "euw1"
+    },
+    {
+     "riotId": "PERMISCAMION#MID",
+     "region": "euw1"
+    }
+   ],
+   "rank": "Diamant"
+  },
+  "16RboeIIg5dzRUFyvvUZaYKCb112": {
+   "upd": "2026-10-22T15:12:09.553730Z",
+   "riotId": "Berrry#CDS",
+   "region": "euw1",
+   "pseudo": "Berrry",
+   "updated": "2026-10-21T22:05:18.667Z"
+  },
+  "6ckjwIpiLUPUHckcigseHinfSwk2": {
+   "upd": "2026-10-22T17:29:37.508988Z",
+   "riotId": "Nera#06660",
+   "pseudo": "Gurvan 2",
+   "region": "euw1",
+   "updated": "2026-10-22T17:29:38.106Z"
+  },
+  "7ggyIoUpvlRrJCpqKkgdYlsMhcp2": {
+   "upd": "2026-10-23T12:50:21.435768Z",
+   "roles": [],
+   "rank": "Platine",
+   "discord": "",
+   "pseudo": "Skryvv",
+   "riotId": "EUW Easyhoon#EUW",
+   "region": "euw1",
+   "alts": [
+    {
+     "riotId": "Mr Ratajkowski#EUW",
+     "region": "euw1"
+    },
+    {
+     "riotId": "IU Husband#EUW",
+     "region": "euw1"
+    }
+   ],
+   "updated": "2026-10-23T12:50:20.521Z"
+  },
+  "BsMlT28q4RU3R7mBuHOkJbJbrmj1": {
+   "upd": "2026-10-21T22:05:19.471747Z",
+   "updated": "2026-10-21T22:05:18.667Z",
+   "riotId": "Berrry#CDS",
+   "pseudo": "Berrry",
+   "region": "euw1"
+  },
+  "C1wPF34ebNPTAM7pHpvMNdnfG1v1": {
+   "upd": "2026-10-21T19:07:55.222670Z",
+   "riotId": "EUW Easyhoon#EUW",
+   "region": "euw1",
+   "pseudo": "Skryvv",
+   "updated": "2026-10-21T19:07:54.057Z"
+  },
+  "CSxW5Yuj5MNQWfCxoL3PqhBMLco1": {
+   "upd": "2026-10-21T13:49:05.272692Z",
+   "updated": "2026-10-21T13:49:04.892Z",
+   "pseudo": "Trendy",
+   "riotId": "TrendySD#SCF",
+   "region": "euw1"
+  },
+  "DSHpmBJyD7NOh6l40G3L56jdhz93": {
+   "upd": "2026-10-21T13:50:03.667303Z",
+   "pseudo": "Gurvan",
+   "region": "euw1",
+   "riotId": "Gurvan#EUW",
+   "updated": "2026-10-21T13:50:02.427Z"
+  },
+  "FppP8olojSg9pyqhYqVb0h2H0113": {
+   "upd": "2026-10-21T11:29:52.378997Z",
+   "pseudo": "Bapti",
+   "riotId": "Bxpt#zoo",
+   "updated": "2026-10-21T11:29:47.352Z",
+   "region": "euw1"
+  },
+  "HF1MWrAdoMY0XpptFmn9zzD7IOC3": {
+   "upd": "2026-10-21T21:01:21.348274Z",
+   "roles": [
+    "Mid",
+    "Top",
+    "Support",
+    "Bot",
+    "Jungle"
+   ],
+   "updated": "2026-10-21T21:01:21.154Z",
+   "rank": "Diamant",
+   "discord": "ewolo95510_87263",
+   "pseudo": "Ewolo",
+   "region": "euw1",
+   "riotId": "ewolo#euw"
+  },
+  "L8DtqXPQneOrVIrLZkaEJpJYfjK2": {
+   "upd": "2026-10-22T12:25:02.200031Z",
+   "discord": "Mao Ze Dong",
+   "roles": [
+    "Top",
+    "Bot",
+    "Mid",
+    "Support",
+    "Jungle"
+   ],
+   "updated": "2026-10-22T12:25:01.894Z",
+   "rank": "Platine",
+   "riotId": "Mort 2 Kaiser#BONK",
+   "pseudo": "Mort 2 Kaiser #BONK",
+   "region": "euw1"
+  },
+  "RVUC45fjsIdd588LYlbCoVWrFCY2": {
+   "upd": "2026-10-22T16:46:04.961178Z",
+   "riotId": "Tabaskoh#EUW",
+   "roles": [
+    "Top",
+    "Support",
+    "Mid",
+    "Bot",
+    "Jungle"
+   ],
+   "pseudo": "Tabaskoh",
+   "region": "euw1",
+   "updated": "2026-10-21T21:07:35.063Z",
+   "rank": "Non classé",
+   "discord": "Tabaskoh"
+  },
+  "etddQT7rHJWJ6SFIpPbCXwJbqW23": {
+   "upd": "2026-10-23T12:10:40.204462Z",
+   "riotId": "Bxpt#zoo",
+   "pseudo": "Bapti",
+   "region": "euw1",
+   "updated": "2026-10-21T11:29:47.352Z"
+  },
+  "mBGo8Mdo54WCgSOntD2woYJ2Z4h1": {
+   "upd": "2026-10-22T12:26:48.542557Z",
+   "pseudo": "audric",
+   "region": "euw1",
+   "riotId": "nunu enjoyer#1901",
+   "updated": "2026-10-22T12:26:47.057Z",
+   "rank": "Émeraude",
+   "roles": [],
+   "discord": "Audric"
+  },
+  "oRPLVNzuBnYVw2FmxARPDhGwLWB2": {
+   "upd": "2026-10-22T18:13:44.293532Z",
+   "rank": "Émeraude",
+   "roles": [
+    "Support",
+    "Jungle",
+    "Mid",
+    "Bot",
+    "Top"
+   ],
+   "region": "euw1",
+   "pseudo": "Gurvan",
+   "riotId": "Gurvan#EUW",
+   "updated": "2026-10-22T18:13:43.570Z",
+   "discord": "Gulu"
+  },
+  "ylIcs70L5vO11aMx72AxOFBYfSv2": {
+   "upd": "2026-10-21T21:07:34.189200Z",
+   "roles": [
+    "Top",
+    "Support",
+    "Mid",
+    "Bot",
+    "Jungle"
+   ],
+   "rank": "Non classé",
+   "discord": "Tabaskoh",
+   "riotId": "Tabaskoh#EUW",
+   "region": "euw1",
+   "pseudo": "Tabaskoh",
+   "updated": "2026-10-21T21:07:35.063Z"
+  },
+  "zl47wtlKy6dIWvh7mFy1mZohuiq2": {
+   "upd": "2026-10-21T17:54:17.137472Z",
+   "updated": "2026-10-21T17:54:17.542Z",
+   "riotId": "⁦HOOtHOOtsHiNy⁩⁩#EUW",
+   "region": "euw1",
+   "pseudo": "HOOtHOOtsHiNy"
+  }
+ }
 }
