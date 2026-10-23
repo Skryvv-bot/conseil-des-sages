@@ -1,0 +1,694 @@
+{
+ "Gen.G": {
+  "name": "Gen.G Esports",
+  "code": "GEN",
+  "image": "http://static.lolesports.com/teams/1773829250929_GENGLOGO_GOLD.png",
+  "players": [
+   {
+    "name": "Chovy",
+    "role": "mid",
+    "image": "http://static.lolesports.com/players/1778842975847_LCK_GEN_Chovy_F.png"
+   },
+   {
+    "name": "SIRIUSS",
+    "role": "support",
+    "image": "http://static.lolesports.com/players/1769087912320_image6-2026-01-22T141807.421.png"
+   },
+   {
+    "name": "Ripple",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1769087975904_image6-2026-01-22T141912.328.png"
+   },
+   {
+    "name": "Courage",
+    "role": "jungle",
+    "image": "http://static.lolesports.com/players/1769088040791_image6-2026-01-22T142015.564.png"
+   },
+   {
+    "name": "MUDAI",
+    "role": "bottom",
+    "image": "http://static.lolesports.com/players/1769088228177_image6-2026-01-22T142317.010.png"
+   },
+   {
+    "name": "Lumos",
+    "role": "support",
+    "image": "http://static.lolesports.com/players/1769088159344_image6-2026-01-22T142218.990.png"
+   },
+   {
+    "name": "Ruler",
+    "role": "bottom",
+    "image": "http://static.lolesports.com/players/1778842957393_LCK_GEN_Ruler_F.PNG"
+   },
+   {
+    "name": "Duro",
+    "role": "support",
+    "image": "http://static.lolesports.com/players/1778842969792_LCK_GEN_Duro_F.PNG"
+   },
+   {
+    "name": "Kemish",
+    "role": "mid",
+    "image": "http://static.lolesports.com/players/1769088100524_image6-2026-01-22T142115.940.png"
+   },
+   {
+    "name": "Kiin",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1778842963805_LCK_GEN_Kiin_F.PNG"
+   },
+   {
+    "name": "Canyon",
+    "role": "jungle",
+    "image": "http://static.lolesports.com/players/1778842984822_LCK_GEN_Canyon_F.PNG"
+   }
+  ]
+ },
+ "Hanwha Life Esports": {
+  "name": "Hanwha Life Esports",
+  "code": "HLE",
+  "image": "http://static.lolesports.com/teams/1631819564399_hle-2021-worlds.png",
+  "players": [
+   {
+    "name": "Delight",
+    "role": "support",
+    "image": "http://static.lolesports.com/players/1769089417110_LCK_HLE_Delight_F.PNG"
+   },
+   {
+    "name": "Cracker",
+    "role": "mid",
+    "image": "http://static.lolesports.com/players/1769086419226_image6-2026-01-22T135315.938.png"
+   },
+   {
+    "name": "Valiant",
+    "role": "mid",
+    "image": "http://static.lolesports.com/players/1769086142550_image6-2026-01-22T134839.572.png"
+   },
+   {
+    "name": "Panther",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1769086291531_image6-2026-01-22T135105.756.png"
+   },
+   {
+    "name": "Kanavi",
+    "role": "jungle",
+    "image": "http://static.lolesports.com/players/1769089425886_LCK_HLE_Kanavi_F.PNG"
+   },
+   {
+    "name": "Gumayusi",
+    "role": "bottom",
+    "image": "http://static.lolesports.com/players/1769089421483_LCK_HLE_Gumayusi_F.PNG"
+   },
+   {
+    "name": "Bluffing",
+    "role": "support",
+    "image": "http://static.lolesports.com/players/1769086484481_image6-2026-01-22T135420.093.png"
+   },
+   {
+    "name": "Jackal",
+    "role": "jungle",
+    "image": "http://static.lolesports.com/players/1769086354742_image6-2026-01-22T135205.457.png"
+   },
+   {
+    "name": "Pyeonsik",
+    "role": "bottom",
+    "image": "http://static.lolesports.com/players/1769086215440_image6-2026-01-22T134944.828.png"
+   },
+   {
+    "name": "Zeka",
+    "role": "mid",
+    "image": "http://static.lolesports.com/players/1769089430303_LCK_HLE_Zeka_F.PNG"
+   },
+   {
+    "name": "Zeus",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1769089435131_LCK_HLE_Zeus_F.PNG"
+   }
+  ]
+ },
+ "T1": {
+  "name": "T1",
+  "code": "T1",
+  "image": "http://static.lolesports.com/teams/1726801573959_539px-T1_2019_full_allmode.png",
+  "players": [
+   {
+    "name": "Guardian",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1769083424311_image6-2026-01-22T130312.532.png"
+   },
+   {
+    "name": "Haetae",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1769083792191_image6-2026-01-22T130909.603.png"
+   },
+   {
+    "name": "Carim",
+    "role": "jungle",
+    "image": "http://static.lolesports.com/players/default-headshot.png"
+   },
+   {
+    "name": "Guti",
+    "role": "mid",
+    "image": "http://static.lolesports.com/players/1769083583495_image6-2026-01-22T130511.010.png"
+   },
+   {
+    "name": "Cypher",
+    "role": "bottom",
+    "image": "http://static.lolesports.com/players/1769083165855_image6-2026-01-22T125855.379.png"
+   },
+   {
+    "name": "Eclipse",
+    "role": "bottom",
+    "image": "http://static.lolesports.com/players/default-headshot.png"
+   },
+   {
+    "name": "Jinbeom",
+    "role": "bottom",
+    "image": "http://static.lolesports.com/players/default-headshot.png"
+   },
+   {
+    "name": "Cloud ",
+    "role": "support",
+    "image": "http://static.lolesports.com/players/1769083077918_image6144.png"
+   },
+   {
+    "name": "Doran",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1769087520664_LCK_T1_Doran_F.PNG"
+   },
+   {
+    "name": "Faker",
+    "role": "mid",
+    "image": "http://static.lolesports.com/players/1769087499078_LCK_T1_Faker_F.PNG"
+   },
+   {
+    "name": "Oner",
+    "role": "jungle",
+    "image": "http://static.lolesports.com/players/1769087509929_LCK_T1_Oner_F.PNG"
+   },
+   {
+    "name": "Keria",
+    "role": "support",
+    "image": "http://static.lolesports.com/players/1769087515444_LCK_T1_Keria_F.PNG"
+   },
+   {
+    "name": "Painter",
+    "role": "jungle",
+    "image": "http://static.lolesports.com/players/1769084021546_image6-2026-01-22T131032.591.png"
+   },
+   {
+    "name": "Peyz",
+    "role": "bottom",
+    "image": "http://static.lolesports.com/players/1769087491906_LCK_T1_Peyz_F.PNG"
+   }
+  ]
+ },
+ "Dplus KIA": {
+  "name": "Dplus KIA",
+  "code": "DK",
+  "image": "http://static.lolesports.com/teams/1673260049703_DPlusKIALOGO11.png",
+  "players": [
+   {
+    "name": "ShowMaker",
+    "role": "mid",
+    "image": "http://static.lolesports.com/players/1778842721951_LCK_DK_Showmaker_F.png"
+   },
+   {
+    "name": "Wayne",
+    "role": "bottom",
+    "image": "http://static.lolesports.com/players/1769089494861_image6-2026-01-22T144431.139.png"
+   },
+   {
+    "name": "Jaehyuk",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1769089631457_image6-2026-01-22T144643.456.png"
+   },
+   {
+    "name": "Garden",
+    "role": "mid",
+    "image": "http://static.lolesports.com/players/1769089555344_image6-2026-01-22T144534.879.png"
+   },
+   {
+    "name": "Smash",
+    "role": "bottom",
+    "image": "http://static.lolesports.com/players/1778842749985_LCK_DK_Smash_F.PNG"
+   },
+   {
+    "name": "Career",
+    "role": "support",
+    "image": "http://static.lolesports.com/players/1778842708132_LCK_DK_Career_F.PNG"
+   },
+   {
+    "name": "Loopy",
+    "role": "support",
+    "image": "http://static.lolesports.com/players/1769089723144_image6-2026-01-22T144756.107.png"
+   },
+   {
+    "name": "Nevid",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1769089783078_image6-2026-01-22T144919.671.png"
+   },
+   {
+    "name": "Siwoo",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1778842731846_LCK_DK_Siwoo_F.PNG"
+   },
+   {
+    "name": "Lucid",
+    "role": "jungle",
+    "image": "http://static.lolesports.com/players/1778842716183_LCK_DK_Lucid_F.PNG"
+   },
+   {
+    "name": "Solid",
+    "role": "jungle",
+    "image": "http://static.lolesports.com/players/default-headshot.png"
+   }
+  ]
+ },
+ "Anyone's Legend": {
+  "name": "Anyone's Legend",
+  "code": "AL",
+  "image": "http://static.lolesports.com/teams/1641199582689_.png",
+  "players": [
+   {
+    "name": "Shanks",
+    "role": "mid",
+    "image": "http://static.lolesports.com/players/1768349057032_shanks.png"
+   },
+   {
+    "name": "Hope",
+    "role": "bottom",
+    "image": "http://static.lolesports.com/players/1768348315588_hope.png"
+   },
+   {
+    "name": "Kael",
+    "role": "support",
+    "image": "http://static.lolesports.com/players/1768348497910_kael.png"
+   },
+   {
+    "name": "Breathe",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1775225499864_breathe.png"
+   },
+   {
+    "name": "Tarzan",
+    "role": "jungle",
+    "image": "http://static.lolesports.com/players/1768349186102_tarzan.png"
+   }
+  ]
+ },
+ "Bilibili Gaming": {
+  "name": "BILIBILI GAMING",
+  "code": "BLG",
+  "image": "http://static.lolesports.com/teams/1682322954525_Bilibili_Gaming_logo_20211.png",
+  "players": [
+   {
+    "name": "Wenbo",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/default-headshot.png"
+   },
+   {
+    "name": "Viper",
+    "role": "bottom",
+    "image": "http://static.lolesports.com/players/1768349250531_viper.png"
+   },
+   {
+    "name": "Bin",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1768347827679_bin.png"
+   },
+   {
+    "name": "Knight",
+    "role": "mid",
+    "image": "http://static.lolesports.com/players/1768348559860_knight.png"
+   },
+   {
+    "name": "ON",
+    "role": "support",
+    "image": "http://static.lolesports.com/players/1768348897219_on.png"
+   },
+   {
+    "name": "Xun",
+    "role": "jungle",
+    "image": "http://static.lolesports.com/players/1768349380095_xun.png"
+   },
+   {
+    "name": "Flandre",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1768348080942_flandre.png"
+   }
+  ]
+ },
+ "Top Esports": {
+  "name": "TOP ESPORTS",
+  "code": "TES",
+  "image": "http://static.lolesports.com/teams/1592592064571_TopEsportsTES-01-FullonDark.png",
+  "players": [
+   {
+    "name": "Tian",
+    "role": "jungle",
+    "image": "http://static.lolesports.com/players/1775225951328_tian.png"
+   },
+   {
+    "name": "ZUIAN",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1775226028458_zuian.png"
+   },
+   {
+    "name": "Zhuo",
+    "role": "support",
+    "image": "http://static.lolesports.com/players/1768349462733_zhuo.png"
+   },
+   {
+    "name": "JackeyLove",
+    "role": "bottom",
+    "image": "http://static.lolesports.com/players/1768348354504_jackeylove.png"
+   },
+   {
+    "name": "369",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1768347704727_369.png"
+   },
+   {
+    "name": "Creme",
+    "role": "mid",
+    "image": "http://static.lolesports.com/players/1768347880178_creme.png"
+   }
+  ]
+ },
+ "Invictus Gaming": {
+  "name": "Invictus Gaming",
+  "code": "IG",
+  "image": "http://static.lolesports.com/teams/1634762917340_300px-Invictus_Gaming_logo.png",
+  "players": [
+   {
+    "name": "JiaQi",
+    "role": "bottom",
+    "image": "http://static.lolesports.com/players/1775225631369_jiaqi.png"
+   },
+   {
+    "name": "Wei",
+    "role": "jungle",
+    "image": "http://static.lolesports.com/players/1775225991291_wei.png"
+   },
+   {
+    "name": "TheShy",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1753279025857_image628.png"
+   },
+   {
+    "name": "Assum",
+    "role": "bottom",
+    "image": "http://static.lolesports.com/players/1768347811166_assum.png"
+   },
+   {
+    "name": "Rookie",
+    "role": "mid",
+    "image": "http://static.lolesports.com/players/1775225799612_rookie.png"
+   },
+   {
+    "name": "Meiko",
+    "role": "support",
+    "image": "http://static.lolesports.com/players/1775225723214_meiko.png"
+   }
+  ]
+ },
+ "G2 Esports": {
+  "name": "G2 Esports",
+  "code": "G2",
+  "image": "http://static.lolesports.com/teams/G2-FullonDark.png",
+  "players": [
+   {
+    "name": "Hans Sama",
+    "role": "bottom",
+    "image": "http://static.lolesports.com/players/1768549994123_HansSama-01.png"
+   },
+   {
+    "name": "BrokenBlade",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1768550002850_BrokenBlade-01.png"
+   },
+   {
+    "name": "Caps",
+    "role": "mid",
+    "image": "http://static.lolesports.com/players/1768549998426_Caps-01.png"
+   },
+   {
+    "name": "Rodrigo",
+    "role": "none",
+    "image": "http://static.lolesports.com/players/default-headshot.png"
+   },
+   {
+    "name": "SkewMond",
+    "role": "jungle",
+    "image": "http://static.lolesports.com/players/1768549980779_Skewmond-01.png"
+   },
+   {
+    "name": "Labrov",
+    "role": "support",
+    "image": "http://static.lolesports.com/players/1768549989298_Labrov-01.png"
+   }
+  ]
+ },
+ "Movistar KOI": {
+  "name": "Movistar KOI",
+  "code": "MKOI",
+  "image": "http://static.lolesports.com/teams/1734012609283_MKOI_FullColor_Blue.png",
+  "players": [
+   {
+    "name": "Elyoya",
+    "role": "jungle",
+    "image": "http://static.lolesports.com/players/1774651428253_elyoya.png"
+   },
+   {
+    "name": "Jojopyun",
+    "role": "mid",
+    "image": "http://static.lolesports.com/players/1774651666226_jojopyun.png"
+   },
+   {
+    "name": "Myrwn",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1774652336923_myrwn.png"
+   },
+   {
+    "name": "Supa",
+    "role": "bottom",
+    "image": "http://static.lolesports.com/players/1774652617630_supa.png"
+   },
+   {
+    "name": "Alvaro",
+    "role": "support",
+    "image": "http://static.lolesports.com/players/1774651304778_alvaro.png"
+   },
+   {
+    "name": "NightSlayer",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/default-headshot.png"
+   }
+  ]
+ },
+ "Karmine Corp": {
+  "name": "Karmine Corp",
+  "code": "KC",
+  "image": "http://static.lolesports.com/teams/1704714951336_KC.png",
+  "players": [
+   {
+    "name": "Yike",
+    "role": "jungle",
+    "image": "http://static.lolesports.com/players/1768550195190_Yike-01.png"
+   },
+   {
+    "name": "Caliste",
+    "role": "bottom",
+    "image": "http://static.lolesports.com/players/1774651348279_caliste.png"
+   },
+   {
+    "name": "Canna",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1774651372836_canna.png"
+   },
+   {
+    "name": "kyeahoo",
+    "role": "mid",
+    "image": "http://static.lolesports.com/players/1774652002153_kyeahoo.png"
+   },
+   {
+    "name": "Busio",
+    "role": "support",
+    "image": "http://static.lolesports.com/players/1774651329556_busio.png"
+   }
+  ]
+ },
+ "Team Liquid": {
+  "name": "Team Liquid Alienware",
+  "code": "TLAW",
+  "image": "http://static.lolesports.com/teams/1769357207762_TLAlienware_Minimal_Bug-White.png",
+  "players": [
+   {
+    "name": "Quid",
+    "role": "mid",
+    "image": "http://static.lolesports.com/players/1769150548420_AME_LCS26S1_TL_QUID.png"
+   },
+   {
+    "name": "Josedeodo",
+    "role": "jungle",
+    "image": "http://static.lolesports.com/players/1769150518581_AME_LCS26S1_TL_JOSEDEODO.png"
+   },
+   {
+    "name": "Morgan",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1769752562927_morgan.png"
+   },
+   {
+    "name": "CoreJJ",
+    "role": "support",
+    "image": "http://static.lolesports.com/players/1769150483053_AME_LCS26S1_TL_COREJJ.png"
+   },
+   {
+    "name": "Yeon",
+    "role": "bottom",
+    "image": "http://static.lolesports.com/players/1769150607307_AME_LCS26S1_TL_YEON.png"
+   }
+  ]
+ },
+ "LYON": {
+  "name": "Lyon Academy",
+  "code": "LYON",
+  "image": "http://static.lolesports.com/teams/1771401158736_FULL_COLOR_FOR_DARK_BG-1.png",
+  "players": [
+   {
+    "name": "Ticky",
+    "role": "none",
+    "image": "http://static.lolesports.com/players/default-headshot.png"
+   },
+   {
+    "name": "Winder",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/default-headshot.png"
+   },
+   {
+    "name": "Kase",
+    "role": "jungle",
+    "image": "http://static.lolesports.com/players/1674136234584_placeholder.png"
+   },
+   {
+    "name": "Sweeho",
+    "role": "mid",
+    "image": "http://static.lolesports.com/players/1772308572880_sweeho.png"
+   },
+   {
+    "name": "NANINI",
+    "role": "bottom",
+    "image": "http://static.lolesports.com/players/default-headshot.png"
+   },
+   {
+    "name": "Starhide",
+    "role": "support",
+    "image": "http://static.lolesports.com/players/default-headshot.png"
+   },
+   {
+    "name": "Zhayend",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1772308634015_zhayend.png"
+   },
+   {
+    "name": "Razel",
+    "role": "none",
+    "image": "http://static.lolesports.com/players/default-headshot.png"
+   }
+  ]
+ },
+ "Team Secret Whales": {
+  "name": "Team Secret Whales",
+  "code": "TSW",
+  "image": "http://static.lolesports.com/teams/1774598000328_White_EyeText_600p.png",
+  "players": [
+   {
+    "name": "Dire",
+    "role": "mid",
+    "image": "http://static.lolesports.com/players/1775221979037_Dire.png"
+   },
+   {
+    "name": "Eddie",
+    "role": "bottom",
+    "image": "http://static.lolesports.com/players/1775221984176_Eddie.png"
+   },
+   {
+    "name": "Hizto",
+    "role": "jungle",
+    "image": "http://static.lolesports.com/players/1775221973791_Hizto.png"
+   },
+   {
+    "name": "Bie",
+    "role": "support",
+    "image": "http://static.lolesports.com/players/1775221988811_Bie.png"
+   },
+   {
+    "name": "Pun",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1775221968161_Pun.png"
+   }
+  ]
+ },
+ "CTBC Flying Oyster": {
+  "name": "CTBC Flying Oyster",
+  "code": "CFO",
+  "image": "http://static.lolesports.com/teams/1656307849320_CFO_Logo.png",
+  "players": [
+   {
+    "name": "Rest",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1769232185565_Rest.png"
+   },
+   {
+    "name": "Doggo",
+    "role": "bottom",
+    "image": "http://static.lolesports.com/players/1769232306480_Doggo.png"
+   },
+   {
+    "name": "Kino",
+    "role": "support",
+    "image": "http://static.lolesports.com/players/1785926061333_Kino.png"
+   },
+   {
+    "name": "POUT",
+    "role": "mid",
+    "image": "http://static.lolesports.com/players/1785926070523_POUT.png"
+   },
+   {
+    "name": "Shad0w",
+    "role": "jungle",
+    "image": "http://static.lolesports.com/players/1769232218550_Shad0w.png"
+   }
+  ]
+ },
+ "LOS": {
+  "name": "LOS",
+  "code": "LOS",
+  "image": "http://static.lolesports.com/teams/1784013312149_LOS-OLaranja.png",
+  "players": [
+   {
+    "name": "Curse",
+    "role": "jungle",
+    "image": "http://static.lolesports.com/players/1785139911386_LOS_Curse-1copy.png"
+   },
+   {
+    "name": "Zest",
+    "role": "top",
+    "image": "http://static.lolesports.com/players/1785139905307_LOS_Zest-1copy.png"
+   },
+   {
+    "name": "Feisty",
+    "role": "mid",
+    "image": "http://static.lolesports.com/players/1785139916710_LOS_Feisty-5copy.png"
+   },
+   {
+    "name": "Duduhh",
+    "role": "bottom",
+    "image": "http://static.lolesports.com/players/1785139922550_LOS_Duduhh-1copy.png"
+   },
+   {
+    "name": "Ackerman",
+    "role": "support",
+    "image": "http://static.lolesports.com/players/1785139928559_LOS_Ackerman-1copy.png"
+   }
+  ]
+ }
+}
