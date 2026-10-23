@@ -30,13 +30,13 @@ window.conseilConnect=function(){
 const CONSEIL_NAV=[
   {id:"accueil",href:"index.html",label:"Accueil"},
   {id:"ladder",href:"ladder.html",label:"Ladder"},
-  {id:"worlds",href:"worlds.html",label:"Worlds 2026",sub:[{id:"worlds",href:"worlds.html",label:"Matchs & pronos"},{id:"tierlist",href:"tierlist.html",label:"Tier list"}]},
+  {id:"worlds",href:"worlds.html",label:"Worlds 2026",sub:[{id:"worlds",href:"worlds.html",label:"Matchs & pronos"},{id:"tierlist",href:"tierlist.html",label:"Tier list"},{id:"fantasy",href:"fantasy.html",label:"Fantasy"}]},
   {id:"jeux",href:"jeux.html",label:"Jeux",sub:[{id:"jeux",href:"jeux.html",label:"Tous les jeux"},{id:"devinettes",href:"devinettes.html",label:"Devinettes"},{id:"echauffement",href:"echauffement.html",label:"Échauffement"},{id:"potes",href:"potes.html",label:"Entre potes"}]},
   {id:"conseil",href:"communaute.html",label:"Le Conseil",sub:[{id:"conseil",href:"communaute.html",label:"Le Conseil"},{id:"banque",href:"banque.html",label:"Banque · Pièces d'or"}]},
   {id:"customs",href:"customs.html",label:"Customs & Clash"},
   {id:"patch",href:"patch.html",label:"Patch"}
 ];
-const NAV_GROUP={tierlist:"worlds",devinettes:"jeux",echauffement:"jeux",potes:"jeux",banque:"conseil"};
+const NAV_GROUP={tierlist:"worlds",fantasy:"worlds",devinettes:"jeux",echauffement:"jeux",potes:"jeux",banque:"conseil"};
 (function navStyles(){
   const css=`
 .cnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;margin:-20px calc(-1*max(16px,env(safe-area-inset-left,0px))) 0;padding:10px max(16px,env(safe-area-inset-left,0px));
