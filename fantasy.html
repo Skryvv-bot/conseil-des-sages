@@ -359,6 +359,7 @@ function ownerStart(ph){const def=new Date(phaseStart(ph.id)),loc=new Date(def.g
   return `<div class="state red">Tu es l'organisateur. Quand tout le monde est inscrit, prépare le tirage : l'ordre des sages est tiré au sort, puis tu ouvres les caisses une par une en direct.</div>
     <label class="note">Début de la phase (bloque les capitaines) <input type="datetime-local" id="dStart" value="${loc}"></label>
     ${ph.unique?"":`<div><span class="eyebrow">Équipes encore en lice</span><div class="row" style="margin-top:6px">${Object.keys(DATA.teams).map(k=>`<label class="chip"><input type="checkbox" class="dTeam" value="${k}" checked> ${k}</label>`).join("")}</div></div>`}
+    <div><span class="eyebrow">Inscrits (clique sur un nom pour le retirer)</span><div class="row" style="margin-top:6px">${Object.entries(sages).sort((a,b)=>a[1].at-b.at).map(([id,x])=>`<a class="chip" href="#sage-${encodeURIComponent(id)}">${esc(x.pseudo)}</a>`).join("")||'<span class="note">Personne.</span>'}</div></div>
     <div class="row"><button class="btn" id="prep" ${Object.keys(sages).length?"":"disabled"}>Préparer le tirage (${n2(Object.keys(sages).length,"sage","sages")})</button><span class="note" id="drawMsg"></span></div>`}
 function rnd(n){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n}
 function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
@@ -460,7 +461,11 @@ function vSage(v){const id=param,s=sages[id];if(!s){v.innerHTML=`<div class="emp
     <div class="kv"><div><b>${fr(sagePts(id))}</b><span>points au total</span></div><div><b>${rk}${rk===1?"er":"e"}</b><span>au classement</span></div>${PHASES.filter(p=>teamOf(id,p.id)&&Object.keys(teamOf(id,p.id)).length).map(p=>`<div><b>${fr(sagePts(id,p.id))}</b><span>${p.label}</span></div>`).join("")}</div></section>`;
   for(const ph of [...PHASES].reverse()){const tm=teamOf(id,ph.id);if(tm&&Object.keys(tm).length)h+=teamPanel(id,ph.id,id===uid)}
   if(!PHASES.some(p=>teamOf(id,p.id)&&Object.keys(teamOf(id,p.id)).length))h+=`<div class="state">Pas encore de joueurs : le tirage n'a pas eu lieu.</div>`;
-  v.innerHTML=h;bindCaptains(v)}
+  if(isOwner&&id!==uid)h+=`<section class="panel"><h3>Administration</h3><p class="note">Retire ce sage de la Fantasy (doublon, compte de test…). S'il a déjà des joueurs, recommence le tirage de la phase pour les redistribuer.</p><div class="row"><button class="btn ghost small" id="kick">Retirer ${esc(s.pseudo)} de la Fantasy</button></div></section>`;
+  v.innerHTML=h;bindCaptains(v);bindKick(id)}
+// Skryvv peut retirer un inscrit (double clic pour confirmer)
+function bindKick(id){const b=$("kick");if(!b)return;b.onclick=()=>{if(!b.dataset.sure){b.dataset.sure=1;b.textContent="Confirmer le retrait";return}
+  db.doc("sages/"+id).delete().then(()=>go("classement")).catch(()=>{b.textContent="Échec : réessaie"})}}
 
 // ---------- VOTES ----------
 function vRegles(v){v.innerHTML=`<section class="panel"><h2>Règles</h2><div class="rules">
