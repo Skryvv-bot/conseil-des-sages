@@ -569,7 +569,7 @@ let fdb=null;
   sub("phases",s=>{phases={};s.docs.forEach(d=>phases[d.id]=d.data())});
   sub("captains",s=>{captains={};s.docs.forEach(d=>captains[d.id]=d.data())});
   sub("votes",s=>{votes={};s.docs.forEach(d=>votes[d.id]=d.data())});
-  sub("games",s=>{games=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>a.at-b.at)});
+  sub("games",s=>{games=s.docs.map(d=>{const x={id:d.id,...d.data()};if(x.teams&&!Array.isArray(x.teams))x.teams=Object.keys(x.teams).sort((a,b)=>a-b).map(k=>x.teams[k]);return x}).sort((a,b)=>a.at-b.at)});
 })();
 </script>
 
