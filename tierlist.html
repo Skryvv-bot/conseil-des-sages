@@ -92,6 +92,15 @@ input[type=text]{font:500 1rem var(--body);color:var(--ink);background:var(--voi
 .card{display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--panel);border:1px solid var(--line2);font-size:.88rem}
 .card .avg{font:700 .8rem var(--body);color:var(--gold);font-variant-numeric:tabular-nums}
 .card .rk{font:700 .74rem var(--display);color:var(--hex)}
+.cgrid{display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:16px;align-items:start}
+@media (max-width:760px){.cgrid{grid-template-columns:1fr}}
+.whodone{background:var(--panel2);border:1px solid var(--line2);padding:12px 14px;display:flex;flex-direction:column;gap:8px;position:sticky;top:70px}
+.whodone h3{margin:0;font:700 .8rem var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.whodone ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.whodone li{display:flex;justify-content:space-between;gap:8px;font-size:.92rem}
+.whodone li b{font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.whodone .ok{color:var(--hex);font-weight:700}.whodone .wip{color:var(--muted);font-variant-numeric:tabular-nums}
+.whodone .lbl{font:700 .7rem var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px}
 .rlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
 .rrow{display:grid;grid-template-columns:52px auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:8px 14px 8px 0;background:var(--panel);border-left:4px solid var(--line2)}
 .rpos{font:400 1.5rem var(--display);text-align:center;color:var(--muted)}
@@ -153,7 +162,8 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
   <section id="v-council" class="frame panel" hidden>
     <div class="actions"><h2>Classement du Conseil</h2><span class="note" id="voters"></span></div>
     <div class="chips" id="catsCouncil" role="group" aria-label="Catégorie affichée"></div>
-    <div id="council"></div>
+    <div class="cgrid"><div id="council"></div>
+      <aside class="whodone" aria-labelledby="whoT"><h3 id="whoT">Qui a validé ?</h3><div id="whoDone"></div></aside></div>
     <p class="note">Classement du premier au dernier selon la moyenne des tier lists validées (G = 5, S = 4, A = 3, B = 2, F = 0 ; un C ne compte pas). Faker est hors catégorie 🐐 : il ne se classe pas.</p>
   </section>
 
@@ -258,6 +268,7 @@ function renderCouncil(){
   $("voters").textContent=valid.length?`${valid.length} tier list${valid.length>1?"s":""} validée${valid.length>1?"s":""}`:"";
   $("catsCouncil").innerHTML=CATS.map(c=>`<button data-c="${c.id}" aria-pressed="${c.id===catCouncil}">${c.label}</button>`).join("");
   $("catsCouncil").querySelectorAll("button").forEach(b=>b.onclick=()=>{catCouncil=b.dataset.c;renderCouncil()});
+  renderWho(valid);
   if(!db){$("council").innerHTML=`<div class="empty">Chargement du classement…</div>`;return}
   if(!valid.length){$("council").innerHTML=`<div class="empty">Aucune tier list validée pour l'instant. Le classement apparaîtra dès que le premier sage aura validé la sienne.</div>`;return}
   const cat=CATS.find(c=>c.id===catCouncil);
@@ -267,6 +278,13 @@ function renderCouncil(){
     ${rows.map((r,k)=>`<li class="rrow${k<3&&r.avg!=null?" top"+(k+1):""}"><span class="rpos">${r.avg==null?"–":k+1}</span>${badge(r.team)}<span class="rname"><b>${esc(r.name)}${conseilStars(cat.id==="Equipes"?"team":"player",cat.id==="Equipes"?r.team:r.name)}</b>${cat.id!=="Equipes"?`<small>${esc(TEAMS[r.team].n)}</small>`:""}</span><span class="ravg">${r.avg==null?"pas de note":r.avg.toFixed(2).replace(".",",")+'<small>/5</small>'}</span></li>`).join("")}</ol>`;
 }
 
+// Qui a validé sa tier list (joueurs et équipes), et qui est en cours
+function renderWho(valid){const box=$("whoDone");if(!box)return;
+  if(!db){box.innerHTML=`<span class="note">Chargement…</span>`;return}
+  const people=Object.values(all).filter(p=>p.pseudo),done=people.filter(p=>p.complete&&p.ratings).sort((a,b)=>a.pseudo.localeCompare(b.pseudo)),
+    wip=people.filter(p=>!(p.complete&&p.ratings)).map(p=>({p,n:ratedCount(p.ratings||{})})).sort((a,b)=>b.n-a.n);
+  box.innerHTML=`<span class="lbl">Validées (${done.length})</span>${done.length?`<ul>${done.map(p=>`<li><b>${esc(p.pseudo)}</b><span class="ok">✓</span></li>`).join("")}</ul>`:'<span class="note">Personne pour l\'instant.</span>'}
+    ${wip.length?`<span class="lbl">En cours (${wip.length})</span><ul>${wip.map(x=>`<li><b>${esc(x.p.pseudo)}</b><span class="wip">${x.n} / ${TOTAL}</span></li>`).join("")}</ul>`:""}`}
 function renderAll(){renderMe();renderEditor();renderCouncil()}
 renderAll();
 conseilLoadLogos(()=>renderAll());conseilDD().then(()=>renderAll());
