@@ -1,0 +1,6 @@
+accounts 15
+ranks status 200
+errors {"tabaskoh#euw":"Compte introuvable"}
+bapti {"pseudo":"Bapti","riotId":"Bxpt#zoo","solo":{"tier":"MASTER","rank":"I","lp":0,"w":356,"l":373,"hot":false},"flex":{"tier":"MASTER","rank":"I","lp":10,"w":38,"l":35,"hot":false},"err":null,"alts":[]}
+set debugtest OK
+current updatedAt 2026-10-23T17:43:03.343Z keys ["week","updatedAt","players"] weekKeys ["data","since","at"]
