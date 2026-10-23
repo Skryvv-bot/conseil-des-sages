@@ -466,7 +466,7 @@ loadDiscord();setInterval(loadDiscord,120000);
 
 // ===== Joueurs LoL =====
 function riotParts(id){const i=id.lastIndexOf("#");return i>0?[id.slice(0,i).trim(),id.slice(i+1).trim()]:[id.trim(),""]}
-const opgg=(p)=>{const [n,t]=riotParts(p.riotId);return `https://www.op.gg/summoners/${OPGG[p.region]||"euw"}/${encodeURIComponent(n+"-"+t)}/ingame`};
+const opgg=(p)=>{const [n,t]=riotParts(p.riotId);return `https://www.op.gg/summoners/${OPGG[p.region]||"euw"}/${encodeURIComponent(n+"-"+t)}`};
 const poro=(p)=>{const [n,t]=riotParts(p.riotId);return `https://porofessor.gg/fr/live/${OPGG[p.region]||"euw"}/${encodeURIComponent(n+"-"+t)}`};
 const QUEUES={420:"Classée Solo/Duo",440:"Classée Flex",400:"Normale (draft)",430:"Normale",490:"Partie rapide",450:"ARAM",1700:"Arena",1710:"Arena",900:"URF",1900:"URF",700:"Clash",0:"Personnalisée"};
 function renderRiotReg(){
@@ -493,7 +493,7 @@ function renderRiotReg(){
 function renderPlayers(){
   // un même Riot ID sur plusieurs appareils : une seule ligne (le profil le plus récent)
   const uniq=new Map();for(const [id,p] of Object.entries(riot).filter(([,p])=>p.riotId&&p.pseudo).sort((a,b)=>String(a[1].updated||"").localeCompare(String(b[1].updated||""))))uniq.set(p.riotId.toLowerCase(),[id,p]);
-  const list=[...uniq.values()].map(([id,p])=>{const L=conseilLiveOf(p,live);return {id,...p,lv:L?.g||null,lvAcc:L&&!L.acc.main?L.acc.riotId:null}});
+  const list=[...uniq.values()].map(([id,p])=>{const L=conseilLiveOf(p,live);return {id,...p,lv:L?.g||null,lvAcc:L&&!L.acc.main?L.acc.riotId:null,lvAccObj:L&&!L.acc.main?{riotId:L.acc.riotId,region:L.acc.region||p.region}:null}});
   if(!db&&!list.length){$("players").innerHTML=`<div class="note">${connErr?"Liste indisponible.":"Chargement des invocateurs…"}</div>`;return}
   if(!list.length){$("players").innerHTML=`<div class="note">Aucun invocateur inscrit. Ajoute ton Riot ID ci-dessus pour apparaître ici.</div>`;return}
   list.sort((a,b)=>(b.lv?1:0)-(a.lv?1:0)||a.pseudo.localeCompare(b.pseudo));
@@ -502,7 +502,7 @@ function renderPlayers(){
     const status=LIVE_API?(g?`<span class="st on">En partie</span>`:`<span class="st">Hors partie</span>`):`<span class="st">${REGIONS[p.region]||""}</span>`;
     const detail=g?`${esc(champNames[g.championId]||"Champion")} · ${esc(QUEUES[g.queueId]||"Partie")} · ${mins} min${p.lvAcc?` · sur ${esc(p.lvAcc)}`:""}`:esc(p.riotId)+(p.alts?.length?` <span style="opacity:.7">+${p.alts.length} compte${p.alts.length>1?"s":""}</span>`:"");
     return `<div class="pl ${g?"ingame":""}">${status}<div class="pinfo"><b>${esc(p.pseudo)}${conseilCampTag(p.id)}</b><small>${detail}</small></div>
-      <div class="plinks"><a class="btn ghost small" href="${poro(p)}" target="_blank" rel="noopener">Live</a><a class="btn ghost small" href="${opgg(p)}" target="_blank" rel="noopener">op.gg</a></div></div>`}).join("");
+      <div class="plinks"><a class="btn ghost small" href="${poro(p.lvAccObj||p)}" target="_blank" rel="noopener">Live</a><a class="btn ghost small" href="${opgg(p)}" target="_blank" rel="noopener">op.gg</a></div></div>`}).join("");
   const n=list.filter(p=>p.lv).length;
   $("liveInfo").textContent=LIVE_API?(n?`${n} en partie`:"Personne en partie"):"Clique sur Live pour voir sa partie en cours";
 }
