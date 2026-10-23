@@ -1,7 +1,6 @@
-# Photos et logos officiels depuis l'API publique lolesports (pas de limite stricte, images sur static.lolesports.com)
-import json, os, subprocess, time, urllib.request
-KEY = "0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z"
-H = {"x-api-key": KEY, "User-Agent": "Mozilla/5.0 CDS-fantasy"}
+# Photos et logos officiels depuis l'API publique lolesports, pour les 80 joueurs des Worlds 2026
+import json, os, time, urllib.request
+H = {"x-api-key": "0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z", "User-Agent": "Mozilla/5.0 CDS-fantasy"}
 def get(url, binary=False):
     for i in range(4):
         try:
@@ -10,36 +9,33 @@ def get(url, binary=False):
         except Exception as e:
             print("retry", url[:120], e); time.sleep(4 * (i + 1))
     return None
-os.makedirs("out/le", exist_ok=True)
-log = open("out/le/log.txt", "w")
-WANT = ["Gen.G", "Hanwha Life Esports", "T1", "Dplus KIA", "Anyone's Legend", "Bilibili Gaming", "Top Esports", "Invictus Gaming", "G2 Esports",
-        "Movistar KOI", "Karmine Corp", "Team Liquid", "LYON", "Team Secret Whales", "CTBC Flying Oyster", "LOS"]
-j = get("https://esports-api.lolesports.com/persisted/gw/getTeams?hl=en-US")
-teams = (j or {}).get("data", {}).get("teams", [])
-log.write(f"équipes reçues : {len(teams)}\n")
-norm = lambda s: "".join(c for c in s.lower() if c.isalnum())
-out = {}
-for w in WANT:
-    cands = [t for t in teams if norm(t.get("name", "")) == norm(w) or norm(t.get("code", "")) == norm(w)]
-    cands = cands or [t for t in teams if norm(w) in norm(t.get("name", ""))]
-    cands.sort(key=lambda t: (t.get("status") != "active", -len(t.get("players") or [])))
-    if not cands:
-        log.write("équipe introuvable : " + w + "\n"); continue
-    t = cands[0]
-    out[w] = {"name": t["name"], "code": t.get("code"), "image": t.get("image"), "players": [{"name": p.get("summonerName"), "role": p.get("role"), "image": p.get("image")} for p in t.get("players") or []]}
-json.dump(out, open("out/le/teams.json", "w"), ensure_ascii=False, indent=1)
-os.makedirs("out/le/img", exist_ok=True)
-n = 0
-for w, t in out.items():
-    items = [("TEAM_" + (t["code"] or w), t["image"])] + [(t["code"] + "_" + (p["name"] or "x"), p["image"]) for p in t["players"]]
-    for k, url in items:
-        if not url: continue
-        b = get(url, binary=True)
-        if b and len(b) > 300:
-            ext = os.path.splitext(url.split("?")[0])[1].lower() or ".png"
-            name = "".join(c if c.isalnum() else "_" for c in k)[:60] + ext
-            open("out/le/img/" + name, "wb").write(b); n += 1
-        else:
-            log.write("image ratée : " + k + " " + str(url) + "\n")
-log.write(f"images : {n}\n"); log.close()
-print("images", n)
+want = json.load(open("tools/want.json"))
+os.makedirs("out/le2/img", exist_ok=True)
+log = open("out/le2/log.txt", "w")
+teams = (get("https://esports-api.lolesports.com/persisted/gw/getTeams?hl=en-US") or {}).get("data", {}).get("teams", [])
+idx = [{"name": t.get("name"), "code": t.get("code"), "status": t.get("status"), "image": t.get("image"), "players": [{"n": p.get("summonerName"), "r": p.get("role"), "i": p.get("image")} for p in t.get("players") or []]} for t in teams]
+json.dump(idx, open("out/le2/all.json", "w"), ensure_ascii=False)
+norm = lambda s: "".join(c for c in (s or "").lower() if c.isalnum())
+CODE = {"TL": ["TL", "TLAW"], "LOS": ["LOS", "LØS"], "LYON": ["LYON", "LYN"]}
+res = {}
+def dl(key, url):
+    b = get(url, binary=True)
+    if b and len(b) > 300:
+        name = "".join(c if c.isalnum() else "_" for c in key)[:60] + (os.path.splitext(url.split("?")[0])[1].lower() or ".png")
+        open("out/le2/img/" + name, "wb").write(b); return name
+    log.write("image ratée : " + key + " " + str(url) + "\n")
+for code in want["teams"]:
+    codes = [norm(x) for x in CODE.get(code, [code])]
+    c = [t for t in idx if norm(t["code"]) in codes and "academy" not in (t["name"] or "").lower()]
+    c.sort(key=lambda t: (t["status"] != "active",))
+    if c and c[0]["image"]: res["TEAM:" + code] = {"file": dl("TEAM_" + code, c[0]["image"]), "from": c[0]["name"]}
+    else: log.write("logo introuvable : " + code + "\n")
+for p in want["players"]:
+    codes = [norm(x) for x in CODE.get(p["team"], [p["team"]])]
+    hits = [(t, q) for t in idx for q in t["players"] if norm(q["n"]) == norm(p["name"]) and q["i"]]
+    hits.sort(key=lambda h: (norm(h[0]["code"]) not in codes, "academy" in (h[0]["name"] or "").lower(), h[0]["status"] != "active"))
+    if hits:
+        t, q = hits[0]; res[p["name"]] = {"file": dl(p["team"] + "_" + p["name"], q["i"]), "from": t["name"]}
+    else: log.write("joueur introuvable : " + p["name"] + " (" + p["team"] + ")\n")
+json.dump(res, open("out/le2/images.json", "w"), ensure_ascii=False, indent=1)
+log.write(f"ok : {len(res)}\n"); log.close()
