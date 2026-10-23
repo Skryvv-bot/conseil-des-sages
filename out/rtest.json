@@ -1,0 +1,137 @@
+{
+ "log": [
+  "Résultats : 6 match(s) mis à jour"
+ ],
+ "matches": [
+  {
+   "id": "R1-1",
+   "stage": "Phase suisse",
+   "round": "Ronde 1",
+   "date": "2026-10-23T17:00:00.000Z",
+   "bo": 1,
+   "a": "GEN",
+   "b": "IG",
+   "sa": 1,
+   "sb": 0,
+   "winner": "GEN",
+   "status": "done"
+  },
+  {
+   "id": "R1-2",
+   "stage": "Phase suisse",
+   "round": "Ronde 1",
+   "date": "2026-10-23T18:00:00.000Z",
+   "bo": 1,
+   "a": "HLE",
+   "b": "TES",
+   "sa": 1,
+   "sb": 0,
+   "winner": "HLE",
+   "status": "done"
+  },
+  {
+   "id": "R1-3",
+   "stage": "Phase suisse",
+   "round": "Ronde 1",
+   "date": "2026-10-23T19:00:00.000Z",
+   "bo": 1,
+   "a": "BLG",
+   "b": "MKOI",
+   "sa": 0,
+   "sb": 1,
+   "winner": "MKOI",
+   "status": "done"
+  },
+  {
+   "id": "R1-4",
+   "stage": "Phase suisse",
+   "round": "Ronde 1",
+   "date": "2026-10-23T20:00:00.000Z",
+   "bo": 1,
+   "a": "AL",
+   "b": "KC",
+   "sa": 0,
+   "sb": 1,
+   "winner": "KC",
+   "status": "done"
+  },
+  {
+   "id": "R1-5",
+   "stage": "Phase suisse",
+   "round": "Ronde 1",
+   "date": "2026-10-23T21:00:00.000Z",
+   "bo": 1,
+   "a": "G2",
+   "b": "DK",
+   "sa": 0,
+   "sb": 1,
+   "winner": "DK",
+   "status": "done"
+  },
+  {
+   "id": "R1-6",
+   "stage": "Phase suisse",
+   "round": "Ronde 1",
+   "date": "2026-10-23T22:00:00.000Z",
+   "bo": 1,
+   "a": "TL",
+   "b": "CFO",
+   "sa": 0,
+   "sb": 0,
+   "winner": null,
+   "status": "live"
+  },
+  {
+   "id": "R1-7",
+   "stage": "Phase suisse",
+   "round": "Ronde 1",
+   "date": "2026-10-23T23:00:00.000Z",
+   "bo": 1,
+   "a": "LOS",
+   "b": "T1",
+   "sa": 0,
+   "sb": 0,
+   "winner": null,
+   "status": "upcoming"
+  },
+  {
+   "id": "R1-8",
+   "stage": "Phase suisse",
+   "round": "Ronde 1",
+   "date": "2026-10-24T00:00:00.000Z",
+   "bo": 1,
+   "a": "TSW",
+   "b": "LYON",
+   "sa": 0,
+   "sb": 0,
+   "winner": null,
+   "status": "upcoming"
+  },
+  {
+   "id": "R2-1",
+   "stage": "Phase suisse",
+   "round": "Ronde 2",
+   "date": "2026-10-24T17:00:00.000Z",
+   "bo": 1,
+   "a": "TBD",
+   "b": "TBD",
+   "sa": 0,
+   "sb": 0,
+   "winner": null,
+   "status": "upcoming"
+  },
+  {
+   "id": "R2-2",
+   "stage": "Phase suisse",
+   "round": "Ronde 2",
+   "date": "2026-10-24T18:00:00.000Z",
+   "bo": 1,
+   "a": "TBD",
+   "b": "TBD",
+   "sa": 0,
+   "sb": 0,
+   "winner": null,
+   "status": "upcoming"
+  }
+ ]
+}
