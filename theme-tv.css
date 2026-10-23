@@ -1,0 +1,115 @@
+/* Thème « Plateau TV » du Conseil des Sages — chargé en dernier par conseil.js sur toutes les pages.
+   Noir de plateau, graphite, blanc ; rouge pour l'action et le direct ; ambre pour les données. */
+:root:root{
+  --void:#08090b; --night:#0d0e11; --panel:#15171c; --panel2:#1d2027; --line:#2a2d35; --line2:#2a2d35;
+  --ink:#ffffff; --muted:#a7abb6; --gold:#ffb400; --gold2:#3a3e48; --goldhi:#ffffff;
+  --hex:#ff4d6a; --hex2:#e4002b; --hexdeep:#7a0018;
+  --tv-red:#e4002b; --tv-amber:#ffb400;
+  --display:"Anton","Impact","Arial Narrow",sans-serif;
+  --body:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  color-scheme:dark;
+}
+html body{background:#08090b!important;background-image:none!important;font-family:var(--body);font-size:17px;letter-spacing:.01em}
+
+/* Titres : Anton blanc, sans dégradé */
+h1{font-family:var(--display)!important;font-weight:400!important;letter-spacing:.01em!important;text-transform:uppercase;
+  background:none!important;-webkit-background-clip:border-box!important;background-clip:border-box!important;-webkit-text-fill-color:#fff!important;color:#fff!important;line-height:.95!important}
+h2{font-family:var(--display)!important;font-weight:400!important;letter-spacing:.02em!important;color:#fff!important;text-transform:uppercase}
+h3{color:var(--tv-amber)!important;letter-spacing:.1em!important}
+.eyebrow,.lbl{color:var(--tv-amber)!important}
+
+/* Cadres : panneaux graphite, sans liseré doré */
+.frame,.panel.frame,section.frame{border:0!important;border-top:3px solid var(--tv-red)!important;background:#15171c!important;box-shadow:none!important}
+.frame::before{display:none!important}
+.puzzle.frame,.hint.frame,.win.frame{border-top-color:var(--tv-amber)!important}
+
+/* Boutons : rouge plein, carrés */
+.btn,.btn.primary{font-family:var(--body)!important;font-weight:700!important;font-size:.95rem!important;letter-spacing:.08em!important;text-transform:uppercase;
+  background:var(--tv-red)!important;color:#fff!important;border:0!important;box-shadow:none!important;clip-path:none!important;border-radius:0!important}
+.btn:hover,.btn.primary:hover{background:#ff1744!important;color:#fff!important}
+.btn.ghost{background:transparent!important;color:var(--tv-amber)!important;border:2px solid var(--tv-amber)!important}
+.btn.ghost:hover{background:var(--tv-amber)!important;color:#08090b!important}
+.btn.gold{background:var(--tv-amber)!important;color:#08090b!important}
+.btn.green{background:#15803d!important}.btn.red{background:var(--tv-red)!important}
+.btn.fel{background:transparent!important;color:var(--tv-amber)!important;border:2px solid var(--tv-amber)!important}
+.btn.fel[aria-pressed="true"]{background:var(--tv-amber)!important;color:#08090b!important}
+.btn.discord{background:#5865f2!important}
+
+/* Onglets et sélecteurs : barre plate, soulignement rouge */
+.tabs button,.drills button,.seg button{clip-path:none!important;border-radius:0!important;background:#15171c!important;border:0!important;border-bottom:3px solid transparent!important;
+  font-family:var(--body)!important;font-weight:700!important;letter-spacing:.08em!important;color:var(--muted)!important;box-shadow:none!important}
+.tabs button small,.drills button small{color:var(--muted)!important}
+.tabs button[aria-selected="true"],.tabs button[aria-pressed="true"],.drills button[aria-pressed="true"],.seg button[aria-pressed="true"]{color:#fff!important;border-bottom-color:var(--tv-red)!important;background:#1d2027!important}
+.tabs button[aria-pressed="true"] small,.drills button[aria-pressed="true"] b{color:#fff!important}
+.chip[aria-pressed="true"],.chips button[aria-pressed="true"]{color:var(--tv-amber)!important;border-color:var(--tv-amber)!important;background:rgba(255,180,0,.08)!important}
+
+/* Champs */
+input[type=text],input[type=number],input[type=datetime-local],select,textarea,.search input{background:#08090b!important;border:1px solid #3a3e48!important;border-radius:0!important;color:#fff!important;font-family:var(--body)!important;font-size:1.05rem!important}
+input:focus,select:focus,textarea:focus{border-color:var(--tv-amber)!important;box-shadow:none!important;outline:none}
+.search::before{border-color:var(--tv-red)!important}
+
+/* Listes, tags, barres */
+.item,.pl,.lrow,.match,.bet,.trial,.cat,.ev,.team,.cc,.chg,.wkc,.tile,.res div,.stats3 div{border-radius:0!important}
+.tag.live,.st.on,.live{background:var(--tv-red)!important;color:#fff!important}
+.tile{border:0!important;border-bottom:4px solid var(--tv-red)!important;background:#15171c!important}
+.tile:hover{transform:none!important;background:#1d2027!important}
+.tile b{font-family:var(--display)!important;font-weight:400!important;font-size:1.6rem!important;letter-spacing:.02em!important;color:#fff!important}
+.tile .ic{color:var(--tv-amber)!important}
+.score,.bal,.ver,.date,.clock b,.res b,.stats3 b,.rank,.rk,.sc{font-family:var(--display)!important;font-weight:400!important}
+.wow{border:0!important;border-left:8px solid var(--tv-amber)!important;background:#15171c!important}
+.wow::after{display:none!important}
+.wow h2,.wow .eyebrow,.wow h3{color:var(--tv-amber)!important}
+.clock div{border-color:#2a2d35!important;background:#08090b!important}
+.clock b{color:#fff!important;text-shadow:none!important}
+.clock span{color:var(--tv-amber)!important}
+.prize{border:0!important;border-left:6px solid var(--tv-amber)!important;background:#1d2027!important}
+.dc{border-top-color:#5865f2!important}
+.logo{filter:none!important}
+footer{color:#6f7480!important}
+
+/* Bandeau « Direct » et navigation */
+.tv-ticker{background:var(--tv-red);color:#fff;font:700 .9rem var(--body);letter-spacing:.06em;text-transform:uppercase;overflow:hidden;white-space:nowrap;
+  margin:-20px calc(-1*max(16px,env(safe-area-inset-left,0px))) 0;padding:7px max(16px,env(safe-area-inset-left,0px))}
+.tv-ticker .in{max-width:1040px;margin:0 auto;display:flex;gap:28px;align-items:center}
+.tv-ticker .dot{background:#fff;color:var(--tv-red);padding:2px 8px;flex:none}
+.tv-ticker .run{display:flex;gap:36px;animation:tvrun 40s linear infinite}
+@keyframes tvrun{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.cnav{margin-top:0!important;background:#15171c!important;border-bottom:2px solid #2a2d35!important;backdrop-filter:none!important;padding-block:0!important}
+.cnav-brand{font-family:var(--display)!important;font-weight:400!important;font-size:1.5rem!important;color:#fff!important;letter-spacing:.02em!important;text-transform:uppercase;padding:10px 0}
+.cnav-brand b{color:var(--tv-red);font-weight:400}
+.cnav-brand svg{display:none}
+.cnav-links a{font-family:var(--body)!important;font-weight:700!important;font-size:.95rem!important;color:#a7abb6!important;border:0!important;padding:16px 12px!important}
+.cnav-links a[aria-current="page"]{color:#fff!important;box-shadow:inset 0 -4px 0 var(--tv-red)!important}
+.cnav-install{color:var(--tv-amber)!important;border-color:var(--tv-amber)!important;font-family:var(--body)!important}
+.csub a{border-radius:0!important;font-family:var(--body)!important;font-weight:700!important;font-size:.85rem!important}
+.csub a[aria-current="page"]{color:#fff!important;border-color:var(--tv-red)!important;background:#1d2027!important}
+@media (prefers-reduced-motion:reduce){.tv-ticker .run{animation:none}}
+.cnav-brand span{display:inline!important}
+.logo{display:none!important}
+
+/* Badge de camp */
+.camptag{display:inline-block;margin-left:6px;padding:1px 5px;font:700 .62rem var(--body);letter-spacing:.08em;vertical-align:middle;line-height:1.4}
+.camptag.ct-lol{background:#e4002b;color:#fff}
+.camptag.ct-wow{background:#ffb400;color:#08090b}
+
+/* Thème Azeroth : le site passe à l'ambre pour les Déserteurs */
+:root:root[data-camp="wow"]{--tv-red:#ffb400;--hex:#ffc940;--hex2:#ffb400;--tv-amber:#ff7a1a}
+html[data-camp="wow"] .btn,html[data-camp="wow"] .btn.primary{background:#ffb400!important;color:#08090b!important}
+html[data-camp="wow"] .btn:hover,html[data-camp="wow"] .btn.primary:hover{background:#ffc940!important;color:#08090b!important}
+html[data-camp="wow"] .btn.ghost,html[data-camp="wow"] .btn.fel{color:#ff7a1a!important;border-color:#ff7a1a!important;background:transparent!important}
+html[data-camp="wow"] .tv-ticker{background:#ffb400;color:#08090b}
+html[data-camp="wow"] .tv-ticker .dot{background:#08090b;color:#ffb400}
+html[data-camp="wow"] .cnav-brand b{color:#ffb400}
+html[data-camp="wow"] .tag.live,html[data-camp="wow"] .st.on{background:#ffb400!important;color:#08090b!important}
+html[data-camp="wow"] .camp-lol .btn{background:#e4002b!important;color:#fff!important}
+
+/* Bandeau de récupération de compte */
+.claim{display:flex;flex-direction:column;gap:10px;padding:16px 18px;background:#1d2027;border-left:6px solid var(--tv-amber,#ffb400)}
+.claim b{display:block;font:400 1.3rem var(--display);text-transform:uppercase;color:#fff}
+.claim span{color:var(--muted)}
+.claim-row{display:flex;gap:8px;flex-wrap:wrap}
+.claim-row select{flex:1 1 200px}
+.claim-msg{margin:0;color:var(--gold);font-weight:600}
+
+/* Étoiles de champion du monde */
+.wstars{display:inline-block;margin-left:6px;color:#ffb400;font-size:.8em;letter-spacing:1px;line-height:1;white-space:nowrap;vertical-align:.08em;cursor:help;text-shadow:0 0 6px rgba(255,180,0,.35)}

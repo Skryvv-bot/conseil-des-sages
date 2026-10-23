@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Le Conseil des Sages</title>
+<meta name="theme-color" content="#08090b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png?v=2">
+<link rel="apple-touch-icon" href="icon-192.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Barlow:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="conseil.css">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="conseil.js"></script>
+<style>
+.bet{display:flex;flex-direction:column;gap:10px;padding:14px;background:var(--void);border:1px solid var(--line2)}
+.bet.open{border-color:var(--hex2)}
+.bet .who{font:700 1.05rem var(--display);color:var(--goldhi)}
+.side{display:flex;flex-direction:column;gap:2px;padding:10px;border:1px solid var(--line2);cursor:pointer;background:var(--panel);text-align:left;color:var(--ink);font:inherit}
+.side[aria-pressed="true"]{border-color:var(--hex);box-shadow:inset 0 0 0 1px var(--hex2)}
+.side b{font:700 .95rem var(--display)}
+.side.win b{color:var(--ok)}.side.loss b{color:var(--red)}
+.sides{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bal{font:900 1.6rem var(--display);color:var(--goldhi)}
+.trial{display:flex;flex-direction:column;gap:10px;padding:16px;background:var(--void);border:1px solid var(--line2);position:relative;overflow:hidden}
+.trial .charge{font-size:1.02rem;color:var(--ink);border-left:3px solid var(--gold2);padding-left:10px}
+.stamp{position:absolute;right:14px;top:14px;transform:rotate(-8deg);font:900 1.1rem var(--display);letter-spacing:.12em;padding:4px 10px;border:3px solid currentColor}
+.stamp.g{color:var(--red)}.stamp.i{color:var(--ok)}.stamp.e{color:var(--muted)}
+.cat{display:flex;flex-direction:column;gap:8px;padding:14px;background:var(--void);border:1px solid var(--line2)}
+.crown{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--gold);background:linear-gradient(90deg,rgba(200,170,110,.15),transparent)}
+.crown b{font:700 1rem var(--display);color:var(--goldhi)}
+.vote{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;font-size:.9rem}
+.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:640px){.form{grid-template-columns:1fr}}
+.voters{display:flex;flex-direction:column;gap:4px;font-size:.92rem}.voters div{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.voters b{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;min-width:72px}.voters .vw{color:var(--ok,#2fbf71)}.voters .vl{color:#ff4d6a}
+.vn{padding:2px 8px;background:var(--void,#08090b);border:1px solid var(--line2,#2a2d35)}.vn.me{border-color:var(--gold,#ffb400);color:var(--gold,#ffb400)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="phead between">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <span class="eyebrow">La vie du groupe</span>
+      <h1>Le Conseil</h1>
+      <p class="sub">Pronos sur les parties des potes, tribunal des défaites, et élection du sage de la semaine.</p>
+    </div>
+    <span class="me" id="me">Connexion au Conseil…</span>
+  </header>
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-paris" aria-selected="true">Pronos entre potes</button>
+    <button role="tab" id="tab-banc" aria-selected="false">Banc des accusés</button>
+    <button role="tab" id="tab-sage" aria-selected="false">Sage de la semaine</button>
+    <button role="tab" id="tab-profil" aria-selected="false">Mon profil</button>
+  </div>
+
+  <!-- PRONOS ENTRE POTES -->
+  <section id="v-paris" class="frame panel">
+    <div class="between"><h2>Pronos entre potes</h2><div style="text-align:right"><span class="note">Tes points de prono</span><div class="bal" id="bal">–</div></div></div>
+    <p class="note">Quand un sage est en partie, ouvre un prono : chacun prédit victoire ou défaite pendant 8 minutes. À la fin de la partie, le résultat arrive tout seul depuis Riot. Un bon prono rapporte 10 points. Pas de mise, juste la gloire.</p>
+    <h3>En partie maintenant</h3>
+    <div id="inGame" class="list"><div class="note">Recherche des parties en cours…</div></div>
+    <h3>Pronos en cours</h3>
+    <div class="list" id="openBets"></div>
+    <div class="grid2">
+      <div class="list"><h3>Meilleurs pronostiqueurs</h3><div class="list" id="betBoard"></div></div>
+      <div class="list"><h3>Derniers résultats</h3><div class="list" id="betHist"></div></div>
+    </div>
+  </section>
+
+  <!-- BANC -->
+  <section id="v-banc" class="frame panel" hidden>
+    <h2>Le banc des accusés</h2>
+    <p class="note">Une défaite ? Accuse le coupable. Le Conseil vote pendant 24 heures, puis le verdict tombe. L'accusé peut plaider sa défense mais ne vote pas.</p>
+    <form class="form" id="trialForm">
+      <label class="f">Accusé<select id="tAccused" required></select></label>
+      <label class="f">Chef d'accusation<input type="text" id="tCharge" maxlength="200" placeholder="Ex. n'a jamais gank top en 35 minutes" required></label>
+      <div><button class="btn" type="submit">Porter l'accusation</button></div>
+    </form>
+    <p class="err" id="trialErr" hidden></p>
+    <div class="list" id="trials"></div>
+  </section>
+
+  <!-- SAGE -->
+  <section id="v-sage" class="frame panel" hidden>
+    <div class="between"><h2>Sage de la semaine</h2><span class="note" id="weekInfo"></span></div>
+    <div id="lastWinners"></div>
+    <p class="note">Vote dans chaque catégorie pour cette semaine. Tu peux changer ton vote jusqu'à dimanche minuit, puis les gagnants sont couronnés pour la semaine suivante.</p>
+    <div class="grid3" id="cats"></div>
+  </section>
+
+  <!-- PROFIL -->
+  <section id="v-profil" class="frame panel" hidden>
+    <h2>Mon profil</h2>
+    <p class="note">Ton profil sert partout sur le site : générateur d’équipes, Clash, pronos, votes, ladder et parties en direct.</p>
+    <form class="form" id="profForm">
+      <label class="f">Pseudo<input type="text" id="pPseudo" maxlength="20" required></label>
+      <label class="f">Riot ID (optionnel)<input type="text" id="pRiot" maxlength="40" placeholder="Pseudo#TAG"></label>
+      <label class="f">Région<select id="pRegion"></select></label>
+      <label class="f">2e compte Riot (optionnel)<input type="text" id="pAlt1" maxlength="40" placeholder="Smurf#TAG"></label>
+      <label class="f">Région<select id="pAlt1Reg" class="regsel"></select></label>
+      <label class="f">3e compte Riot (optionnel)<input type="text" id="pAlt2" maxlength="40" placeholder="Smurf#TAG"></label>
+      <label class="f">Région<select id="pAlt2Reg" class="regsel"></select></label>
+      <label class="f">Rang actuel <span id="autoRank" class="note"></span><select id="pRank"></select></label>
+      <div style="grid-column:1/-1"><p class="note riot-optin" style="font-size:.8rem">Ajouter ton Riot ID est facultatif et se fait uniquement par toi. En l'ajoutant, tu acceptes que ton Riot ID et ta partie en cours (champion, mode, durée) soient visibles par tous les visiteurs du site. Tu peux le retirer à tout moment dans Le Conseil › Mon profil (vide le champ Riot ID).</p></div>
+      <label class="f">Pseudo Discord (pour détecter tes parties)<input type="text" id="pDiscord" maxlength="40" placeholder="Ton nom affiché sur le serveur"></label>
+      <div class="f">Postes préférés (dans l'ordre de clic)<div class="chips" id="pRoles"></div></div>
+      <div class="row"><button class="btn" type="submit">Enregistrer mon profil</button><span class="okmsg" id="profMsg"></span></div>
+    </form>
+  </section>
+  <footer>Site de fan du Conseil des Sages, sans lien avec Riot Games ni Discord.</footer>
+</div>
+
+<script>
+conseilNav("conseil");
+const $=id=>document.getElementById(id), esc=conseilEsc;
+const ROLES=["Top","Jungle","Mid","Bot","Support"];
+const RANKS=["Non classé","Fer","Bronze","Argent","Or","Platine","Émeraude","Diamant","Maître","Grand Maître","Challenger"];
+const REGIONS={euw1:"EUW",eun1:"EUNE",na1:"NA",kr:"KR",br1:"BR",tr1:"TR",ru:"RU",jp1:"JP",la1:"LAN",la2:"LAS",oc1:"OCE"};
+const OPEN_MIN=8, PRONO_PTS=10;
+const QUEUES={420:"Classée Solo/Duo",440:"Classée Flex",400:"Normale (draft)",430:"Normale",490:"Partie rapide",450:"ARAM",1700:"Arena",1710:"Arena",900:"URF",1900:"URF",700:"Clash",0:"Personnalisée"};
+let liveGames={},champNames={},ladder=null;
+const CATS=[{k:"carry",t:"Le plus carry",i:"⚔"},{k:"drole",t:"Le plus drôle",i:"☺"},{k:"tilt",t:"Le plus tilté",i:"☄"}];
+let db=null,uid=null,connErr=false,members={},bets={},stakes={},trials={},sage={},playing=[],profRoles=[];
+
+// ---------- onglets ----------
+const TABS=["paris","banc","sage","profil"];
+function showTab(id){for(const t of TABS){$("v-"+t).hidden=t!==id;$("tab-"+t).setAttribute("aria-selected",t===id)}}
+for(const t of TABS)$("tab-"+t).onclick=()=>{showTab(t);history.replaceState(null,"","#"+t)};
+if(TABS.includes(location.hash.slice(1)))showTab(location.hash.slice(1));
+const me=()=>members[uid];const myPseudo=()=>me()?.pseudo||"";
+const nameOf=id=>members[id]?.pseudo||"Un sage";
+const ms=v=>v&&typeof v.toMillis==="function"?v.toMillis():+v||0;
+
+// ---------- Profil ----------
+$("pRegion").innerHTML=Object.entries(REGIONS).map(([k,v])=>`<option value="${k}">${v}</option>`).join("");
+document.querySelectorAll(".regsel").forEach(s=>s.innerHTML=$("pRegion").innerHTML);
+$("pRank").innerHTML=RANKS.map(r=>`<option>${r}</option>`).join("");
+function renderRoleChips(){$("pRoles").innerHTML=ROLES.map(r=>{const i=profRoles.indexOf(r);return `<button type="button" class="chip" data-r="${r}" aria-pressed="${i>=0}">${i>=0?(i+1)+". ":""}${r}</button>`}).join("");
+  $("pRoles").querySelectorAll(".chip").forEach(c=>c.onclick=()=>{const r=c.dataset.r,i=profRoles.indexOf(r);i>=0?profRoles.splice(i,1):profRoles.push(r);renderRoleChips()})}
+let profFilled=false;
+function fillProfile(){if(profFilled||!db||!window.__membersLoaded)return;const m=me()||{};profFilled=true;
+  $("pPseudo").value=m.pseudo||"";$("pRiot").value=m.riotId||"";$("pRegion").value=m.region||"euw1";$("pRank").value=m.rank||"Non classé";$("pDiscord").value=m.discord||"";profRoles=(m.roles||[]).slice();renderRoleChips();
+  const al=Array.isArray(m.alts)?m.alts:[];[1,2].forEach(i=>{$("pAlt"+i).value=al[i-1]?.riotId||"";$("pAlt"+i+"Reg").value=al[i-1]?.region||m.region||"euw1"})}
+renderRoleChips();
+$("profForm").onsubmit=async e=>{e.preventDefault();if(!db)return;const msg=$("profMsg");
+  const pseudo=$("pPseudo").value.trim().slice(0,20),riotId=$("pRiot").value.replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u2069\uFEFF]/g,"").trim().replace(/\s*#\s*/,"#");
+  if(riotId&&!/^.{3,16}#[A-Za-z0-9]{2,5}$/.test(riotId)){msg.className="err";msg.textContent="Le Riot ID doit avoir la forme Pseudo#TAG.";return}
+  const alts=[];for(const i of [1,2]){const a=$("pAlt"+i).value.replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u2069\uFEFF]/g,"").trim().replace(/\s*#\s*/,"#");if(!a)continue;
+    if(!/^.{3,16}#[A-Za-z0-9]{2,5}$/.test(a)){msg.className="err";msg.textContent=`Le ${i+1}e compte doit avoir la forme Pseudo#TAG.`;return}
+    if(!riotId){msg.className="err";msg.textContent="Indique d'abord ton compte principal.";return}
+    if(a.toLowerCase()!==riotId.toLowerCase()&&!alts.some(x=>x.riotId.toLowerCase()===a.toLowerCase()))alts.push({riotId:a,region:$("pAlt"+i+"Reg").value})}
+  {const t=Object.entries(members).find(([id,m])=>id!==uid&&m.pseudo?.toLowerCase()===pseudo.toLowerCase());if(t){msg.className="err";conseilTakeover(msg,db,uid,t[0],t[1].pseudo);return}}
+  try{await db.doc("riot/"+uid).set({pseudo,riotId,region:$("pRegion").value,rank:$("pRank").value,discord:$("pDiscord").value.trim().slice(0,40),roles:profRoles.slice(),alts,updated:new Date().toISOString()},{merge:true});
+    msg.className="okmsg";msg.textContent="Profil enregistré."}catch(x){msg.className="err";msg.textContent="Enregistrement impossible, réessaie."}};
+
+// ---------- Pronos entre potes ----------
+// Parties en cours : détectées par le relais Riot pour les sages qui ont ajouté leur Riot ID.
+fetch("https://ddragon.leagueoflegends.com/api/versions.json").then(r=>r.json()).then(v=>fetch(`https://ddragon.leagueoflegends.com/cdn/${v[0]}/data/fr_FR/champion.json`)).then(r=>r.json()).then(d=>{for(const k in d.data)champNames[d.data[k].key]=d.data[k].name;renderBets()}).catch(()=>{});
+async function loadLive(){
+  const ps=Object.values(members).filter(p=>p.riotId);if(!ps.length){liveGames={};renderBets();return}
+  try{const r=await fetch(RIOT_RELAY+"/live?players="+encodeURIComponent(conseilAllAccounts(members).join(",")));const j=await r.json();liveGames={};for(const [k,g] of Object.entries(j.games||{}))if(g)liveGames[k.toLowerCase()]=g}catch(e){liveGames=null}
+  renderBets();
+}
+setInterval(loadLive,90000);
+function betVotes(id){const ss=Object.values(stakes).filter(s=>s.bet===id);return{ss,w:ss.filter(s=>s.side==="win"),l:ss.filter(s=>s.side==="loss")}}
+function scores(){
+  const sc={};
+  for(const [id,b] of Object.entries(bets)){if(b.status!=="done"||!b.result)continue;
+    for(const s of betVotes(id).ss){const o=sc[s.uid]=sc[s.uid]||{pts:0,ok:0,n:0};o.n++;if(s.side===b.result){o.ok++;o.pts+=PRONO_PTS}}}
+  return sc}
+const ago=t=>{const m=Math.max(0,Math.floor((Date.now()-t)/60000));return m<1?"à l'instant":m+" min"};
+function renderBets(){
+  if(!db){$("openBets").innerHTML=`<div class="note">${connErr?"Pronos indisponibles.":"Chargement…"}</div>`;return}
+  const sc=scores();$("bal").textContent=(sc[uid]?.pts||0).toLocaleString("fr-FR");
+  const now=Date.now(),openTargets=new Set(Object.values(bets).filter(b=>b.status==="open").map(b=>b.target));
+  // en partie maintenant
+  const inGame=Object.entries(members).filter(([,m])=>conseilLiveOf(m,liveGames));
+  $("inGame").innerHTML=liveGames===null?`<div class="note">Détection des parties indisponible pour le moment.</div>`:
+    !Object.values(members).some(m=>m.riotId)?`<div class="note">Aucun sage n'a encore ajouté son Riot ID (onglet Mon profil).</div>`:
+    inGame.length?inGame.map(([id,m])=>{const lv=conseilLiveOf(m,liveGames),g=lv.g;return `<div class="item"><span class="tag live">En partie</span>${conseilChampHTML(champNames[g.championId]||"?",30)}<div class="grow"><b>${esc(m.pseudo)}</b>${conseilCampTag(id)}<div class="note">${esc(champNames[g.championId]||"Champion")} · ${esc(QUEUES[g.queueId]||"Partie")} · depuis ${ago(g.start)}${lv.acc.main?"":` · sur ${esc(lv.acc.riotId)}`}</div></div>
+      ${openTargets.has(id)?'<span class="note">prono ouvert</span>':id===uid?'<span class="note">c\'est toi</span>':`<button class="btn small" data-quick="${id}">Ouvrir un prono</button>`}</div>`}).join(""):`<div class="note">Personne du Conseil n'est en partie pour l'instant.</div>`;
+  $("inGame").querySelectorAll("[data-quick]").forEach(b=>b.onclick=()=>openBet(b.dataset.quick));
+  // pronos en cours
+  const live=Object.entries(bets).filter(([,b])=>b.status==="open").sort((a,b)=>(b[1].created||"").localeCompare(a[1].created||""));
+  $("openBets").innerHTML=live.length?live.map(([id,b])=>{const v=betVotes(id),closes=ms(b.closesAt),open=now<closes,mine=stakes[id+"_"+uid],n=v.ss.length,pw=n?Math.round(100*v.w.length/n):50;
+    const canCancel=uid===b.target||uid===b.openedBy;
+    return `<div class="bet ${open?"open":""}" data-b="${id}"><div class="between"><div><span class="who">${esc(b.targetPseudo)}</span>${conseilCampTag(b.target)} <span class="note">· ${esc(b.label||"Partie")}${b.championName?" · "+esc(b.championName):""} · ouvert par ${esc(b.openedPseudo)}</span></div>
+      <span class="tag ${open?"live":""}">${open?"Votes ouverts · "+Math.max(1,Math.ceil((closes-now)/60000))+" min":"Résultat dès la fin de la partie"}</span></div>
+      <div class="bar"><i style="width:${pw}%;background:var(--ok)"></i><i style="width:${100-pw}%;background:var(--red)"></i></div>
+      <div class="between note"><span>Victoire : ${v.w.length}</span><span>${n} prono${n>1?"s":""}</span><span>Défaite : ${v.l.length}</span></div>
+      ${n?`<div class="voters"><div><b class="vw">Victoire</b> ${v.w.map(s=>`<span class="vn${s.uid===uid?" me":""}">${esc(s.pseudo)}</span>`).join("")||'<span class="note">personne</span>'}</div><div><b class="vl">Défaite</b> ${v.l.map(s=>`<span class="vn${s.uid===uid?" me":""}">${esc(s.pseudo)}</span>`).join("")||'<span class="note">personne</span>'}</div></div>`:""}
+      ${open&&uid!==b.target?`<div class="sides"><button class="side win" data-side="win" aria-pressed="${mine?.side==="win"}"><b>Victoire</b><span class="note">${mine?.side==="win"?"Ton prono":"Il va gagner"}</span></button><button class="side loss" data-side="loss" aria-pressed="${mine?.side==="loss"}"><b>Défaite</b><span class="note">${mine?.side==="loss"?"Ton prono":"Il va perdre"}</span></button></div>`:open?`<p class="note">Tu ne peux pas pronostiquer ta propre partie.</p>`:""}
+      ${canCancel?`<div><button class="btn ghost small" data-cancel>Annuler le prono (partie annulée, remake…)</button></div>`:""}</div>`}).join(""):`<div class="empty">Aucun prono en cours.</div>`;
+  $("openBets").querySelectorAll(".bet").forEach(el=>{const id=el.dataset.b;
+    el.querySelectorAll("[data-side]").forEach(s=>s.onclick=()=>placeStake(id,s.dataset.side));
+    const c=el.querySelector("[data-cancel]");if(c)c.onclick=()=>db.doc("bets/"+id).update({status:"cancel",result:null,settledBy:uid,settledAt:new Date().toISOString()}).catch(()=>{})});
+  // classement
+  const board=Object.entries(sc).filter(([id])=>members[id]?.pseudo).sort((a,b)=>b[1].pts-a[1].pts||b[1].ok/b[1].n-a[1].ok/a[1].n).slice(0,10);
+  $("betBoard").innerHTML=board.length?board.map(([id,o],i)=>`<div class="item ${id===uid?"mine":""}"><b style="color:var(--gold);width:24px">${i+1}</b><span class="grow ellip">${esc(nameOf(id))}${conseilCampTag(id)}</span><span class="note">${o.ok}/${o.n}</span><b>${o.pts} pts</b></div>`).join(""):`<div class="note">Aucun prono terminé pour l'instant.</div>`;
+  const hist=Object.entries(bets).filter(([,b])=>b.status==="done").sort((a,b)=>(b[1].settledAt||"").localeCompare(a[1].settledAt||"")).slice(0,8);
+  $("betHist").innerHTML=hist.length?hist.map(([id,b])=>`<div class="item"><span class="tag ${b.result==="win"?"ok":"live"}">${b.result==="win"?"Victoire":"Défaite"}</span>${b.match?.championName?conseilChampHTML(b.match.championName,26):""}<span class="grow ellip">${esc(b.targetPseudo)}${b.match?` · ${esc(b.match.championName)} ${b.match.kills}/${b.match.deaths}/${b.match.assists}`:""}</span><span class="note">${betVotes(id).ss.filter(s=>s.side===b.result).length}/${betVotes(id).ss.length} justes</span></div>`).join(""):`<div class="note">Aucun prono terminé.</div>`;
+}
+async function openBet(target){
+  if(!myPseudo()){showTab("profil");return}
+  const m=members[target];if(!m)return;const lv=conseilLiveOf(m,liveGames),g=lv?.g,acc=lv?.acc||{riotId:m.riotId,region:m.region||"euw1"};
+  if(Object.values(bets).some(b=>b.status==="open"&&b.target===target))return;
+  try{await db.collection("bets").add({target,targetPseudo:m.pseudo,riotId:acc.riotId,region:acc.region||"euw1",gameId:g?.gameId||null,
+    label:QUEUES[g?.queueId]||"Partie",championName:g?champNames[g.championId]||"":"",openedBy:uid,openedPseudo:myPseudo(),created:new Date().toISOString(),
+    closesAt:firebase.firestore.Timestamp.fromMillis(Date.now()+OPEN_MIN*60000),status:"open",result:null})}catch(e){console.warn(e)}}
+async function placeStake(id,side){if(!myPseudo()){showTab("profil");return}
+  const prev=stakes[id+"_"+uid];stakes[id+"_"+uid]={bet:id,uid,pseudo:myPseudo(),side,updated:new Date().toISOString()};if(document.activeElement)document.activeElement.blur();renderBets();   // affichage immédiat
+  try{await db.doc("stakes/"+id+"_"+uid).set({bet:id,uid,pseudo:myPseudo(),side,updated:new Date().toISOString()})}catch(e){if(prev)stakes[id+"_"+uid]=prev;else delete stakes[id+"_"+uid];renderBets();const el=document.querySelector(`.bet[data-b="${id}"]`);if(el){let p=el.querySelector(".err");if(!p){p=document.createElement("p");p.className="err";el.appendChild(p)}p.textContent="Les votes sont fermés."}}}
+setInterval(()=>{if(db){conseilResolvePronos(db,bets);if(!$("v-paris").hidden)renderBets()}},30000);
+
+function showAutoRank(){const v=ladder?.current?.players?.[uid];const r=v?.solo||v?.flex;const el=$("autoRank");if(!el)return;
+  if(r){el.innerHTML="· détecté chez Riot : "+conseilRankBadge(r);$("pRank").value=TIER_FR[r.tier];$("pRank").disabled=true}else{el.textContent="";$("pRank").disabled=false}}
+// ---------- Banc des accusés ----------
+function renderTrials(){
+  const sel=$("tAccused"),cur=sel.value;
+  sel.innerHTML=`<option value="">Choisis l'accusé</option>`+Object.entries(members).filter(([id,m])=>m.pseudo&&id!==uid).sort((a,b)=>a[1].pseudo.localeCompare(b[1].pseudo)).map(([id,m])=>`<option value="${id}">${esc(m.pseudo)}</option>`).join("");sel.value=cur;
+  if(!db){$("trials").innerHTML=`<div class="note">${connErr?"Tribunal indisponible.":"Chargement…"}</div>`;return}
+  const now=Date.now(),list=Object.entries(trials).sort((a,b)=>b[1].created.localeCompare(a[1].created)).slice(0,20);
+  $("trials").innerHTML=list.length?list.map(([id,t])=>{const votes=Object.values(t.votes||{}),g=votes.filter(v=>v==="coupable").length,i=votes.filter(v=>v==="innocent").length,open=now<t.closesAt,myV=t.votes?.[uid];
+    const verdict=!open?(g>i?`<span class="stamp g">Coupable</span>`:i>g?`<span class="stamp i">Innocent</span>`:`<span class="stamp e">Non-lieu</span>`):"";
+    return `<div class="trial" data-t="${id}">${verdict}<div><b style="font:700 1.1rem var(--display);color:var(--goldhi)">${esc(t.accusedPseudo)}</b>${conseilCampTag(t.accusedUid)} <span class="note">accusé par ${esc(t.accuserPseudo)}${conseilCampTag(t.accuser)} · ${new Date(t.created).toLocaleDateString("fr-FR",{day:"numeric",month:"short"})}</span></div>
+      <div class="charge">« ${esc(t.charge)} »</div>
+      ${t.defense?`<div class="note"><b style="color:var(--hex)">Défense :</b> ${esc(t.defense)}</div>`:""}
+      <div class="bar"><i style="width:${g+i?100*g/(g+i):50}%;background:var(--red)"></i><i style="width:${g+i?100*i/(g+i):50}%;background:var(--ok)"></i></div>
+      <div class="between note"><span>Coupable : ${g}</span><span>${open?"Verdict dans "+Math.max(1,Math.ceil((t.closesAt-now)/3600000))+" h":"Verdict rendu"}</span><span>Innocent : ${i}</span></div>
+      ${open&&uid!==t.accusedUid&&myPseudo()?`<div class="row"><button class="btn small red" data-v="coupable" ${myV==="coupable"?'aria-pressed="true"':""}>${myV==="coupable"?"✓ ":""}Coupable</button><button class="btn small green" data-v="innocent">${myV==="innocent"?"✓ ":""}Innocent</button></div>`:""}
+      ${open&&uid===t.accusedUid?`<form class="row" data-def><input type="text" maxlength="200" placeholder="Ta plaidoirie" value="${esc(t.defense||"")}" style="flex:1 1 220px" aria-label="Défense"><button class="btn small" type="submit">Plaider</button></form>`:""}
+      ${t.accuser===uid&&open?`<div><button class="btn ghost small" data-del>Retirer l'accusation</button></div>`:""}</div>`}).join(""):`<div class="empty">Le tribunal est vide. Personne n'a encore été accusé.</div>`;
+  $("trials").querySelectorAll(".trial").forEach(el=>{const id=el.dataset.t;
+    el.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>db.doc("trials/"+id).update({["votes."+uid]:b.dataset.v}).catch(e=>console.warn(e)));
+    const f=el.querySelector("[data-def]");if(f)f.onsubmit=e=>{e.preventDefault();db.doc("trials/"+id).update({defense:f.querySelector("input").value.trim().slice(0,200)}).catch(()=>{})};
+    const d=el.querySelector("[data-del]");if(d)d.onclick=()=>db.doc("trials/"+id).delete().catch(()=>{})});
+}
+$("trialForm").onsubmit=async e=>{e.preventDefault();const err=$("trialErr");err.hidden=true;
+  if(!myPseudo()){err.textContent="Crée d'abord ton profil (onglet Mon profil).";err.hidden=false;return}
+  const acc=$("tAccused").value;if(!acc){err.textContent="Choisis l'accusé.";err.hidden=false;return}
+  try{await db.collection("trials").add({accuser:uid,accuserPseudo:myPseudo(),accusedUid:acc,accusedPseudo:members[acc].pseudo,charge:$("tCharge").value.trim().slice(0,200),created:new Date().toISOString(),closesAt:Date.now()+24*3600e3,votes:{}});$("trialForm").reset()}
+  catch(x){err.textContent="Accusation impossible pour le moment.";err.hidden=false}};
+
+// ---------- Sage de la semaine ----------
+function tally(week){const t={};for(const c of CATS)t[c.k]={};for(const v of Object.values(sage))if(v.week===week)for(const c of CATS)if(v[c.k])t[c.k][v[c.k]]=(t[c.k][v[c.k]]||0)+1;return t}
+function winners(week){const t=tally(week),w={};for(const c of CATS){const e=Object.entries(t[c.k]).sort((a,b)=>b[1]-a[1]);if(e.length&&(!e[1]||e[0][1]>e[1][1]))w[c.k]=e[0]}return w}
+function renderSage(){
+  const week=conseilWeek(),last=conseilWeek(new Date(Date.now()-7*864e5));
+  const end=new Date();end.setDate(end.getDate()+((7-end.getDay())%7));end.setHours(23,59,0,0);
+  $("weekInfo").textContent=`Semaine ${week.split("-W")[1]} · votes jusqu'au ${end.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"})}`;
+  const lw=winners(last);
+  $("lastWinners").innerHTML=Object.keys(lw).length?`<div class="crown"><span style="font-size:1.6rem">👑</span><div class="grow"><b>Couronnés la semaine dernière</b><div class="note">${CATS.filter(c=>lw[c.k]).map(c=>`${c.t} : <b style="color:var(--goldhi)">${esc(nameOf(lw[c.k][0]))}</b> (${lw[c.k][1]} voix)`).join(" · ")}</div></div></div>`:"";
+  if(!db){$("cats").innerHTML=`<div class="note">${connErr?"Votes indisponibles.":"Chargement…"}</div>`;return}
+  const t=tally(week),mine=sage[week+"_"+uid]||{},people=Object.entries(members).filter(([,m])=>m.pseudo).sort((a,b)=>a[1].pseudo.localeCompare(b[1].pseudo));
+  $("cats").innerHTML=CATS.map(c=>{const rk=Object.entries(t[c.k]).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    return `<div class="cat"><h3>${c.i} ${c.t}</h3>
+      <select data-cat="${c.k}" aria-label="${c.t}" ${myPseudo()?"":"disabled"}><option value="">${myPseudo()?"Ton vote…":"Crée ton profil pour voter"}</option>${people.map(([id,m])=>`<option value="${id}" ${mine[c.k]===id?"selected":""}>${esc(m.pseudo)}</option>`).join("")}</select>
+      <div class="list">${rk.length?rk.map(([id,n],i)=>`<div class="vote"><span class="ellip">${i===0?"👑 ":""}${esc(nameOf(id))}${conseilCampTag(id)}</span><b>${n}</b></div>`).join(""):`<span class="note">Pas encore de vote.</span>`}</div></div>`}).join("");
+  $("cats").querySelectorAll("select").forEach(s=>s.onchange=()=>db.doc("sageVotes/"+week+"_"+uid).set({week,pseudo:myPseudo(),[s.dataset.cat]:s.value||null,updated:new Date().toISOString()},{merge:true}).catch(e=>console.warn(e)));
+}
+
+// ---------- Données ----------
+function renderAll(){$("me").innerHTML=!db?(connErr?"Hors ligne":"Connexion au Conseil…"):myPseudo()?`Connecté : <b>${esc(myPseudo())}</b>`:"Sage anonyme · crée ton profil";
+  {const ae=document.activeElement;if(!ae||!ae.matches("input,textarea,select")||!ae.closest(".bet,.trial,.cat"))renderBets()}renderTrials();renderSage();fillProfile()}
+renderAll();
+(async()=>{const c=await conseilConnect();if(!c.db){connErr=true;renderAll();return}db=c.db;uid=c.uid;
+  const sub=(col,fn)=>db.collection(col).onSnapshot(q=>{const o={};q.docs.filter(d=>!conseilIsClaimed(d.id)).forEach(d=>o[d.id]=d.data());fn(o);renderAll()},e=>console.warn(col,e));
+  let firstRiot=true;sub("riot",o=>{members=o;window.__membersLoaded=true;if(firstRiot){firstRiot=false;loadLive();conseilLadder(db,o).then(l=>{ladder=l;showAutoRank()});if(!location.hash&&!o[uid])showTab("profil")}});sub("bets",o=>{bets=o;conseilResolvePronos(db,o)});sub("stakes",o=>stakes=o);sub("trials",o=>trials=o);sub("sageVotes",o=>sage=o);
+  renderAll()})();
+
+window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
+</script>
+</body>
+</html>
