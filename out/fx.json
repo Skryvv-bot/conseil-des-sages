@@ -1,0 +1,189 @@
+{
+ "log": [
+  "IG-GEN game 1 : enregistrée",
+  "MVP Leaguepedia : ratelimited"
+ ],
+ "written": {
+  "fantasyGames/lol_115660540726095006": {
+   "phase": "swiss",
+   "at": 1792777966439,
+   "start": 1792776079869,
+   "label": "Swiss",
+   "teams": [
+    "IG",
+    "GEN"
+   ],
+   "winner": "GEN",
+   "bo": 1,
+   "n": 1,
+   "obj": {
+    "IG": {
+     "drag": 0,
+     "baron": 0,
+     "towers": 2,
+     "kills": 10
+    },
+    "GEN": {
+     "drag": 4,
+     "baron": 1,
+     "towers": 9,
+     "kills": 22
+    }
+   },
+   "players": {
+    "TheShy": {
+     "team": "IG",
+     "role": "Top",
+     "champ": "Rumble",
+     "k": 1,
+     "d": 5,
+     "a": 6,
+     "cs": 192,
+     "dmg": 0.35,
+     "kp": 0.7,
+     "wp": 9,
+     "wk": 1,
+     "gold": 8058,
+     "win": false
+    },
+    "Wei": {
+     "team": "IG",
+     "role": "Jungle",
+     "champ": "JarvanIV",
+     "k": 0,
+     "d": 3,
+     "a": 8,
+     "cs": 175,
+     "dmg": 0.102,
+     "kp": 0.8,
+     "wp": 11,
+     "wk": 7,
+     "gold": 9081,
+     "win": false
+    },
+    "Rookie": {
+     "team": "IG",
+     "role": "Mid",
+     "champ": "Aurora",
+     "k": 4,
+     "d": 5,
+     "a": 5,
+     "cs": 220,
+     "dmg": 0.303,
+     "kp": 0.9,
+     "wp": 10,
+     "wk": 6,
+     "gold": 10096,
+     "win": false
+    },
+    "JiaQi": {
+     "team": "IG",
+     "role": "Bot",
+     "champ": "Jhin",
+     "k": 5,
+     "d": 2,
+     "a": 4,
+     "cs": 253,
+     "dmg": 0.198,
+     "kp": 0.9,
+     "wp": 14,
+     "wk": 8,
+     "gold": 12374,
+     "win": false
+    },
+    "Meiko": {
+     "team": "IG",
+     "role": "Support",
+     "champ": "Alistar",
+     "k": 0,
+     "d": 7,
+     "a": 8,
+     "cs": 29,
+     "dmg": 0.047,
+     "kp": 0.8,
+     "wp": 48,
+     "wk": 10,
+     "gold": 6171,
+     "win": false
+    },
+    "Kiin": {
+     "team": "GEN",
+     "role": "Top",
+     "champ": "Ornn",
+     "k": 1,
+     "d": 3,
+     "a": 11,
+     "cs": 210,
+     "dmg": 0.127,
+     "kp": 0.545,
+     "wp": 14,
+     "wk": 2,
+     "gold": 9591,
+     "win": true
+    },
+    "Canyon": {
+     "team": "GEN",
+     "role": "Jungle",
+     "champ": "Qiyana",
+     "k": 8,
+     "d": 1,
+     "a": 10,
+     "cs": 248,
+     "dmg": 0.269,
+     "kp": 0.818,
+     "wp": 8,
+     "wk": 6,
+     "gold": 14921,
+     "win": true
+    },
+    "Chovy": {
+     "team": "GEN",
+     "role": "Mid",
+     "champ": "Akali",
+     "k": 8,
+     "d": 1,
+     "a": 9,
+     "cs": 267,
+     "dmg": 0.291,
+     "kp": 0.773,
+     "wp": 6,
+     "wk": 8,
+     "gold": 14344,
+     "win": true
+    },
+    "Ruler": {
+     "team": "GEN",
+     "role": "Bot",
+     "champ": "Corki",
+     "k": 5,
+     "d": 2,
+     "a": 12,
+     "cs": 244,
+     "dmg": 0.256,
+     "kp": 0.773,
+     "wp": 9,
+     "wk": 6,
+     "gold": 13340,
+     "win": true
+    },
+    "Duro": {
+     "team": "GEN",
+     "role": "Support",
+     "champ": "Nautilus",
+     "k": 0,
+     "d": 3,
+     "a": 16,
+     "cs": 29,
+     "dmg": 0.056,
+     "kp": 0.727,
+     "wp": 58,
+     "wk": 11,
+     "gold": 7025,
+     "win": true
+    }
+   },
+   "src": "lolesports",
+   "gameId": "115660540726095006"
+  }
+ }
+}
