@@ -1,0 +1,20 @@
+name: fantasy-data
+on:
+  push:
+    branches: [fantasy-data]
+    paths: [tools/**, .github/workflows/fetch.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/fetch.py
+      - run: |
+          git config user.name "cds-bot"
+          git config user.email "cds-bot@users.noreply.github.com"
+          git add out
+          git commit -m "Données de la fantasy league" || echo "rien de nouveau"
+          git push
