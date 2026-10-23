@@ -244,7 +244,10 @@ window.conseilRankBadge=(v,size=34)=>!v||!v.tier?`<span class="rkb none">Non cla
 const isoDay=d=>{const x=new Date(d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`};
 const weekStart=()=>{const d=new Date();const day=(d.getDay()+6)%7;d.setDate(d.getDate()-day);d.setHours(0,0,0,0);return d};
 // Ladder partagé : un seul visiteur interroge Riot toutes les 15 minutes, les autres lisent Firebase.
+let claimsAt=0;
+const claimChainHas=(base,id,k=x=>x)=>{let o=CLAIM_BY[id];const seen=new Set([id]);while(o&&!seen.has(o)){if(base?.players?.[k(o)])return true;seen.add(o);o=CLAIM_BY[o]}return false};
 window.conseilLadder=async function(db,riotProfiles,{force=false}={}){
+  if(Date.now()-claimsAt>4*60e3){claimsAt=Date.now();await loadClaims(db)}
   const players=Object.entries(riotProfiles||{}).filter(([id,p])=>p.riotId&&p.pseudo&&!conseilIsClaimed(id));
   let cur=null;try{const d=await db.doc("ladder/current").get();cur=d.exists?d.data():null}catch(e){}
   const stale=!cur||Date.now()-Date.parse(cur.updatedAt||0)>15*60e3||players.some(([id,p])=>!cur.players?.[id]||cur.players[id].riotId!==p.riotId||(cur.players[id].alts||[]).length!==conseilAccounts(p).length-1);
@@ -268,11 +271,11 @@ window.conseilLadder=async function(db,riotProfiles,{force=false}={}){
     q.docs.map(d=>d.data()).forEach(sn=>{for(const [id,v] of Object.entries(sn.players||{}))if(!players[id]&&(v.solo||v.flex)){players[id]=v;since[id]=sn.day}});
     base=q.docs.length?{day:q.docs[0].data().day,players,since}:null}catch(e){console.warn("snap",e)}
   // nouveau dans le Ladder cette semaine : on enregistre son point de départ maintenant (une seule fois, impossible à réécrire)
-  try{const today=isoDay(Date.now());for(const [id,v] of Object.entries(cur?.players||{})){if((v.solo||v.flex)&&!base?.players?.[id]&&!(CLAIM_BY[id]&&base?.players?.[CLAIM_BY[id]])){
+  try{const today=isoDay(Date.now());for(const [id,v] of Object.entries(cur?.players||{})){if((v.solo||v.flex)&&!base?.players?.[id]&&!claimChainHas(base,id)){
     await db.doc(`ladderSnap/${today}_${id}`).set({day:today,join:id,players:{[id]:{solo:v.solo,flex:v.flex}}}).catch(()=>{});
     base=base||{day:today,players:{},since:{}};base.players[id]={solo:v.solo,flex:v.flex};base.since[id]=today}
     // comptes secondaires : chacun son propre point de départ
-    for(const a of v.alts||[]){const k=conseilAltKey(id,a.riotId),ok=CLAIM_BY[id]&&base?.players?.[conseilAltKey(CLAIM_BY[id],a.riotId)];
+    for(const a of v.alts||[]){const k=conseilAltKey(id,a.riotId),ok=claimChainHas(base,id,x=>conseilAltKey(x,a.riotId));
       if((a.solo||a.flex)&&!base?.players?.[k]&&!ok){
         await db.doc(`ladderSnap/${today}_${id}_${a.riotId.toLowerCase().replace(/[^a-z0-9]/g,"")}`).set({day:today,join:k,players:{[k]:{solo:a.solo,flex:a.flex}}}).catch(()=>{});
         base=base||{day:today,players:{},since:{}};base.players[k]={solo:a.solo,flex:a.flex};base.since[k]=today}}}}catch(e){}
@@ -285,7 +288,8 @@ window.conseilWeekDelta=function(cur,base,id,q="solo"){
   const [pid,alt]=String(id).split("|");
   const curOf=k=>{const p=cur?.players?.[pid];if(!alt)return p;return (p?.alts||[]).find(a=>a.riotId.toLowerCase()===alt)};
   // compte récupéré sur un autre appareil : on reprend le relevé de début de semaine de l'ancien compte
-  let opid=pid;const seen=new Set(),key=x=>alt?x+"|"+alt:x;while(!base?.players?.[key(opid)]&&CLAIM_BY[opid]&&!seen.has(opid)){seen.add(opid);opid=CLAIM_BY[opid]}
+  // on remonte jusqu'au plus ancien compte qui a un relevé cette semaine (un relevé "nouveau" posé après une récupération ne doit pas effacer la semaine)
+  const key=x=>alt?x+"|"+alt:x;let opid=pid;{let o=pid;const seen=new Set();while(o&&!seen.has(o)){seen.add(o);if(base?.players?.[key(o)])opid=o;o=CLAIM_BY[o]}}
   const a=curOf()?.[q],b=base?.players?.[key(opid)]?.[q];
   if(!a)return null;
   if(!b)return{games:0,wins:0,lp:0,fresh:true};
