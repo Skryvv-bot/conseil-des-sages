@@ -257,7 +257,7 @@ window.conseilLadder=async function(db,riotProfiles,{force=false}={}){
         cur={updatedAt:new Date().toISOString(),players:out};
         await db.doc("ladder/current").set(cur);
         const today=isoDay(Date.now()),snap=await db.doc("ladderSnap/"+today).get();
-        if(!snap.exists){const sp={};for(const [id,v] of Object.entries(out))sp[id]={solo:v.solo,flex:v.flex};await db.doc("ladderSnap/"+today).set({day:today,players:sp})}
+        if(!snap.exists){const sp={};for(const [id,v] of Object.entries(out)){sp[id]={solo:v.solo,flex:v.flex};for(const a of v.alts||[])sp[conseilAltKey(id,a.riotId)]={solo:a.solo,flex:a.flex}}await db.doc("ladderSnap/"+today).set({day:today,players:sp})}
       }
     }catch(e){console.warn("ladder",e)}
   }
@@ -270,14 +270,23 @@ window.conseilLadder=async function(db,riotProfiles,{force=false}={}){
   // nouveau dans le Ladder cette semaine : on enregistre son point de départ maintenant (une seule fois, impossible à réécrire)
   try{const today=isoDay(Date.now());for(const [id,v] of Object.entries(cur?.players||{})){if((v.solo||v.flex)&&!base?.players?.[id]&&!(CLAIM_BY[id]&&base?.players?.[CLAIM_BY[id]])){
     await db.doc(`ladderSnap/${today}_${id}`).set({day:today,join:id,players:{[id]:{solo:v.solo,flex:v.flex}}}).catch(()=>{});
-    base=base||{day:today,players:{},since:{}};base.players[id]={solo:v.solo,flex:v.flex};base.since[id]=today}}}catch(e){}
+    base=base||{day:today,players:{},since:{}};base.players[id]={solo:v.solo,flex:v.flex};base.since[id]=today}
+    // comptes secondaires : chacun son propre point de départ
+    for(const a of v.alts||[]){const k=conseilAltKey(id,a.riotId),ok=CLAIM_BY[id]&&base?.players?.[conseilAltKey(CLAIM_BY[id],a.riotId)];
+      if((a.solo||a.flex)&&!base?.players?.[k]&&!ok){
+        await db.doc(`ladderSnap/${today}_${id}_${a.riotId.toLowerCase().replace(/[^a-z0-9]/g,"")}`).set({day:today,join:k,players:{[k]:{solo:a.solo,flex:a.flex}}}).catch(()=>{});
+        base=base||{day:today,players:{},since:{}};base.players[k]={solo:a.solo,flex:a.flex};base.since[k]=today}}}}catch(e){}
   return{current:cur,base};
 };
 // Évolution de la semaine pour un joueur et une file (solo/flex)
+// Clé d'un compte secondaire dans le ladder : "<sage>|<riot id en minuscules>"
+window.conseilAltKey=(id,riotId)=>id+"|"+String(riotId).toLowerCase();
 window.conseilWeekDelta=function(cur,base,id,q="solo"){
+  const [pid,alt]=String(id).split("|");
+  const curOf=k=>{const p=cur?.players?.[pid];if(!alt)return p;return (p?.alts||[]).find(a=>a.riotId.toLowerCase()===alt)};
   // compte récupéré sur un autre appareil : on reprend le relevé de début de semaine de l'ancien compte
-  let oid=id;const seen=new Set();while(!base?.players?.[oid]&&CLAIM_BY[oid]&&!seen.has(oid)){seen.add(oid);oid=CLAIM_BY[oid]}
-  const a=cur?.players?.[id]?.[q],b=base?.players?.[oid]?.[q];
+  let opid=pid;const seen=new Set(),key=x=>alt?x+"|"+alt:x;while(!base?.players?.[key(opid)]&&CLAIM_BY[opid]&&!seen.has(opid)){seen.add(opid);opid=CLAIM_BY[opid]}
+  const a=curOf()?.[q],b=base?.players?.[key(opid)]?.[q];
   if(!a)return null;
   if(!b)return{games:0,wins:0,lp:0,fresh:true};
   return{games:(a.w+a.l)-(b.w+b.l),wins:a.w-b.w,lp:conseilRankValue(a)-conseilRankValue(b)};

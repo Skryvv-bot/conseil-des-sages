@@ -32,6 +32,7 @@ tr.mine td{background:rgba(255,255,255,.04)}
 .pos{font:400 1.3rem var(--display);color:var(--gold);width:40px}
 .up{color:#2fbf71;font-weight:700}.down{color:#ff4d6a;font-weight:700}.flat{color:var(--muted)}
 .hot{color:#ffb400;font-weight:700;font-size:.8rem;letter-spacing:.06em}
+.acc2{font:700 .68rem var(--body,system-ui);letter-spacing:.08em;text-transform:uppercase;color:#a7abb6;border:1px solid #2a2d35;padding:1px 6px;vertical-align:middle}
 </style>
 </head>
 <body>
@@ -65,13 +66,15 @@ const delta=d=>!d?"—":d.fresh?'<span class="flat">nouveau</span>':!d.games?'<s
 function render(){
   $("me").innerHTML=!db?(connErr?"Hors ligne":"Connexion au Conseil…"):riot[uid]?.pseudo?`Connecté : <b>${esc(riot[uid].pseudo)}</b>`:"Sage anonyme";
   if(!data?.current){$("tbl").innerHTML=`<tr><td class="note">${connErr?"Classement indisponible.":db?"Récupération des rangs chez Riot…":"Chargement…"}</td></tr>`;$("podium").innerHTML="";return}
-  const rows=Object.entries(data.current.players||{}).filter(([id])=>!conseilIsClaimed(id)).map(([id,p])=>({id,p,v:p[q],d:conseilWeekDelta(data.current,data.base,id,q)}))
+  // un compte = une ligne : le compte principal et chaque compte secondaire sont classés séparément
+  const rows=Object.entries(data.current.players||{}).filter(([id])=>!conseilIsClaimed(id)).flatMap(([id,p])=>[{id,p,riotId:p.riotId,v:p[q],d:conseilWeekDelta(data.current,data.base,id,q)},
+    ...(p.alts||[]).filter(a=>a.riotId).map((a,i)=>({id,p,riotId:a.riotId,alt:i+2,v:a[q]||null,d:conseilWeekDelta(data.current,data.base,conseilAltKey(id,a.riotId),q)}))])
     .sort((a,b)=>conseilRankValue(b.v)-conseilRankValue(a.v)||a.p.pseudo.localeCompare(b.p.pseudo));
   $("upd").textContent="Mis à jour à "+new Date(data.current.updatedAt).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
   const ranked=rows.filter(r=>r.v);
-  $("podium").innerHTML=ranked.slice(0,3).map((r,i)=>`<div class="pod p${i+1}" style="--rk:${TIER_COLOR[r.v.tier]}"><span class="pl">${i+1}</span>${conseilRankEmblem(r.v.tier,i===0?110:84)}<b>${esc(r.p.pseudo)}${conseilCampTag(r.id)}</b>${conseilRankBadge(r.v,0)}<span class="note">${r.v.lp} LP · ${r.v.w}V ${r.v.l}D</span></div>`).join("");
+  $("podium").innerHTML=ranked.slice(0,3).map((r,i)=>`<div class="pod p${i+1}" style="--rk:${TIER_COLOR[r.v.tier]}"><span class="pl">${i+1}</span>${conseilRankEmblem(r.v.tier,i===0?110:84)}<b>${esc(r.p.pseudo)}${conseilCampTag(r.id)}</b>${r.alt?`<span class="note" style="font-size:.78rem">${esc(r.riotId)}</span>`:""}${conseilRankBadge(r.v,0)}<span class="note">${r.v.lp} LP · ${r.v.w}V ${r.v.l}D</span></div>`).join("");
   $("tbl").innerHTML=`<thead><tr><th>#</th><th>Sage</th><th>Rang</th><th class="num">LP</th><th class="num">V-D</th><th class="num">Winrate</th><th>Semaine</th></tr></thead><tbody>${
-    rows.map((r,i)=>{const n=r.v?r.v.w+r.v.l:0;return `<tr class="${r.id===uid?"mine":""}"><td class="pos">${r.v?i+1:"–"}</td><td><b>${esc(r.p.pseudo)}</b>${conseilCampTag(r.id)}<div class="note" style="font-size:.8rem">${esc(r.p.riotId)}</div>${(r.p.alts||[]).filter(a=>a.riotId).map(a=>{const v=a[q]||null;return `<div class="note alt" style="font-size:.78rem">+ ${esc(a.riotId)} · ${v?esc(conseilRankLabel(v,false))+" "+v.lp+" LP":"non classé"}</div>`}).join("")}</td>
+    rows.map((r,i)=>{const n=r.v?r.v.w+r.v.l:0;return `<tr class="${r.id===uid?"mine":""}"><td class="pos">${r.v?i+1:"–"}</td><td><b>${esc(r.p.pseudo)}</b>${conseilCampTag(r.id)}${r.alt?` <span class="acc2">compte ${r.alt}</span>`:""}<div class="note" style="font-size:.8rem">${esc(r.riotId)}</div></td>
       <td>${conseilRankBadge(r.v)}${r.v?.hot?' <span class="hot">EN FEU</span>':""}</td><td class="num">${r.v?r.v.lp:"—"}</td><td class="num">${r.v?r.v.w+"-"+r.v.l:"—"}</td>
       <td class="num">${n?Math.round(100*r.v.w/n)+" %":"—"}</td><td>${delta(r.d)}</td></tr>`}).join("")}</tbody>`;
 }
