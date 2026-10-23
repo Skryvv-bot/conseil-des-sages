@@ -457,9 +457,10 @@ html[data-camp="wow"] .cpop-yes{background:#ffb400;color:#08090b}
     btns.forEach(b=>b.onclick=()=>{el.remove();document.documentElement.style.overflow=prevOverflow;open=false;if(forced){try{localStorage.setItem("seen-eff-"+forced.id,"1")}catch(e){}}else setTimeout(show,nextDelay())});
     document.body.appendChild(el);btn.focus();
   }
-  setTimeout(show,nextDelay());
-  window.conseilPopupTest=show;
-  window.conseilPaidPopup=f=>show(f);   // pour tester : conseilPopupTest() dans la console
+  // Popups désactivés à la demande du Conseil (aléatoires et payants). Pour les remettre : POPUPS_ON=true.
+  const POPUPS_ON=false;
+  if(POPUPS_ON){setTimeout(show,nextDelay());window.conseilPaidPopup=f=>show(f)}
+  window.conseilPopupTest=show;   // pour tester : conseilPopupTest() dans la console
 })();
 
 
