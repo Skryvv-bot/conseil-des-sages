@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: python3 tools/lolesports.py
+      - run: python3 tools/who.py
       - run: |
           git config user.name "cds-bot"
           git config user.email "cds-bot@users.noreply.github.com"
