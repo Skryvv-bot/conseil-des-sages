@@ -173,6 +173,13 @@ input[type=search].fsel{min-width:200px;flex:1 1 200px}
 .vit .slot{aspect-ratio:5/7;border:2px dashed #2a2d35;border-radius:10px;display:grid;place-items:center;color:#6f7480;font-size:.85rem;text-align:center;padding:10px}
 .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px}
 .facts div{background:#08090b;padding:10px;display:flex;flex-direction:column;gap:2px}.facts b{font:400 1.4rem var(--display,"Anton"),sans-serif;color:#fff}.facts span{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+/* ---- Fiche : collection d'un champion ---- */
+.chset{display:flex;flex-direction:column;gap:8px;background:#08090b;border:1px solid #2a2d35;padding:12px}
+.chbar{height:6px;background:#2a2d35}.chbar i{display:block;height:100%;background:var(--amber)}
+.chset .facts b small{font:600 .8rem var(--body);color:var(--muted)}
+.chset .mini-cards{grid-template-columns:repeat(auto-fill,minmax(64px,1fr));max-height:260px;overflow-y:auto;padding:2px}
+.chpick{background:none;border:0;padding:0;cursor:pointer}.chpick .tc{cursor:pointer}.chpick.cur .tc{outline:3px solid var(--amber);outline-offset:-3px}
+.chset .mini-cards .tc .tc-key,.chset .mini-cards .tc .tc-cnt,.chset .mini-cards .tc .tc-flags,.chset .mini-cards .tc .tc-gem{display:none}.chset .mini-cards .tc .tc-nm{font-size:.62rem}
 /* ---- Marché et échanges ---- */
 .lots{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:16px}
 .lot{display:flex;flex-direction:column;gap:8px;background:#15171c;padding:10px;border-top:3px solid var(--rc,#3a3e48);min-width:0}
@@ -475,9 +482,11 @@ function showCard(id){const c=BY[id];if(!c)return;const n=mine(id);
       <p class="note" style="margin:0">La carte quitte ta collection pendant la vente. Tu peux annuler tant que personne n'a enchéri.${n===1?" <b>C'est ton seul exemplaire.</b>":""}</p>
       <button class="btn small" id="sellGo" type="button" style="align-self:flex-start">Mettre en vente</button></div>
     ${listedOf(id).length?`<div><span class="eyebrow">En vente au marché</span><div class="row" style="margin-top:6px">${listedOf(id).map(L=>`<a class="ctag" href="#marche" style="color:#fff">${esc(L.sellerPseudo||"Un sage")} · ${L.kind==="auction"?`enchère ${fmt(L.bid||L.price)} PO`:`${fmt(L.price)} PO`}</a>`).join("")}</div></div>`:""}
+    ${c.ch?champSetHTML(c.ch,id):""}
     ${owners.length?`<div><span class="eyebrow">Aussi chez</span><div class="row" style="margin-top:6px">${owners.slice(0,12).join("")}</div>${!n&&me?`<p class="note" style="margin:6px 0 0">Touche un sage pour voir sa collection, ou <a href="#echanges" id="askT">propose-lui un échange</a>.</p>`:""}</div>`:""}</div></div>`;
   document.body.appendChild(m);const close=()=>m.remove();
   m.querySelector(".x").onclick=close;m.onclick=e=>{if(e.target===m||e.target.closest("a"))close()};
+  m.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>showCard(b.dataset.go));
   const vb=m.querySelector("#vit");if(vb)vb.onclick=async()=>{let v2=[...(me.vitrine||[])].filter(x=>x!==id);if(!inVit){if(v2.length>=5){toast("Ta vitrine est pleine (5 cartes). Retire une carte d'abord.",true);return}v2.push(id)}
     try{await db.collection("cards").doc(uid).update({vitrine:v2});close();toast(inVit?"Retirée de ta vitrine":"Ajoutée à ta vitrine")}catch(e){toast("Vitrine indisponible pour le moment.",true)}};
   const rb=m.querySelector("#rec1");if(rb)rb.onclick=async()=>{rb.disabled=true;try{const r=await api({op:"recycle",ids:[id]});snd("coin");close();toast(`+${fmt(r.delta)} PO`)}catch(e){toast(e.message,true);rb.disabled=false}};
@@ -491,6 +500,15 @@ function showCard(id){const c=BY[id];if(!c)return;const n=mine(id);
   const at=m.querySelector("#askT");if(at)at.onclick=()=>{const u=Object.keys(all).find(x=>x!==uid&&all[x].c?.[id]>0&&!conseilIsClaimed(x));tr={to:u||"",give:[],want:u?[id]:[],po:0};};
   m.querySelector(".x").focus();
 }
+
+// cartes d'un champion : la carte champion, son passif, ses 4 sorts et ses skins
+function champSetHTML(ch,cur){const set=CARDS.filter(x=>x.ch===ch),got=set.filter(x=>mine(x.id)>0),C=champ(ch);
+  const part=(t,l)=>{const a=set.filter(x=>x.type===t),g=a.filter(x=>mine(x.id)>0).length;return `<div><b>${g}<small> / ${a.length}</small></b><span>${l}</span></div>`};
+  const copies=set.reduce((a,x)=>a+mine(x.id),0);
+  return `<div class="chset"><div class="between"><span class="eyebrow">Ta collection ${/^[AEIOUYÉÈ]/i.test(C.name)?"d'":"de "}${esc(C.name)}</span><span class="note">${got.length} / ${set.length} cartes · ${copies} exemplaire${copies>1?"s":""}</span></div>
+    <div class="chbar" aria-hidden="true"><i style="width:${(100*got.length/set.length).toFixed(1)}%"></i></div>
+    <div class="facts">${part("champ","Champion")}${part("abil","Passif et sorts")}${part("skin","Skins")}</div>
+    <div class="mini-cards">${set.map(x=>`<button type="button" class="chpick${x.id===cur?" cur":""}" data-go="${esc(x.id)}" title="${esc(x.name)}${mine(x.id)?` (×${mine(x.id)})`:" (manquante)"}">${cardHTML(x,{div:true,count:mine(x.id),miss:!(mine(x.id)>0),sz:34})}</button>`).join("")}</div></div>`}
 
 // ---------- LES SAGES ----------
 function sageRows(){return Object.entries(all).filter(([u,d])=>!conseilIsClaimed(u)&&(d.n||0)>0).map(([u,d])=>({u,d,n:d.n||0,t:d.t||[0,0,0,0,0]})).sort((a,b)=>b.n-a.n||b.t[4]-a.t[4]||b.t[3]-a.t[3])}
