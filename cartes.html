@@ -362,7 +362,8 @@ function feedHTML(){const L=feed.filter(f=>BY[f.id]&&!conseilIsClaimed(f.uid)).s
 // ---------- Ouverture façon booster Pokémon ----------
 let stage=null;
 function closeStage(){if(!stage)return;stage.remove();stage=null;document.body.style.overflow="";busy=false;render()}
-async function openFlow(kind){
+let lastKind="free";
+async function openFlow(kind){lastKind=kind;
   if(busy||!db)return;busy=true;sndLoad();
   const label=kind==="region"?"Région · "+D.regions[regSel].name:PACKS[kind].n;
   const cover=CH[Math.floor(Math.random()*CH.length)].id;
@@ -415,16 +416,21 @@ function burst(r){const f=document.createElement("div");f.className="flash";f.st
   if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
   for(let i=0;i<(r>=4?36:18);i++){const s=document.createElement("span");s.className="spark";s.style.setProperty("--rc",`var(--r${r})`);s.style.left="50%";s.style.top="45%";document.body.appendChild(s);
     const a=Math.random()*Math.PI*2,d=120+Math.random()*220;s.animate([{transform:"translate(-50%,-50%) scale(1)",opacity:1},{transform:`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px) scale(.2)`,opacity:0}],{duration:900+Math.random()*500,easing:"cubic-bezier(.2,.8,.2,1)"}).onfinish=()=>s.remove()}}
+// « Ouvrir un autre » : le même genre de booster, tout de suite (ou un booster gratuit s'il en reste)
+function againHTML(res){const free=res.free??freeNow(),bal=res.po??po??0,P0=PACKS[lastKind];
+  if(lastKind==="free"||free>0)return free>0?`<button class="btn" id="stAgain" type="button" data-k="free">Ouvrir un autre (${free} gratuit${free>1?"s":""})</button>`
+    :hasWallet&&bal>=PACKS.std.p?`<button class="btn" id="stAgain" type="button" data-k="std">Acheter et ouvrir un booster (${PACKS.std.p} PO)</button>`:`<button class="btn" type="button" disabled>Plus de booster gratuit</button>`;
+  return bal>=P0.p?`<button class="btn" id="stAgain" type="button" data-k="${lastKind}">Ouvrir un autre ${lastKind==="chest"?"coffre":"booster"} (${fmt(P0.p)} PO)</button>`:`<button class="btn" type="button" disabled>Il manque ${fmt(P0.p-bal)} PO</button>`}
 function recap(cards,res){if(!stage)return;
   const news=cards.filter(p=>p.isNew).length,best=cards.reduce((a,p)=>Math.max(a,p.r),0);
   const bon=(res.bonuses||[]).map(b=>b.kind==="region"?`Région complète : ${esc(D.regions[b.key]?.name||b.key)} · +${b.po} PO`:`Tous les skins de ${esc(champ(b.key)?.name||b.key)} · +${b.po} PO`);
   stage.innerHTML=`<div class="recap-wrap"><span class="eyebrow">Booster ouvert</span><h2>${news} nouvelle${news>1?"s":""} carte${news>1?"s":""}</h2>
     ${bon.length?`<div class="row" style="justify-content:center">${bon.map(t=>`<span class="ctag">${t}</span>`).join("")}</div>`:""}
     <div class="recap">${cards.map(p=>cardHTML(BY[p.id],{isNew:p.isNew,glow:p.r>=3,count:1})).join("")}</div>
-    <div class="row" style="justify-content:center"><button class="btn" id="stAgain" type="button">Ouvrir un autre</button><button class="btn ghost" id="stColl" type="button">Ma collection</button><button class="btn ghost" id="stClose" type="button">Fermer</button></div></div>`;
+    <div class="row" style="justify-content:center">${againHTML(res)}<button class="btn ghost" id="stColl" type="button">Ma collection</button><button class="btn ghost" id="stClose" type="button">Fermer</button></div></div>`;
   if(best>=3)burst(best);
   $("stClose").onclick=closeStage;$("stColl").onclick=()=>{closeStage();location.hash="collection"};
-  $("stAgain").onclick=()=>{closeStage();scrollTo({top:0})};$("stClose").focus();
+  const ag=$("stAgain");if(ag)ag.onclick=()=>{const k=ag.dataset.k;closeStage();openFlow(k)};$("stClose").focus();
 }
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(document.querySelector(".cmodal"))document.querySelector(".cmodal").remove();else if(stage&&stage.querySelector(".recap"))closeStage()}});
 
