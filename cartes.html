@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cartes de Runeterra · CDS.TV</title>
+<meta name="theme-color" content="#08090b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png?v=2">
+<link rel="apple-touch-icon" href="icon-192.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@400;500;600;700;800&family=Cinzel:wght@600;700&family=Barlow:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="conseil.css">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="conseil.js"></script>
+<style>
+/* Cartes de Runeterra : boosters (ouverture façon Pokémon), collection, vitrines des sages, wiki du jeu.
+   Le robot CDS.TV tire les cartes et tient les comptes ; la page ne fait qu'afficher. */
+:root{--r0:#8a96a3;--r1:#3fbf7f;--r2:#2f8cff;--r3:#b45cff;--r4:#ffb400;--red:#e4002b;--amber:#ffb400}
+.wrap{max-width:1120px}
+.ctabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:2px solid #2a2d35}
+.ctabs a{text-decoration:none;color:var(--muted);font:700 .82rem var(--body);letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-bottom:3px solid transparent;margin-bottom:-2px}
+.ctabs a[aria-current="page"]{color:#fff;border-bottom-color:var(--red)}
+.ctabs a:hover{color:#fff}
+.purse{display:flex;gap:18px;align-items:center;flex-wrap:wrap;font:700 .95rem var(--body);letter-spacing:.04em;color:var(--muted)}
+.purse b{color:#fff;font:400 1.35rem var(--display,"Anton"),sans-serif;letter-spacing:.02em}
+.purse .po b{color:var(--amber)}
+.prog{width:140px;height:6px;background:#2a2d35}.prog i{display:block;height:100%;background:var(--red)}
+.view{display:flex;flex-direction:column;gap:20px;min-width:0}
+
+/* ---- Cartes (5:7) ---- */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:14px}
+.tc{--rc:var(--r0);position:relative;aspect-ratio:5/7;width:100%;background:#0b1520;border:2px solid var(--rc);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;color:#fff;text-align:left;padding:0;font:inherit;
+  box-shadow:0 0 0 1px rgba(0,0,0,.6) inset,0 6px 18px rgba(0,0,0,.45);transition:transform .15s}
+button.tc:hover{transform:translateY(-3px)}
+.tc-art{position:absolute;inset:0;background-size:cover;background-position:center 18%}
+.tc-art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(1,10,19,0) 38%,rgba(1,10,19,.92) 72%,#010a13)}
+.tc-gem{position:absolute;top:8px;left:8px;width:14px;height:14px;transform:rotate(45deg);background:var(--rc);box-shadow:0 0 10px var(--rc);border:1px solid rgba(255,255,255,.5)}
+.tc-no{position:absolute;top:6px;right:8px;font:700 .7rem var(--body);color:rgba(255,255,255,.8);letter-spacing:.06em;text-shadow:0 1px 3px #000}
+.tc-icon{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);background-repeat:no-repeat;border:2px solid var(--rc);border-radius:6px;box-shadow:0 0 24px rgba(0,0,0,.8)}
+.tc-key{position:absolute;left:50%;top:7%;transform:translateX(-50%);font:400 1.2rem var(--display,"Anton"),sans-serif;color:var(--rc);text-shadow:0 1px 4px #000}
+.tc-body{position:relative;margin-top:auto;padding:0 10px 9px;display:flex;flex-direction:column;gap:2px}
+.tc-nm{font:400 1.05rem/1.1 var(--display,"Anton"),sans-serif;text-transform:uppercase;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tc-sub{font:600 .72rem var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tc-st{display:flex;justify-content:space-between;gap:6px;white-space:nowrap;overflow:hidden;font:700 .78rem var(--body);color:#fff;border-top:1px solid rgba(255,255,255,.18);padding-top:4px;margin-top:3px}
+.tc-st b{color:var(--rc)}
+.tc-cnt{position:absolute;top:28px;right:6px;background:rgba(1,10,19,.85);border:1px solid #3a3e48;font:700 .72rem var(--body);padding:1px 6px;color:#fff}
+.tc-flags{display:flex;gap:4px;margin-bottom:3px}.tc-flags:empty{display:none}
+.tc-new{background:var(--red);font:700 .7rem var(--body);letter-spacing:.1em;padding:1px 6px;color:#fff}
+.tc-vit{background:var(--amber);color:#08090b;font:700 .66rem var(--body);letter-spacing:.08em;padding:1px 5px;text-transform:uppercase}
+.tc.miss{border-color:#26303d;filter:grayscale(1) brightness(.5)}
+button.tc.miss:hover{filter:grayscale(.6) brightness(.6)}
+.tc.region .tc-art{background-position:center}
+.tc.big{width:min(290px,78vw);cursor:default;flex:none}
+.tc.big .tc-nm{font-size:1.55rem}.tc.big .tc-sub{font-size:.85rem}.tc.big .tc-st{font-size:.95rem}
+.tc.glow{box-shadow:0 0 34px var(--rc)}
+.tc.holo::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;mix-blend-mode:color-dodge;opacity:.45;
+  background:linear-gradient(115deg,transparent 20%,rgba(255,255,255,.55) 35%,rgba(255,180,0,.35) 42%,rgba(180,92,255,.35) 50%,transparent 62%);background-size:250% 100%;animation:holo 3.2s linear infinite}
+@keyframes holo{from{background-position:120% 0}to{background-position:-120% 0}}
+.rar{font:700 .78rem var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--rc)}
+
+/* ---- Boutique de boosters ---- */
+.shopc{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.prod{background:#15171c;border-top:3px solid var(--pc,#3a3e48);padding:16px;display:flex;flex-direction:column;gap:10px;align-items:flex-start;min-width:0}
+.prod h3{margin:0;font:400 1.35rem var(--display,"Anton"),sans-serif;text-transform:uppercase;color:#fff!important;letter-spacing:.02em!important}
+.prod p{margin:0;color:var(--muted);font-size:.95rem}
+.prod .price{font:700 1.05rem var(--body);color:var(--amber);letter-spacing:.04em}
+.prod select{width:100%;padding:9px;background:#08090b;border:1px solid #2a2d35;color:#fff}
+.prod .btn{margin-top:auto}
+.prod .mini{align-self:center}
+.rates{width:100%;border-collapse:collapse;font-size:.95rem}.rates td,.rates th{padding:7px 8px;border-bottom:1px solid #2a2d35;text-align:left}.rates th{font:700 .74rem var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--amber)}
+.rates .num,.num{text-align:right;font-variant-numeric:tabular-nums}
+.feed{display:flex;flex-direction:column;gap:6px}
+.feed div{display:flex;gap:10px;align-items:center;background:#08090b;padding:8px 10px;font-size:.95rem}
+.feed .d{margin-left:auto;color:#6f7480;font-size:.8rem;white-space:nowrap}
+
+/* ---- Booster (l'objet) ---- */
+.pack{--pw:200px;--ph:320px;--p1:#e4002b;--p2:#5c0012;position:relative;width:var(--pw);height:var(--ph);flex:none;user-select:none;-webkit-user-select:none;touch-action:none}
+.pack .pk-top,.pack .pk-body{position:absolute;left:0;right:0;background:linear-gradient(160deg,var(--p1),var(--p2) 70%,#08090b);background-size:var(--pw) var(--ph);overflow:hidden}
+.pack .pk-top{top:0;height:44px;border-radius:6px 6px 0 0;background-position:0 0;cursor:grab;z-index:3;transition:transform .55s cubic-bezier(.3,.7,.3,1),opacity .55s}
+.pack .pk-body{top:44px;bottom:0;border-radius:0 0 6px 6px;background-position:0 -44px;z-index:2;transition:transform .6s ease-in,opacity .6s}
+.pack .pk-top::before,.pack .pk-body::after{content:"";position:absolute;left:0;right:0;height:16px;background:repeating-linear-gradient(90deg,rgba(0,0,0,.28) 0 3px,rgba(255,255,255,.08) 3px 6px)}
+.pack .pk-top::before{top:0}.pack .pk-body::after{bottom:0}
+.pack .pk-cut{position:absolute;left:0;bottom:0;height:3px;width:calc(var(--tear,0)*100%);background:#fff;box-shadow:0 0 10px #fff,0 0 20px var(--amber)}
+.pack .pk-dash{position:absolute;left:6px;right:6px;bottom:1px;border-top:2px dashed rgba(255,255,255,.45)}
+.pack .pk-win{position:absolute;left:12px;right:12px;top:24px;height:58%;background-size:cover;background-position:center 20%;border:2px solid rgba(255,255,255,.65);box-shadow:0 0 0 4px rgba(0,0,0,.25)}
+.pack .pk-lbl{position:absolute;left:12px;right:12px;bottom:24px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;color:#fff}
+.pack .pk-lbl b{font:400 1.55rem/1 var(--display,"Anton"),sans-serif;letter-spacing:.06em;text-shadow:0 2px 6px rgba(0,0,0,.5)}
+.pack .pk-lbl span{font:700 .72rem var(--body);letter-spacing:.24em;text-transform:uppercase;opacity:.9}
+.pack .pk-shine{position:absolute;inset:0;z-index:4;pointer-events:none;border-radius:6px;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.35) 45%,transparent 60%);background-size:300% 100%;animation:shine 2.8s ease-in-out infinite;mix-blend-mode:overlay}
+@keyframes shine{0%{background-position:130% 0}60%,100%{background-position:-130% 0}}
+.pack.torn .pk-top{transform:translate(70px,-160px) rotate(28deg);opacity:0;pointer-events:none}
+.pack.drop .pk-body{transform:translateY(120vh) rotate(-6deg);opacity:.2}
+.pack.drop .pk-shine{display:none}
+.pack.idle{animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-6px) rotate(-1deg)}}
+.pack.mini{--pw:120px;--ph:192px}.pack.mini .pk-top{height:28px}.pack.mini .pk-body{top:28px;background-position:0 -28px}.pack.mini .pk-win{top:16px;left:8px;right:8px;height:50%}.pack.mini .pk-lbl b{font-size:1rem}.pack.mini .pk-lbl span{font-size:.56rem}.pack.mini .pk-lbl{bottom:16px}
+.pack[data-k="free"]{--p1:#3a3e48;--p2:#15171c}.pack[data-k="std"]{--p1:#e4002b;--p2:#5c0012}.pack[data-k="region"]{--p1:#1f7a5a;--p2:#0c2a22}.pack[data-k="chest"]{--p1:#ffb400;--p2:#6a3d00}
+
+/* ---- Scène d'ouverture ---- */
+.stage{position:fixed;inset:0;z-index:80;background:radial-gradient(circle at 50% 40%,#1d2027,#08090b 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));overflow:hidden}
+.stage .hint{font:700 .9rem var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-align:center;min-height:1.4em}
+.stage .tools{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:12px;display:flex;gap:8px}
+.stage .tools button{background:rgba(0,0,0,.4);border:1px solid #3a3e48;color:#fff;min-width:44px;min-height:44px;cursor:pointer;font:700 .8rem var(--body);letter-spacing:.08em;text-transform:uppercase;padding:0 12px}
+.arena{position:relative;width:260px;height:370px;display:grid;place-items:center}
+.arena>.pack{position:absolute}
+.ocard{position:absolute;width:min(250px,64vw);aspect-ratio:5/7;perspective:1000px;background:none;border:0;padding:0;cursor:pointer;transition:transform .45s cubic-bezier(.2,.8,.2,1),opacity .45s}
+.ocard .in{display:block;position:relative;width:100%;height:100%;transition:transform .55s;transform-style:preserve-3d}
+.ocard.on .in{transform:rotateY(180deg)}
+.ocard .face{display:block;position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.ocard .face.front{transform:rotateY(180deg)}
+.ocard .face.front .tc{height:100%}
+.ocard.hidden{opacity:0;transform:translateY(60px) scale(.9);pointer-events:none}
+.ocard.gone{opacity:0;transform:translate(-140%,40px) rotate(-14deg);pointer-events:none}
+.cback{display:grid;place-items:center;width:100%;height:100%;border-radius:10px;border:2px solid #3a3e48;
+  background:radial-gradient(circle at 50% 45%,rgba(228,0,43,.35),transparent 45%),repeating-linear-gradient(45deg,#101318 0 10px,#15171c 10px 20px)}
+.cback i{width:34%;aspect-ratio:1;transform:rotate(45deg);border:3px solid var(--red);box-shadow:0 0 18px rgba(228,0,43,.6)}
+.cback em{position:absolute;bottom:14px;font:400 1rem var(--display,"Anton"),sans-serif;letter-spacing:.2em;color:rgba(255,255,255,.5);font-style:normal}
+.ocard.tease .cback{border-color:var(--rc);box-shadow:0 0 30px var(--rc),0 0 60px var(--rc)}
+.ocard.tease .cback i{border-color:var(--rc);box-shadow:0 0 22px var(--rc)}
+.ocard.tease{animation:tease .9s ease-in-out infinite}
+@keyframes tease{25%{transform:rotate(-1.5deg)}75%{transform:rotate(1.5deg)}}
+.strip{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;min-height:60px}
+.strip .s{width:44px;aspect-ratio:5/7;border:2px solid var(--rc);border-radius:5px;background-size:cover;background-position:center 18%;animation:pop .3s}
+@keyframes pop{from{transform:scale(.4);opacity:0}}
+.flash{position:fixed;inset:0;z-index:90;pointer-events:none;background:radial-gradient(circle,var(--rc),transparent 70%);animation:flash .9s forwards}
+@keyframes flash{from{opacity:.9}to{opacity:0}}
+.spark{position:fixed;z-index:91;width:8px;height:8px;border-radius:50%;background:var(--rc);pointer-events:none;box-shadow:0 0 10px var(--rc)}
+.recap{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;width:min(1000px,100%)}
+@media (max-width:760px){.recap{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:460px){.recap{grid-template-columns:repeat(2,minmax(0,1fr))}.arena{transform:scale(.9)}}
+.stage .recap-wrap{display:flex;flex-direction:column;gap:14px;align-items:center;width:100%;max-height:100%;overflow-y:auto;padding:8px 0}
+.stage h2{margin:0}
+
+/* ---- Wiki ---- */
+.wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.wtile{position:relative;aspect-ratio:3/4;border:1px solid #2a2d35;overflow:hidden;text-decoration:none;color:#fff;background-size:cover;background-position:center 15%;background-color:#15171c}
+.wtile span{position:absolute;left:0;right:0;bottom:0;padding:18px 8px 6px;background:linear-gradient(180deg,transparent,rgba(8,9,11,.95));font:400 1rem var(--display,"Anton"),sans-serif;text-transform:uppercase}
+.wtile:hover{border-color:var(--amber)}
+.champ-hero{display:grid;grid-template-columns:240px minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:680px){.champ-hero{grid-template-columns:1fr}.champ-hero>img{max-width:220px}}
+.champ-hero>img{width:100%;border:2px solid #3a3e48}
+.lore{white-space:pre-line;max-width:70ch;color:#d8d8dc}
+.abil{display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;padding:12px 0;border-top:1px solid #2a2d35}
+.abil .ic{width:56px;height:56px;border:1px solid #3a3e48;background-repeat:no-repeat}
+.abil b{font:400 1.05rem var(--display,"Anton"),sans-serif;text-transform:uppercase;color:#fff}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.kv div{background:#08090b;border:1px solid #2a2d35;padding:8px 10px}.kv span{display:block;font:700 .7rem var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}.kv b{font-variant-numeric:tabular-nums}
+.cbars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.cbars span{font:700 .7rem var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}.cbars i{display:block;height:6px;background:#2a2d35;margin-top:4px}.cbars i b{display:block;height:100%;background:var(--red)}
+.region-hero{position:relative;min-height:220px;background-size:cover;background-position:center;border:1px solid #3a3e48;display:flex;align-items:flex-end;padding:20px}
+.region-hero::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(1,10,19,.1),rgba(1,10,19,.9))}
+.region-hero>*{position:relative}
+.ctag{display:inline-block;font:700 .74rem var(--body);letter-spacing:.1em;text-transform:uppercase;border:1px solid #3a3e48;color:var(--amber);padding:2px 8px;text-decoration:none}
+.fsel{background:#08090b;border:1px solid #2a2d35;padding:9px 12px;min-height:40px;color:#fff}
+input[type=search].fsel{min-width:200px;flex:1 1 200px}
+
+/* ---- Fiche carte ---- */
+.cmodal{position:fixed;inset:0;z-index:70;background:rgba(1,6,12,.9);display:flex;align-items:center;justify-content:center;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));overflow-y:auto}
+.cmodal-in{background:#15171c;border-top:3px solid var(--red);padding:20px;max-width:820px;width:100%;display:flex;gap:22px;flex-wrap:wrap;position:relative;margin:auto}
+.cmodal-in>.info{flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.cmodal .x{position:absolute;top:8px;right:8px;width:44px;height:44px;background:none;border:1px solid #3a3e48;color:#fff;cursor:pointer;font-size:1.2rem}
+.ctable{width:100%;border-collapse:collapse}.ctable th,.ctable td{padding:8px;border-bottom:1px solid #2a2d35;text-align:left}.ctable th{font:700 .74rem var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--amber)}
+.ctable a{color:#fff;text-decoration:none;font-weight:700}.ctable a:hover{color:var(--amber)}
+.ctoast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:95;background:#1d2027;border-left:4px solid var(--amber);padding:12px 16px;max-width:90vw;font-weight:600}
+.ctoast.err{border-left-color:var(--red)}
+.vit{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+@media (max-width:700px){.vit{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.vit .slot{aspect-ratio:5/7;border:2px dashed #2a2d35;border-radius:10px;display:grid;place-items:center;color:#6f7480;font-size:.85rem;text-align:center;padding:10px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px}
+.facts div{background:#08090b;padding:10px;display:flex;flex-direction:column;gap:2px}.facts b{font:400 1.4rem var(--display,"Anton"),sans-serif;color:#fff}.facts span{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+@media (prefers-reduced-motion:reduce){.ocard,.ocard .in,.pack .pk-top,.pack .pk-body,.tc{transition:none}.pack.idle,.ocard.tease,.tc.holo::before,.pack .pk-shine{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="phead">
+    <span class="eyebrow">Jeux · Collection</span>
+    <h1>Cartes de Runeterra</h1>
+    <div class="purse" id="purse"><span>Connexion…</span></div>
+  </header>
+  <nav class="ctabs" id="ctabs" aria-label="Sections des cartes"></nav>
+  <main class="view" id="view"><div class="empty">Chargement des cartes…</div></main>
+  <footer>Site de fan du Conseil des Sages, sans lien avec Riot Games. Les images et textes de League of Legends appartiennent à Riot Games. Les cartes et les Pièces d'or sont fictives : elles ne s'achètent pas avec de l'argent réel.</footer>
+</div>
+<script>
+conseilNav("cartes");
+const $=id=>document.getElementById(id),esc=conseilEsc,fmt=n=>Math.round(n).toLocaleString("fr-FR");
+const A="cartes/";
+// ---------- Règles (les mêmes que le robot) ----------
+const RAR=["Commune","Peu commune","Rare","Épique","Légendaire"];
+const RW=[55,27,12,5,1];
+const RECYCLE=[2,5,15,50,150],CRAFT=RECYCLE.map(x=>x*5);
+const FREE_EVERY=4*3600e3,FREE_MAX=2;
+const PACKS={
+  free:{n:"Booster gratuit",p:0,d:"Un booster offert toutes les 4 heures (2 en réserve au plus). 5 cartes, dont 1 Rare garantie."},
+  std:{n:"Booster",p:100,d:"5 cartes de tout Runeterra, dont 1 Rare garantie."},
+  region:{n:"Booster de région",p:150,d:"5 cartes d'une seule région (champions, sorts, skins et la carte de la région), dont 1 Rare garantie."},
+  chest:{n:"Coffre hextech",p:400,d:"5 cartes, dont 1 Épique et 1 Rare garanties."}
+};
+const ROLE_FR={Fighter:"Combattant",Tank:"Tank",Mage:"Mage",Assassin:"Assassin",Marksman:"Tireur",Support:"Support"};
+const SKR={kNoRarity:"Standard",kRare:"Standard",kEpic:"Épique",kLegendary:"Légendaire",kMythic:"Mythique",kUltimate:"Ultime",kTranscendent:"Transcendant",kExalted:"Exalté"};
+
+// ---------- Données ----------
+let D=null,SK=null,PL=null,CARDS=[],BY={},CH=[],REG={};
+function build(){
+  CH=Object.entries(D.champions).map(([id,c])=>({id,...c})).sort((a,b)=>a.name.localeCompare(b.name,"fr"));
+  REG={...D.regions,unaffiliated:{name:"Runeterra (sans région)",desc:"Champions venus d'ailleurs ou trop libres pour appartenir à une seule région.",img:null}};
+  PL.cards.forEach(([id,r,g],i)=>{const [t,ch,x]=id.split(":"),c={id,r,g,no:i+1};
+    if(t==="c"){const C=D.champions[ch];Object.assign(c,{type:"champ",ch,name:C.name,sub:C.title,atk:Math.max(C.info.attack,C.info.magic)*10+C.info.difficulty,def:C.info.defense*10+C.info.difficulty})}
+    else if(t==="p"){const C=D.champions[ch];Object.assign(c,{type:"abil",ch,k:0,key:"P",name:C.passive.name,sub:C.name+" · Passif"})}
+    else if(t==="a"){const C=D.champions[ch],k=C.spells.findIndex(s=>s.key===x);Object.assign(c,{type:"abil",ch,k:k+1,key:x,name:C.spells[k].name,sub:C.name+" · "+x})}
+    else if(t==="k"){const list=SK.skins[ch]||[],j=list.findIndex(s=>String(s.num)===x),s=list[j]||{};Object.assign(c,{type:"skin",ch,i:j,of:list.length,rar:s.rarity,legacy:s.legacy,name:s.name||"Skin",sub:D.champions[ch].name+" · Skin",desc:s.desc})}
+    else Object.assign(c,{type:"region",slug:ch,name:D.regions[ch].name,sub:"Région · "+CH.filter(z=>z.region===ch).length+" champions"});
+    CARDS.push(c);BY[id]=c});
+}
+const champ=id=>D.champions[id];
+const total=()=>CARDS.length;
+const artOf=c=>c.type==="region"?A+(D.regions[c.slug].img||""):c.type==="skin"?`${A}k/${c.ch}.webp`:`${A}c/${c.ch}.webp`;
+
+// ---------- Rendu d'une carte ----------
+function spritePos(k,size,ch){const T=SK.atlas,i=T.idx[ch]+k,sc=size/T.size;return `background-image:url(${A}atlas.webp);background-size:${T.w*sc}px ${T.h*sc}px;background-position:-${(i%T.cols)*size}px -${Math.floor(i/T.cols)*size}px`}
+function cardHTML(c,o={}){const own=o.count??1,miss=o.miss;
+  const cls=`tc${miss?" miss":""}${c.type==="region"?" region":""}${o.big?" big":""}${o.glow?" glow":""}${c.r>=3&&!miss?" holo":""}`;
+  const artPos=c.type==="skin"?`;background-size:${c.of*100}% 100%;background-position:${c.of>1?c.i/(c.of-1)*100:0}% 0`:"";
+  let mid="";
+  if(c.type==="abil"){const sz=o.big?180:(o.sz||92);mid=`<span class="tc-key">${c.key==="P"?"Passif":c.key}</span><span class="tc-icon" style="${spritePos(c.k,sz,c.ch)};width:${sz}px;height:${sz}px"></span>`}
+  const st=c.type==="skin"?`<span>Skin</span><span>${c.legacy?"Héritage":esc(SKR[c.rar]||"Standard")}</span>`:c.type==="champ"?`<span>ATQ <b>${c.atk}</b></span><span>DÉF <b>${c.def}</b></span>`:c.type==="abil"?`<span>${c.key==="P"?"Passif":"Sort "+c.key}</span><span><b>${RAR[c.r]}</b></span>`:`<span>Région</span><span><b>${RAR[c.r]}</b></span>`;
+  const tag=o.div||o.big?"div":"button";
+  return `<${tag} class="${cls}" style="--rc:var(--r${c.r})" ${tag==="button"?`type="button" data-card="${esc(c.id)}" aria-label="${esc(c.name)}, ${RAR[c.r]}"`:""}>
+    <span class="tc-art" style="background-image:url('${artOf(c)}')${artPos}${c.type==="abil"?";filter:brightness(.75) saturate(.9) blur(1px);transform:scale(1.05)":""}"></span><span class="tc-gem"></span><span class="tc-no">#${c.no}</span>${own>1?`<span class="tc-cnt">×${own}</span>`:""}${mid}
+    <span class="tc-body"><span class="tc-flags">${o.isNew?`<span class="tc-new">Nouvelle</span>`:""}${o.vit?`<span class="tc-vit">Vitrine</span>`:""}</span><span class="tc-nm">${esc(c.name)}</span><span class="tc-sub">${esc(c.sub)}</span><span class="tc-st">${st}</span></span></${tag}>`}
+
+// ---------- Base ----------
+let db=null,uid=null,me=null,all={},po=null,hasWallet=false,feed=[],busy=false;
+const mine=id=>me?.c?.[id]||0;
+const owned=()=>me?.c?Object.keys(me.c).filter(k=>me.c[k]>0&&BY[k]).length:0;
+function freeNow(){if(!me)return FREE_MAX;const add=Math.floor((Date.now()-(me.freeAt||Date.now()))/FREE_EVERY);return Math.min(FREE_MAX,(me.free||0)+Math.max(0,add))}
+function freeNext(){if(!me||freeNow()>=FREE_MAX)return 0;const el=Date.now()-(me.freeAt||Date.now());return FREE_EVERY-(el%FREE_EVERY)}
+const hms=ms=>{const s=Math.ceil(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?`${h} h ${String(m).padStart(2,"0")}`:`${m} min ${String(s%60).padStart(2,"0")}`};
+async function api(body){
+  const u=firebase.auth().currentUser;if(!u)throw new Error("Connexion au site en cours, réessaie dans un instant.");
+  const t=await u.getIdToken();
+  let r;try{r=await fetch(RIOT_RELAY+"/cards",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+t},body:JSON.stringify(body)})}catch(e){throw new Error("Robot injoignable, réessaie dans un instant.")}
+  const j=await r.json().catch(()=>null);
+  if(!j||(!j.ok&&!j.error))throw new Error("Le robot des cartes n'est pas encore en service.");
+  if(j.error)throw new Error(j.error);
+  return j;
+}
+function toast(t,err){document.querySelectorAll(".ctoast").forEach(x=>x.remove());const d=document.createElement("div");d.className="ctoast"+(err?" err":"");d.setAttribute("role","status");d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),3600)}
+
+// ---------- Sons ----------
+let AC=null,muted=false;try{muted=localStorage.getItem("cartes-mute")==="1"}catch(e){}
+function tone(f,t0,dur,type="triangle",vol=.12){const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(vol,t0+.015);g.gain.exponentialRampToValueAtTime(.0001,t0+dur);o.connect(g).connect(AC.destination);o.start(t0);o.stop(t0+dur+.05)}
+function snd(kind,r=0){if(muted)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime;
+  if(kind==="tear"){const n=AC.createBufferSource(),b=AC.createBuffer(1,AC.sampleRate*.35,AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);
+    n.buffer=b;const f=AC.createBiquadFilter();f.type="bandpass";f.frequency.setValueAtTime(900,t);f.frequency.exponentialRampToValueAtTime(4000,t+.3);const g=AC.createGain();g.gain.value=.35;n.connect(f).connect(g).connect(AC.destination);n.start(t)}
+  else if(kind==="flip")tone(1400,t,.06,"square",.04);
+  else if(kind==="reveal"){const N=[[523],[523,659],[523,659,784],[523,659,784,1047],[392,523,659,784,1047,1319]][r];N.forEach((f,i)=>tone(f,t+i*.09,r>=3?.5:.25,r>=3?"sawtooth":"triangle",r>=3?.07:.1))}
+  else if(kind==="coin")[988,1319].forEach((f,i)=>tone(f,t+i*.08,.18,"square",.05));
+}catch(e){}}
+
+// ---------- Navigation ----------
+const VIEWS=[["boosters","Boosters"],["collection","Ma collection"],["sages","Les sages"],["wiki","Wiki"],["regions","Régions"]];
+let view="boosters",param=null;
+function route(){const h=decodeURIComponent((location.hash||"").slice(1));const m=h.match(/^(champ|region|sage)-(.+)$/);
+  if(m){view=m[1];param=m[2]}else{view=VIEWS.some(v=>v[0]===h)?h:"boosters";param=null}render();scrollTo({top:0})}
+window.addEventListener("hashchange",route);
+const GROUP={champ:"wiki",region:"regions",sage:"sages"};
+function render(){if(!D)return;
+  $("ctabs").innerHTML=VIEWS.map(([k,n])=>`<a href="#${k}" ${k===view||GROUP[view]===k?'aria-current="page"':""}>${n}</a>`).join("");
+  renderPurse();
+  ({boosters:vBoosters,collection:vColl,sages:vSages,sage:vSage,wiki:vWiki,regions:vRegions,champ:vChamp,region:vRegion})[view]($("view"));
+}
+function renderPurse(){const o=owned();
+  $("purse").innerHTML=!db?`<span>${D?total()+" cartes à collectionner":"Connexion…"}</span>`:`<span class="po">PO <b>${po==null?"…":fmt(po)}</b></span><span>Boosters gratuits <b>${freeNow()}</b></span><span title="Cartes différentes possédées">Collection <b>${o}</b> / ${total()}</span><span class="prog" aria-hidden="true"><i style="width:${(100*o/total()).toFixed(1)}%"></i></span>`}
+setInterval(()=>{if(!D||!db)return;renderPurse();const t=$("freeT");if(t)t.textContent=freeNow()>=FREE_MAX?"Réserve pleine":`Prochain dans ${hms(freeNext())}`;const b=$("buy-free");if(b&&!busy){const n=freeNow();b.disabled=!n;b.textContent=n?`Ouvrir (${n})`:"Revient bientôt"}},1000);
+
+// ---------- BOOSTERS ----------
+function packHTML(kind,o={}){const art=o.art||`${A}c/${o.ch||"Ahri"}.webp`;
+  return `<div class="pack${o.mini?" mini":""}" data-k="${kind}" ${o.id?`id="${o.id}"`:""}><div class="pk-top"><span class="pk-dash"></span><span class="pk-cut"></span></div><div class="pk-body"><span class="pk-win" style="background-image:url('${art}')"></span><span class="pk-lbl"><b>RUNETERRA</b><span>${esc(o.label||PACKS[kind].n)}</span></span></div><span class="pk-shine"></span></div>`}
+const COVER={free:"Ahri",std:"Jinx",region:"Garen",chest:"Kaisa"};
+let regSel="";
+function vBoosters(v){
+  const regs=Object.entries(D.regions).sort((a,b)=>a[1].name.localeCompare(b[1].name,"fr"));
+  if(!regSel)regSel=regs[0][0];
+  const n=freeNow(),can=k=>db&&!busy&&(k==="free"?n>0:hasWallet&&(po||0)>=PACKS[k].p);
+  const why=k=>!db?"Connexion…":k==="free"?(n?`Ouvrir (${n})`:"Revient bientôt"):!hasWallet?"Coffre PO fermé":(po||0)<PACKS[k].p?`Il manque ${fmt(PACKS[k].p-(po||0))} PO`:"Acheter et ouvrir";
+  v.innerHTML=`<section class="shopc">${["free","std","region","chest"].map(k=>`<div class="prod" style="--pc:${{free:"#3a3e48",std:"#e4002b",region:"#1f7a5a",chest:"#ffb400"}[k]}">
+      <div class="mini">${packHTML(k,{mini:true,ch:COVER[k]})}</div>
+      <h3>${PACKS[k].n}</h3><span class="price">${k==="free"?`Gratuit · <span id="freeT">${n>=FREE_MAX?"Réserve pleine":`Prochain dans ${hms(freeNext())}`}</span>`:fmt(PACKS[k].p)+" PO"}</span><p>${PACKS[k].d}</p>
+      ${k==="region"?`<label class="note" for="regSel">Région</label><select id="regSel">${regs.map(([s,r])=>`<option value="${s}" ${s===regSel?"selected":""}>${esc(r.name)}</option>`).join("")}</select>`:""}
+      <button class="btn${k==="free"?" gold":""}" id="buy-${k}" type="button" ${can(k)?"":"disabled"}>${why(k)}</button></div>`).join("")}</section>
+    ${db&&!hasWallet?`<div class="panel frame"><p class="note" style="margin:0">Tu peux déjà ouvrir tes boosters gratuits. Pour acheter des boosters avec tes Pièces d'or, ouvre d'abord ton coffre sur la <a href="banque.html">page Banque</a>.</p></div>`:""}
+    ${me?.last?.ids?.length?`<section class="panel frame"><div class="between"><h2>Ton dernier booster</h2><span class="note">${new Date(me.last.at).toLocaleString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</span></div><div class="cards">${me.last.ids.filter(id=>BY[id]).map(id=>cardHTML(BY[id],{count:mine(id)})).join("")}</div></section>`:""}
+    <section class="grid2">
+      <div class="panel frame"><h2>Chances par carte</h2>
+        <table class="rates"><thead><tr><th>Rareté</th><th class="num">Chance</th><th>Exemples</th></tr></thead><tbody>
+        ${RAR.map((r,i)=>`<tr><td><span class="rar" style="--rc:var(--r${i})">◆ ${r}</span></td><td class="num">${RW[i]} %</td><td class="note">${["Passifs, skins de base","Sorts A, Z, E · skins Épiques","Ultimes (R) · skins Légendaires","Champions · skins Mythiques et Prestige","Régions · skins Ultimes, Transcendants, Exaltés"][i]}</td></tr>`).join("")}</tbody></table>
+        <p class="note" style="margin:0">Chaque booster contient 5 cartes. La dernière est au moins Rare ; dans le Coffre hextech, l'avant-dernière est au moins Rare et la dernière au moins Épique.</p></div>
+      <div class="panel frame"><h2>Doublons, création, primes</h2>
+        <table class="rates"><thead><tr><th>Rareté</th><th class="num">Recycler</th><th class="num">Créer</th></tr></thead><tbody>
+        ${RAR.map((r,i)=>`<tr><td><span class="rar" style="--rc:var(--r${i})">◆ ${r}</span></td><td class="num">+${RECYCLE[i]} PO</td><td class="num">${fmt(CRAFT[i])} PO</td></tr>`).join("")}</tbody></table>
+        <p class="note" style="margin:0">Région complète (la carte de la région et tous ses champions) : <b>+200 PO</b>. Tous les skins d'un champion : <b>+100 PO</b>. Le robot verse les primes tout seul.</p></div>
+    </section>
+    <section class="panel frame"><h2>Derniers gros tirages</h2><div class="feed" id="feed">${feedHTML()}</div></section>`;
+  for(const k of Object.keys(PACKS)){const b=$("buy-"+k);if(b)b.onclick=()=>openFlow(k)}
+  const rs=$("regSel");if(rs)rs.onchange=e=>{regSel=e.target.value};
+}
+function ago(t){const m=Math.max(1,Math.round((Date.now()-t)/6e4));return m<60?`il y a ${m} min`:m<1440?`il y a ${Math.round(m/60)} h`:`il y a ${Math.round(m/1440)} j`}
+function feedHTML(){const L=feed.filter(f=>BY[f.id]&&!conseilIsClaimed(f.uid)).slice(0,10);
+  return L.length?L.map(f=>{const c=BY[f.id];return `<div><span class="rar" style="--rc:var(--r${c.r})">◆ ${RAR[c.r]}</span><span><a href="#sage-${encodeURIComponent(f.uid)}" style="color:#fff;font-weight:700;text-decoration:none">${esc(f.pseudo||"Un sage")}</a> a tiré <button type="button" class="chip" data-card="${esc(c.id)}">${esc(c.name)}</button></span><span class="d">${ago(f.at)}</span></div>`}).join(""):`<div class="empty" style="display:block">Les cartes Épiques et Légendaires tirées par les sages apparaîtront ici.</div>`}
+
+// ---------- Ouverture façon booster Pokémon ----------
+let stage=null;
+function closeStage(){if(!stage)return;stage.remove();stage=null;document.body.style.overflow="";busy=false;render()}
+async function openFlow(kind){
+  if(busy||!db)return;busy=true;
+  const label=kind==="region"?"Région · "+D.regions[regSel].name:PACKS[kind].n;
+  const cover=kind==="region"?(CH.find(c=>c.region===regSel)?.id||"Garen"):CH[Math.floor(Math.random()*CH.length)].id;
+  stage=document.createElement("div");stage.className="stage";stage.setAttribute("role","dialog");stage.setAttribute("aria-label","Ouverture du booster");
+  stage.innerHTML=`<div class="tools"><button type="button" id="stMute" aria-pressed="${muted}">${muted?"Son coupé":"Son"}</button><button type="button" id="stSkip">Tout révéler</button></div>
+    <div class="arena" id="arena">${packHTML(kind,{id:"opack",ch:cover,label})}</div>
+    <div class="hint" id="stHint">Le robot prépare ton booster…</div><div class="strip" id="strip"></div>`;
+  document.body.appendChild(stage);document.body.style.overflow="hidden";
+  $("stMute").onclick=e=>{muted=!muted;try{localStorage.setItem("cartes-mute",muted?"1":"0")}catch(x){}e.target.textContent=muted?"Son coupé":"Son";e.target.setAttribute("aria-pressed",muted)};
+  $("stSkip").disabled=true;
+  let res;
+  try{res=await api(kind==="free"?{op:"free"}:{op:"buy",kind,region:kind==="region"?regSel:undefined})}
+  catch(e){toast(e.message,true);closeStage();return}
+  if(res.delta)snd("coin");
+  const cards=(res.pack||[]).filter(p=>BY[p.id]);
+  const pk=$("opack");pk.classList.add("idle");
+  $("stHint").textContent="Glisse le long du haut du booster pour le déchirer (ou touche-le)";
+  tearable(pk,()=>reveal(cards,res));
+}
+function tearable(pk,done){
+  const top=pk.querySelector(".pk-top");let x0=null,w=pk.offsetWidth,fin=false;
+  const set=v=>pk.style.setProperty("--tear",Math.max(0,Math.min(1,v)));
+  const finish=()=>{if(fin)return;fin=true;set(1);snd("tear");pk.classList.remove("idle");pk.classList.add("torn");setTimeout(done,500)};
+  top.onpointerdown=e=>{x0=e.clientX;top.setPointerCapture(e.pointerId)};
+  top.onpointermove=e=>{if(x0==null)return;const p=Math.abs(e.clientX-x0)/w;set(p);if(p>.7)finish()};
+  top.onpointerup=e=>{if(x0!=null&&Math.abs(e.clientX-x0)<8){let p=0;const it=setInterval(()=>{p+=.12;set(p);if(p>=1){clearInterval(it);finish()}},30)}else if(!fin)set(0);x0=null};
+  pk.onclick=e=>{if(e.target.closest(".pk-top"))return;let p=0;const it=setInterval(()=>{p+=.12;set(p);if(p>=1){clearInterval(it);finish()}},30)};
+  pk.tabIndex=0;pk.setAttribute("role","button");pk.setAttribute("aria-label","Déchirer le booster");pk.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();finish()}};pk.focus();
+}
+function reveal(cards,res){
+  const arena=$("arena"),pk=$("opack");pk.classList.add("drop");
+  // les cartes sortent du booster, la plus rare en dernier
+  const els=cards.map((p,i)=>{const c=BY[p.id],b=document.createElement("button");b.type="button";b.className="ocard hidden";b.style.setProperty("--rc",`var(--r${c.r})`);b.style.zIndex=50-i;
+    b.innerHTML=`<span class="in"><span class="face back"><span class="cback"><i></i><em>CDS.TV</em></span></span><span class="face front">${cardHTML(c,{div:true,glow:c.r>=3,isNew:p.isNew,sz:118})}</span></span>`;
+    b.setAttribute("aria-label",`Carte ${i+1} sur ${cards.length}, à retourner`);arena.appendChild(b);return b});
+  let cur=0,flipped=false;
+  setTimeout(()=>{els.forEach((b,i)=>setTimeout(()=>b.classList.remove("hidden"),i*70));setTimeout(prep,els.length*70+250)},250);
+  function prep(){$("stSkip").disabled=false;if(cur>=els.length)return recap(cards,res);const b=els[cur],r=cards[cur].r;
+    if(r>=2)b.classList.add("tease");$("stHint").textContent=r>=3?"Quelque chose brille…":`Touche la carte pour la retourner (${cur+1}/${els.length})`;b.focus({preventScroll:true});
+    els.forEach((x,i)=>x.onclick=i===cur?step:null)}
+  function step(){const b=els[cur],p=cards[cur],c=BY[p.id];
+    if(!flipped){flipped=true;b.classList.remove("tease");b.classList.add("on");snd("flip");setTimeout(()=>snd("reveal",c.r),220);if(c.r>=3)setTimeout(()=>burst(c.r),260);
+      $("stHint").textContent=`${p.isNew?"Nouvelle ! ":"Doublon · "}${c.name} · ${RAR[c.r]}`;return}
+    flipped=false;b.classList.add("gone");
+    const s=document.createElement("span");s.className="s";s.style.setProperty("--rc",`var(--r${c.r})`);s.style.backgroundImage=`url('${artOf(c)}')`;if(c.type==="skin"){s.style.backgroundSize=`${c.of*100}% 100%`;s.style.backgroundPosition=`${c.of>1?c.i/(c.of-1)*100:0}% 0`}
+    s.title=c.name;$("strip").appendChild(s);cur++;setTimeout(prep,200)}
+  $("stSkip").onclick=()=>recap(cards,res);
+}
+function burst(r){const f=document.createElement("div");f.className="flash";f.style.setProperty("--rc",`var(--r${r})`);document.body.appendChild(f);setTimeout(()=>f.remove(),1000);
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  for(let i=0;i<(r>=4?36:18);i++){const s=document.createElement("span");s.className="spark";s.style.setProperty("--rc",`var(--r${r})`);s.style.left="50%";s.style.top="45%";document.body.appendChild(s);
+    const a=Math.random()*Math.PI*2,d=120+Math.random()*220;s.animate([{transform:"translate(-50%,-50%) scale(1)",opacity:1},{transform:`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px) scale(.2)`,opacity:0}],{duration:900+Math.random()*500,easing:"cubic-bezier(.2,.8,.2,1)"}).onfinish=()=>s.remove()}}
+function recap(cards,res){if(!stage)return;
+  const news=cards.filter(p=>p.isNew).length,best=cards.reduce((a,p)=>Math.max(a,p.r),0);
+  const bon=(res.bonuses||[]).map(b=>b.kind==="region"?`Région complète : ${esc(D.regions[b.key]?.name||b.key)} · +${b.po} PO`:`Tous les skins de ${esc(champ(b.key)?.name||b.key)} · +${b.po} PO`);
+  stage.innerHTML=`<div class="recap-wrap"><span class="eyebrow">Booster ouvert</span><h2>${news} nouvelle${news>1?"s":""} carte${news>1?"s":""}</h2>
+    ${bon.length?`<div class="row" style="justify-content:center">${bon.map(t=>`<span class="ctag">${t}</span>`).join("")}</div>`:""}
+    <div class="recap">${cards.map(p=>cardHTML(BY[p.id],{isNew:p.isNew,glow:p.r>=3,count:1})).join("")}</div>
+    <div class="row" style="justify-content:center"><button class="btn" id="stAgain" type="button">Ouvrir un autre</button><button class="btn ghost" id="stColl" type="button">Ma collection</button><button class="btn ghost" id="stClose" type="button">Fermer</button></div></div>`;
+  if(best>=3)burst(best);
+  $("stClose").onclick=closeStage;$("stColl").onclick=()=>{closeStage();location.hash="collection"};
+  $("stAgain").onclick=()=>{closeStage();scrollTo({top:0})};$("stClose").focus();
+}
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(document.querySelector(".cmodal"))document.querySelector(".cmodal").remove();else if(stage&&stage.querySelector(".recap"))closeStage()}});
+
+// ---------- COLLECTION ----------
+let fType="all",fRar="all",fReg="all",fOwn="all",fQ="";
+function filterCards(own){return CARDS.filter(c=>(fType==="all"||c.type===fType)&&(fRar==="all"||c.r===+fRar)&&(fReg==="all"||c.g===fReg)&&(fOwn==="all"||(fOwn==="own"?own(c.id)>0:fOwn==="dup"?own(c.id)>1:!(own(c.id)>0)))&&(!fQ||(c.name+" "+c.sub).toLowerCase().includes(fQ.toLowerCase())))}
+function filtersHTML(withDup){return `<div class="chips">${[["all","Tout"],["champ","Champions"],["abil","Compétences"],["skin","Skins"],["region","Régions"]].map(([k,n])=>`<button class="chip" type="button" data-ft="${k}" aria-pressed="${fType===k}">${n}</button>`).join("")}</div>
+    <div class="row"><select class="fsel" id="fRar" aria-label="Rareté"><option value="all">Toutes les raretés</option>${RAR.map((r,i)=>`<option value="${i}" ${fRar==i?"selected":""}>${r}</option>`).join("")}</select>
+      <select class="fsel" id="fReg" aria-label="Région"><option value="all">Toutes les régions</option>${Object.entries(REG).map(([k,r])=>`<option value="${k}" ${fReg===k?"selected":""}>${esc(r.name)}</option>`).join("")}</select>
+      <select class="fsel" id="fOwn" aria-label="Afficher"><option value="all">Toutes</option><option value="own" ${fOwn==="own"?"selected":""}>Possédées</option>${withDup?`<option value="dup" ${fOwn==="dup"?"selected":""}>Doublons</option>`:""}<option value="miss" ${fOwn==="miss"?"selected":""}>Manquantes</option></select>
+      <input type="search" class="fsel" id="fQ" placeholder="Rechercher un champion, un sort, un skin…" value="${esc(fQ)}" aria-label="Rechercher"></div>`}
+function bindFilters(v){v.querySelectorAll("[data-ft]").forEach(b=>b.onclick=()=>{fType=b.dataset.ft;render()});
+  $("fRar").onchange=e=>{fRar=e.target.value;render()};$("fReg").onchange=e=>{fReg=e.target.value;render()};$("fOwn").onchange=e=>{fOwn=e.target.value;render()};
+  $("fQ").oninput=e=>{fQ=e.target.value;clearTimeout(window._q);window._q=setTimeout(()=>{render();const q=$("fQ");q.focus();q.setSelectionRange(q.value.length,q.value.length)},250)}}
+function gridHTML(list,own,o={}){return list.length?`<div class="cards">${list.slice(0,240).map(c=>cardHTML(c,{count:own(c.id),miss:!(own(c.id)>0),vit:o.vit?.includes(c.id)})).join("")}</div>${list.length>240?`<p class="note">Affine la recherche pour voir les ${list.length-240} autres cartes.</p>`:""}`:`<div class="empty">Aucune carte avec ces filtres.</div>`}
+function dupValue(){return me?.c?Object.entries(me.c).reduce((a,[k,n])=>a+(BY[k]&&n>1?(n-1)*RECYCLE[BY[k].r]:0),0):0}
+function vColl(v){
+  if(!me){v.innerHTML=`<section class="panel frame"><h2>Ta collection est vide</h2><p class="note">Ouvre tes deux boosters gratuits pour commencer.</p><a class="btn" href="#boosters" style="align-self:flex-start">Ouvrir un booster</a></section>`;return}
+  const list=filterCards(mine),dup=dupValue(),t=me.t||[0,0,0,0,0];
+  v.innerHTML=`<section class="panel frame"><div class="between"><h2>Ma collection</h2><span class="note">${owned()} / ${total()} cartes · ${me.opened||0} boosters ouverts</span></div>
+    <div class="facts">${RAR.map((r,i)=>`<div><b style="color:var(--r${i})">${t[i]||0}</b><span>${r}s · ${CARDS.filter(c=>c.r===i).length}</span></div>`).join("")}</div>
+    ${filtersHTML(true)}
+    <div class="row"><button class="btn small" id="recycle" type="button" ${dup&&hasWallet?"":"disabled"}>${!hasWallet?"Coffre PO fermé : pas de recyclage":dup?`Recycler tous les doublons (+${fmt(dup)} PO)`:"Aucun doublon à recycler"}</button><span class="note">${list.length} carte${list.length>1?"s":""} · touche une carte pour la voir, la créer ou la mettre en vitrine</span></div></section>
+    ${gridHTML(list,mine,{vit:me.vitrine||[]})}`;
+  bindFilters(v);
+  $("recycle").onclick=async e=>{const b=e.target;if(!b.dataset.sure){b.dataset.sure=1;b.textContent=`Confirmer : recycler les doublons (+${fmt(dup)} PO)`;return}b.disabled=true;b.textContent="Recyclage…";
+    try{const r=await api({op:"recycle"});snd("coin");toast(`+${fmt(r.delta)} PO : doublons recyclés`)}catch(err){toast(err.message,true);render()}};
+}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-card]");if(b&&!e.target.closest(".cmodal")&&!e.target.closest(".stage"))showCard(b.dataset.card,b.dataset.owner)});
+
+// ---------- Fiche d'une carte ----------
+const regLink=s=>s&&REG[s]?`<a class="ctag" href="#region-${s}">${esc(REG[s].name)}</a>`:"";
+function showCard(id){const c=BY[id];if(!c)return;const n=mine(id);
+  document.querySelector(".cmodal")?.remove();
+  const m=document.createElement("div");m.className="cmodal";m.setAttribute("role","dialog");m.setAttribute("aria-label",c.name);
+  let info="";
+  if(c.type==="champ"){const ch=champ(c.ch);info=`<span class="eyebrow">${(ch.tags||[]).map(t=>ROLE_FR[t]||t).join(" · ")}</span><h2>${esc(ch.name)}</h2><span class="note">${esc(ch.title)} · ${regLink(ch.region)}</span><p style="margin:0">${esc(ch.blurb)}</p><a class="btn small ghost" href="#champ-${encodeURIComponent(c.ch)}" style="align-self:flex-start">Page wiki de ${esc(ch.name)}</a>`}
+  else if(c.type==="abil"){const ch=champ(c.ch),s=c.key==="P"?ch.passive:ch.spells[c.k-1];info=`<span class="eyebrow">${c.key==="P"?"Passif":"Compétence "+c.key} · ${esc(ch.name)}</span><h2>${esc(s.name)}</h2><p style="margin:0">${esc(s.desc)}</p>${c.key!=="P"?`<div class="kv"><div><span>Récupération</span><b>${esc(s.cd||"–")} s</b></div><div><span>Coût</span><b>${esc(s.cost&&s.cost!=="0"?s.cost:"aucun")}</b></div><div><span>Portée</span><b>${esc(s.range||"–")}</b></div></div>`:""}<a class="btn small ghost" href="#champ-${encodeURIComponent(c.ch)}" style="align-self:flex-start">Page wiki de ${esc(ch.name)}</a>`}
+  else if(c.type==="skin"){const ch=champ(c.ch);info=`<span class="eyebrow">Skin · ${esc(ch.name)}</span><h2>${esc(c.name)}</h2><div class="row"><span class="ctag">Gamme ${esc(SKR[c.rar]||"Standard")}</span>${c.legacy?'<span class="ctag">Héritage</span>':""}</div>${c.desc?`<p style="margin:0">${esc(c.desc)}</p>`:""}<a class="btn small ghost" href="#champ-${encodeURIComponent(c.ch)}" style="align-self:flex-start">Page wiki de ${esc(ch.name)}</a>`}
+  else{const r=D.regions[c.slug];info=`<span class="eyebrow">Région de Runeterra</span><h2>${esc(r.name)}</h2><p style="margin:0">${esc(r.desc.slice(0,420))}${r.desc.length>420?"…":""}</p><a class="btn small ghost" href="#region-${c.slug}" style="align-self:flex-start">Page wiki de la région</a>`}
+  const inVit=(me?.vitrine||[]).includes(id),canCraft=db&&hasWallet&&!n&&(po||0)>=CRAFT[c.r];
+  const owners=Object.entries(all).filter(([u,d])=>u!==uid&&d.c?.[id]>0&&!conseilIsClaimed(u)).map(([u,d])=>`<a class="ctag" href="#sage-${encodeURIComponent(u)}" style="color:#fff">${esc(d.pseudo||"Un sage")}${d.c[id]>1?" ×"+d.c[id]:""}</a>`);
+  m.innerHTML=`<div class="cmodal-in"><button class="x" type="button" aria-label="Fermer">✕</button>${cardHTML(c,{big:true,count:n,glow:c.r>=3})}
+    <div class="info"><span class="rar" style="--rc:var(--r${c.r})">◆ ${RAR[c.r]} · carte #${c.no}</span>${info}
+    <p class="note" style="margin:0">${n?`Tu possèdes ${n} exemplaire${n>1?"s":""}.`:"Tu ne possèdes pas encore cette carte."}</p>
+    <div class="row">
+      ${!n&&db?`<button class="btn small" id="craft" type="button" ${canCraft?"":"disabled"}>${!hasWallet?"Coffre PO fermé":(po||0)<CRAFT[c.r]?`Créer : il manque ${fmt(CRAFT[c.r]-(po||0))} PO`:`Créer pour ${fmt(CRAFT[c.r])} PO`}</button>`:""}
+      ${n?`<button class="btn small ghost" id="vit" type="button">${inVit?"Retirer de ma vitrine":"Mettre en vitrine"}</button>`:""}
+      ${n>1&&hasWallet?`<button class="btn small ghost" id="rec1" type="button">Recycler ${n-1} doublon${n>2?"s":""} (+${fmt((n-1)*RECYCLE[c.r])} PO)</button>`:""}
+    </div>
+    ${owners.length?`<div><span class="eyebrow">Aussi chez</span><div class="row" style="margin-top:6px">${owners.slice(0,12).join("")}</div></div>`:""}</div></div>`;
+  document.body.appendChild(m);const close=()=>m.remove();
+  m.querySelector(".x").onclick=close;m.onclick=e=>{if(e.target===m||e.target.closest("a"))close()};
+  const cr=m.querySelector("#craft");if(cr)cr.onclick=async()=>{if(!cr.dataset.sure){cr.dataset.sure=1;cr.textContent=`Confirmer : ${fmt(CRAFT[c.r])} PO`;return}cr.disabled=true;cr.textContent="Création…";
+    try{await api({op:"craft",id});snd("reveal",c.r);close();toast(`${c.name} ajoutée à ta collection`)}catch(e){toast(e.message,true);cr.disabled=false;cr.textContent="Réessayer"}};
+  const vb=m.querySelector("#vit");if(vb)vb.onclick=async()=>{let v2=[...(me.vitrine||[])].filter(x=>x!==id);if(!inVit){if(v2.length>=5){toast("Ta vitrine est pleine (5 cartes). Retire une carte d'abord.",true);return}v2.push(id)}
+    try{await db.collection("cards").doc(uid).update({vitrine:v2});close();toast(inVit?"Retirée de ta vitrine":"Ajoutée à ta vitrine")}catch(e){toast("Vitrine indisponible pour le moment.",true)}};
+  const rb=m.querySelector("#rec1");if(rb)rb.onclick=async()=>{rb.disabled=true;try{const r=await api({op:"recycle",ids:[id]});snd("coin");close();toast(`+${fmt(r.delta)} PO`)}catch(e){toast(e.message,true);rb.disabled=false}};
+  m.querySelector(".x").focus();
+}
+
+// ---------- LES SAGES ----------
+function sageRows(){return Object.entries(all).filter(([u,d])=>!conseilIsClaimed(u)&&(d.n||0)>0).map(([u,d])=>({u,d,n:d.n||0,t:d.t||[0,0,0,0,0]})).sort((a,b)=>b.n-a.n||b.t[4]-a.t[4]||b.t[3]-a.t[3])}
+function vSages(v){const rows=sageRows();
+  v.innerHTML=`<section class="panel frame"><div class="between"><h2>Les collections du Conseil</h2><span class="note">Touche un sage pour voir sa vitrine et ses cartes</span></div>
+    ${rows.length?`<div style="overflow-x:auto"><table class="ctable"><thead><tr><th>#</th><th>Sage</th><th class="num">Cartes</th><th class="num">Complétion</th><th class="num">Légendaires</th><th class="num">Épiques</th><th class="num">Boosters</th></tr></thead><tbody>
+      ${rows.map((r,i)=>`<tr${r.u===uid?' style="background:rgba(228,0,43,.12)"':""}><td>${i<3?["🥇","🥈","🥉"][i]:i+1}</td><td><a href="#sage-${encodeURIComponent(r.u)}">${esc(r.d.pseudo||"Un sage")}</a>${r.u===uid?' <span class="note">(toi)</span>':""}</td><td class="num">${r.n}</td><td class="num">${(100*r.n/total()).toFixed(1)} %</td><td class="num" style="color:var(--r4)">${r.t[4]}</td><td class="num" style="color:var(--r3)">${r.t[3]}</td><td class="num">${r.d.opened||0}</td></tr>`).join("")}</tbody></table></div>`
+      :`<div class="empty">Personne n'a encore ouvert de booster. Sois le premier !</div>`}</section>
+    <section class="panel frame"><h2>Derniers gros tirages</h2><div class="feed">${feedHTML()}</div></section>`}
+let sType="all";
+function vSage(v){const d=all[param];
+  if(!d){v.innerHTML=`<a class="chip" href="#sages" style="align-self:flex-start;text-decoration:none">← Les sages</a><div class="empty">${db?"Ce sage n'a pas encore de collection.":"Chargement…"}</div>`;return}
+  const own=id=>d.c?.[id]||0,t=d.t||[0,0,0,0,0],isMe=param===uid,vit=(d.vitrine||[]).filter(id=>BY[id]);
+  const list=CARDS.filter(c=>own(c.id)>0&&(sType==="all"||c.type===sType)).sort((a,b)=>b.r-a.r||a.no-b.no);
+  const rank=sageRows().findIndex(r=>r.u===param);
+  v.innerHTML=`<a class="chip" href="#sages" style="align-self:flex-start;text-decoration:none">← Les sages</a>
+    <section class="panel frame"><span class="eyebrow">Collection</span><h2>${esc(d.pseudo||"Un sage")}${isMe?" (toi)":""}</h2>
+      <div class="facts"><div><b>${d.n||0}</b><span>cartes sur ${total()}</span></div><div><b>${rank>=0?rank+1+(rank?"e":"er"):"–"}</b><span>au classement</span></div>${RAR.map((r,i)=>i>=2?`<div><b style="color:var(--r${i})">${t[i]||0}</b><span>${r}s</span></div>`:"").join("")}<div><b>${d.opened||0}</b><span>boosters ouverts</span></div></div></section>
+    <section class="panel frame"><div class="between"><h2>Vitrine</h2>${isMe?`<span class="note">Ouvre une de tes cartes pour l'ajouter ou la retirer</span>`:""}</div>
+      <div class="vit">${[0,1,2,3,4].map(i=>vit[i]?cardHTML(BY[vit[i]],{count:own(vit[i]),glow:BY[vit[i]].r>=3}):`<div class="slot">${isMe?"Emplacement libre":"Vide"}</div>`).join("")}</div></section>
+    <section class="panel frame"><div class="between"><h2>Ses cartes</h2><span class="note">${list.length} carte${list.length>1?"s":""}</span></div>
+      <div class="chips">${[["all","Tout"],["champ","Champions"],["abil","Compétences"],["skin","Skins"],["region","Régions"]].map(([k,n])=>`<button class="chip" type="button" data-st="${k}" aria-pressed="${sType===k}">${n}</button>`).join("")}</div>
+      ${list.length?`<div class="cards">${list.slice(0,300).map(c=>cardHTML(c,{count:own(c.id)})).join("")}</div>`:`<div class="empty">Aucune carte de ce type.</div>`}</section>`;
+  v.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{sType=b.dataset.st;render()});
+}
+
+// ---------- WIKI ----------
+let wQ="",wRole="all";
+function vWiki(v){const list=CH.filter(c=>(wRole==="all"||c.tags.includes(wRole))&&(!wQ||(c.name+" "+c.title).toLowerCase().includes(wQ.toLowerCase())));
+  v.innerHTML=`<section class="panel frame"><span class="eyebrow">Encyclopédie</span><h2>Les ${CH.length} champions</h2>
+    <div class="row"><div class="chips"><button class="chip" type="button" data-wr="all" aria-pressed="${wRole==="all"}">Tous</button>${Object.entries(ROLE_FR).map(([k,n])=>`<button class="chip" type="button" data-wr="${k}" aria-pressed="${wRole===k}">${n}</button>`).join("")}</div><input type="search" class="fsel" id="wQ" placeholder="Rechercher un champion" value="${esc(wQ)}" aria-label="Rechercher un champion"></div></section>
+    <div class="wgrid">${list.map(c=>`<a class="wtile" href="#champ-${encodeURIComponent(c.id)}" style="background-image:url('${A}c/${c.id}.webp')"><span>${esc(c.name)}</span></a>`).join("")||'<div class="empty">Aucun champion.</div>'}</div>`;
+  v.querySelectorAll("[data-wr]").forEach(b=>b.onclick=()=>{wRole=b.dataset.wr;render()});
+  $("wQ").oninput=e=>{wQ=e.target.value;clearTimeout(window._w);window._w=setTimeout(()=>{render();const q=$("wQ");q.focus();q.setSelectionRange(q.value.length,q.value.length)},200)};
+}
+function vChamp(v){const c=champ(param);if(!c){v.innerHTML=`<div class="empty">Champion introuvable. <a href="#wiki">Retour au wiki</a></div>`;return}
+  const st=c.stats,abil=[{k:0,key:"Passif",name:c.passive.name,desc:c.passive.desc},...c.spells.map((s,i)=>({k:i+1,key:s.key,...s}))];
+  const cc=CARDS.filter(x=>x.ch===param&&x.type!=="skin"),sk=CARDS.filter(x=>x.type==="skin"&&x.ch===param),skOwn=sk.filter(x=>mine(x.id)>0).length;
+  v.innerHTML=`<a class="chip" href="#wiki" style="align-self:flex-start;text-decoration:none">← Tous les champions</a>
+  <section class="panel frame"><div class="champ-hero"><img src="${A}c/${param}.webp" alt="${esc(c.name)}">
+    <div style="display:flex;flex-direction:column;gap:12px;min-width:0"><span class="eyebrow">${c.tags.map(t=>ROLE_FR[t]||t).join(" · ")}</span><h1 style="margin:0">${esc(c.name)}</h1><span style="font:700 1.2rem var(--body);color:var(--amber)">${esc(c.title)}</span>
+      <div class="row">${regLink(c.region)}<span class="ctag">Ressource : ${esc(c.partype||"aucune")}</span><span class="ctag">${c.nskins} skins</span></div>
+      <div class="cbars">${[["Attaque",c.info.attack],["Défense",c.info.defense],["Magie",c.info.magic],["Difficulté",c.info.difficulty]].map(([l,x])=>`<div><span>${l} · ${x}/10</span><i><b style="width:${x*10}%"></b></i></div>`).join("")}</div>
+      <h2>Histoire</h2><p class="lore" style="margin:0">${esc(c.lore)}</p></div></div></section>
+  <section class="panel frame"><h2>Compétences</h2>${abil.map(a=>`<div class="abil"><span class="ic" style="${spritePos(a.k,56,param)}"></span><div><b>${a.key} · ${esc(a.name)}</b><p style="margin:4px 0 0">${esc(a.desc)}</p>${a.k?`<span class="note">Récupération ${esc(a.cd||"–")} s · Coût ${esc(a.cost&&a.cost!=="0"?a.cost:"aucun")} · Portée ${esc(a.range||"–")}</span>`:""}</div></div>`).join("")}</section>
+  <section class="panel frame"><h2>Statistiques de base</h2><div class="kv">${[["PV",st.hp+" (+"+st.hpperlevel+"/niv.)"],["Ressource",st.mp?st.mp+" (+"+st.mpperlevel+"/niv.)":"–"],["Armure",st.armor],["Résist. magique",st.spellblock],["Dégâts d'attaque",st.attackdamage],["Vitesse d'attaque",st.attackspeed],["Vitesse de déplacement",st.movespeed],["Portée",st.attackrange]].map(([l,x])=>`<div><span>${l}</span><b>${x}</b></div>`).join("")}</div></section>
+  ${c.allytips?.length?`<section class="panel frame"><h2>Conseils de jeu</h2><ul style="margin:0">${c.allytips.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></section>`:""}
+  <section class="panel frame"><h2>Les cartes de ${esc(c.name)}</h2><div class="cards">${cc.map(x=>cardHTML(x,{count:mine(x.id),miss:!(mine(x.id)>0)})).join("")}</div></section>
+  <section class="panel frame"><div class="between"><h2>Skins de ${esc(c.name)}</h2><span class="note">${skOwn} / ${sk.length} · tous les skins = +100 PO</span></div><div class="cards">${sk.map(x=>cardHTML(x,{count:mine(x.id),miss:!(mine(x.id)>0)})).join("")}</div></section>`;
+}
+function vRegions(v){v.innerHTML=`<section class="panel frame"><span class="eyebrow">Runeterra</span><h2>Les régions</h2><p class="note" style="margin:0">Les ${Object.keys(D.regions).length} régions de l'univers de League of Legends et leurs champions. Complète une région (sa carte et tous ses champions) pour gagner 200 PO.</p></section>
+  <div class="wgrid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">${Object.entries(D.regions).map(([k,r])=>{const set=CARDS.filter(c=>(c.type==="champ"&&c.g===k)||c.id==="r:"+k),got=set.filter(c=>mine(c.id)>0).length;
+    return `<a class="wtile" href="#region-${k}" style="aspect-ratio:16/10;background-image:url('${A}${r.img}')"><span>${esc(r.name)} · ${got}/${set.length}</span></a>`}).join("")}
+  <a class="wtile" href="#region-unaffiliated" style="aspect-ratio:16/10"><span>Sans région · ${CH.filter(c=>c.region==="unaffiliated").length}</span></a></div>`}
+function vRegion(v){const r=REG[param];if(!r){v.innerHTML=`<div class="empty">Région introuvable.</div>`;return}const list=CH.filter(c=>c.region===param),card=BY["r:"+param];
+  const set=CARDS.filter(c=>(c.type==="champ"&&c.g===param)||c.id==="r:"+param);
+  v.innerHTML=`<a class="chip" href="#regions" style="align-self:flex-start;text-decoration:none">← Toutes les régions</a>
+  <section class="region-hero" style="${r.img?`background-image:url('${A}${r.img}')`:"background:#1d2027"}"><div><span class="eyebrow">Région</span><h1 style="margin:0">${esc(r.name)}</h1><span class="note">${list.length} champions</span></div></section>
+  <section class="panel frame"><p class="lore" style="margin:0">${esc(r.desc)}</p></section>
+  ${card?`<section class="panel frame"><div class="between"><h2>Collection de la région</h2><span class="note">${set.filter(c=>mine(c.id)>0).length} / ${set.length} · complète = +200 PO</span></div><div class="cards">${set.map(c=>cardHTML(c,{count:mine(c.id),miss:!(mine(c.id)>0)})).join("")}</div></section>`:""}
+  <section class="panel frame"><h2>Champions de ${esc(r.name)}</h2><div class="wgrid">${list.map(c=>`<a class="wtile" href="#champ-${encodeURIComponent(c.id)}" style="background-image:url('${A}c/${c.id}.webp')"><span>${esc(c.name)}</span></a>`).join("")}</div></section>`}
+
+// ---------- Démarrage ----------
+(async()=>{
+  try{[D,SK,PL]=await Promise.all(["data.json","skins.json","pool.json"].map(f=>fetch(A+f).then(r=>{if(!r.ok)throw 0;return r.json()})))}
+  catch(e){$("view").innerHTML=`<div class="empty">Impossible de charger les cartes. Recharge la page.</div>`;return}
+  const fix=t=>String(t||"").replace(/([.!?…])([A-ZÀ-Ý«])/g,"$1 $2");
+  for(const r of Object.values(D.regions))r.desc=fix(r.desc);for(const c of Object.values(D.champions)){c.lore=fix(c.lore);c.blurb=fix(c.blurb)}
+  build();route();
+  const c=await conseilConnect();if(!c.db){$("purse").innerHTML=`<span>Site injoignable pour le moment, recharge la page.</span>`;return}
+  db=c.db;uid=c.uid;
+  const soft=()=>{if(stage||document.querySelector(".cmodal"))renderPurse();else if(view==="boosters"||view==="sages"||view==="sage"||view==="collection")render();else renderPurse()};
+  db.collection("cards").onSnapshot(q=>{all={};q.docs.forEach(d=>all[d.id]=d.data());me=all[uid]||null;if(document.activeElement?.id==="fQ"||document.activeElement?.id==="wQ")renderPurse();else soft()},e=>console.error(e));
+  db.collection("wallets").doc(uid).onSnapshot(s=>{hasWallet=s.exists;po=s.exists?(s.data().po||0):0;soft()},()=>{});
+  db.collection("cardFeed").orderBy("at","desc").limit(15).onSnapshot(q=>{feed=q.docs.map(d=>d.data());const f=$("feed");if(f)f.innerHTML=feedHTML()},()=>{});
+  render();
+  window.addEventListener("conseil-camps",()=>{if(view==="sages")render()});
+})();
+</script>
+</body>
+</html>
