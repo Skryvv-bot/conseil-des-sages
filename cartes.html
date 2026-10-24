@@ -256,7 +256,7 @@ function toast(t,err){document.querySelectorAll(".ctoast").forEach(x=>x.remove()
 // ---------- Sons ----------
 let AC=null,muted=false;try{muted=localStorage.getItem("cartes-mute")==="1"}catch(e){}
 // vrais bruitages de cartes (Kenney Casino Audio, domaine public CC0)
-const SND={tear:["cards-pack-open-1","cards-pack-open-2"],out:["cards-pack-take-out-1"],flip:["card-slide-1","card-slide-2","card-slide-3"],place:["card-place-1","card-place-2"],coin:["chips-stack-1"]},BUF={};
+const SND={tear:["cards-pack-open-1","cards-pack-open-2"],out:["cards-pack-take-out-1"],flip:["card-slide-1","card-slide-2","card-slide-3"],place:["card-place-1","card-place-2"],coin:["chips-stack-1"],legend:["legendaire"]},BUF={};
 function sndLoad(){if(muted||AC)return;try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){return}
   for(const n of new Set(Object.values(SND).flat()))fetch(`${A}snd/${n}.mp3`).then(r=>r.arrayBuffer()).then(b=>new Promise((ok,ko)=>AC.decodeAudioData(b,ok,ko))).then(x=>BUF[n]=x).catch(()=>{})}
 function snd(kind,vol=1){if(muted)return;sndLoad();const L=SND[kind];if(!L||!AC)return;const n=L[Math.floor(Math.random()*L.length)],b=BUF[n];
@@ -362,7 +362,7 @@ function reveal(cards,res){
     if(r>=2)b.classList.add("tease");$("stHint").textContent=r>=3?"Quelque chose brille…":`Touche la carte pour la retourner (${cur+1}/${els.length})`;b.focus({preventScroll:true});
     els.forEach((x,i)=>x.onclick=i===cur?step:null)}
   function step(){const b=els[cur],p=cards[cur],c=BY[p.id];
-    if(!flipped){flipped=true;b.classList.remove("tease");b.classList.add("on");snd("flip");if(c.r>=3)setTimeout(()=>burst(c.r),260);
+    if(!flipped){flipped=true;b.classList.remove("tease");b.classList.add("on");snd("flip");if(c.r>=4)setTimeout(()=>snd("legend"),250);if(c.r>=3)setTimeout(()=>burst(c.r),260);
       $("stHint").textContent=`${p.isNew?"Nouvelle ! ":"Doublon · "}${c.name} · ${RAR[c.r]}`;return}
     flipped=false;b.classList.add("gone");snd("place",.7);
     const s=document.createElement("span");s.className="s";s.style.setProperty("--rc",`var(--r${c.r})`);s.style.backgroundImage=`url('${artOf(c)}')`;if(c.type==="skin"){s.style.backgroundSize=`${c.of*100}% 100%`;s.style.backgroundPosition=`${c.of>1?c.i/(c.of-1)*100:0}% 0`}
