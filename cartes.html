@@ -217,7 +217,7 @@ const A="cartes/";
 // ---------- Règles (les mêmes que le robot) ----------
 const RAR=["Commune","Peu commune","Rare","Épique","Légendaire"];
 const RW=[55,27,12,5,1];
-const RECYCLE=[2,5,15,50,150],CRAFT=RECYCLE.map(x=>x*5);
+const RECYCLE=[2,5,15,50,150];
 const FREE_EVERY=4*3600e3,FREE_MAX=2;
 const PACKS={
   free:{n:"Booster gratuit",p:0,d:"Un booster offert toutes les 4 heures (2 en réserve au plus). 5 cartes, dont 1 Rare garantie."},
@@ -325,15 +325,24 @@ function vBoosters(v){
       <button class="btn${k==="free"?" gold":""}" id="buy-${k}" type="button" ${can(k)?"":"disabled"}>${why(k)}</button></div>`).join("")}</section>
     ${db&&!hasWallet?`<div class="panel frame"><p class="note" style="margin:0">Tu peux déjà ouvrir tes boosters gratuits. Pour acheter des boosters avec tes Pièces d'or, ouvre d'abord ton coffre sur la <a href="banque.html">page Banque</a>.</p></div>`:""}
     ${me?.last?.ids?.length?`<section class="panel frame"><div class="between"><h2>Ton dernier booster</h2><span class="note">${new Date(me.last.at).toLocaleString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</span></div><div class="cards">${me.last.ids.filter(id=>BY[id]).map(id=>cardHTML(BY[id],{count:mine(id)})).join("")}</div></section>`:""}
+    <section class="panel frame"><h2>Gagner des boosters et des PO</h2>
+      <table class="rates"><thead><tr><th>Sur le site</th><th class="num">Récompense</th></tr></thead><tbody>
+        <tr><td>Pick'em des Worlds : chaque prono fait</td><td class="num">+10 PO</td></tr>
+        <tr><td>Pick'em : bon prono (BO1 / BO3 / BO5)</td><td class="num">+50 / +70 / +90 PO <b style="color:var(--amber)">+ 1 booster</b></td></tr>
+        <tr><td>Prono sur la partie d'un pote : chaque prono fait</td><td class="num">+10 PO</td></tr>
+        <tr><td>Prono juste sur la partie d'un pote</td><td class="num">+40 PO <b style="color:var(--amber)">+ 1 booster</b> (3 par jour)</td></tr>
+        <tr><td>Passage du jour, tier list, jeux, classées…</td><td class="num"><a href="banque.html">voir la Banque</a></td></tr>
+      </tbody></table>
+      <p class="note" style="margin:0">Les boosters gagnés s'ajoutent à tes boosters gratuits, sans limite de réserve.${me?.boostWon?` Tu en as déjà gagné <b>${me.boostWon}</b>.`:""}</p></section>
     <section class="grid2">
       <div class="panel frame"><h2>Chances par carte</h2>
         <table class="rates"><thead><tr><th>Rareté</th><th class="num">Chance</th><th>Exemples</th></tr></thead><tbody>
         ${RAR.map((r,i)=>`<tr><td><span class="rar" style="--rc:var(--r${i})">◆ ${r}</span></td><td class="num">${RW[i]} %</td><td class="note">${["Passifs, skins de base","Sorts A, Z, E · skins Épiques","Ultimes (R) · skins Légendaires","Champions · skins Mythiques et Prestige","Régions · skins Ultimes, Transcendants, Exaltés"][i]}</td></tr>`).join("")}</tbody></table>
         <p class="note" style="margin:0">Chaque booster contient 5 cartes. La dernière est au moins Rare ; dans le Coffre hextech, l'avant-dernière est au moins Rare et la dernière au moins Épique.</p></div>
-      <div class="panel frame"><h2>Doublons, création, primes</h2>
-        <table class="rates"><thead><tr><th>Rareté</th><th class="num">Recycler</th><th class="num">Créer</th></tr></thead><tbody>
-        ${RAR.map((r,i)=>`<tr><td><span class="rar" style="--rc:var(--r${i})">◆ ${r}</span></td><td class="num">+${RECYCLE[i]} PO</td><td class="num">${fmt(CRAFT[i])} PO</td></tr>`).join("")}</tbody></table>
-        <p class="note" style="margin:0">Région complète (la carte de la région et tous ses champions) : <b>+200 PO</b>. Tous les skins d'un champion : <b>+100 PO</b>. Le robot verse les primes tout seul.</p></div>
+      <div class="panel frame"><h2>Doublons et primes</h2>
+        <table class="rates"><thead><tr><th>Rareté</th><th class="num">Recycler un doublon</th></tr></thead><tbody>
+        ${RAR.map((r,i)=>`<tr><td><span class="rar" style="--rc:var(--r${i})">◆ ${r}</span></td><td class="num">+${RECYCLE[i]} PO</td></tr>`).join("")}</tbody></table>
+        <p class="note" style="margin:0">Région complète (la carte de la région et tous ses champions) : <b>+200 PO</b>. Tous les skins d'un champion : <b>+100 PO</b>. Le robot verse les primes tout seul. Les cartes ne s'achètent pas à l'unité : boosters, marché et échanges uniquement.</p></div>
     </section>
     <section class="panel frame"><h2>Derniers gros tirages</h2><div class="feed" id="feed">${feedHTML()}</div></section>`;
   for(const k of Object.keys(PACKS)){const b=$("buy-"+k);if(b)b.onclick=()=>openFlow(k)}
@@ -431,7 +440,7 @@ function vColl(v){
   v.innerHTML=`<section class="panel frame"><div class="between"><h2>Ma collection</h2><span class="note">${owned()} / ${total()} cartes · ${me.opened||0} boosters ouverts</span></div>
     <div class="facts">${RAR.map((r,i)=>`<div><b style="color:var(--r${i})">${t[i]||0}</b><span>${r}s · ${CARDS.filter(c=>c.r===i).length}</span></div>`).join("")}</div>
     ${filtersHTML(true)}
-    <div class="row"><button class="btn small" id="recycle" type="button" ${dup&&hasWallet?"":"disabled"}>${!hasWallet?"Coffre PO fermé : pas de recyclage":dup?`Recycler tous les doublons (+${fmt(dup)} PO)`:"Aucun doublon à recycler"}</button><span class="note">${list.length} carte${list.length>1?"s":""} · touche une carte pour la voir, la créer ou la mettre en vitrine</span></div></section>
+    <div class="row"><button class="btn small" id="recycle" type="button" ${dup&&hasWallet?"":"disabled"}>${!hasWallet?"Coffre PO fermé : pas de recyclage":dup?`Recycler tous les doublons (+${fmt(dup)} PO)`:"Aucun doublon à recycler"}</button><span class="note">${list.length} carte${list.length>1?"s":""} · touche une carte pour la voir, la vendre ou la mettre en vitrine</span></div></section>
     ${gridHTML(list,mine,{vit:me.vitrine||[]})}`;
   bindFilters(v);
   $("recycle").onclick=async e=>{const b=e.target;if(!b.dataset.sure){b.dataset.sure=1;b.textContent=`Confirmer : recycler les doublons (+${fmt(dup)} PO)`;return}b.disabled=true;b.textContent="Recyclage…";
@@ -449,13 +458,12 @@ function showCard(id){const c=BY[id];if(!c)return;const n=mine(id);
   else if(c.type==="abil"){const ch=champ(c.ch),s=c.key==="P"?ch.passive:ch.spells[c.k-1];info=`<span class="eyebrow">${c.key==="P"?"Passif":"Compétence "+c.key} · ${esc(ch.name)}</span><h2>${esc(s.name)}</h2><p style="margin:0">${esc(s.desc)}</p>${c.key!=="P"?`<div class="kv"><div><span>Récupération</span><b>${esc(s.cd||"–")} s</b></div><div><span>Coût</span><b>${esc(s.cost&&s.cost!=="0"?s.cost:"aucun")}</b></div><div><span>Portée</span><b>${esc(s.range||"–")}</b></div></div>`:""}<a class="btn small ghost" href="#champ-${encodeURIComponent(c.ch)}" style="align-self:flex-start">Page wiki de ${esc(ch.name)}</a>`}
   else if(c.type==="skin"){const ch=champ(c.ch);info=`<span class="eyebrow">Skin · ${esc(ch.name)}</span><h2>${esc(c.name)}</h2><div class="row"><span class="ctag">Gamme ${esc(SKR[c.rar]||"Standard")}</span>${c.legacy?'<span class="ctag">Héritage</span>':""}</div>${c.desc?`<p style="margin:0">${esc(c.desc)}</p>`:""}<a class="btn small ghost" href="#champ-${encodeURIComponent(c.ch)}" style="align-self:flex-start">Page wiki de ${esc(ch.name)}</a>`}
   else{const r=D.regions[c.slug];info=`<span class="eyebrow">Région de Runeterra</span><h2>${esc(r.name)}</h2><p style="margin:0">${esc(r.desc.slice(0,420))}${r.desc.length>420?"…":""}</p><a class="btn small ghost" href="#region-${c.slug}" style="align-self:flex-start">Page wiki de la région</a>`}
-  const inVit=(me?.vitrine||[]).includes(id),canCraft=db&&hasWallet&&!n&&(po||0)>=CRAFT[c.r];
+  const inVit=(me?.vitrine||[]).includes(id);
   const owners=Object.entries(all).filter(([u,d])=>u!==uid&&d.c?.[id]>0&&!conseilIsClaimed(u)).map(([u,d])=>`<a class="ctag" href="#sage-${encodeURIComponent(u)}" style="color:#fff">${esc(d.pseudo||"Un sage")}${d.c[id]>1?" ×"+d.c[id]:""}</a>`);
   m.innerHTML=`<div class="cmodal-in"><button class="x" type="button" aria-label="Fermer">✕</button>${cardHTML(c,{big:true,count:n,glow:c.r>=3})}
     <div class="info"><span class="rar" style="--rc:var(--r${c.r})">◆ ${RAR[c.r]} · carte #${c.no}</span>${info}
     <p class="note" style="margin:0">${n?`Tu possèdes ${n} exemplaire${n>1?"s":""}.`:"Tu ne possèdes pas encore cette carte."}</p>
     <div class="row">
-      ${!n&&db?`<button class="btn small" id="craft" type="button" ${canCraft?"":"disabled"}>${!hasWallet?"Coffre PO fermé":(po||0)<CRAFT[c.r]?`Créer : il manque ${fmt(CRAFT[c.r]-(po||0))} PO`:`Créer pour ${fmt(CRAFT[c.r])} PO`}</button>`:""}
       ${n?`<button class="btn small ghost" id="vit" type="button">${inVit?"Retirer de ma vitrine":"Mettre en vitrine"}</button>`:""}
       ${n>1&&hasWallet?`<button class="btn small ghost" id="rec1" type="button">Recycler ${n-1} doublon${n>2?"s":""} (+${fmt((n-1)*RECYCLE[c.r])} PO)</button>`:""}
       ${n&&hasWallet?`<button class="btn small ghost" id="sellT" type="button">Vendre au marché</button>`:""}
@@ -463,15 +471,13 @@ function showCard(id){const c=BY[id];if(!c)return;const n=mine(id);
     </div>
     <div class="sellbox" id="sellBox" hidden><span class="eyebrow">Mettre en vente</span>
       <div class="chips"><button class="chip" type="button" data-sk="fixed" aria-pressed="true">Prix fixe</button><button class="chip" type="button" data-sk="auction" aria-pressed="false">Enchères 24 h</button></div>
-      <div class="row"><input type="number" id="sellP" min="5" step="1" value="${CRAFT[c.r]}" aria-label="Prix en PO"><span class="note" id="sellN">PO · tu touches ${fmt(CRAFT[c.r]-Math.floor(CRAFT[c.r]*.05))} PO après la taxe de 5 %</span></div>
+      <div class="row"><input type="number" id="sellP" min="5" step="1" value="${[20,50,150,500,1500][c.r]}" aria-label="Prix en PO"><span class="note" id="sellN">PO · tu touches ${fmt([20,50,150,500,1500][c.r]-Math.floor([20,50,150,500,1500][c.r]*.05))} PO après la taxe de 5 %</span></div>
       <p class="note" style="margin:0">La carte quitte ta collection pendant la vente. Tu peux annuler tant que personne n'a enchéri.${n===1?" <b>C'est ton seul exemplaire.</b>":""}</p>
       <button class="btn small" id="sellGo" type="button" style="align-self:flex-start">Mettre en vente</button></div>
     ${listedOf(id).length?`<div><span class="eyebrow">En vente au marché</span><div class="row" style="margin-top:6px">${listedOf(id).map(L=>`<a class="ctag" href="#marche" style="color:#fff">${esc(L.sellerPseudo||"Un sage")} · ${L.kind==="auction"?`enchère ${fmt(L.bid||L.price)} PO`:`${fmt(L.price)} PO`}</a>`).join("")}</div></div>`:""}
     ${owners.length?`<div><span class="eyebrow">Aussi chez</span><div class="row" style="margin-top:6px">${owners.slice(0,12).join("")}</div>${!n&&me?`<p class="note" style="margin:6px 0 0">Touche un sage pour voir sa collection, ou <a href="#echanges" id="askT">propose-lui un échange</a>.</p>`:""}</div>`:""}</div></div>`;
   document.body.appendChild(m);const close=()=>m.remove();
   m.querySelector(".x").onclick=close;m.onclick=e=>{if(e.target===m||e.target.closest("a"))close()};
-  const cr=m.querySelector("#craft");if(cr)cr.onclick=async()=>{if(!cr.dataset.sure){cr.dataset.sure=1;cr.textContent=`Confirmer : ${fmt(CRAFT[c.r])} PO`;return}cr.disabled=true;cr.textContent="Création…";
-    try{await api({op:"craft",id});snd("flip");close();toast(`${c.name} ajoutée à ta collection`)}catch(e){toast(e.message,true);cr.disabled=false;cr.textContent="Réessayer"}};
   const vb=m.querySelector("#vit");if(vb)vb.onclick=async()=>{let v2=[...(me.vitrine||[])].filter(x=>x!==id);if(!inVit){if(v2.length>=5){toast("Ta vitrine est pleine (5 cartes). Retire une carte d'abord.",true);return}v2.push(id)}
     try{await db.collection("cards").doc(uid).update({vitrine:v2});close();toast(inVit?"Retirée de ta vitrine":"Ajoutée à ta vitrine")}catch(e){toast("Vitrine indisponible pour le moment.",true)}};
   const rb=m.querySelector("#rec1");if(rb)rb.onclick=async()=>{rb.disabled=true;try{const r=await api({op:"recycle",ids:[id]});snd("coin");close();toast(`+${fmt(r.delta)} PO`)}catch(e){toast(e.message,true);rb.disabled=false}};
