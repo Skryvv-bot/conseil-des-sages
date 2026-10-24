@@ -239,7 +239,7 @@ function cardHTML(c,o={}){const own=o.count??1,miss=o.miss;
 let db=null,uid=null,me=null,all={},po=null,hasWallet=false,feed=[],busy=false;
 const mine=id=>me?.c?.[id]||0;
 const owned=()=>me?.c?Object.keys(me.c).filter(k=>me.c[k]>0&&BY[k]).length:0;
-function freeNow(){if(!me)return FREE_MAX;const add=Math.floor((Date.now()-(me.freeAt||Date.now()))/FREE_EVERY);return Math.min(FREE_MAX,(me.free||0)+Math.max(0,add))}
+function freeNow(){if(!me)return FREE_MAX;const add=Math.floor((Date.now()-(me.freeAt||Date.now()))/FREE_EVERY),f=me.free||0;return add>0?Math.max(f,Math.min(FREE_MAX,f+add)):f}
 function freeNext(){if(!me||freeNow()>=FREE_MAX)return 0;const el=Date.now()-(me.freeAt||Date.now());return FREE_EVERY-(el%FREE_EVERY)}
 const hms=ms=>{const s=Math.ceil(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?`${h} h ${String(m).padStart(2,"0")}`:`${m} min ${String(s%60).padStart(2,"0")}`};
 async function api(body){
@@ -297,6 +297,7 @@ function vBoosters(v){
       <button class="btn${k==="free"?" gold":""}" id="buy-${k}" type="button" ${can(k)?"":"disabled"}>${why(k)}</button></div>`).join("")}</section>
     ${db&&!hasWallet?`<div class="panel frame"><p class="note" style="margin:0">Tu peux déjà ouvrir tes boosters gratuits. Pour acheter des boosters avec tes Pièces d'or, ouvre d'abord ton coffre sur la <a href="banque.html">page Banque</a>.</p></div>`:""}
     ${me?.last?.ids?.length?`<section class="panel frame"><div class="between"><h2>Ton dernier booster</h2><span class="note">${new Date(me.last.at).toLocaleString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</span></div><div class="cards">${me.last.ids.filter(id=>BY[id]).map(id=>cardHTML(BY[id],{count:mine(id)})).join("")}</div></section>`:""}
+    ${uid===CONSEIL_ADMIN?`<div class="panel frame"><div class="between"><span class="note">Outil de Skryvv : s'offrir des boosters gratuits pour tester.</span><button class="btn small ghost" id="gift" type="button">+3 boosters gratuits</button></div></div>`:""}
     <section class="grid2">
       <div class="panel frame"><h2>Chances par carte</h2>
         <table class="rates"><thead><tr><th>Rareté</th><th class="num">Chance</th><th>Exemples</th></tr></thead><tbody>
@@ -309,6 +310,7 @@ function vBoosters(v){
     </section>
     <section class="panel frame"><h2>Derniers gros tirages</h2><div class="feed" id="feed">${feedHTML()}</div></section>`;
   for(const k of Object.keys(PACKS)){const b=$("buy-"+k);if(b)b.onclick=()=>openFlow(k)}
+  const g=$("gift");if(g)g.onclick=async()=>{g.disabled=true;try{await api({op:"gift",n:3});toast("3 boosters gratuits ajoutés")}catch(e){toast(e.message.includes("Action inconnue")?"Installe d'abord la nouvelle version du robot.":e.message,true)}g.disabled=false};
   const rs=$("regSel");if(rs)rs.onchange=e=>{regSel=e.target.value;const w=document.querySelector('.prod .pack[data-k="region"] .pk-win');if(w)w.style.backgroundImage=`url('${packArt("region")}')`};
 }
 function ago(t){const m=Math.max(1,Math.round((Date.now()-t)/6e4));return m<60?`il y a ${m} min`:m<1440?`il y a ${Math.round(m/60)} h`:`il y a ${Math.round(m/1440)} j`}
