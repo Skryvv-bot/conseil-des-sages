@@ -74,6 +74,13 @@ input[type=text],select{font:500 1rem var(--body);color:var(--ink);background:va
 .reg-tag{font:600 .68rem var(--body);letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
 .days{display:flex;flex-direction:column;gap:18px}
 .day{display:flex;flex-direction:column;gap:8px}
+.day>summary{list-style:none;cursor:pointer;display:flex;align-items:baseline;gap:6px 14px;flex-wrap:wrap;padding:6px 0;min-height:36px}
+.day>summary::-webkit-details-marker{display:none}
+.day>summary h3{margin:0;display:flex;align-items:center;gap:8px}
+.day>summary h3::before{content:"";width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .2s;flex:none}
+.day[open]>summary h3::before{transform:rotate(45deg) translate(-2px,-2px)}
+.day:not([open]){background:#15171c;padding:6px 14px}
+.dsum{font-size:.85rem;color:var(--muted)}.dsum b{color:#fff;font-weight:700}
 .compo{grid-column:1/-1;border-top:1px dashed var(--line2);padding-top:6px}
 .compo summary{cursor:pointer;font-size:.8rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px 0;min-height:32px}
 .cgrid{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:6px 10px;align-items:center;padding:6px 0 4px}
@@ -342,9 +349,18 @@ function renderMatches(){
   if(!state){box.innerHTML=`<div class="empty">Le calendrier n'est pas encore disponible. Il apparaîtra ici automatiquement.</div>`;return}
   const ms=[...state.matches].sort((a,b)=>Date.parse(a.date)-Date.parse(b.date)||a.id.localeCompare(b.id));
   if(!ms.length){box.innerHTML=`<div class="empty">Aucun match annoncé pour l'instant.</div>`;return}
-  const groups={};for(const m of ms){const k=(m.stage||"")+"|"+(m.round||"");(groups[k]=groups[k]||[]).push(m)}
-  box.innerHTML=Object.entries(groups).map(([k,list])=>{const [stage,round]=k.split("|");
-    return `<div class="day"><h3>${esc(stage)}${round?" · "+esc(round):""} · ${fmtDay(list[0].date)}</h3>${list.map(matchRow).join("")}</div>`}).join("");
+  // une journée = les matchs d'une même soirée (ceux après minuit, heure de Paris, comptent pour la veille)
+  const bday=d=>new Date(Date.parse(d)-8*3600e3).toLocaleDateString("sv-SE",{timeZone:"Europe/Paris"});
+  const groups={};for(const m of ms){const k=(m.stage||"")+"|"+(m.round||"")+"|"+bday(m.date);(groups[k]=groups[k]||[]).push(m)}
+  const G=Object.entries(groups);
+  box.innerHTML=G.map(([k,list],i)=>{const [stage,round]=k.split("|");
+    // la journée se replie dès que le premier match de la journée suivante commence (sauf si on l'a rouverte)
+    const next=G[i+1]?.[1][0],past=!!next&&(Date.parse(next.date)<=Date.now()||next.status!=="upcoming");
+    const open=dayOpen.has(k)?dayOpen.get(k):!past,done=list.filter(m=>m.status==="done");
+    const sum=past?`<span class="dsum">${done.length}/${list.length} terminé${done.length>1?"s":""}${done.length?" · "+done.map(m=>`<b>${esc(m.winner||"?")}</b>`).join(" · "):""}</span>`:"";
+    return `<details class="day" data-dk="${esc(k)}" ${open?"open":""}><summary><h3>${esc(stage)}${round?" · "+esc(round):""} · ${fmtDay(list[0].date)}</h3>${sum}</summary>${list.map(matchRow).join("")}</details>`}).join("");
+  // seulement les clics du sage (l'évènement « toggle » part aussi à l'affichage)
+  box.querySelectorAll("details.day>summary").forEach(sm=>sm.addEventListener("click",()=>{const d=sm.parentElement;dayOpen.set(d.dataset.dk,!d.open)}));
   box.querySelectorAll("button.side").forEach(b=>b.onclick=()=>pick(b.dataset.m,b.dataset.t));
   box.querySelectorAll("details.compo").forEach(d=>d.addEventListener("toggle",()=>compoOpen.set(d.dataset.cm,d.open)));
 }
@@ -359,7 +375,7 @@ function matchRow(m){
 }
 // Compositions des deux équipes, poste par poste, avec les sages qui ont le joueur dans leur Fantasy (© = capitaine)
 const ROLES5=["Top","Jungle","Mid","Bot","Support"];
-let fan={sages:{},phases:{},captains:{}};const compoOpen=new Map();
+let fan={sages:{},phases:{},captains:{}};const compoOpen=new Map(),dayOpen=new Map();
 function fanPhase(){const order=["finale","demis","quarts","swiss"];return order.find(id=>fan.phases[id]?.picks?.length)||null}
 function fanOwners(name){const ph=fanPhase();if(!ph)return[];return fan.phases[ph].picks.filter(p=>p.name===name).map(p=>({uid:p.uid,cap:fan.captains[p.uid]?.[ph]===name}))}
 function compoRow(m){
