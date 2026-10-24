@@ -1,5 +1,4 @@
 #!/bin/bash
-mkdir -p out; cd out
-{ echo "--- robot /cards"; curl -s -X POST -H "Content-Type: application/json" -d '{"op":"free"}' https://conseil-riot.perrotinyvanpro.workers.dev/cards; echo
-  echo "--- doc cartes Skryvv"; curl -s "https://firestore.googleapis.com/v1/projects/conseil-des-sages/databases/(default)/documents/cards/7ggyIoUpvlRrJCpqKkgdYlsMhcp2?mask.fieldPaths=free&mask.fieldPaths=freeAt&mask.fieldPaths=opened&mask.fieldPaths=n"; echo
-  echo "--- portefeuille"; curl -s "https://firestore.googleapis.com/v1/projects/conseil-des-sages/databases/(default)/documents/wallets/7ggyIoUpvlRrJCpqKkgdYlsMhcp2?mask.fieldPaths=po"; } > check.txt 2>&1
+mkdir -p out/jingle; cd out/jingle
+for u in https://lpc.opengameart.org/sites/default/files/jingleSounds_Kenney.zip https://opengameart.org/sites/default/files/jingleSounds_Kenney.zip; do curl -sfL "$u" -o j.zip && break; done
+unzip -o -q j.zip && rm -f j.zip; find . -type f | sort > ../jreport.txt
