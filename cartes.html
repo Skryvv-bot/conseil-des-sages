@@ -173,6 +173,7 @@ input[type=search].fsel{min-width:200px;flex:1 1 200px}
 .vit .slot{aspect-ratio:5/7;border:2px dashed #2a2d35;border-radius:10px;display:grid;place-items:center;color:#6f7480;font-size:.85rem;text-align:center;padding:10px}
 .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px}
 .facts div{background:#08090b;padding:10px;display:flex;flex-direction:column;gap:2px}.facts b{font:400 1.4rem var(--display,"Anton"),sans-serif;color:#fff}.facts span{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.dated{display:flex;flex-direction:column;gap:4px;min-width:0}.gotd{font:600 .78rem var(--body);color:var(--muted);text-align:center;letter-spacing:.04em}
 /* ---- Fiche : collection d'un champion ---- */
 .chset{display:flex;flex-direction:column;gap:8px;background:#08090b;border:1px solid #2a2d35;padding:12px}
 .chbar{height:6px;background:#2a2d35}.chbar i{display:block;height:100%;background:var(--amber)}
@@ -435,21 +436,27 @@ function recap(cards,res){if(!stage)return;
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(document.querySelector(".cmodal"))document.querySelector(".cmodal").remove();else if(stage&&stage.querySelector(".recap"))closeStage()}});
 
 // ---------- COLLECTION ----------
-let fType="all",fRar="all",fReg="all",fOwn="all",fQ="";
+let fType="all",fRar="all",fReg="all",fOwn="all",fQ="",fSort="no";try{fSort=localStorage.getItem("cartes-tri")||"no"}catch(e){}
+const gotAt=id=>me?.got?.[id]||0;
+const fmtGot=t=>new Date(t).toLocaleString("fr-FR",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"});
 function filterCards(own){return CARDS.filter(c=>(fType==="all"||c.type===fType)&&(fRar==="all"||c.r===+fRar)&&(fReg==="all"||c.g===fReg)&&(fOwn==="all"||(fOwn==="own"?own(c.id)>0:fOwn==="dup"?own(c.id)>1:fOwn==="wish"?wished(c.id):!(own(c.id)>0)))&&(!fQ||(c.name+" "+c.sub).toLowerCase().includes(fQ.toLowerCase())))}
 function filtersHTML(withDup){return `<div class="chips">${[["all","Tout"],["champ","Champions"],["abil","Compétences"],["skin","Skins"],["region","Régions"]].map(([k,n])=>`<button class="chip" type="button" data-ft="${k}" aria-pressed="${fType===k}">${n}</button>`).join("")}</div>
     <div class="row"><select class="fsel" id="fRar" aria-label="Rareté"><option value="all">Toutes les raretés</option>${RAR.map((r,i)=>`<option value="${i}" ${fRar==i?"selected":""}>${r}</option>`).join("")}</select>
       <select class="fsel" id="fReg" aria-label="Région"><option value="all">Toutes les régions</option>${Object.entries(REG).map(([k,r])=>`<option value="${k}" ${fReg===k?"selected":""}>${esc(r.name)}</option>`).join("")}</select>
       <select class="fsel" id="fOwn" aria-label="Afficher"><option value="all">Toutes</option><option value="own" ${fOwn==="own"?"selected":""}>Possédées</option>${withDup?`<option value="dup" ${fOwn==="dup"?"selected":""}>Doublons</option>`:""}<option value="miss" ${fOwn==="miss"?"selected":""}>Manquantes</option><option value="wish" ${fOwn==="wish"?"selected":""}>Ma liste de souhaits</option></select>
+      ${withDup?`<select class="fsel" id="fSort" aria-label="Trier"><option value="no" ${fSort==="no"?"selected":""}>Tri : numéro</option><option value="new" ${fSort==="new"?"selected":""}>Tri : date d'obtention (récentes)</option><option value="old" ${fSort==="old"?"selected":""}>Tri : date d'obtention (anciennes)</option><option value="rar" ${fSort==="rar"?"selected":""}>Tri : rareté</option><option value="name" ${fSort==="name"?"selected":""}>Tri : nom</option></select>`:""}
       <input type="search" class="fsel" id="fQ" placeholder="Rechercher un champion, un sort, un skin…" value="${esc(fQ)}" aria-label="Rechercher"></div>`}
 function bindFilters(v){v.querySelectorAll("[data-ft]").forEach(b=>b.onclick=()=>{fType=b.dataset.ft;render()});
   $("fRar").onchange=e=>{fRar=e.target.value;render()};$("fReg").onchange=e=>{fReg=e.target.value;render()};$("fOwn").onchange=e=>{fOwn=e.target.value;render()};
+  const fs=$("fSort");if(fs)fs.onchange=e=>{fSort=e.target.value;try{localStorage.setItem("cartes-tri",fSort)}catch(x){}if((fSort==="new"||fSort==="old")&&fOwn==="all")fOwn="own";render()};
   $("fQ").oninput=e=>{fQ=e.target.value;clearTimeout(window._q);window._q=setTimeout(()=>{render();const q=$("fQ");q.focus();q.setSelectionRange(q.value.length,q.value.length)},250)}}
-function gridHTML(list,own,o={}){return list.length?`<div class="cards">${list.slice(0,240).map(c=>cardHTML(c,{count:own(c.id),miss:!(own(c.id)>0),vit:o.vit?.includes(c.id),wish:wished(c.id)})).join("")}</div>${list.length>240?`<p class="note">Affine la recherche pour voir les ${list.length-240} autres cartes.</p>`:""}`:`<div class="empty">Aucune carte avec ces filtres.</div>`}
+function gridHTML(list,own,o={}){const byDate=o.vit&&(fSort==="new"||fSort==="old");return list.length?`<div class="cards">${list.slice(0,240).map(c=>{const h=cardHTML(c,{count:own(c.id),miss:!(own(c.id)>0),vit:o.vit?.includes(c.id),wish:wished(c.id)});return byDate&&gotAt(c.id)?`<div class="dated">${h}<span class="gotd">${new Date(gotAt(c.id)).toLocaleString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</span></div>`:h}).join("")}</div>${list.length>240?`<p class="note">Affine la recherche pour voir les ${list.length-240} autres cartes.</p>`:""}`:`<div class="empty">Aucune carte avec ces filtres.</div>`}
 function dupValue(){return me?.c?Object.entries(me.c).reduce((a,[k,n])=>a+(BY[k]&&n>1?(n-1)*RECYCLE[BY[k].r]:0),0):0}
 function vColl(v){
   if(!me){v.innerHTML=`<section class="panel frame"><h2>Ta collection est vide</h2><p class="note">Ouvre tes deux boosters gratuits pour commencer.</p><a class="btn" href="#boosters" style="align-self:flex-start">Ouvrir un booster</a></section>`;return}
   const list=filterCards(mine),dup=dupValue(),t=me.t||[0,0,0,0,0];
+  if(fSort==="new"||fSort==="old"){const k=fSort==="new"?-1:1;list.sort((a,b)=>((gotAt(a.id)||(k<0?0:9e15))-(gotAt(b.id)||(k<0?0:9e15)))*k||a.no-b.no)}
+  else if(fSort==="rar")list.sort((a,b)=>b.r-a.r||a.no-b.no);else if(fSort==="name")list.sort((a,b)=>a.name.localeCompare(b.name,"fr"));
   v.innerHTML=`<section class="panel frame"><div class="between"><h2>Ma collection</h2><span class="note">${owned()} / ${total()} cartes · ${me.opened||0} boosters ouverts</span></div>
     <div class="facts">${RAR.map((r,i)=>`<div><b style="color:var(--r${i})">${t[i]||0}</b><span>${r}s · ${CARDS.filter(c=>c.r===i).length}</span></div>`).join("")}</div>
     ${filtersHTML(true)}
@@ -475,7 +482,7 @@ function showCard(id){const c=BY[id];if(!c)return;const n=mine(id);
   const owners=Object.entries(all).filter(([u,d])=>u!==uid&&d.c?.[id]>0&&!conseilIsClaimed(u)).map(([u,d])=>`<a class="ctag" href="#sage-${encodeURIComponent(u)}" style="color:#fff">${esc(d.pseudo||"Un sage")}${d.c[id]>1?" ×"+d.c[id]:""}</a>`);
   m.innerHTML=`<div class="cmodal-in"><button class="x" type="button" aria-label="Fermer">✕</button>${cardHTML(c,{big:true,count:n,glow:c.r>=3})}
     <div class="info"><span class="rar" style="--rc:var(--r${c.r})">◆ ${RAR[c.r]} · carte #${c.no}</span>${info}
-    <p class="note" style="margin:0">${n?`Tu possèdes ${n} exemplaire${n>1?"s":""}.`:"Tu ne possèdes pas encore cette carte."}</p>
+    <p class="note" style="margin:0">${n?`Tu possèdes ${n} exemplaire${n>1?"s":""}.${gotAt(id)?` Obtenue le ${fmtGot(gotAt(id))}.`:""}`:"Tu ne possèdes pas encore cette carte."}</p>
     <div class="row">
       ${n?`<button class="btn small ghost" id="vit" type="button">${inVit?"Retirer de ma vitrine":"Mettre en vitrine"}</button>`:""}
       ${n>1&&hasWallet?`<button class="btn small ghost" id="rec1" type="button">Recycler ${n-1} doublon${n>2?"s":""} (+${fmt((n-1)*RECYCLE[c.r])} PO)</button>`:""}
