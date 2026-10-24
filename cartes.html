@@ -177,6 +177,11 @@ input[type=search].fsel{min-width:200px;flex:1 1 200px}
 .vrow{display:flex;flex-direction:column;gap:10px;padding:14px 0;border-top:1px solid #2a2d35}
 .vname{color:#fff;font:400 1.3rem var(--display,"Anton"),sans-serif;text-transform:uppercase;text-decoration:none;letter-spacing:.02em}.vname:hover{color:var(--amber)}
 .vslot{display:flex;flex-direction:column;gap:6px}
+.vit.editing .vslot .tc{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.vbtns{display:grid;grid-template-columns:auto 1fr auto;gap:4px}.vbtns .btn{padding-inline:8px}
+.vslot.dragging .tc{opacity:.25}
+.vit .over{outline:3px dashed var(--amber);outline-offset:3px;border-radius:10px}
+.vghost{position:fixed;z-index:120;pointer-events:none;opacity:.92;transform:rotate(3deg) scale(1.04);box-shadow:0 18px 40px rgba(0,0,0,.7)!important}
 /* ---- Fiche : collection d'un champion ---- */
 .chset{display:flex;flex-direction:column;gap:8px;background:#08090b;border:1px solid #2a2d35;padding:12px}
 .chbar{height:6px;background:#2a2d35}.chbar i{display:block;height:100%;background:var(--amber)}
@@ -554,7 +559,21 @@ function vSage(v){const d=all[param];
 
 // ---------- VITRINES ----------
 let vitEdit=false,vq="";
-function vitSlots(ids,own,isMe){return `<div class="vit">${[0,1,2,3,4].map(i=>ids[i]&&BY[ids[i]]?(isMe&&vitEdit?`<div class="vslot">${cardHTML(BY[ids[i]],{count:own(ids[i]),glow:BY[ids[i]].r>=3})}<button class="btn small ghost" type="button" data-vrm="${esc(ids[i])}">Retirer</button></div>`:cardHTML(BY[ids[i]],{count:own(ids[i]),glow:BY[ids[i]].r>=3})):`<div class="slot">${isMe?"Emplacement libre":"Vide"}</div>`).join("")}</div>`}
+function vitSlots(ids,own,isMe){const ed=isMe&&vitEdit;return `<div class="vit${ed?" editing":""}">${[0,1,2,3,4].map(i=>ids[i]&&BY[ids[i]]?(ed?`<div class="vslot" data-vi="${i}">${cardHTML(BY[ids[i]],{count:own(ids[i]),glow:BY[ids[i]].r>=3,div:true})}<div class="vbtns"><button class="btn small ghost" type="button" data-vmv="${i}:-1" aria-label="Déplacer à gauche" ${i?"":"disabled"}>◀</button><button class="btn small ghost" type="button" data-vrm="${esc(ids[i])}">Retirer</button><button class="btn small ghost" type="button" data-vmv="${i}:1" aria-label="Déplacer à droite" ${i<ids.length-1?"":"disabled"}>▶</button></div></div>`:cardHTML(BY[ids[i]],{count:own(ids[i]),glow:BY[ids[i]].r>=3})):`<div class="slot" ${ed?`data-vi="${i}" data-empty="1"`:""}>${isMe?"Emplacement libre":"Vide"}</div>`).join("")}</div>`}
+// glisser-déposer des cartes de la vitrine (souris et doigt) : on lâche sur une carte pour échanger leurs places
+function dragVit(box,ids){const inside=(el,ev)=>{const r=el.getBoundingClientRect();return ev.clientX>=r.left&&ev.clientX<=r.right&&ev.clientY>=r.top&&ev.clientY<=r.bottom};
+  box.querySelectorAll(".vslot").forEach(el=>{const card=el.querySelector(".tc"),from=+el.dataset.vi;
+    card.addEventListener("pointerdown",e=>{if(e.button)return;e.preventDefault();
+      const r=card.getBoundingClientRect(),ox=e.clientX-r.left,oy=e.clientY-r.top;let ghost=null;
+      const slots=[...box.querySelectorAll("[data-vi]")];
+      const mv=ev=>{if(!ghost){if(Math.hypot(ev.clientX-e.clientX,ev.clientY-e.clientY)<6)return;ghost=card.cloneNode(true);ghost.classList.add("vghost");ghost.style.width=r.width+"px";ghost.style.height=r.height+"px";document.body.appendChild(ghost);el.classList.add("dragging")}
+        ghost.style.left=ev.clientX-ox+"px";ghost.style.top=ev.clientY-oy+"px";slots.forEach(x=>x.classList.toggle("over",x!==el&&inside(x,ev)))};
+      const up=ev=>{removeEventListener("pointermove",mv);removeEventListener("pointerup",up);removeEventListener("pointercancel",up);slots.forEach(x=>x.classList.remove("over"));
+        if(!ghost){showCard(ids[from]);return}
+        ghost.remove();el.classList.remove("dragging");const t=slots.find(x=>x!==el&&inside(x,ev));if(!t)return;
+        const a=[...ids];if(t.dataset.empty){a.splice(from,1);a.push(ids[from])}else{const to=+t.dataset.vi;[a[from],a[to]]=[a[to],a[from]]}
+        snd("place",.6);saveVit(a)};
+      addEventListener("pointermove",mv);addEventListener("pointerup",up);addEventListener("pointercancel",up)})})}
 async function saveVit(v2){try{await db.collection("cards").doc(uid).update({vitrine:v2})}catch(e){toast("Vitrine indisponible pour le moment.",true)}}
 function vVitrines(v){
   const rows=Object.entries(all).filter(([u,d])=>u!==uid&&!conseilIsClaimed(u)&&(d.vitrine||[]).some(id=>BY[id]&&d.c?.[id]>0)).sort((a,b)=>(b[1].n||0)-(a[1].n||0));
@@ -562,7 +581,7 @@ function vVitrines(v){
   const pick=vitEdit&&me?CARDS.filter(c=>mine(c.id)>0&&!myVit.includes(c.id)&&(!vq||(c.name+" "+c.sub).toLowerCase().includes(vq.toLowerCase()))).sort((a,b)=>b.r-a.r||a.no-b.no):[];
   v.innerHTML=`<section class="panel frame" id="myVit"><div class="between"><h2>Ma vitrine</h2>${me?`<button class="btn small${vitEdit?" ghost":""}" id="vitEd" type="button">${vitEdit?"Terminer":"Modifier ma vitrine"}</button>`:""}</div>
       ${me?vitSlots(myVit,mine,true):`<div class="empty">Ouvre un booster pour pouvoir exposer tes cartes.</div>`}
-      ${vitEdit?`<div class="between"><span class="eyebrow">Choisis jusqu'à 5 cartes (${myVit.length}/5)</span><span class="note">tes plus rares en premier</span></div>
+      ${vitEdit?`<p class="note" style="margin:0">Glisse une carte sur une autre avec la souris (ou le doigt) pour échanger leurs places, ou utilise les flèches.</p><div class="between"><span class="eyebrow">Choisis jusqu'à 5 cartes (${myVit.length}/5)</span><span class="note">tes plus rares en premier</span></div>
         <input type="search" class="fsel" id="vq" placeholder="Chercher dans tes cartes" value="${esc(vq)}" aria-label="Chercher dans tes cartes" style="width:100%;flex:none">
         <div class="mini-cards">${pick.slice(0,80).map(c=>cardHTML(c,{count:mine(c.id),pick:"vit"})).join("")||'<span class="note">Aucune carte.</span>'}</div>`:""}</section>
     <section class="panel frame"><div class="between"><h2>Les vitrines du Conseil</h2><span class="note">${rows.length} sage${rows.length>1?"s exposent leurs":" expose ses"} cartes</span></div>
@@ -570,6 +589,8 @@ function vVitrines(v){
         return `<div class="vrow"><div class="between"><a class="vname" href="#sage-${encodeURIComponent(u)}">${esc(d.pseudo||"Un sage")}</a><span class="note">${d.n||0} cartes · <a href="#sage-${encodeURIComponent(u)}">voir sa collection</a></span></div>${vitSlots(ids,own,false)}</div>`}).join(""):`<div class="empty">Personne n'a encore rempli sa vitrine.</div>`}</section>`;
   const ed=$("vitEd");if(ed)ed.onclick=()=>{vitEdit=!vitEdit;render();$("myVit").scrollIntoView({block:"start"})};
   v.querySelectorAll("[data-vrm]").forEach(b=>b.onclick=e=>{e.stopPropagation();saveVit(myVit.filter(x=>x!==b.dataset.vrm))});
+  v.querySelectorAll("[data-vmv]").forEach(b=>b.onclick=e=>{e.stopPropagation();const [i,d]=b.dataset.vmv.split(":").map(Number),a=[...myVit];[a[i],a[i+d]]=[a[i+d],a[i]];saveVit(a)});
+  if(vitEdit&&me)dragVit($("myVit").querySelector(".vit"),myVit);
   v.querySelectorAll('[data-pick="vit"]').forEach(b=>b.onclick=e=>{e.stopPropagation();if(myVit.length>=5){toast("Ta vitrine est pleine : retire une carte d'abord.",true);return}saveVit([...myVit,b.dataset.id])});
   const q=$("vq");if(q)q.oninput=e=>{vq=e.target.value;clearTimeout(window._v);window._v=setTimeout(()=>{render();const x=$("vq");x.focus();x.setSelectionRange(x.value.length,x.value.length)},250)};
 }
