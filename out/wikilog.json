@@ -1,0 +1,14 @@
+{
+ "version": "16.21.1",
+ "n": 173,
+ "errors": [],
+ "idxkeys": [
+  "id",
+  "name",
+  "locale",
+  "champions",
+  "factions"
+ ],
+ "regions": 13,
+ "noRegion": []
+}
