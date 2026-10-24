@@ -50,7 +50,7 @@ def work(cid):
       "stats":{k:c["stats"][k] for k in ["hp","hpperlevel","mp","mpperlevel","armor","spellblock","attackdamage","attackspeed","movespeed","attackrange"]},
       "passive":{"name":c["passive"]["name"],"desc":clean(c["passive"]["description"])},
       "spells":[{"key":"QWER"[i],"name":s["name"],"desc":clean(s["description"]),"cd":s.get("cooldownBurn"),"cost":s.get("costBurn"),"range":s.get("rangeBurn")} for i,s in enumerate(c["spells"])],
-      "skins":[s["name"] for s in c.get("skins",[]) if s["num"]!=0][:40],"allytips":c.get("allytips",[])[:3]}
+      "skins":[s["name"] for s in c.get("skins",[]) if s["num"]!=0 and not s.get("parentSkin")][:60],"nskins":len([s for s in c.get("skins",[]) if s["num"]!=0 and not s.get("parentSkin")]),"allytips":c.get("allytips",[])[:3]}
 with cf.ThreadPoolExecutor(12) as ex: list(ex.map(work,list(full)))
 json.dump({"version":ver,"champions":champs,"regions":regions},open(f"{OUT}/data.json","w"),ensure_ascii=False)
 log["regions"]=len(regions);log["noRegion"]=[k for k,v in champs.items() if not v["region"]]
