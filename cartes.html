@@ -173,6 +173,29 @@ input[type=search].fsel{min-width:200px;flex:1 1 200px}
 .vit .slot{aspect-ratio:5/7;border:2px dashed #2a2d35;border-radius:10px;display:grid;place-items:center;color:#6f7480;font-size:.85rem;text-align:center;padding:10px}
 .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px}
 .facts div{background:#08090b;padding:10px;display:flex;flex-direction:column;gap:2px}.facts b{font:400 1.4rem var(--display,"Anton"),sans-serif;color:#fff}.facts span{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+/* ---- Marché et échanges ---- */
+.lots{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:16px}
+.lot{display:flex;flex-direction:column;gap:8px;background:#15171c;padding:10px;border-top:3px solid var(--rc,#3a3e48);min-width:0}
+.lot .tc{width:100%}
+.lot .lp{display:flex;justify-content:space-between;align-items:baseline;gap:6px;font:700 1rem var(--body)}
+.lot .lp b{color:var(--amber);font:400 1.25rem var(--display,"Anton"),sans-serif;letter-spacing:.02em}
+.lot .ls{font-size:.85rem;color:var(--muted);line-height:1.3}
+.lot .ls a{color:#fff;font-weight:700;text-decoration:none}
+.lot input{width:100%;padding:8px;background:#08090b;border:1px solid #2a2d35;color:#fff;font:inherit}
+.lot .btn{width:100%}
+.lot.wish{outline:2px solid var(--amber);outline-offset:-2px}
+.tc-wish{background:var(--amber);color:#08090b;font:700 .66rem var(--body);letter-spacing:.08em;padding:1px 5px;text-transform:uppercase}
+.badge{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;margin-left:6px;border-radius:9px;background:var(--red);color:#fff;font:700 .7rem var(--body);letter-spacing:0;vertical-align:2px}
+.trade{background:#15171c;border-left:4px solid var(--amber);padding:14px;display:flex;flex-direction:column;gap:10px}
+.trade .sides{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:700px){.trade .sides{grid-template-columns:1fr}.trade .arrow{transform:rotate(90deg);justify-self:center}}
+.trade .arrow{font:400 2rem var(--display,"Anton"),sans-serif;color:var(--amber);align-self:center}
+.mini-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.mini-cards .tc .tc-body{padding:0 6px 6px}.mini-cards .tc .tc-nm{font-size:.8rem}.mini-cards .tc .tc-sub,.mini-cards .tc .tc-st,.mini-cards .tc .tc-no{display:none}.mini-cards .tc .tc-key{font-size:.85rem}
+.pick .tc{opacity:.95}.pick .tc.on{outline:3px solid var(--amber);outline-offset:-3px;opacity:1}
+.sellbox{display:flex;flex-direction:column;gap:8px;background:#08090b;padding:12px;border:1px solid #2a2d35}
+.sellbox input{padding:9px;background:#15171c;border:1px solid #2a2d35;color:#fff;font:inherit;width:140px}
+.hist td{font-size:.92rem}
 @media (prefers-reduced-motion:reduce){.ocard,.ocard .in,.pack .pk-top,.pack .pk-body,.tc{transition:none}.pack.idle,.ocard.tease,.tc.holo::before,.pack .pk-shine{animation:none}}
 </style>
 </head>
@@ -231,12 +254,13 @@ function cardHTML(c,o={}){const own=o.count??1,miss=o.miss;
   if(c.type==="abil"){const sz=o.big?180:(o.sz||92);mid=`<span class="tc-key">${c.key==="P"?"Passif":c.key}</span><span class="tc-icon" style="${spritePos(c.k,sz,c.ch)};width:${sz}px;height:${sz}px"></span>`}
   const st=c.type==="skin"?`<span>Skin</span><span>${c.legacy?"Héritage":esc(SKR[c.rar]||"Standard")}</span>`:c.type==="champ"?`<span>ATQ <b>${c.atk}</b></span><span>DÉF <b>${c.def}</b></span>`:c.type==="abil"?`<span>${c.key==="P"?"Passif":"Sort "+c.key}</span><span><b>${RAR[c.r]}</b></span>`:`<span>Région</span><span><b>${RAR[c.r]}</b></span>`;
   const tag=o.div||o.big?"div":"button";
-  return `<${tag} class="${cls}" style="--rc:var(--r${c.r})" ${tag==="button"?`type="button" data-card="${esc(c.id)}" aria-label="${esc(c.name)}, ${RAR[c.r]}"`:""}>
+  return `<${tag} class="${cls}${o.on?" on":""}" style="--rc:var(--r${c.r})" ${tag==="button"?`type="button" ${o.pick?`data-pick="${o.pick}" data-id="${esc(c.id)}" aria-pressed="${!!o.on}"`:`data-card="${esc(c.id)}"`} aria-label="${esc(c.name)}, ${RAR[c.r]}"`:""}>
     <span class="tc-art" style="background-image:url('${artOf(c)}')${artPos}${c.type==="abil"?";filter:brightness(.75) saturate(.9) blur(1px);transform:scale(1.05)":""}"></span><span class="tc-gem"></span><span class="tc-no">#${c.no}</span>${own>1?`<span class="tc-cnt">×${own}</span>`:""}${mid}
-    <span class="tc-body"><span class="tc-flags">${o.isNew?`<span class="tc-new">Nouvelle</span>`:""}${o.vit?`<span class="tc-vit">Vitrine</span>`:""}</span><span class="tc-nm">${esc(c.name)}</span><span class="tc-sub">${esc(c.sub)}</span><span class="tc-st">${st}</span></span></${tag}>`}
+    <span class="tc-body"><span class="tc-flags">${o.isNew?`<span class="tc-new">Nouvelle</span>`:""}${o.vit?`<span class="tc-vit">Vitrine</span>`:""}${o.wish?`<span class="tc-wish">Souhait</span>`:""}</span><span class="tc-nm">${esc(c.name)}</span><span class="tc-sub">${esc(c.sub)}</span><span class="tc-st">${st}</span></span></${tag}>`}
 
 // ---------- Base ----------
-let db=null,uid=null,me=null,all={},po=null,hasWallet=false,feed=[],busy=false;
+let db=null,uid=null,me=null,all={},po=null,hasWallet=false,feed=[],busy=false,market=[],sold=[],tradesIn=[],tradesOut=[];
+const wished=id=>(me?.wish||[]).includes(id);
 const mine=id=>me?.c?.[id]||0;
 const owned=()=>me?.c?Object.keys(me.c).filter(k=>me.c[k]>0&&BY[k]).length:0;
 function freeNow(){if(!me)return FREE_MAX;const add=Math.floor((Date.now()-(me.freeAt||Date.now()))/FREE_EVERY),f=me.free||0;return add>0?Math.max(f,Math.min(FREE_MAX,f+add)):f}
@@ -264,16 +288,20 @@ function snd(kind,vol=1){if(muted)return;sndLoad();const L=SND[kind];if(!L||!AC)
     else{const a=new Audio(`${A}snd/${n}.mp3`);a.volume=Math.min(1,vol);a.play().catch(()=>{})}}catch(e){}}
 
 // ---------- Navigation ----------
-const VIEWS=[["boosters","Boosters"],["collection","Ma collection"],["sages","Les sages"],["wiki","Wiki"],["regions","Régions"]];
+const VIEWS=[["boosters","Boosters"],["collection","Ma collection"],["marche","Marché"],["echanges","Échanges"],["sages","Les sages"],["wiki","Wiki"],["regions","Régions"]];
 let view="boosters",param=null;
 function route(){const h=decodeURIComponent((location.hash||"").slice(1));const m=h.match(/^(champ|region|sage)-(.+)$/);
   if(m){view=m[1];param=m[2]}else{view=VIEWS.some(v=>v[0]===h)?h:"boosters";param=null}render();scrollTo({top:0})}
 window.addEventListener("hashchange",route);
 const GROUP={champ:"wiki",region:"regions",sage:"sages"};
+function renderTabs(){if(!D)return;
+  const bdg={marche:wishLots().length,echanges:tradesIn.filter(t=>t.status==="open").length};
+  $("ctabs").innerHTML=VIEWS.map(([k,n])=>`<a href="#${k}" ${k===view||GROUP[view]===k?'aria-current="page"':""}>${n}${bdg[k]?`<span class="badge" aria-label="${bdg[k]} nouveau${bdg[k]>1?"x":""}">${bdg[k]}</span>`:""}</a>`).join("");
+}
 function render(){if(!D)return;
-  $("ctabs").innerHTML=VIEWS.map(([k,n])=>`<a href="#${k}" ${k===view||GROUP[view]===k?'aria-current="page"':""}>${n}</a>`).join("");
+  renderTabs();
   renderPurse();
-  ({boosters:vBoosters,collection:vColl,sages:vSages,sage:vSage,wiki:vWiki,regions:vRegions,champ:vChamp,region:vRegion})[view]($("view"));
+  ({boosters:vBoosters,collection:vColl,marche:vMarket,echanges:vTrades,sages:vSages,sage:vSage,wiki:vWiki,regions:vRegions,champ:vChamp,region:vRegion})[view]($("view"));
 }
 function renderPurse(){const o=owned();
   $("purse").innerHTML=!db?`<span>${D?total()+" cartes à collectionner":"Connexion…"}</span>`:`<span class="po">PO <b>${po==null?"…":fmt(po)}</b></span><span>Boosters gratuits <b>${freeNow()}</b></span><span title="Cartes différentes possédées">Collection <b>${o}</b> / ${total()}</span><span class="prog" aria-hidden="true"><i style="width:${(100*o/total()).toFixed(1)}%"></i></span>`}
@@ -386,16 +414,16 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(document.querySe
 
 // ---------- COLLECTION ----------
 let fType="all",fRar="all",fReg="all",fOwn="all",fQ="";
-function filterCards(own){return CARDS.filter(c=>(fType==="all"||c.type===fType)&&(fRar==="all"||c.r===+fRar)&&(fReg==="all"||c.g===fReg)&&(fOwn==="all"||(fOwn==="own"?own(c.id)>0:fOwn==="dup"?own(c.id)>1:!(own(c.id)>0)))&&(!fQ||(c.name+" "+c.sub).toLowerCase().includes(fQ.toLowerCase())))}
+function filterCards(own){return CARDS.filter(c=>(fType==="all"||c.type===fType)&&(fRar==="all"||c.r===+fRar)&&(fReg==="all"||c.g===fReg)&&(fOwn==="all"||(fOwn==="own"?own(c.id)>0:fOwn==="dup"?own(c.id)>1:fOwn==="wish"?wished(c.id):!(own(c.id)>0)))&&(!fQ||(c.name+" "+c.sub).toLowerCase().includes(fQ.toLowerCase())))}
 function filtersHTML(withDup){return `<div class="chips">${[["all","Tout"],["champ","Champions"],["abil","Compétences"],["skin","Skins"],["region","Régions"]].map(([k,n])=>`<button class="chip" type="button" data-ft="${k}" aria-pressed="${fType===k}">${n}</button>`).join("")}</div>
     <div class="row"><select class="fsel" id="fRar" aria-label="Rareté"><option value="all">Toutes les raretés</option>${RAR.map((r,i)=>`<option value="${i}" ${fRar==i?"selected":""}>${r}</option>`).join("")}</select>
       <select class="fsel" id="fReg" aria-label="Région"><option value="all">Toutes les régions</option>${Object.entries(REG).map(([k,r])=>`<option value="${k}" ${fReg===k?"selected":""}>${esc(r.name)}</option>`).join("")}</select>
-      <select class="fsel" id="fOwn" aria-label="Afficher"><option value="all">Toutes</option><option value="own" ${fOwn==="own"?"selected":""}>Possédées</option>${withDup?`<option value="dup" ${fOwn==="dup"?"selected":""}>Doublons</option>`:""}<option value="miss" ${fOwn==="miss"?"selected":""}>Manquantes</option></select>
+      <select class="fsel" id="fOwn" aria-label="Afficher"><option value="all">Toutes</option><option value="own" ${fOwn==="own"?"selected":""}>Possédées</option>${withDup?`<option value="dup" ${fOwn==="dup"?"selected":""}>Doublons</option>`:""}<option value="miss" ${fOwn==="miss"?"selected":""}>Manquantes</option><option value="wish" ${fOwn==="wish"?"selected":""}>Ma liste de souhaits</option></select>
       <input type="search" class="fsel" id="fQ" placeholder="Rechercher un champion, un sort, un skin…" value="${esc(fQ)}" aria-label="Rechercher"></div>`}
 function bindFilters(v){v.querySelectorAll("[data-ft]").forEach(b=>b.onclick=()=>{fType=b.dataset.ft;render()});
   $("fRar").onchange=e=>{fRar=e.target.value;render()};$("fReg").onchange=e=>{fReg=e.target.value;render()};$("fOwn").onchange=e=>{fOwn=e.target.value;render()};
   $("fQ").oninput=e=>{fQ=e.target.value;clearTimeout(window._q);window._q=setTimeout(()=>{render();const q=$("fQ");q.focus();q.setSelectionRange(q.value.length,q.value.length)},250)}}
-function gridHTML(list,own,o={}){return list.length?`<div class="cards">${list.slice(0,240).map(c=>cardHTML(c,{count:own(c.id),miss:!(own(c.id)>0),vit:o.vit?.includes(c.id)})).join("")}</div>${list.length>240?`<p class="note">Affine la recherche pour voir les ${list.length-240} autres cartes.</p>`:""}`:`<div class="empty">Aucune carte avec ces filtres.</div>`}
+function gridHTML(list,own,o={}){return list.length?`<div class="cards">${list.slice(0,240).map(c=>cardHTML(c,{count:own(c.id),miss:!(own(c.id)>0),vit:o.vit?.includes(c.id),wish:wished(c.id)})).join("")}</div>${list.length>240?`<p class="note">Affine la recherche pour voir les ${list.length-240} autres cartes.</p>`:""}`:`<div class="empty">Aucune carte avec ces filtres.</div>`}
 function dupValue(){return me?.c?Object.entries(me.c).reduce((a,[k,n])=>a+(BY[k]&&n>1?(n-1)*RECYCLE[BY[k].r]:0),0):0}
 function vColl(v){
   if(!me){v.innerHTML=`<section class="panel frame"><h2>Ta collection est vide</h2><p class="note">Ouvre tes deux boosters gratuits pour commencer.</p><a class="btn" href="#boosters" style="align-self:flex-start">Ouvrir un booster</a></section>`;return}
@@ -430,8 +458,16 @@ function showCard(id){const c=BY[id];if(!c)return;const n=mine(id);
       ${!n&&db?`<button class="btn small" id="craft" type="button" ${canCraft?"":"disabled"}>${!hasWallet?"Coffre PO fermé":(po||0)<CRAFT[c.r]?`Créer : il manque ${fmt(CRAFT[c.r]-(po||0))} PO`:`Créer pour ${fmt(CRAFT[c.r])} PO`}</button>`:""}
       ${n?`<button class="btn small ghost" id="vit" type="button">${inVit?"Retirer de ma vitrine":"Mettre en vitrine"}</button>`:""}
       ${n>1&&hasWallet?`<button class="btn small ghost" id="rec1" type="button">Recycler ${n-1} doublon${n>2?"s":""} (+${fmt((n-1)*RECYCLE[c.r])} PO)</button>`:""}
+      ${n&&hasWallet?`<button class="btn small ghost" id="sellT" type="button">Vendre au marché</button>`:""}
+      ${!n&&me?`<button class="btn small ghost" id="wishB" type="button">${wished(id)?"Retirer de ma liste de souhaits":"♥ Ajouter à ma liste de souhaits"}</button>`:""}
     </div>
-    ${owners.length?`<div><span class="eyebrow">Aussi chez</span><div class="row" style="margin-top:6px">${owners.slice(0,12).join("")}</div></div>`:""}</div></div>`;
+    <div class="sellbox" id="sellBox" hidden><span class="eyebrow">Mettre en vente</span>
+      <div class="chips"><button class="chip" type="button" data-sk="fixed" aria-pressed="true">Prix fixe</button><button class="chip" type="button" data-sk="auction" aria-pressed="false">Enchères 24 h</button></div>
+      <div class="row"><input type="number" id="sellP" min="5" step="1" value="${CRAFT[c.r]}" aria-label="Prix en PO"><span class="note" id="sellN">PO · tu touches ${fmt(CRAFT[c.r]-Math.floor(CRAFT[c.r]*.05))} PO après la taxe de 5 %</span></div>
+      <p class="note" style="margin:0">La carte quitte ta collection pendant la vente. Tu peux annuler tant que personne n'a enchéri.${n===1?" <b>C'est ton seul exemplaire.</b>":""}</p>
+      <button class="btn small" id="sellGo" type="button" style="align-self:flex-start">Mettre en vente</button></div>
+    ${listedOf(id).length?`<div><span class="eyebrow">En vente au marché</span><div class="row" style="margin-top:6px">${listedOf(id).map(L=>`<a class="ctag" href="#marche" style="color:#fff">${esc(L.sellerPseudo||"Un sage")} · ${L.kind==="auction"?`enchère ${fmt(L.bid||L.price)} PO`:`${fmt(L.price)} PO`}</a>`).join("")}</div></div>`:""}
+    ${owners.length?`<div><span class="eyebrow">Aussi chez</span><div class="row" style="margin-top:6px">${owners.slice(0,12).join("")}</div>${!n&&me?`<p class="note" style="margin:6px 0 0">Touche un sage pour voir sa collection, ou <a href="#echanges" id="askT">propose-lui un échange</a>.</p>`:""}</div>`:""}</div></div>`;
   document.body.appendChild(m);const close=()=>m.remove();
   m.querySelector(".x").onclick=close;m.onclick=e=>{if(e.target===m||e.target.closest("a"))close()};
   const cr=m.querySelector("#craft");if(cr)cr.onclick=async()=>{if(!cr.dataset.sure){cr.dataset.sure=1;cr.textContent=`Confirmer : ${fmt(CRAFT[c.r])} PO`;return}cr.disabled=true;cr.textContent="Création…";
@@ -439,6 +475,14 @@ function showCard(id){const c=BY[id];if(!c)return;const n=mine(id);
   const vb=m.querySelector("#vit");if(vb)vb.onclick=async()=>{let v2=[...(me.vitrine||[])].filter(x=>x!==id);if(!inVit){if(v2.length>=5){toast("Ta vitrine est pleine (5 cartes). Retire une carte d'abord.",true);return}v2.push(id)}
     try{await db.collection("cards").doc(uid).update({vitrine:v2});close();toast(inVit?"Retirée de ta vitrine":"Ajoutée à ta vitrine")}catch(e){toast("Vitrine indisponible pour le moment.",true)}};
   const rb=m.querySelector("#rec1");if(rb)rb.onclick=async()=>{rb.disabled=true;try{const r=await api({op:"recycle",ids:[id]});snd("coin");close();toast(`+${fmt(r.delta)} PO`)}catch(e){toast(e.message,true);rb.disabled=false}};
+  const sb=m.querySelector("#sellT");if(sb)sb.onclick=()=>{const box=m.querySelector("#sellBox");box.hidden=!box.hidden;if(!box.hidden)m.querySelector("#sellP").focus()};
+  let sk="fixed";m.querySelectorAll("[data-sk]").forEach(b=>b.onclick=()=>{sk=b.dataset.sk;m.querySelectorAll("[data-sk]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+  const sp=m.querySelector("#sellP");if(sp)sp.oninput=()=>{const v=Math.floor(+sp.value||0);m.querySelector("#sellN").textContent=`PO · tu touches ${fmt(v-Math.floor(v*.05))} PO après la taxe de 5 %`};
+  const sg=m.querySelector("#sellGo");if(sg)sg.onclick=async()=>{sg.disabled=true;sg.textContent="Mise en vente…";
+    try{await api({op:"sell",id,kind:sk,price:Math.floor(+sp.value||0)});close();toast(sk==="auction"?"Enchère lancée pour 24 h":"Carte mise en vente");location.hash="marche"}catch(e){toast(e.message,true);sg.disabled=false;sg.textContent="Mettre en vente"}};
+  const wb=m.querySelector("#wishB");if(wb)wb.onclick=async()=>{const w=(me.wish||[]).filter(x=>x!==id);if(!wished(id)){if(w.length>=50){toast("Liste de souhaits pleine (50 cartes).",true);return}w.push(id)}
+    try{await db.collection("cards").doc(uid).update({wish:w});wb.textContent=wished(id)?"♥ Ajouter à ma liste de souhaits":"Retirer de ma liste de souhaits";toast(w.includes(id)?"Ajoutée à ta liste de souhaits : tu seras prévenu si elle passe au marché":"Retirée de ta liste de souhaits")}catch(e){toast("Liste de souhaits indisponible pour le moment.",true)}};
+  const at=m.querySelector("#askT");if(at)at.onclick=()=>{const u=Object.keys(all).find(x=>x!==uid&&all[x].c?.[id]>0&&!conseilIsClaimed(x));tr={to:u||"",give:[],want:u?[id]:[],po:0};};
   m.querySelector(".x").focus();
 }
 
@@ -457,14 +501,96 @@ function vSage(v){const d=all[param];
   const list=CARDS.filter(c=>own(c.id)>0&&(sType==="all"||c.type===sType)).sort((a,b)=>b.r-a.r||a.no-b.no);
   const rank=sageRows().findIndex(r=>r.u===param);
   v.innerHTML=`<a class="chip" href="#sages" style="align-self:flex-start;text-decoration:none">← Les sages</a>
-    <section class="panel frame"><span class="eyebrow">Collection</span><h2>${esc(d.pseudo||"Un sage")}${isMe?" (toi)":""}</h2>
+    <section class="panel frame"><div class="between"><div><span class="eyebrow">Collection</span><h2>${esc(d.pseudo||"Un sage")}${isMe?" (toi)":""}</h2></div>${!isMe&&me?`<a class="btn small" href="#echanges" id="tradeWith">Proposer un échange</a>`:""}</div>
       <div class="facts"><div><b>${d.n||0}</b><span>cartes sur ${total()}</span></div><div><b>${rank>=0?rank+1+(rank?"e":"er"):"–"}</b><span>au classement</span></div>${RAR.map((r,i)=>i>=2?`<div><b style="color:var(--r${i})">${t[i]||0}</b><span>${r}s</span></div>`:"").join("")}<div><b>${d.opened||0}</b><span>boosters ouverts</span></div></div></section>
     <section class="panel frame"><div class="between"><h2>Vitrine</h2>${isMe?`<span class="note">Ouvre une de tes cartes pour l'ajouter ou la retirer</span>`:""}</div>
       <div class="vit">${[0,1,2,3,4].map(i=>vit[i]?cardHTML(BY[vit[i]],{count:own(vit[i]),glow:BY[vit[i]].r>=3}):`<div class="slot">${isMe?"Emplacement libre":"Vide"}</div>`).join("")}</div></section>
     <section class="panel frame"><div class="between"><h2>Ses cartes</h2><span class="note">${list.length} carte${list.length>1?"s":""}</span></div>
       <div class="chips">${[["all","Tout"],["champ","Champions"],["abil","Compétences"],["skin","Skins"],["region","Régions"]].map(([k,n])=>`<button class="chip" type="button" data-st="${k}" aria-pressed="${sType===k}">${n}</button>`).join("")}</div>
-      ${list.length?`<div class="cards">${list.slice(0,300).map(c=>cardHTML(c,{count:own(c.id)})).join("")}</div>`:`<div class="empty">Aucune carte de ce type.</div>`}</section>`;
+      ${list.length?`<div class="cards">${list.slice(0,300).map(c=>cardHTML(c,{count:own(c.id),wish:!isMe&&wished(c.id)})).join("")}</div>`:`<div class="empty">Aucune carte de ce type.</div>`}</section>`;
   v.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{sType=b.dataset.st;render()});
+  const tw=$("tradeWith");if(tw)tw.onclick=()=>{tr={to:param,give:[],want:list.filter(c=>wished(c.id)).slice(0,5).map(c=>c.id),po:0}};
+}
+
+// ---------- MARCHÉ ----------
+const listedOf=id=>market.filter(L=>L.card===id&&L.status==="open");
+const wishLots=()=>market.filter(L=>L.status==="open"&&L.seller!==uid&&wished(L.card)&&BY[L.card]);
+const left=t=>{const m=Math.max(0,Math.round((t-Date.now())/6e4));return m<60?`${m} min`:`${Math.floor(m/60)} h ${String(m%60).padStart(2,"0")}`};
+let mF="all",mQ="",mRar="all";const settling=new Set();
+function minBid(L){return L.bidder?L.bid+Math.max(1,Math.ceil(L.bid*.05)):L.price}
+function lotHTML(L){const c=BY[L.card];if(!c)return "";const isMine=L.seller===uid,lead=L.bidder===uid,auc=L.kind==="auction";
+  let act="";
+  if(isMine)act=auc&&L.bidder?`<span class="note">Enchère en cours : annulation impossible</span>`:`<button class="btn small ghost" type="button" data-cancel="${L.id}">Retirer de la vente</button>`;
+  else if(!hasWallet)act=`<span class="note">Ouvre ton coffre PO sur la page Banque pour acheter</span>`;
+  else if(auc)act=lead?`<span class="note" style="color:var(--r1)">Tu es en tête</span>`:`<input type="number" min="${minBid(L)}" value="${minBid(L)}" aria-label="Ton enchère en PO" id="bid-${L.id}"><button class="btn small" type="button" data-bid="${L.id}" ${(po||0)<minBid(L)?"disabled":""}>${(po||0)<minBid(L)?"PO insuffisantes":"Enchérir"}</button>`;
+  else act=`<button class="btn small" type="button" data-buy="${L.id}" ${(po||0)<L.price?"disabled":""}>${(po||0)<L.price?`Il manque ${fmt(L.price-(po||0))} PO`:"Acheter"}</button>`;
+  return `<div class="lot${!isMine&&wished(L.card)?" wish":""}" style="--rc:var(--r${c.r})">${cardHTML(c,{count:1,wish:!isMine&&wished(L.card),glow:c.r>=3})}
+    <div class="lp"><span>${auc?(L.bidder?"Enchère":"Mise à prix"):"Prix"}</span><b>${fmt(auc?(L.bid||L.price):L.price)} PO</b></div>
+    <div class="ls">${isMine?"Ta vente":`Vendu par <a href="#sage-${encodeURIComponent(L.seller)}">${esc(L.sellerPseudo||"Un sage")}</a>`}${auc?` · fin dans ${left(L.endsAt)}${L.bids?` · ${L.bids} enchère${L.bids>1?"s":""}${L.bidderPseudo?` (en tête : ${esc(L.bidderPseudo)})`:""}`:""}`:""}</div>${act}</div>`}
+function vMarket(v){
+  for(const L of market)if(L.status==="open"&&L.kind==="auction"&&L.endsAt<=Date.now()&&!settling.has(L.id)){settling.add(L.id);api({op:"settle",listing:L.id}).catch(()=>{})}
+  const open=market.filter(L=>L.status==="open"&&BY[L.card]&&!(L.kind==="auction"&&L.endsAt<=Date.now()));
+  const list=open.filter(L=>{const c=BY[L.card];return (mF==="all"||(mF==="mine"?L.seller===uid:mF==="bids"?L.bidder===uid:mF==="auction"?L.kind==="auction":mF==="fixed"?L.kind==="fixed":wished(L.card)))&&(mRar==="all"||c.r===+mRar)&&(!mQ||(c.name+" "+c.sub+" "+(L.sellerPseudo||"")).toLowerCase().includes(mQ.toLowerCase()))})
+    .sort((a,b)=>(wished(b.card)-wished(a.card))||(b.at-a.at));
+  const wl=wishLots(),hist=sold.filter(L=>L.status==="sold"&&BY[L.card]).sort((a,b)=>b.doneAt-a.doneAt).slice(0,15);
+  v.innerHTML=`<section class="panel frame"><div class="between"><h2>Marché du Conseil</h2><span class="note">${open.length} carte${open.length>1?"s":""} en vente · taxe de 5 % sur chaque vente</span></div>
+    <p class="note" style="margin:0">Pour vendre, ouvre une carte de ta collection et choisis « Vendre au marché » : prix fixe, ou enchères pendant 24 h (une enchère dans les 5 dernières minutes prolonge de 5 minutes). Les PO d'une enchère sont bloquées et rendues si quelqu'un surenchérit.</p>
+    ${wl.length?`<div class="trade" style="border-left-color:var(--amber)"><b>♥ ${wl.length} carte${wl.length>1?"s":""} de ta liste de souhaits ${wl.length>1?"sont":"est"} en vente !</b><span class="note">${wl.slice(0,6).map(L=>esc(BY[L.card].name)).join(", ")}${wl.length>6?"…":""}</span></div>`:""}
+    <div class="chips">${[["all","Tout"],["wish","♥ Mes souhaits"],["fixed","Prix fixe"],["auction","Enchères"],["mine","Mes ventes"],["bids","Mes enchères"]].map(([k,n])=>`<button class="chip" type="button" data-mf="${k}" aria-pressed="${mF===k}">${n}</button>`).join("")}</div>
+    <div class="row"><select class="fsel" id="mRar" aria-label="Rareté"><option value="all">Toutes les raretés</option>${RAR.map((r,i)=>`<option value="${i}" ${mRar==i?"selected":""}>${r}</option>`).join("")}</select><input type="search" class="fsel" id="mQ" placeholder="Rechercher une carte ou un vendeur" value="${esc(mQ)}" aria-label="Rechercher au marché"></div></section>
+    ${list.length?`<div class="lots">${list.map(lotHTML).join("")}</div>`:`<div class="empty">${open.length?"Aucune vente avec ces filtres.":"Rien en vente pour l'instant. Sois le premier : ouvre une carte de ta collection et mets-la en vente."}</div>`}
+    <section class="panel frame"><h2>Ventes récentes</h2>${hist.length?`<div style="overflow-x:auto"><table class="ctable hist"><thead><tr><th>Carte</th><th>Vendeur</th><th>Acheteur</th><th class="num">Prix</th><th>Quand</th></tr></thead><tbody>
+      ${hist.map(L=>`<tr><td><button type="button" class="chip" data-card="${esc(L.card)}" style="--rc:var(--r${BY[L.card].r});border-color:var(--rc)">${esc(BY[L.card].name)}</button></td><td>${esc(L.sellerPseudo||"?")}</td><td>${esc(L.buyerPseudo||"?")}</td><td class="num">${fmt(L.paid||L.price)} PO</td><td class="note">${ago(L.doneAt)}</td></tr>`).join("")}</tbody></table></div>`:`<div class="empty">Aucune vente cette semaine.</div>`}</section>`;
+  v.querySelectorAll("[data-mf]").forEach(b=>b.onclick=()=>{mF=b.dataset.mf;render()});
+  $("mRar").onchange=e=>{mRar=e.target.value;render()};
+  $("mQ").oninput=e=>{mQ=e.target.value;clearTimeout(window._m);window._m=setTimeout(()=>{render();const q=$("mQ");q.focus();q.setSelectionRange(q.value.length,q.value.length)},250)};
+  const act=async(b,body,msg)=>{b.disabled=true;const t=b.textContent;b.textContent="…";try{const r=await api(body);if(r.delta)snd("coin",.8);else snd("flip");toast(msg)}catch(e){toast(e.message,true);b.disabled=false;b.textContent=t}};
+  v.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>{if(!b.dataset.sure){b.dataset.sure=1;b.textContent="Confirmer l'achat";return}act(b,{op:"purchase",listing:b.dataset.buy},"Carte achetée : elle est dans ta collection")});
+  v.querySelectorAll("[data-bid]").forEach(b=>b.onclick=()=>act(b,{op:"bid",listing:b.dataset.bid,amount:Math.floor(+$("bid-"+b.dataset.bid).value||0)},"Enchère placée : tes PO sont bloquées jusqu'à la fin"));
+  v.querySelectorAll("[data-cancel]").forEach(b=>b.onclick=()=>act(b,{op:"cancel",listing:b.dataset.cancel},"Vente retirée : la carte revient dans ta collection"));
+}
+
+// ---------- ÉCHANGES ----------
+let tr={to:"",give:[],want:[],po:0},tq1="",tq2="";
+function tradeCards(ids,cls=""){return `<div class="mini-cards">${ids.filter(id=>BY[id]).map(id=>cardHTML(BY[id],{count:1,wish:cls==="get"&&wished(id)})).join("")||'<span class="note">Rien</span>'}</div>`}
+function tradeHTML(T,inc){const who=inc?T.fromPseudo:T.toPseudo,missing=inc?(T.want||[]).filter(id=>!(mine(id)>0)):[];
+  const get=inc?T.give:T.want,giv=inc?T.want:T.give,poGet=inc?T.po:0,poGive=inc?0:T.po;
+  return `<div class="trade"><div class="between"><b>${inc?`${esc(who||"Un sage")} te propose un échange`:`Ta proposition à ${esc(who||"un sage")}`}</b><span class="note">${ago(T.at)}</span></div>
+    <div class="sides"><div><span class="eyebrow">Tu reçois${poGet?` · +${fmt(poGet)} PO`:""}</span>${tradeCards(get||[],"get")}</div><span class="arrow" aria-hidden="true">⇄</span><div><span class="eyebrow">Tu donnes${poGive?` · ${fmt(poGive)} PO`:""}</span>${tradeCards(giv||[])}</div></div>
+    ${missing.length?`<span class="note" style="color:#ff4d6a">Tu n'as plus : ${missing.map(id=>esc(BY[id]?.name||id)).join(", ")} (en vente ou déjà échangée).</span>`:""}
+    <div class="row">${inc?`<button class="btn small" type="button" data-acc="${T.id}" ${missing.length?"disabled":""}>Accepter</button><button class="btn small ghost" type="button" data-ref="${T.id}">Refuser</button>`:`<button class="btn small ghost" type="button" data-unt="${T.id}">Annuler ma proposition</button><span class="note">Tes cartes${T.po?" et tes PO":""} sont en dépôt jusqu'à la réponse.</span>`}</div></div>`}
+function vTrades(v){
+  if(!me){v.innerHTML=`<section class="panel frame"><h2>Échanges</h2><p class="note">Ouvre d'abord un booster pour avoir des cartes à échanger.</p><a class="btn" href="#boosters" style="align-self:flex-start">Ouvrir un booster</a></section>`;return}
+  const inc=tradesIn.filter(T=>T.status==="open").sort((a,b)=>b.at-a.at),out=tradesOut.filter(T=>T.status==="open").sort((a,b)=>b.at-a.at);
+  const past=[...tradesIn,...tradesOut].filter(T=>T.status!=="open"&&T.doneAt>Date.now()-7*864e5).sort((a,b)=>b.doneAt-a.doneAt).slice(0,8);
+  const sages=Object.entries(all).filter(([u,d])=>u!==uid&&!conseilIsClaimed(u)&&(d.n||0)>0).sort((a,b)=>String(a[1].pseudo||"").localeCompare(String(b[1].pseudo||""),"fr"));
+  const td=all[tr.to],myList=CARDS.filter(c=>mine(c.id)>0&&(!tq1||(c.name+" "+c.sub).toLowerCase().includes(tq1.toLowerCase()))).sort((a,b)=>(mine(b.id)>1)-(mine(a.id)>1)||b.r-a.r);
+  const theirList=td?CARDS.filter(c=>td.c?.[c.id]>0&&(!tq2||(c.name+" "+c.sub).toLowerCase().includes(tq2.toLowerCase()))).sort((a,b)=>wished(b.id)-wished(a.id)||b.r-a.r):[];
+  v.innerHTML=`<section class="panel frame"><div class="between"><h2>Propositions reçues</h2><span class="note">${inc.length} en attente</span></div>${inc.length?inc.map(T=>tradeHTML(T,true)).join(""):`<div class="empty">Aucune proposition pour l'instant.</div>`}</section>
+    <section class="panel frame" id="newTrade"><h2>Proposer un échange</h2>
+      <div class="row"><label class="note" for="trTo">Avec</label><select class="fsel" id="trTo"><option value="">Choisir un sage…</option>${sages.map(([u,d])=>`<option value="${u}" ${u===tr.to?"selected":""}>${esc(d.pseudo||"Un sage")} · ${d.n} cartes</option>`).join("")}</select>
+        <label class="note" for="trPo">PO en plus</label><input type="number" class="fsel" id="trPo" min="0" step="10" value="${tr.po||0}" style="width:110px" ${hasWallet?"":"disabled"}></div>
+      <div class="grid2">
+        <div class="pick"><div class="between"><span class="eyebrow">Tu donnes (${tr.give.length}/5)</span><span class="note">tes doublons en premier</span></div>
+          <input type="search" class="fsel" id="tq1" placeholder="Chercher dans tes cartes" value="${esc(tq1)}" aria-label="Chercher dans tes cartes" style="width:100%;margin:6px 0">
+          <div class="mini-cards">${myList.slice(0,60).map(c=>cardHTML(c,{count:mine(c.id),pick:"give",on:tr.give.includes(c.id)})).join("")||'<span class="note">Aucune carte.</span>'}</div></div>
+        <div class="pick"><div class="between"><span class="eyebrow">Tu demandes (${tr.want.length}/5)</span><span class="note">${td?"tes souhaits en premier":""}</span></div>
+          ${td?`<input type="search" class="fsel" id="tq2" placeholder="Chercher dans ses cartes" value="${esc(tq2)}" aria-label="Chercher dans ses cartes" style="width:100%;margin:6px 0">
+          <div class="mini-cards">${theirList.slice(0,60).map(c=>cardHTML(c,{count:td.c[c.id],pick:"want",on:tr.want.includes(c.id),wish:wished(c.id)})).join("")||'<span class="note">Aucune carte.</span>'}</div>`:`<div class="empty">Choisis d'abord un sage.</div>`}</div>
+      </div>
+      <div class="row"><button class="btn" id="trGo" type="button" ${tr.to&&(tr.give.length||tr.po)?"":"disabled"}>Envoyer la proposition</button><span class="note">Les cartes et les PO que tu proposes sont mises en dépôt jusqu'à sa réponse. Pas de taxe sur les échanges.</span></div></section>
+    <section class="panel frame"><h2>Mes propositions envoyées</h2>${out.length?out.map(T=>tradeHTML(T,false)).join(""):`<div class="empty">Aucune proposition en cours.</div>`}</section>
+    ${past.length?`<section class="panel frame"><h2>Derniers échanges</h2><div class="feed">${past.map(T=>`<div><span>${esc(T.fromPseudo||"?")} → ${esc(T.toPseudo||"?")}</span><span class="note">${{done:"accepté",refused:"refusé",cancelled:"annulé"}[T.status]||T.status}</span><span class="d">${ago(T.doneAt)}</span></div>`).join("")}</div></section>`:""}`;
+  $("trTo").onchange=e=>{tr={to:e.target.value,give:tr.give,want:[],po:tr.po};tq2="";render()};
+  $("trPo").oninput=e=>{tr.po=Math.max(0,Math.floor(+e.target.value||0));$("trGo").disabled=!(tr.to&&(tr.give.length||tr.po))};
+  const srch=(id,set)=>{const el=$(id);if(el)el.oninput=e=>{set(e.target.value);clearTimeout(window._t);window._t=setTimeout(()=>{render();const q=$(id);q.focus();q.setSelectionRange(q.value.length,q.value.length)},250)}};
+  srch("tq1",x=>tq1=x);srch("tq2",x=>tq2=x);
+  v.querySelectorAll("[data-pick]").forEach(b=>b.onclick=e=>{e.stopPropagation();const L=tr[b.dataset.pick],id=b.dataset.id,i=L.indexOf(id);if(i>=0)L.splice(i,1);else{if(L.length>=5){toast("5 cartes au plus de chaque côté",true);return}L.push(id)}render();document.getElementById("newTrade")?.scrollIntoView({block:"nearest"})});
+  const act=async(b,body,msg)=>{b.disabled=true;try{const r=await api(body);if(r.delta)snd("coin",.8);else snd("flip");toast(msg);return r}catch(e){toast(e.message,true);b.disabled=false}};
+  $("trGo").onclick=async()=>{const r=await act($("trGo"),{op:"trade",to:tr.to,give:tr.give,want:tr.want,po:tr.po},"Proposition envoyée");if(r){tr={to:"",give:[],want:[],po:0};render()}};
+  v.querySelectorAll("[data-acc]").forEach(b=>b.onclick=()=>{if(!b.dataset.sure){b.dataset.sure=1;b.textContent="Confirmer l'échange";return}act(b,{op:"accept",trade:b.dataset.acc},"Échange accepté : les cartes sont dans ta collection")});
+  v.querySelectorAll("[data-ref]").forEach(b=>b.onclick=()=>act(b,{op:"refuse",trade:b.dataset.ref},"Échange refusé"));
+  v.querySelectorAll("[data-unt]").forEach(b=>b.onclick=()=>act(b,{op:"untrade",trade:b.dataset.unt},"Proposition annulée : tes cartes reviennent"));
 }
 
 // ---------- WIKI ----------
@@ -503,6 +629,12 @@ function vRegion(v){const r=REG[param];if(!r){v.innerHTML=`<div class="empty">R�
   ${card?`<section class="panel frame"><div class="between"><h2>Collection de la région</h2><span class="note">${set.filter(c=>mine(c.id)>0).length} / ${set.length} · complète = +200 PO</span></div><div class="cards">${set.map(c=>cardHTML(c,{count:mine(c.id),miss:!(mine(c.id)>0)})).join("")}</div></section>`:""}
   <section class="panel frame"><h2>Champions de ${esc(r.name)}</h2><div class="wgrid">${list.map(c=>`<a class="wtile" href="#champ-${encodeURIComponent(c.id)}" style="background-image:url('${A}c/${c.id}.webp')"><span>${esc(c.name)}</span></a>`).join("")}</div></section>`}
 
+// alerte « liste de souhaits » : une seule fois par vente
+function wishAlert(){if(!me)return;let seen=[];try{seen=JSON.parse(localStorage.getItem("cartes-wish-seen")||"[]")}catch(e){}
+  const fresh=wishLots().filter(L=>!seen.includes(L.id));if(!fresh.length)return;
+  toast(`♥ ${fresh.length>1?fresh.length+" cartes de ta liste de souhaits sont":BY[fresh[0].card].name+" (ta liste de souhaits) est"} en vente au marché !`);
+  try{localStorage.setItem("cartes-wish-seen",JSON.stringify([...seen,...fresh.map(L=>L.id)].slice(-200)))}catch(e){}}
+
 // ---------- Démarrage ----------
 (async()=>{
   try{[D,SK,PL]=await Promise.all(["data.json","skins.json","pool.json"].map(f=>fetch(A+f).then(r=>{if(!r.ok)throw 0;return r.json()})))}
@@ -516,6 +648,13 @@ function vRegion(v){const r=REG[param];if(!r){v.innerHTML=`<div class="empty">R�
   db.collection("cards").onSnapshot(q=>{all={};q.docs.forEach(d=>all[d.id]=d.data());me=all[uid]||null;if(document.activeElement?.id==="fQ"||document.activeElement?.id==="wQ")renderPurse();else soft()},e=>console.error(e));
   db.collection("wallets").doc(uid).onSnapshot(s=>{hasWallet=s.exists;po=s.exists?(s.data().po||0):0;soft()},()=>{});
   db.collection("cardFeed").orderBy("at","desc").limit(15).onSnapshot(q=>{feed=q.docs.map(d=>d.data());const f=$("feed");if(f)f.innerHTML=feedHTML()},()=>{});
+  const typing=()=>["fQ","mQ","tq1","tq2","trPo"].includes(document.activeElement?.id)||document.activeElement?.id?.startsWith("bid-");
+  const soft2=()=>{if(stage||document.querySelector(".cmodal")||typing())renderPurse();else if(view==="marche"||view==="echanges")render();else{renderPurse();renderTabs()}};
+  const docs=q=>q.docs.map(d=>({id:d.id,...d.data()}));
+  db.collection("cardMarket").where("status","==","open").onSnapshot(q=>{market=docs(q).filter(L=>L.status==="open");wishAlert();soft2()},e=>console.error(e));
+  db.collection("cardMarket").where("doneAt",">",Date.now()-7*864e5).onSnapshot(q=>{sold=docs(q).filter(L=>L.status!=="open");if(view==="marche"&&!typing())render()},()=>{});
+  db.collection("cardTrades").where("to","==",uid).onSnapshot(q=>{tradesIn=docs(q).filter(T=>T.to===uid);soft2()},()=>{});
+  db.collection("cardTrades").where("from","==",uid).onSnapshot(q=>{tradesOut=docs(q).filter(T=>T.from===uid);soft2()},()=>{});
   render();
   window.addEventListener("conseil-camps",()=>{if(view==="sages")render()});
 })();
