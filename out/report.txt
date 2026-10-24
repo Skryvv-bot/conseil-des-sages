@@ -1,0 +1,14 @@
+hex:
+total 328
+drwxr-xr-x 2 runner runner   4096 Oct 24 15:22 .
+drwxr-xr-x 6 runner runner   4096 Oct 24 15:22 ..
+-rw-r--r-- 1 runner runner  94605 Oct 24 15:22 chest.png
+-rw-r--r-- 1 runner runner  59975 Oct 24 15:22 chest_champion_mastery.png
+-rw-r--r-- 1 runner runner 106226 Oct 24 15:22 chest_generic.png
+-rw-r--r-- 1 runner runner  48005 Oct 24 15:22 list.json
+-rw-r--r-- 1 runner runner   9598 Oct 24 15:22 names.txt
+
+snd:
+total 8
+drwxr-xr-x 2 runner runner 4096 Oct 24 15:22 .
+drwxr-xr-x 6 runner runner 4096 Oct 24 15:22 ..
