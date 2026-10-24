@@ -164,6 +164,21 @@ input[type=text],select{font:500 1rem var(--body);color:var(--ink);background:va
 .feat .lg{display:flex;align-items:center;gap:10px}
 @media (max-width:640px){.feat{grid-template-columns:1fr}.feat .fa,.feat .fb{clip-path:none;align-items:flex-start;text-align:left}}
 .fan{background:#15171c;border-top:4px solid var(--tv-red,#e4002b);padding:20px;display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:20px;align-items:center}
+/* Annonce de sortie de LolMaster */
+.lm{position:relative;overflow:hidden;background:linear-gradient(120deg,#5c0012,#15171c 55%,#2a1f00);border-top:4px solid #e4002b;padding:22px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:center}
+@media (max-width:720px){.lm{grid-template-columns:1fr}.lm-fan{display:none}}
+.lm h2{margin:4px 0 8px;font-size:clamp(1.8rem,5vw,2.8rem)!important;line-height:1!important}
+.lm p{margin:0 0 14px;color:#d5d7dd;max-width:56ch}
+.lm .gift{display:inline-flex;align-items:baseline;gap:8px;font:700 1rem var(--body);color:#ffb400;letter-spacing:.04em;margin-bottom:12px}
+.lm .gift b{font:400 2.4rem/1 var(--display,"Anton"),sans-serif;color:#ffb400}
+.lm .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.lm .msg{font-weight:600}
+.lm-fan{position:relative;width:300px;height:190px}
+.lm-fan span{position:absolute;bottom:0;left:50%;width:104px;aspect-ratio:5/7;border-radius:8px;background-size:cover;background-position:center 18%;border:2px solid var(--c);box-shadow:0 8px 24px rgba(0,0,0,.6),0 0 18px var(--c);transform-origin:50% 120%}
+.lm-fan span:nth-child(1){--c:#2f8cff;transform:translateX(calc(-50% - 78px)) rotate(-18deg)}
+.lm-fan span:nth-child(2){--c:#b45cff;transform:translateX(calc(-50% - 26px)) translateY(-10px) rotate(-6deg)}
+.lm-fan span:nth-child(3){--c:#3fbf7f;transform:translateX(calc(-50% + 26px)) translateY(-10px) rotate(6deg)}
+.lm-fan span:nth-child(4){--c:#ffb400;transform:translateX(calc(-50% + 78px)) rotate(18deg)}
 .fan-rank{background:#08090b;border:1px solid #2a2d35;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
 .fr-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}.fr-head h3{margin:0;font-size:1.4rem}
 .fr-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
@@ -253,6 +268,17 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
     </div>
   </header>
   <div id="pins" hidden></div>
+  <!-- Sortie de LolMaster : 10 boosters offerts à chaque sage inscrit -->
+  <section class="lm" id="lmLaunch" aria-labelledby="lmT">
+    <div>
+      <span class="eyebrow">Nouveau sur CDS.TV</span>
+      <h2 id="lmT">LolMaster est sorti !</h2>
+      <p>Le jeu de cartes de Runeterra du Conseil : 3 011 cartes de champions, sorts, skins et régions à collectionner, un marché et des échanges entre sages. Pour la sortie, chaque sage inscrit reçoit un cadeau, jusqu'au 15 novembre.</p>
+      <div class="gift"><b>10</b> boosters offerts</div>
+      <div class="row"><button class="btn" id="lmBtn" type="button" disabled>Connexion…</button><a class="btn ghost" href="cartes.html">Découvrir LolMaster</a><span class="msg note" id="lmMsg" role="status"></span></div>
+    </div>
+    <div class="lm-fan" aria-hidden="true"><span style="background-image:url('cartes/c/Jinx.webp')"></span><span style="background-image:url('cartes/c/Ahri.webp')"></span><span style="background-image:url('cartes/c/Yasuo.webp')"></span><span style="background-image:url('cartes/c/Kaisa.webp')"></span></div>
+  </section>
   <!-- Avant le début des Worlds : pronos et tier list à faire -->
   <section class="kick" id="kick" aria-labelledby="kickT" hidden>
     <div class="kick-head">
@@ -400,6 +426,21 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
 </div>
 
 <script>
+// ---------- Sortie de LolMaster : récupérer ses 10 boosters ----------
+function lmSetup(c){const btn=document.getElementById("lmBtn"),msg=document.getElementById("lmMsg"),sec=document.getElementById("lmLaunch");
+  if(Date.now()>Date.parse("2026-11-15T23:59:59+01:00")){sec.hidden=true;return}
+  if(!c.db){btn.textContent="Site injoignable";return}
+  let cards=null,wallet=null,got=false;
+  const draw=()=>{if(cards?.launch||got){btn.hidden=true;msg.innerHTML=`<b style="color:#ffb400">Tes 10 boosters sont dans ta collection.</b> <a href="cartes.html#boosters">Les ouvrir (${(cards?.free||0)})</a>`;return}
+    if(!wallet){btn.disabled=false;btn.textContent="M'inscrire pour les recevoir";btn.onclick=()=>location.href="banque.html";msg.textContent="Ouvre ton coffre sur la page Banque avec ton pseudo, puis reviens ici.";return}
+    btn.disabled=false;btn.textContent="Récupérer mes 10 boosters";msg.textContent="";btn.onclick=claim};
+  async function claim(){btn.disabled=true;btn.textContent="Envoi…";
+    try{const t=await firebase.auth().currentUser.getIdToken();const r=await fetch(RIOT_RELAY+"/cards",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+t},body:JSON.stringify({op:"launch"})});
+      const j=await r.json().catch(()=>null);if(!j||(!j.ok&&!j.error))throw new Error("Le robot n'est pas encore prêt, réessaie dans un moment.");if(j.error)throw new Error(j.error);
+      got=true;draw()}catch(e){btn.disabled=false;btn.textContent="Réessayer";msg.textContent=e.message}}
+  c.db.collection("cards").doc(c.uid).onSnapshot(s=>{cards=s.exists?s.data():null;draw()},()=>{});
+  c.db.collection("wallets").doc(c.uid).onSnapshot(s=>{wallet=s.exists?s.data():null;draw()},()=>{});
+}
 conseilNav("accueil");
 // ---------- Soirée CDS Game (heure à ajuster ici) ----------
 const CDS_GAME_START=new Date("2026-10-22T20:30:00+02:00").getTime(), CDS_GAME_HOURS=4;
@@ -664,6 +705,7 @@ renderAll();
 conseilLoadLogos(()=>renderAll());conseilDD().then(()=>renderAll());
 (async()=>{
   const c=await conseilConnect();
+  lmSetup(c);
   if(!c.db){connErr=true;renderAll();return}
   db=c.db;uid=c.uid;
   const sub=(col,fn)=>db.collection(col).onSnapshot(q=>{const o={};q.docs.filter(d=>!conseilIsClaimed(d.id)).forEach(d=>o[d.id]=d.data());fn(o);renderAll()},e=>console.warn(col,e));
