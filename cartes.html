@@ -508,9 +508,10 @@ function vRegion(v){const r=REG[param];if(!r){v.innerHTML=`<div class="empty">R�
   catch(e){$("view").innerHTML=`<div class="empty">Impossible de charger les cartes. Recharge la page.</div>`;return}
   const fix=t=>String(t||"").replace(/([.!?…])([A-ZÀ-Ý«])/g,"$1 $2");
   for(const r of Object.values(D.regions))r.desc=fix(r.desc);for(const c of Object.values(D.champions)){c.lore=fix(c.lore);c.blurb=fix(c.blurb)}
-  build();route();
-  const c=await conseilConnect();if(!c.db){$("purse").innerHTML=`<span>Site injoignable pour le moment, recharge la page.</span>`;return}
+  build();
+  const c=await conseilConnect();if(c.uid===CONSEIL_ADMIN)route();if(!c.db){$("purse").innerHTML=`<span>Site injoignable pour le moment, recharge la page.</span>`;return}
   db=c.db;uid=c.uid;
+  if(uid!==CONSEIL_ADMIN){$("ctabs").hidden=true;$("purse").innerHTML="";$("view").innerHTML=`<section class="panel frame"><h2>Bientôt sur CDS.TV</h2><p class="note" style="margin:0">Les cartes de Runeterra sont en préparation. Reviens très vite !</p></section>`;D=null;return}
   const soft=()=>{if(stage||document.querySelector(".cmodal"))renderPurse();else if(view==="boosters"||view==="sages"||view==="sage"||view==="collection")render();else renderPurse()};
   db.collection("cards").onSnapshot(q=>{all={};q.docs.forEach(d=>all[d.id]=d.data());me=all[uid]||null;if(document.activeElement?.id==="fQ"||document.activeElement?.id==="wQ")renderPurse();else soft()},e=>console.error(e));
   db.collection("wallets").doc(uid).onSnapshot(s=>{hasWallet=s.exists;po=s.exists?(s.data().po||0):0;soft()},()=>{});

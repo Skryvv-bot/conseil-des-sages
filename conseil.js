@@ -18,7 +18,7 @@ window.conseilConnect=function(){
       const auth=firebase.auth(), db=firebase.firestore();
       let done=false,tried=false;
       auth.onAuthStateChanged(async u=>{
-        if(u&&!done){done=true;window.CONSEIL_UID=u.uid;renderAccount(u);await loadClaims(db);watchCamps(db,u.uid);resolve({db,uid:u.uid});offerClaim(db,u.uid);conseilBank(db,u.uid)}
+        if(u&&!done){done=true;window.CONSEIL_UID=u.uid;conseilShowAdmin();renderAccount(u);await loadClaims(db);watchCamps(db,u.uid);resolve({db,uid:u.uid});offerClaim(db,u.uid);conseilBank(db,u.uid)}
         else if(u)renderAccount(u);
         else if(!done&&!tried){tried=true;auth.signInAnonymously().catch(e=>{if(!done){done=true;console.error(e);resolve({db:null,error:e})}})}   // pas de session : compte anonyme
       });
@@ -26,12 +26,15 @@ window.conseilConnect=function(){
   });
 };
 
+// Pages en préparation : visibles seulement par Skryvv
+window.CONSEIL_ADMIN="7ggyIoUpvlRrJCpqKkgdYlsMhcp2";
+window.conseilShowAdmin=function(){const ok=window.CONSEIL_UID===CONSEIL_ADMIN;document.querySelectorAll("[data-admin]").forEach(e=>e.hidden=!ok)};
 // ---------- Navigation commune ----------
 const CONSEIL_NAV=[
   {id:"accueil",href:"index.html",label:"Accueil"},
   {id:"ladder",href:"ladder.html",label:"Ladder"},
   {id:"worlds",href:"worlds.html",label:"Worlds 2026",sub:[{id:"worlds",href:"worlds.html",label:"Matchs & pronos"},{id:"tierlist",href:"tierlist.html",label:"Tier list"},{id:"fantasy",href:"fantasy.html",label:"Fantasy"}]},
-  {id:"jeux",href:"jeux.html",label:"Jeux",sub:[{id:"jeux",href:"jeux.html",label:"Tous les jeux"},{id:"devinettes",href:"devinettes.html",label:"Devinettes"},{id:"echauffement",href:"echauffement.html",label:"Échauffement"},{id:"potes",href:"potes.html",label:"Entre potes"},{id:"cartes",href:"cartes.html",label:"Cartes de Runeterra"}]},
+  {id:"jeux",href:"jeux.html",label:"Jeux",sub:[{id:"jeux",href:"jeux.html",label:"Tous les jeux"},{id:"devinettes",href:"devinettes.html",label:"Devinettes"},{id:"echauffement",href:"echauffement.html",label:"Échauffement"},{id:"potes",href:"potes.html",label:"Entre potes"},{id:"cartes",href:"cartes.html",label:"Cartes de Runeterra",admin:1}]},
   {id:"conseil",href:"communaute.html",label:"Le Conseil",sub:[{id:"conseil",href:"communaute.html",label:"Le Conseil"},{id:"banque",href:"banque.html",label:"Banque · Pièces d'or"}]},
   {id:"customs",href:"customs.html",label:"Customs & Clash"},
   {id:"patch",href:"patch.html",label:"Patch"}
@@ -70,7 +73,7 @@ window.conseilNav=function(active){
   document.body.prepend(tk);conseilTicker(defaultTicker());
   const item=CONSEIL_NAV.find(n=>n.id===group);
   if(item&&item.sub){const wrap=document.querySelector(".wrap");if(wrap){const sub=document.createElement("div");sub.className="csub";
-    sub.innerHTML=item.sub.map(s=>`<a href="${s.href}" ${s.id===active?'aria-current="page"':""}>${s.label}</a>`).join("");wrap.prepend(sub)}}
+    sub.innerHTML=item.sub.map(s=>`<a href="${s.href}" ${s.id===active?'aria-current="page"':""}${s.admin?' data-admin hidden':""}>${s.label}</a>`).join("");wrap.prepend(sub)}}
   setupInstall();
 };
 
