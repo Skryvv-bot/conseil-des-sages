@@ -273,8 +273,8 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
     <div>
       <span class="eyebrow">Nouveau sur CDS.TV</span>
       <h2 id="lmT">LolMaster est sorti !</h2>
-      <p>Le jeu de cartes de Runeterra du Conseil : 3 011 cartes de champions, sorts, skins et régions à collectionner, un marché et des échanges entre sages. Pour la sortie, chaque sage inscrit reçoit un cadeau, jusqu'au 15 novembre.</p>
-      <div class="gift"><b>10</b> boosters offerts</div>
+      <p>Le jeu de cartes de Runeterra du Conseil : 3 011 cartes de champions, sorts, skins et régions à collectionner, un marché et des échanges entre sages. Pour la sortie, chaque sage inscrit peut récupérer 10 boosters, deux fois, jusqu'au 15 novembre.</p>
+      <div class="gift"><b>2 × 10</b> boosters offerts</div>
       <div class="row"><button class="btn" id="lmBtn" type="button" disabled>Connexion…</button><a class="btn ghost" href="cartes.html">Découvrir LolMaster</a><span class="msg note" id="lmMsg" role="status"></span></div>
     </div>
     <div class="lm-fan" aria-hidden="true"><span style="background-image:url('cartes/c/Jinx.webp')"></span><span style="background-image:url('cartes/c/Ahri.webp')"></span><span style="background-image:url('cartes/c/Yasuo.webp')"></span><span style="background-image:url('cartes/c/Kaisa.webp')"></span></div>
@@ -430,14 +430,17 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
 function lmSetup(c){const btn=document.getElementById("lmBtn"),msg=document.getElementById("lmMsg"),sec=document.getElementById("lmLaunch");
   if(Date.now()>Date.parse("2026-11-15T23:59:59+01:00")){sec.hidden=true;return}
   if(!c.db){btn.textContent="Site injoignable";return}
-  let cards=null,wallet=null,got=false;
-  const draw=()=>{if(cards?.launch||got){btn.hidden=true;msg.innerHTML=`<b style="color:#ffb400">Tes 10 boosters sont dans ta collection.</b> <a href="cartes.html#boosters">Les ouvrir (${(cards?.free||0)})</a>`;return}
+  let cards=null,wallet=null,got=0;
+  const draw=()=>{const n=Math.max(cards?.launchN??(cards?.launch?1:0),got);
+    if(n>=2){btn.hidden=true;msg.innerHTML=`<b style="color:#ffb400">Tes 20 boosters de lancement sont dans ta collection.</b> <a href="cartes.html#boosters">Les ouvrir (${(cards?.free||0)})</a>`;return}
     if(!wallet){btn.disabled=false;btn.textContent="M'inscrire pour les recevoir";btn.onclick=()=>location.href="banque.html";msg.textContent="Ouvre ton coffre sur la page Banque avec ton pseudo, puis reviens ici.";return}
-    btn.disabled=false;btn.textContent="Récupérer mes 10 boosters";msg.textContent="";btn.onclick=claim};
+    btn.hidden=false;btn.disabled=false;btn.onclick=claim;
+    if(n===1){btn.textContent="Récupérer 10 boosters de plus";msg.innerHTML=`Bonus : le Conseil t'offre une 2e tournée ! <a href="cartes.html#boosters">Ouvrir mes boosters (${(cards?.free||0)})</a>`}
+    else{btn.textContent="Récupérer mes 10 boosters";msg.textContent=""}};
   async function claim(){btn.disabled=true;btn.textContent="Envoi…";
     try{const t=await firebase.auth().currentUser.getIdToken();const r=await fetch(RIOT_RELAY+"/cards",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+t},body:JSON.stringify({op:"launch"})});
       const j=await r.json().catch(()=>null);if(!j||(!j.ok&&!j.error))throw new Error("Le robot n'est pas encore prêt, réessaie dans un moment.");if(j.error)throw new Error(j.error);
-      got=true;draw()}catch(e){btn.disabled=false;btn.textContent="Réessayer";msg.textContent=e.message}}
+      got=j.launchN||got+1;draw()}catch(e){btn.disabled=false;btn.textContent="Réessayer";msg.textContent=e.message}}
   c.db.collection("cards").doc(c.uid).onSnapshot(s=>{cards=s.exists?s.data():null;draw()},()=>{});
   c.db.collection("wallets").doc(c.uid).onSnapshot(s=>{wallet=s.exists?s.data():null;draw()},()=>{});
 }
