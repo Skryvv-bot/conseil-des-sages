@@ -33,13 +33,14 @@ window.conseilShowAdmin=function(){const ok=window.CONSEIL_UID===CONSEIL_ADMIN;d
 const CONSEIL_NAV=[
   {id:"accueil",href:"index.html",label:"Accueil"},
   {id:"ladder",href:"ladder.html",label:"Ladder"},
-  {id:"worlds",href:"worlds.html",label:"Worlds 2026",sub:[{id:"worlds",href:"worlds.html",label:"Matchs & pronos"},{id:"tierlist",href:"tierlist.html",label:"Tier list"},{id:"fantasy",href:"fantasy.html",label:"Fantasy"}]},
-  {id:"jeux",href:"jeux.html",label:"Jeux",sub:[{id:"jeux",href:"jeux.html",label:"Tous les jeux"},{id:"devinettes",href:"devinettes.html",label:"Devinettes"},{id:"echauffement",href:"echauffement.html",label:"Échauffement"},{id:"potes",href:"potes.html",label:"Entre potes"},{id:"cartes",href:"cartes.html",label:"Cartes de Runeterra",admin:1}]},
-  {id:"conseil",href:"communaute.html",label:"Le Conseil",sub:[{id:"conseil",href:"communaute.html",label:"Le Conseil"},{id:"banque",href:"banque.html",label:"Banque · Pièces d'or"}]},
-  {id:"customs",href:"customs.html",label:"Customs & Clash"},
-  {id:"patch",href:"patch.html",label:"Patch"}
+  {id:"worlds",href:"worlds.html",label:"Worlds 2026",sub:[{id:"worlds",href:"worlds.html",label:"Matchs & pronos"},{id:"tierlist",href:"tierlist.html",label:"Tier list"},
+    {id:"fantasy",href:"fantasy.html",label:"Fantasy",sub:[["accueil","Accueil"],["tirage","Tirage"],["classement","Classement"],["joueurs","Joueurs"],["parties","Parties"],["regles","Règles"]].map(([h,l])=>({href:"fantasy.html#"+h,label:l}))}]},
+  {id:"lolmaster",href:"cartes.html",label:"LolMaster",admin:1,noBar:1,sub:[["boosters","Boosters"],["collection","Ma collection"],["sages","Les sages"],["wiki","Wiki des champions"],["regions","Régions"]].map(([h,l])=>({id:"cartes",href:"cartes.html#"+h,label:l}))},
+  {id:"jeux",href:"jeux.html",label:"Jeux",sub:[{id:"jeux",href:"jeux.html",label:"Tous les jeux"},{id:"devinettes",href:"devinettes.html",label:"Devinettes"},{id:"echauffement",href:"echauffement.html",label:"Échauffement"},{id:"potes",href:"potes.html",label:"Entre potes"}]},
+  {id:"conseil",href:"communaute.html",label:"Le Conseil",sub:[{id:"conseil",href:"communaute.html",label:"Le Conseil",sub:[{href:"communaute.html#paris",label:"Pronos entre potes"}]},{id:"banque",href:"banque.html",label:"Banque · Pièces d'or"}]},
+  {id:"autre",href:null,label:"Autre",sub:[{id:"customs",href:"customs.html",label:"Customs & Clash",sub:[{href:"customs.html#roue",label:"Roue des champions"}]},{id:"patch",href:"patch.html",label:"Patch"}]}
 ];
-const NAV_GROUP={tierlist:"worlds",fantasy:"worlds",cartes:"jeux",devinettes:"jeux",echauffement:"jeux",potes:"jeux",banque:"conseil"};
+const NAV_GROUP={tierlist:"worlds",fantasy:"worlds",cartes:"lolmaster",devinettes:"jeux",echauffement:"jeux",potes:"jeux",banque:"conseil",customs:"autre",patch:"autre"};
 (function navStyles(){
   const css=`
 .cnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;margin:-20px calc(-1*max(16px,env(safe-area-inset-left,0px))) 0;padding:10px max(16px,env(safe-area-inset-left,0px));
@@ -56,14 +57,26 @@ const NAV_GROUP={tierlist:"worlds",fantasy:"worlds",cartes:"jeux",devinettes:"je
 .csub{display:flex;gap:6px;flex-wrap:wrap}
 .csub a{text-decoration:none;font:600 .74rem "Barlow",system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#a09b8c;padding:6px 10px;border:1px solid #1e2d43;background:#010a13}
 .csub a[aria-current="page"]{color:#0ac8b9;border-color:#0397ab}
-@media (max-width:620px){.cnav-brand span{display:none}}`;
+@media (max-width:620px){.cnav-brand span{display:none}}
+.cnav-links a.has-sub::after{content:"";display:inline-block;width:5px;height:5px;margin-left:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-3px) rotate(45deg);opacity:.7}
+.cdrop{position:fixed;z-index:60;min-width:220px;max-width:calc(100vw - 16px);max-height:calc(100vh - 90px);overflow-y:auto;background:#15171c;border-top:3px solid #e4002b;box-shadow:0 14px 34px rgba(0,0,0,.6);padding:8px 0;display:flex;flex-direction:column}
+.cdrop[hidden]{display:none}
+.cdrop a{display:block;text-decoration:none;color:#d5d7dd;font:700 .9rem "Barlow Condensed","Barlow",system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:9px 18px;white-space:nowrap}
+.cdrop a:hover,.cdrop a:focus-visible{background:#1d2027;color:#fff}
+.cdrop a[aria-current="page"]{color:#fff;box-shadow:inset 3px 0 0 #e4002b}
+.cdrop a.ss{font-weight:600;font-size:.82rem;color:#a7abb6;padding:6px 18px 6px 34px;text-transform:none;letter-spacing:.03em}
+.cdrop a.ss::before{content:"– ";color:#5c606b}
+.cdrop.mega{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:14px 4px;padding:16px 8px;width:min(1040px,calc(100vw - 16px));max-width:none}
+.cdrop.mega .col{display:flex;flex-direction:column;min-width:0}
+.cdrop.mega a{white-space:normal;padding:7px 10px}.cdrop.mega a.ss{padding:4px 10px 4px 20px}
+.cdrop.mega .col>a:first-child{color:#ffb400;font-family:"Anton","Barlow Condensed",sans-serif;font-weight:400;font-size:1.05rem;letter-spacing:.04em}`;
   const s=document.createElement("style");s.textContent=css;document.head.appendChild(s);
 })();
 window.conseilNav=function(active){
   const group=NAV_GROUP[active]||active;
   const nav=document.createElement("nav");nav.className="cnav";nav.setAttribute("aria-label","Navigation du site");
   nav.innerHTML=`<div class="cnav-in"><a class="cnav-brand" href="index.html" aria-label="Conseil des Sages, accueil"><span>CDS<b>.</b>TV</span></a>
-    <div class="cnav-links">${CONSEIL_NAV.map(n=>`<a href="${n.href}" ${n.id===group?'aria-current="page"':""}>${n.label}</a>`).join("")}</div>
+    <div class="cnav-links">${CONSEIL_NAV.map((n,i)=>`<a ${n.href?`href="${n.href}"`:'href="#" role="button"'} data-nav="${i}" class="${n.sub?"has-sub":""}" ${n.sub?'aria-haspopup="true" aria-expanded="false"':""} ${n.id===group?'aria-current="page"':""}${n.admin?' data-admin hidden':""}>${n.label}</a>`).join("")}</div>
     <a class="cnav-po" id="cnavPO" href="banque.html" title="Tes Pièces d'or : voir la banque" hidden><i>PO</i><b></b></a>
     <button class="cnav-acc" id="cnavAcc" type="button" hidden>Connexion</button>
     <button class="cnav-install" id="cnavInstall" hidden>Installer l'appli</button></div>`;
@@ -71,11 +84,43 @@ window.conseilNav=function(active){
   const tk=document.createElement("div");tk.className="tv-ticker";tk.setAttribute("aria-label","Bandeau d'infos");
   tk.innerHTML=`<div class="in"><div style="overflow:hidden;flex:1;min-width:0"><div class="run" id="tvRun"></div></div></div>`;
   document.body.prepend(tk);conseilTicker(defaultTicker());
+  setupDrops(nav,active,group);
   const item=CONSEIL_NAV.find(n=>n.id===group);
-  if(item&&item.sub){const wrap=document.querySelector(".wrap");if(wrap){const sub=document.createElement("div");sub.className="csub";
+  if(item&&item.sub&&!item.noBar){const wrap=document.querySelector(".wrap");if(wrap){const sub=document.createElement("div");sub.className="csub";
     sub.innerHTML=item.sub.map(s=>`<a href="${s.href}" ${s.id===active?'aria-current="page"':""}${s.admin?' data-admin hidden':""}>${s.label}</a>`).join("");wrap.prepend(sub)}}
   setupInstall();
 };
+
+// Menus déroulants : survol à la souris, premier toucher sur mobile ; CDS.TV ouvre le plan complet du site
+function setupDrops(nav,active,group){
+  const drop=document.createElement("div");drop.className="cdrop";drop.hidden=true;drop.id="cnavDrop";nav.appendChild(drop);
+  const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const vis=x=>!x.admin||window.CONSEIL_UID===window.CONSEIL_ADMIN;
+  const here=h=>{const [f,hash]=h.split("#"),p=location.pathname.split("/").pop()||"index.html";return f===p&&(!hash||location.hash.slice(1)===hash)};
+  const link=(x,cls="")=>x.href?`<a href="${x.href}" class="${cls}" ${here(x.href)?'aria-current="page"':""}>${esc(x.label)}</a>`:"";
+  const list=n=>(n.sub||[]).filter(vis).map(x=>link(x)+(x.sub||[]).map(y=>link(y,"ss")).join("")).join("");
+  let cur=null,timer=null;
+  const place=el=>{const r=el.getBoundingClientRect(),w=drop.offsetWidth;drop.style.top=Math.round(nav.getBoundingClientRect().bottom)+"px";drop.style.left=Math.max(8,Math.min(r.left,innerWidth-w-8))+"px"};
+  const open=(key,el)=>{clearTimeout(timer);if(cur===key&&!drop.hidden)return;cur=key;
+    if(key==="mega"){drop.className="cdrop mega";drop.innerHTML=CONSEIL_NAV.filter(vis).map(n=>`<div class="col">${n.href?link(n):`<a>${esc(n.label)}</a>`}${list(n)}</div>`).join("")}
+    else{const n=CONSEIL_NAV[key];drop.className="cdrop";drop.innerHTML=(n.href&&!n.sub.some(x=>x.href===n.href)?link(n):"")+list(n)}
+    drop.hidden=false;place(el);nav.querySelectorAll("[aria-expanded]").forEach(a=>a.setAttribute("aria-expanded",String(a===el)))};
+  const close=()=>{timer=setTimeout(()=>{drop.hidden=true;cur=null;nav.querySelectorAll("[aria-expanded]").forEach(a=>a.setAttribute("aria-expanded","false"))},160)};
+  const bind=(el,key)=>{
+    el.addEventListener("pointerenter",e=>{if(e.pointerType==="mouse")open(key,el)});
+    el.addEventListener("pointerleave",e=>{if(e.pointerType==="mouse")close()});
+    el.addEventListener("click",e=>{const n=key==="mega"?null:CONSEIL_NAV[key];if(!(key==="mega"||n?.sub))return;
+      // toucher : le premier ouvre le menu, le second suit le lien (« Autre » n'a pas de page)
+      if(drop.hidden||cur!==key||(n&&!n.href)){e.preventDefault();if(!drop.hidden&&cur===key){clearTimeout(timer);drop.hidden=true;cur=null}else open(key,el)}});
+    el.addEventListener("keydown",e=>{if(e.key==="ArrowDown"){e.preventDefault();open(key,el);drop.querySelector("a[href]")?.focus()}})};
+  nav.querySelectorAll("[data-nav]").forEach(a=>{const n=CONSEIL_NAV[+a.dataset.nav];if(n.sub)bind(a,+a.dataset.nav);else a.addEventListener("pointerenter",e=>{if(e.pointerType==="mouse"){clearTimeout(timer);drop.hidden=true;cur=null}})});
+  bind(nav.querySelector(".cnav-brand"),"mega");
+  drop.addEventListener("pointerenter",()=>clearTimeout(timer));drop.addEventListener("pointerleave",e=>{if(e.pointerType==="mouse")close()});
+  document.addEventListener("click",e=>{if(!e.target.closest(".cnav"))drop.hidden=true,cur=null});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!drop.hidden){drop.hidden=true;cur=null}});
+  nav.querySelector(".cnav-links").addEventListener("scroll",()=>{drop.hidden=true;cur=null},{passive:true});
+  addEventListener("hashchange",()=>{drop.hidden=true;cur=null});
+}
 
 // ---------- Application installable ----------
 let deferredInstall=null;
