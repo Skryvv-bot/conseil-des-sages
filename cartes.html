@@ -297,7 +297,6 @@ function vBoosters(v){
       <button class="btn${k==="free"?" gold":""}" id="buy-${k}" type="button" ${can(k)?"":"disabled"}>${why(k)}</button></div>`).join("")}</section>
     ${db&&!hasWallet?`<div class="panel frame"><p class="note" style="margin:0">Tu peux déjà ouvrir tes boosters gratuits. Pour acheter des boosters avec tes Pièces d'or, ouvre d'abord ton coffre sur la <a href="banque.html">page Banque</a>.</p></div>`:""}
     ${me?.last?.ids?.length?`<section class="panel frame"><div class="between"><h2>Ton dernier booster</h2><span class="note">${new Date(me.last.at).toLocaleString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</span></div><div class="cards">${me.last.ids.filter(id=>BY[id]).map(id=>cardHTML(BY[id],{count:mine(id)})).join("")}</div></section>`:""}
-    ${uid===CONSEIL_ADMIN?`<div class="panel frame"><div class="between"><span class="note">Outil de Skryvv : s'offrir des boosters gratuits pour tester.</span><button class="btn small ghost" id="gift" type="button">+3 boosters gratuits</button></div></div>`:""}
     <section class="grid2">
       <div class="panel frame"><h2>Chances par carte</h2>
         <table class="rates"><thead><tr><th>Rareté</th><th class="num">Chance</th><th>Exemples</th></tr></thead><tbody>
@@ -310,7 +309,6 @@ function vBoosters(v){
     </section>
     <section class="panel frame"><h2>Derniers gros tirages</h2><div class="feed" id="feed">${feedHTML()}</div></section>`;
   for(const k of Object.keys(PACKS)){const b=$("buy-"+k);if(b)b.onclick=()=>openFlow(k)}
-  const g=$("gift");if(g)g.onclick=async()=>{g.disabled=true;try{await api({op:"gift",n:3});toast("3 boosters gratuits ajoutés")}catch(e){toast(e.message.includes("Action inconnue")?"Installe d'abord la nouvelle version du robot.":e.message,true)}g.disabled=false};
   const rs=$("regSel");if(rs)rs.onchange=e=>{regSel=e.target.value;const w=document.querySelector('.prod .pack[data-k="region"] .pk-win');if(w)w.style.backgroundImage=`url('${packArt("region")}')`};
 }
 function ago(t){const m=Math.max(1,Math.round((Date.now()-t)/6e4));return m<60?`il y a ${m} min`:m<1440?`il y a ${Math.round(m/60)} h`:`il y a ${Math.round(m/1440)} j`}
@@ -511,10 +509,9 @@ function vRegion(v){const r=REG[param];if(!r){v.innerHTML=`<div class="empty">R�
   catch(e){$("view").innerHTML=`<div class="empty">Impossible de charger les cartes. Recharge la page.</div>`;return}
   const fix=t=>String(t||"").replace(/([.!?…])([A-ZÀ-Ý«])/g,"$1 $2");
   for(const r of Object.values(D.regions))r.desc=fix(r.desc);for(const c of Object.values(D.champions)){c.lore=fix(c.lore);c.blurb=fix(c.blurb)}
-  build();
-  const c=await conseilConnect();if(c.uid===CONSEIL_ADMIN)route();if(!c.db){$("purse").innerHTML=`<span>Site injoignable pour le moment, recharge la page.</span>`;return}
+  build();route();
+  const c=await conseilConnect();if(!c.db){$("purse").innerHTML=`<span>Site injoignable pour le moment, recharge la page.</span>`;return}
   db=c.db;uid=c.uid;
-  if(uid!==CONSEIL_ADMIN){$("ctabs").hidden=true;$("purse").innerHTML="";$("view").innerHTML=`<section class="panel frame"><h2>Bientôt sur CDS.TV</h2><p class="note" style="margin:0">LolMaster, le jeu de cartes de Runeterra, est en préparation. Reviens très vite !</p></section>`;D=null;return}
   const soft=()=>{if(stage||document.querySelector(".cmodal"))renderPurse();else if(view==="boosters"||view==="sages"||view==="sage"||view==="collection")render();else renderPurse()};
   db.collection("cards").onSnapshot(q=>{all={};q.docs.forEach(d=>all[d.id]=d.data());me=all[uid]||null;if(document.activeElement?.id==="fQ"||document.activeElement?.id==="wQ")renderPurse();else soft()},e=>console.error(e));
   db.collection("wallets").doc(uid).onSnapshot(s=>{hasWallet=s.exists;po=s.exists?(s.data().po||0):0;soft()},()=>{});
