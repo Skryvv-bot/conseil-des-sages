@@ -174,6 +174,9 @@ input[type=search].fsel{min-width:200px;flex:1 1 200px}
 .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px}
 .facts div{background:#08090b;padding:10px;display:flex;flex-direction:column;gap:2px}.facts b{font:400 1.4rem var(--display,"Anton"),sans-serif;color:#fff}.facts span{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
 .dated{display:flex;flex-direction:column;gap:4px;min-width:0}.gotd{font:600 .78rem var(--body);color:var(--muted);text-align:center;letter-spacing:.04em}
+.vrow{display:flex;flex-direction:column;gap:10px;padding:14px 0;border-top:1px solid #2a2d35}
+.vname{color:#fff;font:400 1.3rem var(--display,"Anton"),sans-serif;text-transform:uppercase;text-decoration:none;letter-spacing:.02em}.vname:hover{color:var(--amber)}
+.vslot{display:flex;flex-direction:column;gap:6px}
 /* ---- Fiche : collection d'un champion ---- */
 .chset{display:flex;flex-direction:column;gap:8px;background:#08090b;border:1px solid #2a2d35;padding:12px}
 .chbar{height:6px;background:#2a2d35}.chbar i{display:block;height:100%;background:var(--amber)}
@@ -296,7 +299,7 @@ function snd(kind,vol=1){if(muted)return;sndLoad();const L=SND[kind];if(!L||!AC)
     else{const a=new Audio(`${A}snd/${n}.mp3`);a.volume=Math.min(1,vol);a.play().catch(()=>{})}}catch(e){}}
 
 // ---------- Navigation ----------
-const VIEWS=[["boosters","Boosters"],["collection","Ma collection"],["marche","Marché"],["echanges","Échanges"],["sages","Les sages"],["wiki","Wiki"],["regions","Régions"]];
+const VIEWS=[["boosters","Boosters"],["collection","Ma collection"],["marche","Marché"],["echanges","Échanges"],["vitrines","Vitrines"],["sages","Les sages"],["wiki","Wiki"],["regions","Régions"]];
 let view="boosters",param=null;
 function route(){const h=decodeURIComponent((location.hash||"").slice(1));const m=h.match(/^(champ|region|sage)-(.+)$/);
   if(m){view=m[1];param=m[2]}else{view=VIEWS.some(v=>v[0]===h)?h:"boosters";param=null}render();scrollTo({top:0})}
@@ -309,7 +312,7 @@ function renderTabs(){if(!D)return;
 function render(){if(!D)return;
   renderTabs();
   renderPurse();
-  ({boosters:vBoosters,collection:vColl,marche:vMarket,echanges:vTrades,sages:vSages,sage:vSage,wiki:vWiki,regions:vRegions,champ:vChamp,region:vRegion})[view]($("view"));
+  ({boosters:vBoosters,collection:vColl,marche:vMarket,echanges:vTrades,vitrines:vVitrines,sages:vSages,sage:vSage,wiki:vWiki,regions:vRegions,champ:vChamp,region:vRegion})[view]($("view"));
 }
 function renderPurse(){const o=owned();
   $("purse").innerHTML=!db?`<span>${D?total()+" cartes à collectionner":"Connexion…"}</span>`:`<span class="po">PO <b>${po==null?"…":fmt(po)}</b></span><span>Boosters gratuits <b>${freeNow()}</b></span><span title="Cartes différentes possédées">Collection <b>${o}</b> / ${total()}</span><span class="prog" aria-hidden="true"><i style="width:${(100*o/total()).toFixed(1)}%"></i></span>`}
@@ -549,6 +552,28 @@ function vSage(v){const d=all[param];
   const tw=$("tradeWith");if(tw)tw.onclick=()=>{tr={to:param,give:[],want:list.filter(c=>wished(c.id)).slice(0,5).map(c=>c.id),po:0}};
 }
 
+// ---------- VITRINES ----------
+let vitEdit=false,vq="";
+function vitSlots(ids,own,isMe){return `<div class="vit">${[0,1,2,3,4].map(i=>ids[i]&&BY[ids[i]]?(isMe&&vitEdit?`<div class="vslot">${cardHTML(BY[ids[i]],{count:own(ids[i]),glow:BY[ids[i]].r>=3})}<button class="btn small ghost" type="button" data-vrm="${esc(ids[i])}">Retirer</button></div>`:cardHTML(BY[ids[i]],{count:own(ids[i]),glow:BY[ids[i]].r>=3})):`<div class="slot">${isMe?"Emplacement libre":"Vide"}</div>`).join("")}</div>`}
+async function saveVit(v2){try{await db.collection("cards").doc(uid).update({vitrine:v2})}catch(e){toast("Vitrine indisponible pour le moment.",true)}}
+function vVitrines(v){
+  const rows=Object.entries(all).filter(([u,d])=>u!==uid&&!conseilIsClaimed(u)&&(d.vitrine||[]).some(id=>BY[id]&&d.c?.[id]>0)).sort((a,b)=>(b[1].n||0)-(a[1].n||0));
+  const myVit=(me?.vitrine||[]).filter(id=>BY[id]&&mine(id)>0);
+  const pick=vitEdit&&me?CARDS.filter(c=>mine(c.id)>0&&!myVit.includes(c.id)&&(!vq||(c.name+" "+c.sub).toLowerCase().includes(vq.toLowerCase()))).sort((a,b)=>b.r-a.r||a.no-b.no):[];
+  v.innerHTML=`<section class="panel frame" id="myVit"><div class="between"><h2>Ma vitrine</h2>${me?`<button class="btn small${vitEdit?" ghost":""}" id="vitEd" type="button">${vitEdit?"Terminer":"Modifier ma vitrine"}</button>`:""}</div>
+      ${me?vitSlots(myVit,mine,true):`<div class="empty">Ouvre un booster pour pouvoir exposer tes cartes.</div>`}
+      ${vitEdit?`<div class="between"><span class="eyebrow">Choisis jusqu'à 5 cartes (${myVit.length}/5)</span><span class="note">tes plus rares en premier</span></div>
+        <input type="search" class="fsel" id="vq" placeholder="Chercher dans tes cartes" value="${esc(vq)}" aria-label="Chercher dans tes cartes" style="width:100%;flex:none">
+        <div class="mini-cards">${pick.slice(0,80).map(c=>cardHTML(c,{count:mine(c.id),pick:"vit"})).join("")||'<span class="note">Aucune carte.</span>'}</div>`:""}</section>
+    <section class="panel frame"><div class="between"><h2>Les vitrines du Conseil</h2><span class="note">${rows.length} sage${rows.length>1?"s exposent leurs":" expose ses"} cartes</span></div>
+      ${rows.length?rows.map(([u,d])=>{const own=id=>d.c?.[id]||0,ids=(d.vitrine||[]).filter(id=>BY[id]&&own(id)>0);
+        return `<div class="vrow"><div class="between"><a class="vname" href="#sage-${encodeURIComponent(u)}">${esc(d.pseudo||"Un sage")}</a><span class="note">${d.n||0} cartes · <a href="#sage-${encodeURIComponent(u)}">voir sa collection</a></span></div>${vitSlots(ids,own,false)}</div>`}).join(""):`<div class="empty">Personne n'a encore rempli sa vitrine.</div>`}</section>`;
+  const ed=$("vitEd");if(ed)ed.onclick=()=>{vitEdit=!vitEdit;render();$("myVit").scrollIntoView({block:"start"})};
+  v.querySelectorAll("[data-vrm]").forEach(b=>b.onclick=e=>{e.stopPropagation();saveVit(myVit.filter(x=>x!==b.dataset.vrm))});
+  v.querySelectorAll('[data-pick="vit"]').forEach(b=>b.onclick=e=>{e.stopPropagation();if(myVit.length>=5){toast("Ta vitrine est pleine : retire une carte d'abord.",true);return}saveVit([...myVit,b.dataset.id])});
+  const q=$("vq");if(q)q.oninput=e=>{vq=e.target.value;clearTimeout(window._v);window._v=setTimeout(()=>{render();const x=$("vq");x.focus();x.setSelectionRange(x.value.length,x.value.length)},250)};
+}
+
 // ---------- MARCHÉ ----------
 const listedOf=id=>market.filter(L=>L.card===id&&L.status==="open");
 const wishLots=()=>market.filter(L=>L.status==="open"&&L.seller!==uid&&wished(L.card)&&BY[L.card]);
@@ -681,8 +706,8 @@ function wishAlert(){if(!me)return;let seen=[];try{seen=JSON.parse(localStorage.
   build();route();
   const c=await conseilConnect();if(!c.db){$("purse").innerHTML=`<span>Site injoignable pour le moment, recharge la page.</span>`;return}
   db=c.db;uid=c.uid;
-  const soft=()=>{if(stage||document.querySelector(".cmodal"))renderPurse();else if(view==="boosters"||view==="sages"||view==="sage"||view==="collection")render();else renderPurse()};
-  db.collection("cards").onSnapshot(q=>{all={};q.docs.forEach(d=>all[d.id]=d.data());me=all[uid]||null;if(document.activeElement?.id==="fQ"||document.activeElement?.id==="wQ")renderPurse();else soft()},e=>console.error(e));
+  const soft=()=>{if(stage||document.querySelector(".cmodal"))renderPurse();else if(view==="boosters"||view==="sages"||view==="sage"||view==="collection"||view==="vitrines")render();else renderPurse()};
+  db.collection("cards").onSnapshot(q=>{all={};q.docs.forEach(d=>all[d.id]=d.data());me=all[uid]||null;if(["fQ","wQ","vq"].includes(document.activeElement?.id))renderPurse();else soft()},e=>console.error(e));
   db.collection("wallets").doc(uid).onSnapshot(s=>{hasWallet=s.exists;po=s.exists?(s.data().po||0):0;soft()},()=>{});
   db.collection("cardFeed").orderBy("at","desc").limit(15).onSnapshot(q=>{feed=q.docs.map(d=>d.data());const f=$("feed");if(f)f.innerHTML=feedHTML()},()=>{});
   const typing=()=>["fQ","mQ","tq1","tq2","trPo"].includes(document.activeElement?.id)||document.activeElement?.id?.startsWith("bid-");
