@@ -1,0 +1,34 @@
+--- robot /cards
+{"error":"Connexion expirée : recharge la page."}
+--- doc cartes Skryvv
+{
+  "name": "projects/conseil-des-sages/databases/(default)/documents/cards/7ggyIoUpvlRrJCpqKkgdYlsMhcp2",
+  "fields": {
+    "free": {
+      "integerValue": "0"
+    },
+    "opened": {
+      "integerValue": "2"
+    },
+    "freeAt": {
+      "integerValue": "1792855097292"
+    },
+    "n": {
+      "integerValue": "10"
+    }
+  },
+  "createTime": "2026-10-24T15:18:17.728863Z",
+  "updateTime": "2026-10-24T15:18:46.686606Z"
+}
+
+--- portefeuille
+{
+  "name": "projects/conseil-des-sages/databases/(default)/documents/wallets/7ggyIoUpvlRrJCpqKkgdYlsMhcp2",
+  "fields": {
+    "po": {
+      "integerValue": "1130"
+    }
+  },
+  "createTime": "2026-10-22T15:16:36.299986Z",
+  "updateTime": "2026-10-24T15:23:46.169790Z"
+}
