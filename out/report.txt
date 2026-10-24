@@ -1,14 +1,58 @@
-hex:
-total 328
-drwxr-xr-x 2 runner runner   4096 Oct 24 15:22 .
-drwxr-xr-x 6 runner runner   4096 Oct 24 15:22 ..
--rw-r--r-- 1 runner runner  94605 Oct 24 15:22 chest.png
--rw-r--r-- 1 runner runner  59975 Oct 24 15:22 chest_champion_mastery.png
--rw-r--r-- 1 runner runner 106226 Oct 24 15:22 chest_generic.png
--rw-r--r-- 1 runner runner  48005 Oct 24 15:22 list.json
--rw-r--r-- 1 runner runner   9598 Oct 24 15:22 names.txt
-
-snd:
-total 8
-drwxr-xr-x 2 runner runner 4096 Oct 24 15:22 .
-drwxr-xr-x 6 runner runner 4096 Oct 24 15:22 ..
+./Audio/card-fan-1.ogg
+./Audio/card-fan-2.ogg
+./Audio/card-place-1.ogg
+./Audio/card-place-2.ogg
+./Audio/card-place-3.ogg
+./Audio/card-place-4.ogg
+./Audio/card-shove-1.ogg
+./Audio/card-shove-2.ogg
+./Audio/card-shove-3.ogg
+./Audio/card-shove-4.ogg
+./Audio/card-shuffle.ogg
+./Audio/card-slide-1.ogg
+./Audio/card-slide-2.ogg
+./Audio/card-slide-3.ogg
+./Audio/card-slide-4.ogg
+./Audio/card-slide-5.ogg
+./Audio/card-slide-6.ogg
+./Audio/card-slide-7.ogg
+./Audio/card-slide-8.ogg
+./Audio/cards-pack-open-1.ogg
+./Audio/cards-pack-open-2.ogg
+./Audio/cards-pack-take-out-1.ogg
+./Audio/cards-pack-take-out-2.ogg
+./Audio/chip-lay-1.ogg
+./Audio/chip-lay-2.ogg
+./Audio/chip-lay-3.ogg
+./Audio/chips-collide-1.ogg
+./Audio/chips-collide-2.ogg
+./Audio/chips-collide-3.ogg
+./Audio/chips-collide-4.ogg
+./Audio/chips-handle-1.ogg
+./Audio/chips-handle-2.ogg
+./Audio/chips-handle-3.ogg
+./Audio/chips-handle-4.ogg
+./Audio/chips-handle-5.ogg
+./Audio/chips-handle-6.ogg
+./Audio/chips-stack-1.ogg
+./Audio/chips-stack-2.ogg
+./Audio/chips-stack-3.ogg
+./Audio/chips-stack-4.ogg
+./Audio/chips-stack-5.ogg
+./Audio/chips-stack-6.ogg
+./Audio/dice-grab-1.ogg
+./Audio/dice-grab-2.ogg
+./Audio/dice-shake-1.ogg
+./Audio/dice-shake-2.ogg
+./Audio/dice-shake-3.ogg
+./Audio/dice-throw-1.ogg
+./Audio/dice-throw-2.ogg
+./Audio/dice-throw-3.ogg
+./Audio/die-throw-1.ogg
+./Audio/die-throw-2.ogg
+./Audio/die-throw-3.ogg
+./Audio/die-throw-4.ogg
+./License.txt
+./Preview.ogg
+./Visit Kenney.url
+./Visit Patreon.url
