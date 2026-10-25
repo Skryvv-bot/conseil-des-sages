@@ -1,2 +1,2 @@
-err.txt
+codes.txt
 list.txt
