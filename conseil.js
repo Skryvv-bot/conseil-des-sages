@@ -36,11 +36,11 @@ const CONSEIL_NAV=[
   {id:"worlds",href:"worlds.html",label:"Worlds 2026",sub:[{id:"worlds",href:"worlds.html",label:"Matchs & pronos"},{id:"tierlist",href:"tierlist.html",label:"Tier list"},
     {id:"fantasy",href:"fantasy.html",label:"Fantasy",sub:[["accueil","Accueil"],["tirage","Tirage"],["classement","Classement"],["joueurs","Joueurs"],["parties","Parties"],["regles","Règles"]].map(([h,l])=>({href:"fantasy.html#"+h,label:l}))}]},
   {id:"lolmaster",href:"cartes.html",label:"LolMaster",noBar:1,sub:[["boosters","Boosters"],["collection","Ma collection"],["marche","Marché"],["echanges","Échanges"],["vitrines","Vitrines"],["sages","Les sages"],["wiki","Wiki des champions"],["regions","Régions"]].map(([h,l])=>({id:"cartes",href:"cartes.html#"+h,label:l}))},
-  {id:"jeux",href:"jeux.html",label:"Jeux",sub:[{id:"jeux",href:"jeux.html",label:"Tous les jeux"},{id:"devinettes",href:"devinettes.html",label:"Devinettes"},{id:"echauffement",href:"echauffement.html",label:"Échauffement"},{id:"potes",href:"potes.html",label:"Entre potes"}]},
+  {id:"jeux",href:"jeux.html",label:"Jeux",sub:[{id:"jeux",href:"jeux.html",label:"Tous les jeux"},{id:"icathia",href:"icathia.html",label:"Survivants d'Icathia",admin:1},{id:"devinettes",href:"devinettes.html",label:"Devinettes"},{id:"echauffement",href:"echauffement.html",label:"Échauffement"},{id:"potes",href:"potes.html",label:"Entre potes"}]},
   {id:"conseil",href:"communaute.html",label:"Le Conseil",sub:[{id:"conseil",href:"communaute.html",label:"Le Conseil",sub:[{href:"communaute.html#paris",label:"Pronos entre potes"}]},{id:"banque",href:"banque.html",label:"Banque · Pièces d'or"}]},
   {id:"autre",href:null,label:"Autre",sub:[{id:"customs",href:"customs.html",label:"Customs & Clash",sub:[{href:"customs.html#roue",label:"Roue des champions"}]},{id:"patch",href:"patch.html",label:"Patch"}]}
 ];
-const NAV_GROUP={tierlist:"worlds",fantasy:"worlds",cartes:"lolmaster",devinettes:"jeux",echauffement:"jeux",potes:"jeux",banque:"conseil",customs:"autre",patch:"autre"};
+const NAV_GROUP={icathia:"jeux",tierlist:"worlds",fantasy:"worlds",cartes:"lolmaster",devinettes:"jeux",echauffement:"jeux",potes:"jeux",banque:"conseil",customs:"autre",patch:"autre"};
 (function navStyles(){
   const css=`
 .cnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;margin:-20px calc(-1*max(16px,env(safe-area-inset-left,0px))) 0;padding:10px max(16px,env(safe-area-inset-left,0px));
