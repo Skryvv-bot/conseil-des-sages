@@ -267,8 +267,8 @@ const CHAMPS=[
     lore:"Empereur de Shurima revenu d'entre les morts sous la forme d'un Élevé. Icathia fut jadis une cité vassale de son empire : c'est sa propre terre que le Néant ronge. Ses soldats de sable tiennent la ligne à sa place."},
   {id:"Gangplank",name:"Gangplank",title:"Fléau des mers",region:"Bilgewater",col:"#ff9b3d",hp:115,spd:58,weapon:"keg",ult:"barrage",crop:[80,50,100,100],
     lore:"Ancien maître de Bilgewater, chassé de son trône et revenu le reprendre. Pour lui, le Néant n'est qu'une flotte ennemie de plus : il sème ses barils de poudre et fait tout sauter d'un coup de pistolet."},
-  {id:"Kled",name:"Kled",title:"Le cavalier colérique",region:"Noxus",col:"#ff7a4d",hp:120,spd:64,weapon:"trap",ult:"charge",crop:[70,40,110,110],
-    lore:"Yordle noxien, chevalier autoproclamé, juché sur Skaarl, un lézard bien plus peureux que lui. Kled ne recule jamais, même devant une brèche vers le Néant. Surtout pas devant une brèche."},
+  {id:"Kled",name:"Kled",title:"Le cavalier colérique",region:"Noxus",col:"#ff7a4d",hp:120,spd:64,weapon:"trap",ult:"charge",crop:[70,40,110,110],model:"kled.glb.txt",modelH:200,model2:"kledd.glb.txt",model2H:120,
+    lore:"Yordle noxien, chevalier autoproclamé, juché sur Skaarl, un lézard bien plus peureux que lui. Skaarl encaisse les coups à sa place ; quand il s'enfuit, Kled continue à pied jusqu'à ce que son courage revienne."},
   {id:"Galio",name:"Galio",title:"Le colosse",region:"Demacia",col:"#f3d48a",hp:140,spd:54,weapon:"winds",ult:"entrance",crop:[70,10,110,110],
     lore:"Statue de pétricite géante qui protège Demacia de la magie. La magie du Néant suffit à le réveiller : il n'a jamais eu autant de raisons de se battre."},
   {id:"Mordekaiser",name:"Mordekaiser",title:"Le revenant de fer",region:"Noxus",col:"#4fe0b0",hp:135,spd:52,weapon:"mace",ult:"realm",crop:[60,20,110,110],
@@ -287,8 +287,8 @@ const WEAPONS={
     st:l=>({cd:[1.1,1.05,1,.95,.62][l-1],n:[1,2,2,3,3][l-1],dmg:[16,17,22,23,27][l-1],len:[34,34,44,46,50][l-1],w:8})},
   keg:{name:"Baril de poudre",key:"E",by:"Gangplank",col:"#ff9b3d",desc:["Gangplank pose des barils près des ennemis et leur tire dessus : ils explosent et font sauter les barils voisins.","+1 baril","Explosions plus larges, +30 % de dégâts","+1 baril","+1 baril, pose bien plus rapide"],
     st:l=>({cd:[2.1,2,1.9,1.8,1.25][l-1],max:[2,3,3,4,5][l-1],dmg:[30,32,42,44,52][l-1],blast:[20,21,25,26,28][l-1]})},
-  trap:{name:"Piège à ours au bout d'une corde",key:"Q",by:"Kled",col:"#ff7a4d",desc:["Kled lance un piège à ours : la proie reste attachée par la corde, saigne, puis se fait arracher vers lui.","+30 % de dégâts","+1 piège","Corde plus longue, saignement plus fort","+1 piège, recharge plus rapide"],
-    st:l=>({cd:[2,1.9,1.8,1.7,1.25][l-1],n:[1,1,2,2,3][l-1],dmg:[22,28,29,33,38][l-1],tether:[1.2,1.2,1.2,1.6,1.6][l-1],bleed:[8,10,10,16,18][l-1],spd:190})},
+  trap:{name:"Piège à ours au bout d'une corde",key:"Q",by:"Kled",col:"#ff7a4d",desc:["Kled lance son piège à ours au bout d'une longue corde : la proie reste attachée, saigne, puis se fait arracher vers lui.","+30 % de dégâts","+1 piège","Corde plus longue, saignement plus fort","+1 piège, recharge plus rapide"],
+    st:l=>({cd:[2,1.9,1.8,1.7,1.25][l-1],n:[1,1,2,2,3][l-1],dmg:[22,28,29,33,38][l-1],tether:[1.2,1.2,1.2,1.6,1.6][l-1],bleed:[8,10,10,16,18][l-1],spd:240})},
   winds:{name:"Vents de la guerre",key:"Q",by:"Galio",col:"#f3d48a",desc:["Deux rafales convergent vers l'ennemi et forment une tornade qui déchiquette tout ce qui reste dedans.","Tornade plus large","+35 % de dégâts","Tornade plus longue","+1 tornade, recharge plus rapide"],
     st:l=>({cd:[2.4,2.3,2.2,2.05,1.55][l-1],n:[1,1,1,1,2][l-1],dmg:[14,15,20,21,24][l-1],tdps:[12,13,18,19,22][l-1],tr:[14,18,18,19,21][l-1],tt:[1.5,1.6,1.6,2.3,2.4][l-1]})},
   mace:{name:"Anéantissement",key:"Q",by:"Mordekaiser",col:"#4fe0b0",desc:["Mordekaiser abat sa masse devant lui. Un ennemi isolé subit 60 % de dégâts en plus.","Zone plus large","+35 % de dégâts","Zone plus longue","Coups bien plus rapides"],
@@ -479,6 +479,7 @@ function mkPlayer(c,i,skin){
     inv:0,face:1,walk:0,dir:0,weapons:{[c.weapon]:1},frags:{},items:[],elix:{},cds:{},ultCd:12,smiteCd:0,gold:0,goldF:0,revive:0,shield:0,down:false,rez:0,kills:0,dmgDone:0,extraPick:0,lsUsed:0};
   const R=IC.runes();for(const r of RUNES)if(R[r.k])r.apply(p,Math.min(RUNE_MAX,R[r.k]));
   if(G&&G.mod.verre){p.dmgMul+=.4;p.maxHp=Math.round(p.maxHp*.6);p.hp=p.maxHp}
+  if(c.id==="Kled"){p.mounted=true;p.skaarlMax=Math.round(p.maxHp*.6);p.skaarl=p.skaarlMax;p.courage=0}
   return p}
 function newGame(list,skinsSel=[]){
   const mod={};if(chal)for(const k of chal.mods)mod[k]=1;
@@ -573,7 +574,7 @@ function hurt(f,dmg,kx=0,ky=0,o=G.p){if(!f||f.dead||!o)return 0;if(G.realm&&f!==
   if(G.texts.length<30)G.texts.push({x:f.x+rnd(-3,3),y:f.y-f.r-2,s:String(Math.round(d))+(cr?"!":""),col:cr?"#ff9b3d":f.boss||f.elite?"#ffcc4d":"#ffffff",t:.5,max:.5,small:!cr});
   if(f.hp<=0)killFoe(f,o);return d}
 function addGold(p,g){p.goldF+=g*p.goldMul;const n=Math.floor(p.goldF);if(n>0){p.gold+=n;p.goldF-=n}}
-function killFoe(f,o){if(f.dead)return;f.dead=true;f.hp=0;G.kills++;o.kills=(o.kills||0)+1;const F=FOES[f.type];
+function killFoe(f,o){if(f.dead)return;f.dead=true;f.hp=0;G.kills++;o.kills=(o.kills||0)+1;if(o.courage!=null&&!o.mounted)o.courage+=f.boss?3:f.elite?1:.05;const F=FOES[f.type];
   const g=(F.g||0)*(G.mod.pauvre?.5:1);for(const p of G.ps)addGold(p,g);
   if(g>=10){G.texts.push({x:f.x,y:f.y-f.r-10,s:`+${Math.round(g)} or`,col:"#ffd75e",t:1,max:1,small:true});sfx("coin")}
   if(f.boss&&!F.mini)G.bossKills++;
@@ -591,6 +592,9 @@ function damagePlayer(dm,p,src){if(!p||p.down||p.inv>0||G.dead||p.stasis>0||p.da
   const blocked=Math.min(Math.max(0,dm-1),p.armor);dm=Math.max(1,dm-p.armor);
   if(p.thorns&&src&&!src.dead&&src.max)hurt(src,blocked*3+2,0,0,p);
   if(p.shield>0){const a=Math.min(p.shield,dm);p.shield-=a;dm-=a;if(dm<=0){p.inv=.3;return}}
+  // Skaarl encaisse les coups tant que Kled est monté
+  if(p.mounted&&p.skaarl>0){const a=Math.min(p.skaarl,dm);p.skaarl-=a;dm-=a;if(p.skaarl<=0){p.mounted=false;p.courage=0;say("Skaarl s'enfuit ! Kled continue à pied","#ff7a4d",2);G.fx.push({k:"dust",x:p.x,y:p.y,r:14,t:.6,max:.6})}
+    if(dm<=0){p.inv=.45;sfx("hurt");G.texts.push({x:p.x,y:p.y-10,s:"-"+Math.round(a),col:"#ffb07a",t:.6,max:.6,small:true});return}}
   p.hp-=dm;p.inv=.45;sfx("hurt");G.shake=Math.max(G.shake,.2);
   G.texts.push({x:p.x,y:p.y-10,s:"-"+Math.round(dm),col:"#ff5d73",t:.6,max:.6,small:true});
   if(p.items.includes("sterak")&&p.hp>0&&p.hp<p.maxHp*.3&&G.t>=(p.sterakT||0)){p.sterakT=G.t+60;p.shield=p.maxHp*.3;say("Gage de Sterak : bouclier !","#ffcc4d",1.6)}
@@ -669,8 +673,9 @@ function update(dt){G.t+=dt;const two=G.ps.length>1;
     if(p.down){const q=G.ps.find(o=>o!==p&&!o.down&&Math.hypot(o.x-p.x,o.y-p.y)<20);p.rez=q?p.rez+dt:Math.max(0,p.rez-dt*.5);
       if(p.rez>=3){p.down=false;p.hp=p.maxHp*.4;p.inv=2;say(`${p.champ.name} se relève !`,"#6cff8a",2)}continue}
     if(p.dash){const D=p.dash,k=Math.min(dt,D.t);p.x+=D.vx*k;p.y+=D.vy*k;D.t-=dt;if(D.onStep)D.onStep(p,dt);if(D.t<=0){const e=D.onEnd;p.dash=null;if(e)e(p)}}
-    else if(!p.stasis){const [mx,my]=moveDir(p.i);const air=G.terrain==="nuage"&&patchHit(p.x,p.y)?1.35:1;p.x+=mx*p.spd*air*dt;p.y+=my*p.spd*air*dt;
+    else if(!p.stasis){const [mx,my]=moveDir(p.i);const air=G.terrain==="nuage"&&patchHit(p.x,p.y)?1.35:1;const foot=p.skaarlMax&&!p.mounted?.85:1;p.x+=mx*p.spd*air*foot*dt;p.y+=my*p.spd*air*foot*dt;
       if(mx)p.face=Math.sign(mx);if(mx||my)p.dir=Math.atan2(my,mx);p.walk+=(mx||my)?dt:0;p.moving=!!(mx||my);p.mvx=mx;p.mvy=my}
+    if(p.skaarlMax&&!p.mounted){p.courage+=dt;if(p.courage>=15){p.mounted=true;p.skaarl=p.skaarlMax*.6;p.mountT=G.t;say("Skaarl revient au combat !","#ff7a4d",1.8)}}
     p.hp=Math.min(p.maxHp,p.hp+(p.regen+(G.terrain==="ocean"&&patchHit(p.x,p.y)?3:0))*dt);
     if(G.terrain==="montagne")rockPush(p,p.r);p.hidden=!!inBush(p.x,p.y)}
   // à deux : on reste dans le même écran
@@ -729,9 +734,9 @@ function weapons(dt,p){
     else if(k==="keg"&&ready){if(G.kegs.filter(b=>b.o===p).length>=s.max)continue;const t=nearest(p.x,p.y,130);if(!t)continue;cd();
       const a=Math.atan2(t.y-p.y,t.x-p.x),dd=Math.min(Math.hypot(t.x-p.x,t.y-p.y)*.75,90),x=p.x+Math.cos(a)*dd+rnd(-10,10),y=p.y+Math.sin(a)*dd+rnd(-10,10);
       G.kegs.push({x,y,o:p,t:0,arm:.55,life:12,dmg:s.dmg,blast:s.blast,fuse:0,seed:Math.random()*6});G.fx.push({k:"dust",x,y,t:.5,max:.5});sfx("shoot")}
-    else if(k==="trap"&&ready){const tg=closestFoes(p.x,p.y,130,s.n);if(!tg.length)continue;cd();sfx("shoot");
+    else if(k==="trap"&&ready){const tg=closestFoes(p.x,p.y,130,s.n);if(!tg.length)continue;cd();sfx("shoot");p.aimA=Math.atan2(tg[0].y-p.y,tg[0].x-p.x);
       for(let i=0;i<s.n;i++){const f=tg[i]||tg[0],a=Math.atan2(f.y-p.y,f.x-p.x)+(tg[i]?0:rnd(-.3,.3));
-        G.shots.push({k:"trap",o:p,x:p.x,y:p.y,vx:Math.cos(a)*s.spd,vy:Math.sin(a)*s.spd,a,t:.8,dmg:s.dmg,r:4,tether:s.tether,bleed:s.bleed,trail:[]})}}
+        G.shots.push({k:"trap",o:p,x:p.x,y:p.y,sx:p.x,sy:p.y,vx:Math.cos(a)*s.spd,vy:Math.sin(a)*s.spd,a,t:.72,max:.72,dmg:s.dmg,r:4,tether:s.tether,bleed:s.bleed,trail:[]})}}
     else if(k==="winds"&&ready){const tg=closestFoes(p.x,p.y,150,s.n);if(!tg.length)continue;cd();sfx("shoot");
       for(const f of tg){const dx=f.x-p.x,dy=f.y-p.y,d=Math.hypot(dx,dy)||1;
         for(const side of [-1,1])G.shots.push({k:"gust",o:p,x:p.x,y:p.y,sx:p.x,sy:p.y,cx:p.x+dx/2-dy/d*.45*d*side,cy:p.y+dy/2+dx/d*.45*d*side,tx:f.x,ty:f.y,u:0,dur:clamp(d/150,.35,.7),a:Math.atan2(dy,dx),t:2,
@@ -776,7 +781,7 @@ function spells(dt){
   G.kegs=G.kegs.filter(b=>!b.done);
   for(const te of G.tethers){const f=te.f,o=te.o;if(f.dead||o.down){te.t=0;continue}te.t-=dt;te.tick-=dt;
     if(te.tick<=0){te.tick=.25;hurt(f,te.bleed*.25,0,0,o)}
-    const dx=o.x-f.x,dy=o.y-f.y,d=Math.hypot(dx,dy)||1;if(d>75){f.x+=dx/d*(d-75);f.y+=dy/d*(d-75)}
+    const dx=o.x-f.x,dy=o.y-f.y,d=Math.hypot(dx,dy)||1;if(d>95){f.x+=dx/d*(d-95);f.y+=dy/d*(d-95)}
     if(te.t<=0&&!f.dead){const m=f.boss?.15:f.elite?.45:1,pull=Math.max(0,d-12)*m;f.x+=dx/d*pull;f.y+=dy/d*pull;hurt(f,te.dmg*1.2,0,0,o);f.stun=Math.max(f.stun,.3);G.fx.push({k:"star",x:f.x,y:f.y,t:.3,max:.3,col:"#ffb347"});sfx("boom")}}
   G.tethers=G.tethers.filter(te=>te.t>0&&!te.f.dead);
   for(const T of G.tornados){T.t-=dt;T.tick-=dt;if(T.tick<=0){T.tick=.2;near(T.x,T.y,T.r+12,f=>{const dx=T.x-f.x,dy=T.y-f.y,d=Math.hypot(dx,dy)||1;if(d<T.r+f.r){hurt(f,T.dps*.2,0,0,T.o);if(!f.boss){f.kx+=dx/d*30-dy/d*25;f.ky+=dy/d*30+dx/d*25}}})}}
@@ -825,7 +830,7 @@ const ULT_FN={
   rage(p){p.rageT=5;p.hp=Math.max(p.hp,1);G.fx.push({k:"rage",o:p,t:5,max:5})}
 };
 function castUlt(p){if(!G||state!=="play"||!p||p.down||p.ultCd>0||p.stasis>0)return;const u=p.champ.ult,U=ULTS[u];
-  if(ULT_FN[u](p)===false)return;p.ultCd=U.cd*p.ultMul;p.spellT=G.t;sfx("ult");G.texts.push({x:p.x,y:p.y-28,s:U.name,col:p.champ.col,t:1.4,max:1.4,small:false})}
+  if(ULT_FN[u](p)===false)return;p.ultCd=U.cd*p.ultMul;p.ultT=G.t;sfx("ult");G.texts.push({x:p.x,y:p.y-28,s:U.name,col:p.champ.col,t:1.4,max:1.4,small:false})}
 // Châtiment (F) : achève les monstres de la Faille, avec un bonus si le coup tue
 function smite(p){if(!G||state!=="play"||!p||p.down)return;if(G.mod.sanschati){say("Pas de Châtiment pour ce défi !","#ff5d73",1.2);return}if(p.smiteCd>0)return;
   let b=null,bs=-1;for(const f of G.foes){if(f.dead||(G.realm&&f!==G.realm.tgt))continue;const d=Math.hypot(f.x-p.x,f.y-p.y);if(d>110)continue;const F=FOES[f.type];const s=(f.boss?3e6:F.shape?2e6:f.elite?1e6:0)-d;if(s>bs){bs=s;b=f}}
@@ -946,7 +951,13 @@ const traps3=pool(8,()=>{const g=new THREE.Group(),iron=std(0x6b6b72,0x3a1a00,.2
   const j1=new THREE.Mesh(new THREE.TorusGeometry(7,1.3,6,16,Math.PI),iron),j2=j1.clone();j1.rotation.x=-.5;j2.rotation.x=Math.PI+.5;
   const teeth=new THREE.Group();for(let i=0;i<7;i++){const t=new THREE.Mesh(new THREE.ConeGeometry(1,3.4,4),iron);const a=i/6*Math.PI;t.position.set(Math.cos(a)*6,Math.sin(a)*6*.6,0);t.rotation.z=a-Math.PI/2;teeth.add(t)}
   const fireG=new THREE.Mesh(new THREE.SphereGeometry(8,12,10),glow(0xff8a2a,.55,softTex));g.add(j1,j2,teeth,fireG);return g});
-const ropes=pool(8,()=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(1,1,1,6),std(0xb07a3a,0x5a2a00,.4));m.geometry.rotateZ(Math.PI/2);m.geometry.translate(.5,0,0);return m});
+const ropeG=new THREE.CylinderGeometry(1,1,1,6);ropeG.rotateX(Math.PI/2);const ropeM=inst(ropeG,std(0xe0a050,0x8a4200,.55,{roughness:.8}),800,true);
+const loopM=inst(new THREE.TorusGeometry(1,.2,6,20),std(0xe0a050,0x8a4200,.55,{roughness:.8}),12,true);
+const _ra=new THREE.Vector3(),_rb=new THREE.Vector3();
+// une corde souple entre deux points : affaissement au milieu et ondulation latérale (le lasso fouette pendant le lancer)
+function rope(n0,a,b,sag,wave,ph,r=3.6,N=22){let n=n0;const dx=b[0]-a[0],dz=b[2]-a[2],L=Math.hypot(dx,dz)||1,px=-dz/L,pz=dx/L;let prev=null;
+  for(let i=0;i<=N&&n<800;i++){const u=i/N,w=Math.sin(u*Math.PI*2.5+ph)*wave*u*(1-u)*4,x=a[0]+dx*u+px*w,z=a[2]+dz*u+pz*w,y=a[1]+(b[1]-a[1])*u-sag*4*u*(1-u);
+    if(prev){_ra.set(...prev);_rb.set(x,y,z);dummy.position.copy(_ra).add(_rb).multiplyScalar(.5);dummy.lookAt(_rb);dummy.scale.set(r,r,_ra.distanceTo(_rb)+.6);dummy.updateMatrix();ropeM.setMatrixAt(n++,dummy.matrix)}prev=[x,y,z]}return n}
 const leashes=pool(2,()=>{const m=new THREE.Mesh(new THREE.RingGeometry(.97,1,96),glow(0xff9a3a,.6));m.rotation.x=-Math.PI/2;return m});
 // ---- Vents de Galio : rafales dorées, tornades ----
 const gustRib=ribbons(16,16,0xf6dfa0),gustHead=inst(new THREE.SphereGeometry(1,16,12),glow(0xfff2c8,.9,softTex),40,false);
@@ -1023,18 +1034,19 @@ function mkFig(){const fig=new THREE.Group();scene.add(fig);
 const FIGS=[mkFig(),mkFig()];
 function setFigure(F,p){const key=p.champ.id+":"+(p.skin??"");if(F.for===key)return;F.for=key;F.artMat.map=(p.skin!=null&&skinTex(p.champ.id,p.skin))||CTEX[p.champ.id];F.artMat.needsUpdate=true;F.ring.material.color.set(p.champ.col)}
 const MODELS={};let lastDraw=performance.now();
-function loadModel(c){if(!c.model||MODELS[c.id]||!THREE.GLTFLoader)return;MODELS[c.id]={loading:true};
-  fetch((window.IC_MODELS??ASSET)+c.model).then(r=>{if(!r.ok)throw 0;return r.text()}).then(b64=>{const bin=atob(b64.trim()),buf=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)buf[i]=bin.charCodeAt(i);
+function loadModel(c,file=c.model,key=c.id,H=c.modelH||175){if(!file||MODELS[key]||!THREE.GLTFLoader)return;MODELS[key]={loading:true};
+  fetch((window.IC_MODELS??ASSET)+file).then(r=>{if(!r.ok)throw 0;return r.text()}).then(b64=>{const bin=atob(b64.trim()),buf=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)buf[i]=bin.charCodeAt(i);
   new THREE.GLTFLoader().parse(buf.buffer,"",g=>{const root=g.scene;root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false}});
-    const box=new THREE.Box3().setFromObject(root),h=box.max.y-box.min.y||1,sc=175/h;root.scale.setScalar(sc);root.position.y=-box.min.y*sc;
+    const box=new THREE.Box3().setFromObject(root),h=box.max.y-box.min.y||1,sc=H/h;root.scale.setScalar(sc);root.position.y=-box.min.y*sc;
     const holder=new THREE.Group();holder.add(root);holder.visible=false;scene.add(holder);
     const mixer=new THREE.AnimationMixer(root),A={};
-    for(const cl of g.animations){const n=cl.name.toLowerCase(),role=/death|mort/.test(n)?"death":/idle/.test(n)?"idle":/run|walk/.test(n)?"run":/spell/.test(n)?"spell":/attack/.test(n)?"attack":null;if(role&&!A[role])A[role]=mixer.clipAction(cl)}
+    for(const cl of g.animations){const n=cl.name.toLowerCase(),role=/death|mort/.test(n)?"death":/idle/.test(n)?"idle":/mount/.test(n)?"mount":/run|walk/.test(n)?"run":/spell4/.test(n)?"ult":/spell1/.test(n)?"q":/spell/.test(n)?"spell":/attack/.test(n)?"attack":null;if(role&&!A[role])A[role]=mixer.clipAction(cl)}
     if(!A.run&&g.animations[0])A.run=mixer.clipAction(g.animations[0]);
-    for(const k of ["attack","spell","death"])if(A[k]){A[k].setLoop(THREE.LoopOnce);A[k].clampWhenFinished=true}
+    if(!A.attack&&A.q)A.attack=A.q;if(!A.spell&&A.q)A.spell=A.q;
+    for(const k of ["attack","spell","death","q","ult","mount"])if(A[k]){A[k].setLoop(THREE.LoopOnce);A[k].clampWhenFinished=true}
     if(A.attack)A.attack.timeScale=1.8;if(A.spell)A.spell.timeScale=1.4;
-    MODELS[c.id]={holder,mixer,A,cur:null}},()=>{MODELS[c.id]={failed:true}})}).catch(()=>{MODELS[c.id]={failed:true}})}
-for(const c of CHAMPS)loadModel(c);
+    MODELS[key]={holder,mixer,A,cur:null}},()=>{MODELS[key]={failed:true}})}).catch(()=>{MODELS[key]={failed:true}})}
+for(const c of CHAMPS){loadModel(c);if(c.model2)loadModel(c,c.model2,c.id+"_d",c.model2H)}
 function playRole(M,role){const a=M.A[role];if(!a)return;if(M.cur===role&&(a.isRunning()||role==="death"))return;const prev=M.cur&&M.A[M.cur];
   a.reset();a.fadeIn(.12);a.play();if(prev&&prev!==a)prev.fadeOut(.12);M.cur=role}
 // échoppe du marchand (provisoire)
@@ -1094,13 +1106,13 @@ function draw(){
   const used=new Set();
   FIGS.forEach((F,i)=>{const p=G.ps[i];if(!p){F.fig.visible=false;champLights[i].intensity=0;return}
     let X=p.x*K,Z=p.y*K,Y=0;const ez=p.flying&&G.zones.find(z=>z.k==="entrance"&&z.o===p);if(ez){const u=1-ez.t/ez.max;X+=(ez.x-p.x)*K*u;Z+=(ez.y-p.y)*K*u;Y=Math.sin(u*Math.PI)*420}
-    const blink=p.down||G.dead||p.dash||!(p.inv>0&&Math.floor(p.inv*20)%2),M=MODELS[p.champ.id],useM=M&&M.holder&&p.skin==null;
+    const blink=p.down||G.dead||p.dash||!(p.inv>0&&Math.floor(p.inv*20)%2),mk=p.skaarlMax&&!p.mounted?p.champ.id+"_d":p.champ.id,M=MODELS[mk]?.holder?MODELS[mk]:MODELS[p.champ.id],useM=M&&M.holder&&p.skin==null;p.handY=useM?(p.mounted?95:60):60;
     setFigure(F,p);F.fig.visible=!useM&&blink;F.fig.position.set(X,Y,Z);
     F.stand.rotation.z=p.moving&&!p.down?Math.sin(p.walk*12)*.08:0;F.stand.rotation.x=p.down?-1.35:-.32;F.stand.position.y=8+(p.moving&&!p.down?Math.abs(Math.sin(p.walk*12))*4:0);
     F.stand.rotation.y+=(((p.face<0?-.35:.35))-F.stand.rotation.y)*.15;F.ring.material.opacity=.35+Math.sin(t*4)*.1;
     F.rez.visible=p.down;if(p.down){F.rez.scale.setScalar(.25+.75*p.rez/3);F.rez.material.opacity=.4+.5*(p.rez/3)}
-    if(useM){used.add(p.champ.id);M.holder.visible=blink;M.holder.position.set(X,Y,Z);const want=Math.PI/2-(p.dir??0);let d=want-M.holder.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));M.holder.rotation.y+=d*.25;
-      const A=M.A;let role,freeze=false;if((p.down||G.dead)&&A.death)role="death";else if(A.spell&&G.t-(p.spellT??-9)<.9)role="spell";else if(A.attack&&G.t-(p.atkT??-9)<.55)role="attack";
+    if(useM){used.add(Object.keys(MODELS).find(k=>MODELS[k]===M));M.holder.visible=blink;M.holder.position.set(X,Y,Z);const want=Math.PI/2-(G.t-(p.atkT??-9)<.5&&p.aimA!=null?p.aimA:(p.dir??0));let d=want-M.holder.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));M.holder.rotation.y+=d*.25;
+      const A=M.A;let role,freeze=false;if((p.down||G.dead)&&A.death)role="death";else if(A.mount&&G.t-(p.mountT??-9)<.6)role="mount";else if(A.ult&&(p.charging||G.t-(p.ultT??-9)<.7))role="ult";else if(A.spell&&G.t-(p.spellT??-9)<.9)role="spell";else if(A.attack&&G.t-(p.atkT??-9)<.55)role="attack";
       else if(p.moving&&state==="play")role="run";else if(A.idle)role="idle";else{role="run";freeze=true}
       playRole(M,role);if(state==="play"||G.dead||p.down)M.mixer.update(freeze?0:ddt)}
     champLights[i].intensity=1.2;champLights[i].color.set(p.realmGlow?0x3fffc0:p.champ.col);champLights[i].position.set(X,160+Y,Z+120)});
@@ -1121,6 +1133,7 @@ function draw(){
   GEMS.forEach((m,i)=>m.count=ng[i]);chestM.count=nch;healM.count=nh;done(...GEMS,chestM,healM);
   // projectiles
   hideAll(lunarRib,gustRib,crystalRib,crystalCore,traps3,crystals);
+  let nrope=0,nloop=0;
   {let na=0,nl=0,nlr=0,ng2=0,ngr=0,ntr=0,ncr=0;
     for(const s of G.shots){const x=s.x*K,z=s.y*K;
       if(s.k==="arrow"){if(na<500){const ry=Math.atan2(s.vx,s.vy),L=Math.min(46,(1.2-s.t)*260);put(arrowM,na,x,16,z,1,0,ry,0);put(streakM,na,x,16,z,[9,9,L*1.8],0,ry,0);put(streakCore,na++,x,16,z,[2.5,2.5,L*1.6],0,ry,0)}}
@@ -1129,7 +1142,8 @@ function draw(){
         for(let w=0;w<3&&nlr<lunarRib.length;w++){const off=(w-1)*sz*.55,pts=[[x,hy,z],...s.trail.map(([tx,ty,u],i)=>{const ph=Math.sin(i*.9+w*2+t*14)*sz*.18;return [tx*K+Math.cos(s.a+Math.PI/2)*(off+ph),18+rise(u),ty*K+Math.sin(s.a+Math.PI/2)*(off+ph)]})];
           lunarRib[nlr++].set(pts,sz*(w===1?.7:.4),w===1?1:.7)}}
       else if(s.k==="gust"){if(ng2<40)put(gustHead,ng2++,x,22,z,s.r*K*1.3);if(ngr<gustRib.length){const pts=[[x,22,z],...s.trail.map(([tx,ty],i)=>[tx*K+Math.sin(i*1.3+t*20)*6,22,ty*K+Math.cos(i*1.3+t*20)*6])];gustRib[ngr++].set(pts,s.r*K*.9,.9)}}
-      else if(s.k==="trap"){if(ntr<traps3.length){const g=traps3[ntr++];g.visible=true;g.position.set(x,22,z);g.rotation.set(t*14,-s.a,0);g.scale.setScalar(1.6)}}
+      else if(s.k==="trap"){if(ntr<traps3.length){const o=s.o,u=1-s.t/s.max,g=traps3[ntr++],hy=(o.handY||60)*(1-u)+26*u;g.visible=true;g.position.set(x,hy,z);g.rotation.set(t*10,-s.a,0);g.scale.setScalar(1.05);
+        nrope=rope(nrope,[o.x*K,o.handY||60,o.y*K],[x,hy,z],10*(1-u),26*(1-u*.6),t*22);if(nloop<12)put(loopM,nloop++,x,hy,z,22,Math.PI/2,t*6,0)}}
       else if(s.k==="crystal"){if(ncr<crystals.length){const g=crystals[ncr];g.visible=true;g.position.set(x,30,z);g.rotation.set(0,Math.PI/2-s.a,0);
         const pts=[[x,30,z],...s.trail.map(([tx,ty])=>[tx*K,30,ty*K])];crystalRib[ncr].set(pts,34,1);crystalCore[ncr].set(pts,10,1);ncr++}}}
     arrowM.count=streakM.count=streakCore.count=na;headM.count=headHalo.count=nl;gustHead.count=ng2;done(arrowM,streakM,streakCore,headM,headHalo,gustHead)}
@@ -1144,8 +1158,10 @@ function draw(){
   kegs3.forEach((o,i)=>{const b=G.kegs[i];o.g.visible=!!b;if(!b)return;o.g.position.set(b.x*K,0,b.y*K);o.g.rotation.y=b.seed;const armed=b.t>=b.arm,fr=Math.min(1,b.t/Math.max(.01,b.arm));
     o.ring.geometry.setDrawRange(0,6*Math.round(32*(armed?1:fr)));o.ring.material.color.set(b.fuse>0?0xff7a2a:armed?0x6fd0ff:0x3a6a9a);o.fuse.visible=b.fuse>0||armed;o.fuse.scale.setScalar(b.fuse>0?1.8+Math.random():1+Math.sin(t*20)*.3)});
   // cordes de Kled et rayon de la corde
-  ropes.forEach(m=>m.visible=false);leashes.forEach(m=>m.visible=false);
-  G.tethers.slice(0,ropes.length).forEach((te,i)=>{const m=ropes[i],o=te.o,f=te.f,dx=(f.x-o.x)*K,dz=(f.y-o.y)*K,L=Math.hypot(dx,dz);m.visible=true;m.position.set(o.x*K,30,o.y*K);m.rotation.set(0,-Math.atan2(dz,dx),0);m.scale.set(L,1.4,1.4)});
+  leashes.forEach(m=>m.visible=false);
+  G.tethers.forEach(te=>{const o=te.o,f=te.f,k=te.t/te.max,R=f.r*K;if(nloop<12)put(loopM,nloop++,f.x*K,R*1.1,f.y*K,R*.9,Math.PI/2,0,0);
+    nrope=rope(nrope,[o.x*K,o.handY||60,o.y*K],[f.x*K,R*1.1,f.y*K],14*k,8*k,t*9)});
+  ropeM.count=nrope;loopM.count=nloop;done(ropeM,loopM);
   G.ps.forEach((p,i)=>{if(G.tethers.some(te=>te.o===p)){const m=leashes[i];m.visible=true;m.position.set(p.x*K,2,p.y*K);m.scale.setScalar(75*K)}});
   // tornades de Galio
   tornados3.forEach((g,i)=>{const T=G.tornados[i];g.visible=!!T;if(!T)return;const R=T.r*K,k=Math.min(1,(T.max-T.t)/.25)*Math.min(1,T.t/.3);g.position.set(T.x*K,0,T.y*K);
@@ -1211,6 +1227,7 @@ function draw(){
   const two=G.ps.length>1;ctx.textAlign="center";
   G.ps.forEach(p=>{const X=p.x*K,Z=p.y*K;if(p.down){const [sx,sy,ok]=toScreen(X,60,Z);if(ok){ctx.font="700 13px Silkscreen,monospace";ctx.fillStyle="#120818";ctx.fillText("À terre",sx+1,sy+1);ctx.fillStyle="#ff5d73";ctx.fillText("À terre",sx,sy)}return}
     bar(X,0,Z+75,60,p.hp/p.maxHp,p.hp/p.maxHp<.3?"#e83b4f":"#6cff8a",p.shield/p.maxHp);
+    if(p.skaarlMax){if(p.mounted)bar(X,0,Z+62,60,p.skaarl/p.skaarlMax,"#ff9a4d");else bar(X,0,Z+62,60,p.courage/15,"#6b5a4a")}
     if(two){const [sx,sy,ok]=toScreen(X,0,Z+110);if(ok){ctx.font="700 12px Silkscreen,monospace";ctx.fillStyle="#120818";ctx.fillText("J"+(p.i+1),sx+1,sy+1);ctx.fillStyle=p.champ.col;ctx.fillText("J"+(p.i+1),sx,sy)}}
     if(p.hidden){const [sx,sy,ok]=toScreen(X,0,Z+130);if(ok){ctx.font="400 11px Silkscreen,monospace";ctx.fillStyle="#7fe0a8";ctx.fillText("caché",sx,sy)}}});
   for(const f of G.foes)if(f.boss||f.elite)bar(f.x*K,f.r*K*2.9,f.y*K,f.boss?100:60,f.hp/f.max,f.boss?"#ff4fa8":"#ffcc4d");
