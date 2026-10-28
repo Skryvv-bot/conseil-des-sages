@@ -288,6 +288,10 @@ h3.cat{margin:6px 0 0}
 .spell .key{position:relative;padding:0;overflow:hidden}
 .spell .key img{width:100%;height:100%}
 .spell .key i{position:absolute;right:0;bottom:0;font:700 10px var(--title);font-style:normal;background:rgba(1,10,19,.85);padding:0 3px;color:var(--gold-hi)}
+.vols{display:flex;flex-direction:column;gap:6px;max-width:420px}
+.vols label{display:grid;grid-template-columns:150px minmax(0,1fr) 34px;gap:10px;align-items:center;font:600 12px var(--pixel);color:var(--muted)}
+.vols b{font:700 12px var(--title);color:var(--gold-hi);text-align:right}
+.vols input{accent-color:var(--gold);width:100%}
 
 </style>
 </head>
@@ -325,7 +329,8 @@ h3.cat{margin:6px 0 0}
               <div class="chooser" id="chooser" hidden></div>
               <h3 style="margin-top:6px">Visée</h3>
               <div class="seg" role="group" aria-label="Visée des sorts"><button type="button" id="aimA" aria-pressed="true">Automatique</button><button type="button" id="aimC" aria-pressed="false">Curseur de la souris</button></div>
-              <p class="note" id="aimNote"></p></div>
+              <p class="note" id="aimNote"></p>
+              <h3 style="margin-top:6px">Son</h3><div class="vols" data-vols></div></div>
             <div class="sec"><h3>Défi de la semaine</h3><div class="px chalcard" id="chalCard"></div></div>
           </div>
           <div class="sec"><h3>Difficulté</h3><div class="diffs" id="diffs"></div></div>
@@ -357,7 +362,7 @@ h3.cat{margin:6px 0 0}
   <div class="inv" id="shopInv"></div>
   <div id="shopList"></div>
   <div class="row"><button class="btn" id="shopClose" type="button">Retour au combat (E)</button></div></div></section>
-<section class="screen" id="pause" hidden><div class="box"><span class="eyebrow">Pause</span><h2>La brèche attend</h2><div class="kits" id="pkit"></div><div class="keys2" id="pkeys"></div><div class="row"><button class="btn play" id="resume" type="button">Reprendre</button><button class="btn alt" id="quit" type="button">Abandonner</button></div></div></section>
+<section class="screen" id="pause" hidden><div class="box"><span class="eyebrow">Pause</span><h2>La brèche attend</h2><div class="kits" id="pkit"></div><div class="vols" data-vols></div><div class="keys2" id="pkeys"></div><div class="row"><button class="btn play" id="resume" type="button">Reprendre</button><button class="btn alt" id="quit" type="button">Abandonner</button></div></div></section>
 <section class="screen" id="over" hidden><div class="box"><span class="eyebrow" id="ovE">Fin de partie</span><h2 id="ovT">Le Néant t'a englouti</h2><p class="lead" id="ovL"></p><div class="res" id="ovR"></div><div class="px reward" id="ovW" hidden></div><p class="note" id="ovN"></p><div class="row"><button class="btn play" id="again" type="button">Rejouer</button><button class="btn alt" id="toMenu" type="button">Menu</button></div></div></section>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -365,7 +370,7 @@ h3.cat{margin:6px 0 0}
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
 <script>
 // ===================== Version CDS.TV : compte du site, cartes LolMaster, robot =====================
-window.IC_ASSET="cartes/";window.IC_MODELS="icathia/";window.IC_UI="icathia/ui/";
+window.IC_ASSET="cartes/";window.IC_MODELS="icathia/";window.IC_UI="icathia/ui/";window.IC_SND="icathia/snd/";window.IC_MUSIC="icathia/music/";
 (function(){const FREE=["Ashe","Diana","Azir","Galio"];let db=null,uid=null,own=new Set(),skinOwn={},doc={runes:{},ess:0};
   async function call(body){const u=firebase.auth().currentUser;if(!u)throw new Error("Connexion au site en cours");const t=await u.getIdToken();
     let r;try{r=await fetch(RIOT_RELAY+"/cards",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+t},body:JSON.stringify(body)})}catch(e){throw new Error("Robot injoignable")}
@@ -692,9 +697,10 @@ const TILES=[];(function(){for(let v=0;v<8;v++){const c=document.createElement("
 
 // ===================== Sons 8 bits =====================
 let AC=null,muted=store.get("ic-mute",false),lastS={};
-function tone(f,d,type="square",vol=.05,slide=0){if(muted)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();
+let VOL=Object.assign({music:.45,voice:.9,sfx:.6},store.get("ic-vol",{}));
+function tone(f,d,type="square",vol=.05,slide=0){if(muted||VOL.sfx<=0)return;vol*=VOL.sfx*1.4;if(type==="square")type="triangle";try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();
   o.type=type;o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f*slide),t+d);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+d+.02)}catch(e){}}
-function noise(d,vol=.08){if(muted)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const b=AC.createBuffer(1,AC.sampleRate*d,AC.sampleRate),a=b.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=(Math.random()*2-1)*(1-i/a.length);const s=AC.createBufferSource(),g=AC.createGain();g.gain.value=vol;s.buffer=b;s.connect(g).connect(AC.destination);s.start()}catch(e){}}
+function noise(d,vol=.08){if(muted||VOL.sfx<=0)return;vol*=VOL.sfx*1.4;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const b=AC.createBuffer(1,AC.sampleRate*d,AC.sampleRate),a=b.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=(Math.random()*2-1)*(1-i/a.length);const s=AC.createBufferSource(),g=AC.createGain();g.gain.value=vol;s.buffer=b;s.connect(g).connect(AC.destination);s.start()}catch(e){}}
 function sfx(k){const now=performance.now();if(now-(lastS[k]||0)<({hit:45,gem:35,shoot:80,boom:90,coin:60}[k]||0))return;lastS[k]=now;
   if(k==="hit")tone(rnd(160,220),.05,"square",.03,.5);else if(k==="gem")tone(rnd(1200,1500),.05,"square",.025,1.3);
   else if(k==="shoot")tone(880,.05,"square",.02,.5);else if(k==="coin")tone(1760,.06,"square",.03,1.5);
@@ -857,9 +863,9 @@ function damagePlayer(dm,p,src){if(!p||p.down||p.inv>0||G.dead||p.stasis>0||p.da
   if(p.rageT>0){p.hp=1;return}
   if(p.champ.ult==="rage"&&p.ultCd<=0){castUlt(p);p.hp=1;return}
   if(p.items.includes("ange")&&G.t>=(p.angeT||0)){p.angeT=G.t+300;p.hp=p.maxHp*.5;p.inv=2.5;say("Ange gardien : tu te relèves !","#fff2b0",2.2);G.fx.push({k:"moon",x:p.x,y:p.y,r:30,t:.6,max:.6});return}
-  if(p.revive>0){p.revive--;p.hp=p.maxHp*.5;p.inv=2.5;say("Bénédiction d'Atakhan : tu te relèves !","#ff4f6a",2.4);G.fx.push({k:"moon",x:p.x,y:p.y,r:30,t:.6,max:.6});return}
+  if(p.revive>0){p.revive--;p.hp=p.maxHp*.5;p.inv=2.5;voice(p.champ,"respawn",{interrupt:true});say("Bénédiction d'Atakhan : tu te relèves !","#ff4f6a",2.4);G.fx.push({k:"moon",x:p.x,y:p.y,r:30,t:.6,max:.6});return}
   downPlayer(p)}
-function downPlayer(p){p.hp=0;if(G.ps.length===1){lose();return}
+function downPlayer(p){p.hp=0;voice(p.champ,"death",{interrupt:true});if(G.ps.length===1){lose();return}
   p.down=true;p.rez=0;p.dash=null;sfx("die");say(`${p.champ.name} est à terre ! Reste à côté pour le relever`,"#ff5d73",2.6);if(!alive().length)lose()}
 // zones annoncées au sol, qui frappent après un délai
 function hazard(x,y,r,delay,dmg,col,cb,src){G.haz.push({x,y,r,t:delay,max:delay,dmg,col,cb,src})}
@@ -883,7 +889,7 @@ function brain(f,dt,dx,dy,d,tp){const F=FOES[f.type];f.cd-=dt;if(BOSS_AI[f.type]
   if(f.ai==="acid"){if(f.cd<=0){f.cd=3.4;for(let i=0;i<3;i++)hazard(tp.x+rnd(-30,30),tp.y+rnd(-30,30),17,1.25,f.dmg,"#9b4dff",null,f);if(Math.random()<.4)for(let i=0;i<4;i++)spawnAt("rodeur",f.x+rnd(-20,20),f.y+rnd(-20,20))}return null}
   return null}
 // ce qui se passe quand un monstre de la Faille tombe (les bonus profitent à toute l'équipe)
-function onKill(f,o){const F=FOES[f.type],all=G.ps;
+function onKill(f,o){const F=FOES[f.type],all=G.ps;if(f.boss&&!F.mini&&o&&o.champ)voice(o.champ,"kill",{interrupt:true});
   if(F.split)for(let i=0;i<F.split[1];i++)spawnAt(F.split[0],f.x+rnd(-6,6),f.y+rnd(-6,6));
   if(f.type==="poroKing"){G.kingKilled=1;for(const p of all)if(!p.down)p.hp=p.maxHp;for(const p of all)addGold(p,150);
     say(IC.online?"Le Roi Poro est vaincu ! Une montagne de PO t'attend à la fin de la partie":"Le Roi Poro est vaincu ! (les PO hors jeu se gagnent sur CDS.TV)","#ffd75e",3.2);sfx("chest");G.shake=.3;
@@ -929,7 +935,7 @@ function update(dt){G.t+=dt;const two=G.ps.length>1;
   for(const p of G.ps){p.inv-=dt;p.stasis=Math.max(0,(p.stasis||0)-dt);p.rageT=Math.max(0,(p.rageT||0)-dt);p.ultCd-=dt;p.smiteCd-=dt;p.lsUsed=Math.max(0,p.lsUsed-dt*p.maxHp*.06);
     for(const k in p.elix){p.elix[k]-=dt;if(p.elix[k]<=0){delete p.elix[k];elixir(p,k,-1)}}
     if(p.down){const q=G.ps.find(o=>o!==p&&!o.down&&Math.hypot(o.x-p.x,o.y-p.y)<20);p.rez=q?p.rez+dt:Math.max(0,p.rez-dt*.5);
-      if(p.rez>=3){p.down=false;p.hp=p.maxHp*.4;p.inv=2;say(`${p.champ.name} se relève !`,"#6cff8a",2)}continue}
+      if(p.rez>=3){p.down=false;p.hp=p.maxHp*.4;p.inv=2;voice(p.champ,"respawn",{interrupt:true});say(`${p.champ.name} se relève !`,"#6cff8a",2)}continue}
     if(p.dash){const D=p.dash,k=Math.min(dt,D.t);p.x+=D.vx*k;p.y+=D.vy*k;D.t-=dt;if(D.onStep)D.onStep(p,dt);if(D.t<=0){const e=D.onEnd;p.dash=null;if(e)e(p)}}
     else if(!p.stasis){const [mx,my]=moveDir(p.i);const air=G.terrain==="nuage"&&patchHit(p.x,p.y)?1.35:1;const foot=p.skaarlMax&&!p.mounted?.85:1;p.x+=mx*p.spd*air*foot*dt;p.y+=my*p.spd*air*foot*dt;
       if(mx)p.face=Math.sign(mx);if(mx||my)p.dir=Math.atan2(my,mx);p.walk+=(mx||my)?dt:0;p.moving=!!(mx||my);p.mvx=mx;p.mvy=my}
@@ -941,7 +947,7 @@ function update(dt){G.t+=dt;const two=G.ps.length>1;
   if(two){const [a,b]=G.ps,mx=LW*.8,my=LH*.72,dx=b.x-a.x,dy=b.y-a.y;if(Math.abs(dx)>mx){const e=(Math.abs(dx)-mx)/2*Math.sign(dx);a.x+=e;b.x-=e}if(Math.abs(dy)>my){const e=(Math.abs(dy)-my)/2*Math.sign(dy);a.y+=e;b.y-=e}}
   const al=alive().length?alive():G.ps;G.cx=al.reduce((s,p)=>s+p.x,0)/al.length;G.cy=al.reduce((s,p)=>s+p.y,0)/al.length;
   faillePlan(dt);build();
-  for(const p of G.ps){if(p.down)continue;G.p=p;const w=p.champ.weapon,c0=p.cds[w]||0,a0=p.aimA;weapons(dt,p);if((p.cds[w]||0)>c0+.01){p.atkT=G.t;if(p.aimA===a0){const t=nearest(p.x,p.y,260);if(t)p.aimA=Math.atan2(t.y-p.y,t.x-p.x)}}}
+  for(const p of G.ps){if(p.down)continue;G.p=p;vTick(p);const w=p.champ.weapon,c0=p.cds[w]||0,a0=p.aimA;weapons(dt,p);if((p.cds[w]||0)>c0+.01){p.atkT=G.t;vSig(p);if(p.aimA===a0){const t=nearest(p.x,p.y,260);if(t)p.aimA=Math.atan2(t.y-p.y,t.x-p.x)}}}
   G.p=G.ps[0];shots(dt);spells(dt);if(state!=="play")return;
   const realm=G.realm;
   for(const f of G.foes){if(f.dead)continue;f.flash-=dt;
@@ -1173,7 +1179,7 @@ const ULT_FN={
       onEnd:pp=>{pp.charging=false;pp.ultEndT=G.t;sfx("bigboom");G.shake=.35;G.fx.push({k:"blast",x:pp.x+dx*8,y:pp.y+dy*8,r:30,t:.5,max:.5});
         near(pp.x,pp.y,50,f=>{const ex=f.x-pp.x,ey=f.y-pp.y,d=Math.hypot(ex,ey)||1;if(d<30+f.r){hurt(f,(90+G.t*.2)*um(l),ex/d*90,ey/d*90,pp);f.stun=Math.max(f.stun,.8)}});if(again)go(false)}}};go(mx)},
   entrance(p,l){const mx=l>=MAXL,R=mx?100:46+5*(l-1);const ally=G.ps.find(o=>o!==p&&!o.down);let x,y;if(ally&&Math.hypot(ally.x-p.x,ally.y-p.y)>25){x=ally.x;y=ally.y}else{const t=densest(p.x,p.y,180,40)||bigTarget(p.x,p.y,180);x=t?t.x:p.x;y=t?t.y:p.y}
-    p.stasis=1.2;p.inv=Math.max(p.inv,1.3);p.flying=true;G.zones.push({k:"entrance",x,y,o:p,r:R,t:1.2,max:1.2,end:z=>{p.x=z.x;p.y=z.y;p.flying=false;p.ultEndT=G.t;sfx("bigboom");G.shake=.45;
+    p.stasis=1.2;p.inv=Math.max(p.inv,1.3);p.flying=true;G.zones.push({k:"entrance",x,y,o:p,r:R,t:1.2,max:1.2,end:z=>{p.x=z.x;p.y=z.y;p.flying=false;p.ultEndT=G.t;champSfx(p.champ,"landSfx",.3);sfx("bigboom");G.shake=.45;
       G.fx.push({k:"land",x:z.x,y:z.y,r:R,t:.7,max:.7});for(const q of G.ps)if(!q.down&&Math.hypot(q.x-z.x,q.y-z.y)<R+10)q.shield=Math.max(q.shield,q.maxHp*(mx?.6:.25+.04*(l-1)));
       near(z.x,z.y,R+25,f=>{const ex=f.x-z.x,ey=f.y-z.y,d=Math.hypot(ex,ey)||1;if(d<R+f.r){hurt(f,(80+G.t*.2)*um(l),ex/d*70,ey/d*70,p);f.stun=Math.max(f.stun,mx?2.5:1+.1*(l-1));f.air=G.t+.7}})}})},
   realm(p,l){const mx=l>=MAXL;const t=bigTarget(p.x,p.y,200);if(!t){say("Aucune cible pour le Royaume des morts","#4fe0b0",1.2);return false}
@@ -1184,7 +1190,7 @@ const ULT_FN={
     p.x-=Math.cos(a0)*15;p.y-=Math.sin(a0)*15;G.fx.push({k:"star",x:p.x,y:p.y,t:.25,max:.25,col:"#ff5a2a"});G.shake=.3}
 };
 function castUlt(p){if(!G||state!=="play"||!p||p.down||p.ultCd>0||p.stasis>0)return;const u=p.champ.ult,U=ULTS[u],l=p.ultLvl||1;
-  const a0=p.aimA;if(ULT_FN[u](p,l)===false)return;if(p.aimA===a0&&!p.charging){const t=bigTarget(p.x,p.y,260)||nearest(p.x,p.y,260);if(t)p.aimA=Math.atan2(t.y-p.y,t.x-p.x)}p.ultCd=ultCd(u,l)*p.ultMul;p.ultT=G.t;sfx("ult");G.texts.push({x:p.x,y:p.y-28,s:U.name+(l>=MAXL?" MAX":""),col:p.champ.col,t:1.4,max:1.4,small:false})}
+  const a0=p.aimA;if(ULT_FN[u](p,l)===false)return;if(p.aimA===a0&&!p.charging){const t=bigTarget(p.x,p.y,260)||nearest(p.x,p.y,260);if(t)p.aimA=Math.atan2(t.y-p.y,t.x-p.x)}p.ultCd=ultCd(u,l)*p.ultMul;p.ultT=G.t;sfx("ult");vUlt(p);G.texts.push({x:p.x,y:p.y-28,s:U.name+(l>=MAXL?" MAX":""),col:p.champ.col,t:1.4,max:1.4,small:false})}
 // Châtiment (F) : achève les monstres de la Faille, avec un bonus si le coup tue
 function smite(p){if(!G||state!=="play"||!p||p.down)return;if(G.mod.sanschati){say("Pas de Châtiment pour ce défi !","#ff5d73",1.2);return}if(p.smiteCd>0)return;
   let b=null,bs=-1;for(const f of G.foes){if(f.dead||(G.realm&&f!==G.realm.tgt))continue;const d=Math.hypot(f.x-p.x,f.y-p.y);if(d>110)continue;const F=FOES[f.type];const s=(f.boss?3e6:(F.shape||F.model)?2e6:f.elite?1e6:0)-d;if(s>bs){bs=s;b=f}}
@@ -2138,6 +2144,33 @@ const BOSS_AI={
         hazard(f.x,f.y,95,2.1,f.dmg*1.8,"#c48bff",()=>{if(!f.dead){banim(f,"s6",.7,2.3/.7);G.shake=.5}},f)}}
     return [0,0]}};
 
+// ===================== Voix des champions (VO de League of Legends) et musiques =====================
+// Voix : phrase de sélection, répliques sur le sort signature et l'ultime, en combat, à la mort, au retour et sur un boss abattu.
+// Musiques : fichiers menu.mp3, game.mp3 et boss.mp3 (facultatif) dans le dossier music/ ; tant qu'un fichier manque, ce moment reste sans musique.
+const SND={"Ashe": {"select": ["Ashe_Select"], "sig": ["Ashe_Original_W_0", "Ashe_Original_W_1", "Ashe_Original_W_2", "Ashe_Original_W_3"], "ult": ["Ashe_Original_R_0", "Ashe_Original_R_1", "Ashe_Original_R_2", "Ashe_Original_R_3"], "attack": ["Ashe_Original_Attack_0", "Ashe_Original_Attack_1", "Ashe_Original_Attack_2", "Ashe_Original_Attack_3", "Ashe_Original_Attack_4", "Ashe_Original_Attack_5"], "death": ["Ashe_Original_Death_0", "Ashe_Original_Death_1", "Ashe_Original_Death_2"], "kill": ["Ashe_Original_Kill_0", "Ashe_Original_Kill_1", "Ashe_Original_Kill_2"]}, "Diana": {"select": ["Diana_Select"], "sig": ["Diana_Original_Q_0", "Diana_Original_Q_1", "Diana_Original_Q_2", "Diana_Original_Q_3"], "ult": ["Diana_Original_R_0", "Diana_Original_R_1", "Diana_Original_R_2", "Diana_Original_R_3"], "attack": ["Diana_Original_Attack_0", "Diana_Original_Attack_1", "Diana_Original_Attack_2", "Diana_Original_Attack_3", "Diana_Original_Attack_4", "Diana_Original_Attack_5"], "death": ["Diana_Original_Death_0", "Diana_Original_Death_1", "Diana_Original_Death_2"]}, "Azir": {"select": ["Azir_Select"], "sig": ["Azir_Original_W_0", "Azir_Original_W_1", "Azir_Original_W_2", "Azir_Original_W_3"], "ult": ["Azir_Original_R_0", "Azir_Original_R_1", "Azir_Original_R_2", "Azir_Original_R_3"], "attack": ["Azir_Original_Attack_0", "Azir_Original_Attack_1", "Azir_Original_Attack_2", "Azir_Original_Attack_3", "Azir_Original_Attack_4", "Azir_Original_Attack_5"], "death": ["Azir_Original_Death_0", "Azir_Original_Death_1", "Azir_Original_Death_2"], "kill": ["Azir_Original_Kill_0", "Azir_Original_Kill_1", "Azir_Original_Kill_2"], "respawn": ["Azir_Original_Respawn_0", "Azir_Original_Respawn_1"]}, "Gangplank": {"select": ["Gangplank_Select"], "sig": ["Gangplank_Original_E_0", "Gangplank_Original_E_1", "Gangplank_Original_E_2", "Gangplank_Original_E_3"], "ult": ["Gangplank_Original_R_0", "Gangplank_Original_R_1", "Gangplank_Original_R_2", "Gangplank_Original_R_3"], "attack": ["Gangplank_Original_Attack_0", "Gangplank_Original_Attack_1", "Gangplank_Original_Attack_2", "Gangplank_Original_Attack_3", "Gangplank_Original_Attack_4", "Gangplank_Original_Attack_5"], "death": ["Gangplank_Original_Death_0", "Gangplank_Original_Death_1", "Gangplank_Original_Death_2"]}, "Kled": {"select": ["Kled_Select"], "sig": ["Kled_Original_Q_hit_0", "Kled_Original_Q_hit_1", "Kled_Original_Q_hit_2", "Kled_Original_Q_hit_3"], "ult": ["Kled_Original_R_0", "Kled_Original_R_1", "Kled_Original_R_2", "Kled_Original_R_3"], "attack": ["Kled_Original_Mounted_Attack_0", "Kled_Original_Mounted_Attack_1", "Kled_Original_Mounted_Attack_2", "Kled_Original_Mounted_Attack_3", "Kled_Original_Mounted_Attack_4", "Kled_Original_Mounted_Attack_5"], "death": ["Kled_Original_Death_0", "Kled_Original_Death_1", "Kled_Original_Death_2"], "kill": ["Kled_Original_Kill_0", "Kled_Original_Kill_1", "Kled_Original_Kill_2"], "ultSfx": ["Kled_Original_RDash_SFX"]}, "Galio": {"select": ["Galio_Select"], "sig": ["Galio_Original_Q_0", "Galio_Original_Q_1", "Galio_Original_Q_2", "Galio_Original_Q_3"], "ult": ["Galio_Original_R"], "attack": ["Galio_Original_Attack_0", "Galio_Original_Attack_1", "Galio_Original_Attack_2", "Galio_Original_Attack_3", "Galio_Original_Attack_4", "Galio_Original_Attack_5"], "death": ["Galio_Original_Death_0", "Galio_Original_Death_1", "Galio_Original_Death_2"], "kill": ["Galio_Original_Kill_0", "Galio_Original_Kill_1", "Galio_Original_Kill_2"], "respawn": ["Galio_Original_Respawn_0", "Galio_Original_Respawn_1"], "sigSfx": ["Galio_Original_SFX_Q_OnCast"], "ultSfx": ["Galio_Original_SFX_R_OnCast"], "landSfx": ["Galio_Original_SFX_R_land"]}, "Mordekaiser": {"select": ["Mordekaiser_Select"], "sig": ["Mordekaiser_Original_Q_0", "Mordekaiser_Original_Q_1", "Mordekaiser_Original_Q_2", "Mordekaiser_Original_Q_3"], "ult": ["Mordekaiser_Original_R_0", "Mordekaiser_Original_R_1", "Mordekaiser_Original_R_2", "Mordekaiser_Original_R_3"], "attack": ["Mordekaiser_Original_Attack_0", "Mordekaiser_Original_Attack_1", "Mordekaiser_Original_Attack_2", "Mordekaiser_Original_Attack_3", "Mordekaiser_Original_Attack_4", "Mordekaiser_Original_Attack_5"], "death": ["Mordekaiser_Original_Death_0", "Mordekaiser_Original_Death_1", "Mordekaiser_Original_Death_2"], "kill": ["Mordekaiser_Original_Kill_0", "Mordekaiser_Original_Kill_1", "Mordekaiser_Original_Kill_2"], "respawn": ["Mordekaiser_Original_Respawn_0", "Mordekaiser_Original_Respawn_1"]}, "Tryndamere": {"select": ["Tryndamere_Select"], "sig": ["Tryndamere_Original_Attack_0", "Tryndamere_Original_Attack_1", "Tryndamere_Original_Attack_2"], "ult": ["Tryndamere_Original_R_Cast_SFX"], "attack": ["Tryndamere_Original_Attack_0", "Tryndamere_Original_Attack_1", "Tryndamere_Original_Attack_2", "Tryndamere_Original_Attack_3", "Tryndamere_Original_Attack_4", "Tryndamere_Original_Attack_5"], "death": ["Tryndamere_Original_Death_0", "Tryndamere_Original_Death_1", "Tryndamere_Original_Death_2"], "ultSfx": ["Tryndamere_Original_R_Cast_SFX"]}, "Graves": {"select": ["Graves_Select"], "sig": ["Graves_Original_Attack_0", "Graves_Original_Attack_1", "Graves_Original_Attack_2"], "ult": ["Graves_Original_R_0", "Graves_Original_R_1", "Graves_Original_R_2", "Graves_Original_R_3"], "attack": ["Graves_Original_Attack_0", "Graves_Original_Attack_1", "Graves_Original_Attack_2", "Graves_Original_Attack_3", "Graves_Original_Attack_4", "Graves_Original_Attack_5"], "death": ["Graves_Original_Death_0", "Graves_Original_Death_1", "Graves_Original_Death_2"]}};
+const SND_BASE=window.IC_SND??"snd/",MUSIC_BASE=window.IC_MUSIC??"music/";
+let audioOK=false;for(const ev of ["pointerdown","keydown","touchstart"])addEventListener(ev,()=>{audioOK=true},{once:true,capture:true});
+function playFile(src,vol){if(muted||vol<=0)return null;try{const a=new Audio(src);a.volume=Math.min(1,vol);a.play().catch(()=>{});return a}catch(e){return null}}
+let voiceNow=null,voiceT=0;
+function voice(c,cat,{chance=1,gap=0,interrupt=false}={}){const L=SND[c.id]&&SND[c.id][cat];if(!L||!L.length||Math.random()>chance)return;const now=performance.now();
+  if(voiceNow&&!voiceNow.ended&&!voiceNow.paused){if(!interrupt)return;voiceNow.pause()}
+  if(!interrupt&&now-voiceT<gap*1000)return;voiceT=now;voiceNow=playFile(SND_BASE+L[Math.floor(Math.random()*L.length)]+".mp3",VOL.voice)}
+const sfxT={};
+function champSfx(c,cat,gap=.8){const L=SND[c.id]&&SND[c.id][cat];if(!L||!L.length)return;const k=c.id+cat,now=performance.now();if(now-(sfxT[k]||0)<gap*1000)return;sfxT[k]=now;playFile(SND_BASE+L[0]+".mp3",Math.min(1,VOL.sfx*1.3))}
+// répliques en partie
+function vSig(p){voice(p.champ,"sig",{chance:.35,gap:7});champSfx(p.champ,"sigSfx",1.2)}
+function vUlt(p){voice(p.champ,"ult",{interrupt:true});champSfx(p.champ,"ultSfx",.5)}
+function vTick(p){if(p.down)return;if(!p.chatT)p.chatT=G.t+rnd(12,20);if(G.t<p.chatT)return;p.chatT=G.t+rnd(20,32);if(nearest(p.x,p.y,90))voice(p.champ,"attack",{chance:.6,gap:6})}
+// musique : fondu entre le menu, la partie et les boss
+const MUS={};let musWant="menu";
+function musicEl(k){if(k in MUS)return MUS[k];const a=new Audio();a.loop=true;a.volume=0;a.preload="auto";a.onerror=()=>{MUS[k]=null};a.src=MUSIC_BASE+k+".mp3";MUS[k]=a;return a}
+function musicTick(dt){
+  if(state==="menu")musWant="menu";else if(G&&G.foes.some(f=>f.boss&&!FOES[f.type].mini)&&MUS.boss!==null)musWant="boss";else musWant="game";
+  if(musWant==="boss"&&!("boss" in MUS))musicEl("boss");if(musWant==="boss"&&MUS.boss===null)musWant="game";
+  for(const k of ["menu","game","boss"]){const want=musWant===k&&!muted&&audioOK;if(want)musicEl(k);const el=MUS[k];if(!el)continue;
+    const target=want?VOL.music*(state==="pause"?.4:1):0,step=dt*.5;el.volume=clamp(el.volume+clamp(target-el.volume,-step,step),0,1);
+    if(target>0&&el.paused)el.play().catch(()=>{});else if(target===0&&el.volume<=.001&&!el.paused)el.pause()}}
+
 // ===================== Interface =====================
 // portraits : illustrations officielles de l'écran de chargement de LoL (et grandes illustrations pour la fiche)
 const loadArt=c=>`${UI_ASSET}load/${c.id}.webp`,splashArt=c=>`${UI_ASSET}splash/${c.id}.webp`;
@@ -2183,7 +2216,7 @@ function bossHud(){rushHud();const bs=G.foes.filter(f=>f.boss&&!FOES[f.type].min
 // résolution adaptative : si les images tardent, on baisse un peu la définition (et on la remonte quand tout va bien)
 let perfT=0,perfN=0;function perf(dt){if(state!=="play")return;perfT+=dt;perfN++;if(perfT<2)return;const avg=perfT/perfN;perfT=perfN=0;
   const np=avg>.024?Math.max(.6,PR-.15):avg<.0145?Math.min(PR_MAX,PR+.1):PR;if(Math.abs(np-PR)>.01){PR=np;R3.setPixelRatio(PR);R3.setSize(W,H)}}
-let last=0;function loop(ts){const raw=Math.min(.25,(ts-last)/1000||0),dt=Math.min(.05,raw);last=ts;perf(raw);pollPads();if(state==="play")update(dt);draw();if(state!=="menu")hud();requestAnimationFrame(loop)}
+let last=0;function loop(ts){const raw=Math.min(.25,(ts-last)/1000||0),dt=Math.min(.05,raw);last=ts;perf(raw);musicTick(raw);pollPads();if(state==="play")update(dt);draw();if(state!=="menu")hud();requestAnimationFrame(loop)}
 
 // ---- montées de niveau (à deux : chacun son tour) ----
 function options(p,n=3){const o=[],kit=KITS[p.champ.id],allMax=Object.values(kit).every(k=>(p.weapons[k]||0)>=MAXL);
@@ -2244,10 +2277,13 @@ const VIEWS={play:"vPlay",runes:"vRunes",board:"vBoard",info:"vInfo"};
 function setView(v){if(v==="board"&&!IC.online)v="play";view=v;for(const k in VIEWS)$(VIEWS[k]).hidden=k!==v;
   $("nav").querySelectorAll("[data-v]").forEach(b=>b.setAttribute("aria-current",b.dataset.v===v?"page":"false"));$("mbody").scrollTop=0;
   ({play:renderMenu,runes:renderRunes,board:renderBoard,info:renderInfo})[v]()}
+function renderVols(){const L=[["music","Musique"],["voice","Voix des champions"],["sfx","Effets"]];
+  document.querySelectorAll("[data-vols]").forEach(box=>{box.innerHTML=L.map(([k,l])=>`<label><span>${l}</span><input type="range" min="0" max="100" step="5" value="${Math.round(VOL[k]*100)}" data-vol="${k}" aria-label="Volume : ${l}"><b>${Math.round(VOL[k]*100)}</b></label>`).join("");
+    box.querySelectorAll("[data-vol]").forEach(i=>i.oninput=()=>{VOL[i.dataset.vol]=i.value/100;store.set("ic-vol",VOL);i.nextElementSibling.textContent=i.value;if(i.dataset.vol==="voice"&&!i._t){i._t=1;setTimeout(()=>i._t=0,600);voice(sel[0],"attack",{interrupt:true})}})})}
 function wallet(){$("walletBE").textContent=fmt(IC.essence())}
 function setMode(n){nPlayers=n;$("m1").setAttribute("aria-pressed",n===1);$("m2").setAttribute("aria-pressed",n===2);chooser=0;if(n===2&&sel[1]===sel[0])sel[1]=CHAMPS.find(c=>c!==sel[0]&&IC.unlocked(c.id))||CHAMPS[1];renderMenu()}
 const diffDesc=d=>d.desc.replace(/\s*Victoire :.*$/,"");
-function renderMenu(){const two=nPlayers===2;wallet();
+function renderMenu(){const two=nPlayers===2;wallet();renderVols();
   $("aimA").setAttribute("aria-pressed",aimMode!=="cursor");$("aimC").setAttribute("aria-pressed",aimMode==="cursor");
   $("aimNote").textContent=aimMode==="cursor"?"Tes sorts visent le monstre le plus proche de ta souris"+(two?" (joueur 1 ; le joueur 2 reste en visée automatique).":"."):"Tes sorts visent seuls les monstres visibles à l'écran.";
   $("chooser").hidden=!two;$("chooser").innerHTML=two?`Choix pour`+[0,1].map(i=>`<button type="button" data-c="${i}" aria-pressed="${chooser===i}">Joueur ${i+1} · ${esc(sel[i].name)}</button>`).join(""):"";
@@ -2260,7 +2296,7 @@ function renderMenu(){const two=nPlayers===2;wallet();
   $("champs").innerHTML="";for(const c of CHAMPS){const lock=!IC.unlocked(c.id),b=document.createElement("button");b.type="button";b.className="champ"+(lock?" lock":"");b.style.setProperty("--c",c.col);
     b.setAttribute("aria-pressed",sel[chooser]===c);b.setAttribute("aria-label",c.name+(lock?" (verrouillé)":""));
     b.innerHTML=`<img src="${loadArt(c)}" alt="" loading="lazy"><span class="cn"><b>${c.name}</b><small>${c.region}</small></span>${two&&sel[0]===c?'<span class="tag">J1</span>':""}${two&&sel[1]===c?'<span class="tag p2">J2</span>':""}${lock?'<span class="tag lk">Verrouillé</span>':""}`;
-    b.onclick=()=>{if(two&&sel[1-chooser]===c)return;sel[chooser]=c;selSkin[chooser]=null;renderMenu()};b.ondblclick=()=>{if(!lock&&!two){sel[0]=c;startGame(false)}};$("champs").appendChild(b)}
+    b.onclick=()=>{if(two&&sel[1-chooser]===c)return;if(sel[chooser]!==c)voice(c,"select",{interrupt:true});sel[chooser]=c;selSkin[chooser]=null;renderMenu()};b.ondblclick=()=>{if(!lock&&!two){sel[0]=c;startGame(false)}};$("champs").appendChild(b)}
   const c=sel[chooser],u=ULTS[c.ult],b=best()[bestKey(c.id,diff)],lock=!IC.unlocked(c.id),sk=IC.skins(c.id),RR=IC.runes()||{},owned=RUNES.filter(r=>RR[r.k]>0);
   $("detail").style.setProperty("--c",c.col);
   $("detail").innerHTML=`<div class="splash" style="background-image:url('${splashArt(c)}')"></div><div class="dbody">
@@ -2288,7 +2324,7 @@ function startGame(challenge){if(challenge){const ch=weekChallenge();chal=ch;nPl
   state="play";last=performance.now();["menu","over","shop"].forEach(i=>$(i).hidden=true);$("hud").hidden=false;$("tools").hidden=false;$("pps").hidden=false;$("chalTag").hidden=false;$("chalTag").textContent=chal?"Défi de la semaine":G.D.name;$("chalTag").style.color=chal?"var(--gold)":G.D.col;
   if(chal)say(`Défi : ${chal.mods.map(k=>MODS.find(m=>m.k===k).name).join(" + ")}`,"#ffcc4d",3);
   buildPanels();try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();AC.resume()}catch(e){}}
-function setPause(on){if(on&&state==="play"){state="pause";$("pkit").innerHTML=kitsHTML();$("pkeys").innerHTML=keysHTML(G.ps.length>1);$("pause").hidden=false;$("resume").focus()}else if(!on&&state==="pause"){state="play";$("pause").hidden=true;last=performance.now()}}
+function setPause(on){if(on&&state==="play"){state="pause";renderVols();$("pkit").innerHTML=kitsHTML();$("pkeys").innerHTML=keysHTML(G.ps.length>1);$("pause").hidden=false;$("resume").focus()}else if(!on&&state==="pause"){state="play";$("pause").hidden=true;last=performance.now()}}
 function finish(won){const P=G.ps[0],c=P.champ,b=best(),bk=bestKey(c.id,G.diff),pr=b[bk],t=Math.min(G.t,RUN),rec=!G.isChal&&G.ps.length===1&&(!pr||t>pr.t||(t===pr.t&&G.kills>pr.k));if(rec){b[bk]={t,k:G.kills,l:G.lvl};store.set("ic-best",b)}
   const sc=score(G.t,G.kills,G.bossKills,won,G.lvl,G.diff),ess=essenceOf(G.t,G.kills,G.bossKills,won,G.diff),names=G.ps.map(p=>p.champ.name).join(" et ");
   $("ovE").textContent=won?"Victoire":"Fin de partie";$("ovT").textContent=won?"La brèche est scellée":"Le Néant t'a englouti";
