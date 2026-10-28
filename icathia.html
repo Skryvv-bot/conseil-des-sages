@@ -381,8 +381,8 @@ window.IC_ASSET="cartes/";window.IC_MODELS="icathia/";window.IC_UI="icathia/ui/"
       q.forEach(d=>{const x=d.data(),pick=tab==="week"?(x.week&&x.week.key===wk?x.week:null):tab==="all"?x.top:(x.best||{})[tab];if(pick)rows.push({...pick,pseudo:x.pseudo,me:d.id===uid})});
       return rows.sort((a,b)=>b.s-a.s).slice(0,50)}};
   IC.ready=conseilConnect().then(async c=>{db=c.db;uid=c.uid;
-    if(!db||uid!==window.CONSEIL_ADMIN){const show=()=>{const d=document.createElement("section");d.className="screen";d.style.zIndex=50;d.style.background="var(--void)";
-      d.innerHTML=`<div class="box"><span class="eyebrow">Salle de jeux</span><h1>Survivants<br>d'<em>Icathia</em></h1><p class="lead">Ce jeu est encore en préparation. Il arrive bientôt sur CDS.TV !</p><div class="row"><a class="btn" href="jeux.html" style="text-decoration:none">Retour aux jeux</a></div></div>`;document.body.appendChild(d)};
+    if(!db){const show=()=>{const d=document.createElement("section");d.className="screen";d.style.zIndex=50;d.style.background="var(--void)";
+      d.innerHTML=`<div class="box"><span class="eyebrow">Salle de jeux</span><h1>Survivants<br>d'<em>Icathia</em></h1><p class="lead">Connexion au site impossible pour le moment. Recharge la page dans un instant.</p><div class="row"><a class="btn" href="jeux.html" style="text-decoration:none">Retour aux jeux</a></div></div>`;document.body.appendChild(d)};
       if(document.readyState==="loading")addEventListener("DOMContentLoaded",show);else show();return new Promise(()=>{})}
     const [cd,sk,ic]=await Promise.all([db.collection("cards").doc(uid).get(),fetch("cartes/skins.json").then(r=>r.json()).catch(()=>({skins:{}})),db.collection("icathia").doc(uid).get()]);
     const cc=(cd.exists&&cd.data().c)||{};for(const id in cc){if(!(cc[id]>0))continue;const [t,ch,x]=id.split(":");own.add(ch);if(t==="k"&&x!=="0")(skinOwn[ch]=skinOwn[ch]||[]).push(x)}
