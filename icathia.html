@@ -1401,7 +1401,7 @@ function draw(){
   {let nk=0;for(const f of G.foes)if(f.moon>t&&nk<300){const R=Math.min(f.r*K*.5,18),k=Math.min(1,(f.moon-t)/.4);put(pillarM,nk,f.x*K,0,f.y*K,[R*k,360,R*k]);put(pillarCore,nk++,f.x*K,0,f.y*K,[R*.3*k,360,R*.3*k])}pillarM.count=pillarCore.count=nk;done(pillarM,pillarCore)}
   // soldats des sables (tous les champions qui ont le sort)
   {const sol=[];for(const p of G.ps)if(p.weapons.sand&&!p.down)for(const so of p.soldiers||[])sol.push(so);
-    soldiers.forEach((m,i)=>{const so=sol[i];m.visible=!!so;if(!so)return;const rise=Math.min(1,(G.t-(so.born??-9))/.6);m.position.set(so.x*K,-90*(1-rise),so.y*K);m.rotation.y=Math.PI/2-so.a;
+    const solModel=!!(PROPS.soldier&&PROPS.soldier.scene);soldiers.forEach((m,i)=>{const so=sol[i];m.visible=!!so&&!solModel;if(!so||solModel)return;const rise=Math.min(1,(G.t-(so.born??-9))/.6);m.position.set(so.x*K,-90*(1-rise),so.y*K);m.rotation.y=Math.PI/2-so.a;
       const k=so.hit!=null?Math.max(0,1-(G.t-so.hit)/.2):0;m.children[3].position.z=12+k*16;m.children[4].position.z=50+k*16});
     solMark.forEach((m,i)=>{const so=sol[i];m.visible=!!so;if(!so)return;m.position.set(so.x*K,112+Math.sin(G.t*3+i)*4,so.y*K);m.rotation.y=G.t*2})}
   // barils de poudre
@@ -1425,7 +1425,7 @@ function draw(){
       else if(z.k==="ball"&&nbl<40){const u=1-z.t/z.max;put(ballsM,nbl,z.x*K,500*(1-u)+6,z.y*K,1);put(ballGlow,nbl++,z.x*K,500*(1-u)+6,z.y*K,1+u)}}
     ballsM.count=ballGlow.count=nbl;done(ballsM,ballGlow)}
   // mur de soldats d'Azir
-  {let nw=0;for(const w of G.walls){const n=w.n||7,a=Math.atan2(w.ny,w.nx);for(let i=0;i<n&&nw<wallSoldiers.length;i++){const g=wallSoldiers[nw++],u=i/(n-1),x=w.x1+(w.x2-w.x1)*u,y=w.y1+(w.y2-w.y1)*u,rise=Math.min(1,(G.t-w.born)/.25),fade=Math.min(1,w.t/.4);
+  {let nw=0;if(!(PROPS.soldierR&&PROPS.soldierR.scene))for(const w of G.walls){const n=w.n||7,a=Math.atan2(w.ny,w.nx);for(let i=0;i<n&&nw<wallSoldiers.length;i++){const g=wallSoldiers[nw++],u=i/(n-1),x=w.x1+(w.x2-w.x1)*u,y=w.y1+(w.y2-w.y1)*u,rise=Math.min(1,(G.t-w.born)/.25),fade=Math.min(1,w.t/.4);
       g.visible=true;g.position.set(x*K,-80*(1-rise)-80*(1-fade),y*K);g.rotation.y=Math.PI/2-a;if(w.move>0&&Math.random()<.5)G.fx.push({k:"px",x:x-w.nx*6,y:y-w.ny*6,vx:-w.nx*40+rnd(-10,10),vy:-w.ny*40+rnd(-10,10),t:.5,col:"#e8c27a"})}}
     for(let i=nw;i<wallSoldiers.length;i++)wallSoldiers[i].visible=false}
   // effets ponctuels
@@ -1578,8 +1578,8 @@ function propKill(f,o){const F=FOES[f.type];
 
 // ---------- modèles ----------
 const PROP_FILES={shop:["shop.glb.txt",230],red:["red.glb.txt",120],turretA:["turretA.glb.txt",340],turretA_dead:["turretA_dead.glb.txt",340],turretB:["turretB.glb.txt",340],turretB_dead:["turretB_dead.glb.txt",340],
-  bloom:["bloom.glb.txt",120],honey:["honey.glb.txt",140],cone:["cone.glb.txt",105]};
-const PCAP={shop:1,red:3,turretA:4,turretA_dead:6,turretB:2,turretB_dead:4,bloom:8,honey:8,cone:8};
+  soldier:["soldier.glb.txt",150],soldierR:["soldierR.glb.txt",150],bloom:["bloom.glb.txt",120],honey:["honey.glb.txt",140],cone:["cone.glb.txt",105]};
+const PCAP={soldier:6,soldierR:24,shop:1,red:3,turretA:4,turretA_dead:6,turretB:2,turretB_dead:4,bloom:8,honey:8,cone:8};
 const PROPS={};
 function loadProp(k){const [file,H]=PROP_FILES[k];PROPS[k]={loading:true};
   fetch((window.IC_MODELS??ASSET)+file).then(r=>{if(!r.ok)throw 0;return r.text()}).then(b64=>{const bin=atob(b64.trim()),buf=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)buf[i]=bin.charCodeAt(i);
@@ -1615,6 +1615,11 @@ function drawProps(t,ddt){const seen=new Set(),put1=(k,ek,x,z,ry,role,speed)=>{c
     // plantes
     cellsAround(G.cx,G.cy,PLC,VIEW()*1.15,(i,j)=>{const pl=plantAt(i,j);if(!pl)return;const st=(G.plantSt||{})[pl.key];
       if(st&&G.t<st.until){if(G.t-st.trig<1.8)put1(pl.type,pl.key,pl.x,pl.y,h2(i,j,35)*6,"trigger");return}put1(pl.type,pl.key,pl.x,pl.y,h2(i,j,35)*6,"idle")})}
+  // soldats des sables d'Azir (modèle fourni) : ils sortent du sable, frappent de la lance ; mur de boucliers de l'ultime
+  if(PROPS.soldier&&PROPS.soldier.scene)G.ps.forEach((p,pi)=>{if(!p.weapons.sand||p.down)return;(p.soldiers||[]).forEach((so,i)=>{const rise=Math.min(1,(G.t-(so.born??-9))/.6),hit=so.hit!=null&&G.t-so.hit<.45;
+    const m=put1("soldier",`so${pi}_${i}`,so.x,so.y,Math.PI/2-so.a,hit?"attack":rise<1?"run":"idle",hit?3:1);if(m)m.g.position.y=-90*(1-rise)})});
+  if(PROPS.soldierR&&PROPS.soldierR.scene)G.walls.forEach(w=>{w.id=w.id||++UID;const n=w.n||7,ry=Math.PI/2-Math.atan2(w.ny,w.nx),rise=Math.min(1,(G.t-w.born)/.25);
+    for(let i=0;i<n;i++){const u=i/(n-1),m=put1("soldierR",`w${w.id}_${i}`,w.x1+(w.x2-w.x1)*u,w.y1+(w.y2-w.y1)*u,ry,w.move>0?"run":w.t<1.3?"death":"idle",w.move>0?2:1);if(m)m.g.position.y=-80*(1-rise)}});
   for(const [ek,m] of USED)if(!seen.has(ek)){m.g.visible=false;(FREE[m.k]=FREE[m.k]||[]).push(m);USED.delete(ek)}
   // auras des buffs, tirs des tourelles
   buffRings.forEach(r=>r.visible=false);let nr=0;
