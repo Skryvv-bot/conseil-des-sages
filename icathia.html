@@ -302,7 +302,7 @@ h3.cat{margin:6px 0 0}
 </div>
 <div class="pps" id="pps" hidden></div>
 <button class="btn shopbtn" id="shopBtn" type="button" hidden>Parler au marchand (E)</button>
-<div class="tools" id="tools" hidden><button class="px" type="button" id="muteB" aria-pressed="false">Son</button><button class="px" type="button" id="pauseB">Pause</button></div>
+<div class="tools" id="tools" hidden><button class="px" type="button" id="zoomIn" aria-label="Zoomer (rapprocher la caméra)" title="Rapprocher (+)">+</button><button class="px" type="button" id="zoomOut" aria-label="Dézoomer (éloigner la caméra)" title="Éloigner (−)">−</button><button class="px" type="button" id="muteB" aria-pressed="false">Son</button><button class="px" type="button" id="pauseB">Pause</button></div>
 
 <section class="screen" id="menu">
   <header class="mtop">
@@ -772,7 +772,7 @@ function build(){grid=new Map();for(const f of G.foes){const k=(Math.floor(f.x/C
 function near(x,y,r,fn){const x0=Math.floor((x-r)/CELL),x1=Math.floor((x+r)/CELL),y0=Math.floor((y-r)/CELL),y1=Math.floor((y+r)/CELL);
   for(let i=x0;i<=x1;i++)for(let j=y0;j<=y1;j++){const a=grid.get((i*73856093)^(j*19349663));if(a)for(const f of a)if(!f.dead&&fn(f)===false)return}}
 // les sorts ne visent que les monstres visibles à l'écran ; en visée au curseur, le joueur 1 vise le monstre le plus proche de sa souris
-const onScr=f=>Math.abs(f.x-G.cx)<LW/2+f.r&&Math.abs(f.y-G.cy)<LH/2+f.r;
+const onScr=f=>Math.abs(f.x-G.cx)<LW/2*ZOOM+f.r&&Math.abs(f.y-G.cy)<LH/2*ZOOM+f.r;
 let aimMode=store.get("ic-aim","auto");const AIM={x:0,y:0,on:false};
 const aimFor=(x,y)=>aimMode==="cursor"&&AIM.on&&G.p&&G.p===G.ps[0]&&x===G.p.x&&y===G.p.y;
 function nearest(x,y,max=400,pred){let b=null,bd=1e18;const cur=aimFor(x,y);for(const f of G.foes){if(f.dead||(pred&&!pred(f)))continue;if(G.realm&&f!==G.realm.tgt)continue;if(!onScr(f))continue;const d=(f.x-x)**2+(f.y-y)**2;if(d>max*max)continue;
@@ -783,7 +783,10 @@ function densest(x,y,range,rad){if(aimFor(x,y))return nearest(x,y,range);let b=n
 function bigTarget(x,y,range){if(aimFor(x,y))return nearest(x,y,range);let b=null,bs=-1;for(const f of G.foes){if(f.dead||!onScr(f))continue;const d=Math.hypot(f.x-x,f.y-y);if(d>range)continue;const s=(f.boss?1e6:f.elite?1e4:0)+f.max-d;if(s>bs){bs=s;b=f}}return b}
 
 // ===================== Ennemis =====================
-const VIEW=()=>Math.hypot(LW,LH)/2*1.3;
+// zoom de la caméra (molette, touches + et −, boutons) : plus loin = plus de terrain visible
+let ZOOM=clamp(store.get("ic-zoom",1.3),.8,1.9);
+function setZoom(z){ZOOM=clamp(Math.round(z*20)/20,.8,1.9);store.set("ic-zoom",ZOOM);if(typeof zoomChanged==="function")zoomChanged()}
+const VIEW=()=>Math.hypot(LW,LH)/2*1.3*ZOOM;
 function spawnAt(type,x,y,o={}){const F=FOES[type],lv=o.lvl||1,boss=F.boss,D=G.D||DIFFS[1],sc=(boss?(1+G.t/900)*(1+.65*(lv-1))*(G.mod.boss&&!F.mini?1.6:1)*(F.mini?D.hp:D.boss):(F.shape?1+G.t/220:(F.elite?1+G.t/600:1+G.t/150))*D.hp);
   const f={type,x,y,r:F.r*(boss&&lv>1?1+.12*(lv-1):1),hp:F.hp*sc,max:F.hp*sc,spd:F.spd*(boss?1:1+Math.min(F.shape?.3:.35,G.t/(F.shape?1500:1200)))*(G.mod.rage?1.25:1)*D.spd,
     dmg:F.dmg*(boss?1+.3*(lv-1):1+G.t/(F.shape?600:400))*D.dmg,xp:F.xp*lv,elite:F.elite||F.tag,boss,kx:0,ky:0,flash:0,seed:Math.random()*6,slow:0,stun:0,lvl:lv,ai:F.ai,cd:2+Math.random()*2,
@@ -1278,9 +1281,10 @@ const GROUND_GLSL=`
 float h21(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
 float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h21(i),h21(i+vec2(1,0)),f.x),mix(h21(i+vec2(0,1)),h21(i+vec2(1,1)),f.x),f.y);}
 float fbm(vec2 p){float s=0.,a=.5;for(int i=0;i<4;i++){s+=vn(p)*a;p*=2.03;a*=.5;}return s;}
-float mStone(vec2 P){float d=fbm(P*.021);return max(smoothstep(.52,.545,fbm(P*.0011)+(d-.5)*.07),1.-smoothstep(520.,700.,length(P)+(d-.5)*60.));}
-float mGrass(vec2 P){float d=fbm(P*.017+vec2(3.,7.));return smoothstep(.6,.625,fbm(P*.0007+vec2(37.,11.))+(d-.5)*.06);}
-float mDirt(vec2 P){float d=fbm(P*.015+vec2(9.,2.));return smoothstep(.042,.026,abs(fbm(P*.0008+vec2(5.,9.))-.5)+(d-.5)*.03);}
+float fbm2(vec2 p){return vn(p)*.5+vn(p*2.03)*.25+.125;}
+float mStone(vec2 P){float d=fbm2(P*.021);return max(smoothstep(.52,.545,fbm(P*.0011)+(d-.5)*.07),1.-smoothstep(520.,700.,length(P)+(d-.5)*60.));}
+float mGrass(vec2 P){float d=fbm2(P*.017+vec2(3.,7.));return smoothstep(.6,.625,fbm(P*.0007+vec2(37.,11.))+(d-.5)*.06);}
+float mDirt(vec2 P){float d=fbm2(P*.015+vec2(9.,2.));return smoothstep(.042,.026,abs(fbm(P*.0008+vec2(5.,9.))-.5)+(d-.5)*.03);}
 `;
 groundMat.onBeforeCompile=sh=>{Object.assign(sh.uniforms,GU);
   sh.vertexShader=sh.vertexShader.replace("#include <common>","#include <common>\nvarying vec3 vWP;").replace("#include <fog_vertex>","#include <fog_vertex>\nvWP=(modelMatrix*vec4(transformed,1.0)).xyz;");
@@ -1293,8 +1297,8 @@ vec3 anti(sampler2D t,vec2 uv,float k){vec3 a=texture2D(t,uv).rgb,b=texture2D(t,
 float wStone,wGrass,wVoid,wDirt;`).replace("#include <map_fragment>",`
   vec2 P=vWP.xz;
   wStone=mStone(P);wGrass=mGrass(P)*(1.-wStone);wDirt=mDirt(P)*(1.-wStone)*(1.-wGrass*.6);
-  float n3=fbm(P*.0013+vec2(-19.,53.));wVoid=smoothstep(.74-uVoid*.3,.78-uVoid*.3,n3+(fbm(P*.02)-.5)*.05);
-  float mv=fbm(P*.0005+vec2(71.,3.));
+  float n3=fbm(P*.0013+vec2(-19.,53.));wVoid=smoothstep(.74-uVoid*.3,.78-uVoid*.3,n3+(fbm2(P*.02)-.5)*.05);
+  float mv=fbm2(P*.0005+vec2(71.,3.));
   vec3 sand=anti(tSand,P/520.,.45+.3*mv),stone=lin(texture2D(tStone,P/900.).rgb),grass=anti(tGrass,P/380.,.4),dirt=anti(tDirt,P/420.,.4),vo=lin(texture2D(tVoid,P/480.).rgb);
   vec3 col=mix(sand,grass,wGrass);col=mix(col,dirt,wDirt);
   // bordures peintes : herbe qui s'assombrit, terre qui s'enfonce, dalles qui débordent d'un liseré d'ombre
@@ -1306,7 +1310,7 @@ float wStone,wGrass,wVoid,wDirt;`).replace("#include <map_fragment>",`
   float lu=dot(col,vec3(.3,.5,.2));float h=lu*1.6+wStone*.9-wDirt*.35+wGrass*.25;
   vec2 gr=vec2(dFdx(h),dFdy(h));float sh=clamp(1.+(gr.x*.9-gr.y*.9)*2.2,.7,1.25);col*=sh;
   // grandes variations de teinte et de lumière, comme sur la Faille
-  col*=mix(vec3(.9,.95,1.04),vec3(1.07,1.,.9),mv)*(.86+.28*fbm(P*.0021+vec2(13.,29.)));
+  col*=mix(vec3(.9,.95,1.04),vec3(1.07,1.,.9),mv)*(.86+.28*fbm2(P*.0021+vec2(13.,29.)));
   col*=uBright;
   diffuseColor.rgb*=col;`).replace("#include <emissivemap_fragment>",`#include <emissivemap_fragment>
   totalEmissiveRadiance+=lin(texture2D(tVoidE,vWP.xz/480.).rgb)*wVoid*(.55+.45*sin(uTime*2.2+vWP.x*.004));`)};
@@ -1316,17 +1320,18 @@ const GJ=(()=>{const f=fr32,fract=v=>f(v-Math.floor(v));
   const vn=(x,y)=>{const i=Math.floor(x),j=Math.floor(y);let u=f(x-i),w=f(y-j);u=u*u*(3-2*u);w=w*w*(3-2*w);
     const a=h21(i,j),b=h21(i+1,j),c=h21(i,j+1),d=h21(i+1,j+1);return (a+(b-a)*u)+((c+(d-c)*u)-(a+(b-a)*u))*w};
   const fbm=(x,y)=>{let s=0,a=.5;for(let i=0;i<4;i++){s+=vn(x,y)*a;x=f(x*2.03);y=f(y*2.03);a*=.5}return s};
+  const fbm2=(x,y)=>vn(x,y)*.5+vn(f(x*2.03),f(y*2.03))*.25+.125;
   const ss=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
-  const stone=(x,z)=>{const d=fbm(x*.021,z*.021);return Math.max(ss(.52,.545,fbm(x*.0011,z*.0011)+(d-.5)*.07),1-ss(520,700,Math.hypot(x,z)+(d-.5)*60))};
-  const grass=(x,z)=>{const d=fbm(x*.017+3,z*.017+7);return ss(.6,.625,fbm(x*.0007+37,z*.0007+11)+(d-.5)*.06)};
-  const dirt=(x,z)=>{const d=fbm(x*.015+9,z*.015+2);return ss(.042,.026,Math.abs(fbm(x*.0008+5,z*.0008+9)-.5)+(d-.5)*.03)};
+  const stone=(x,z)=>{const d=fbm2(x*.021,z*.021);return Math.max(ss(.52,.545,fbm(x*.0011,z*.0011)+(d-.5)*.07),1-ss(520,700,Math.hypot(x,z)+(d-.5)*60))};
+  const grass=(x,z)=>{const d=fbm2(x*.017+3,z*.017+7);return ss(.6,.625,fbm(x*.0007+37,z*.0007+11)+(d-.5)*.06)};
+  const dirt=(x,z)=>{const d=fbm2(x*.015+9,z*.015+2);return ss(.042,.026,Math.abs(fbm(x*.0008+5,z*.0008+9)-.5)+(d-.5)*.03)};
   return {at(x,z){const s=stone(x,z),g=grass(x,z)*(1-s),d=dirt(x,z)*(1-s)*(1-g*.6);return {s,g,d}}}})();
 
 // ===================== Dessin 3D (three.js) =====================
 // La logique travaille en unités basse résolution ; le monde 3D les agrandit ×K (y du jeu = z du monde).
 const K=4;
 const R3=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});
-R3.setPixelRatio(Math.min(2,window.devicePixelRatio||1));R3.shadowMap.enabled=true;R3.shadowMap.type=THREE.PCFSoftShadowMap;R3.outputEncoding=THREE.sRGBEncoding;
+const PR_MAX=Math.min(1.5,window.devicePixelRatio||1);let PR=PR_MAX;R3.setPixelRatio(PR);R3.shadowMap.enabled=true;R3.shadowMap.type=THREE.PCFSoftShadowMap;R3.outputEncoding=THREE.sRGBEncoding;
 R3.domElement.className="gl";document.body.insertBefore(R3.domElement,cv);
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x120b16);scene.fog=new THREE.Fog(0x1c0c2e,1100,2700);
 const cam=new THREE.PerspectiveCamera(40,1,10,6000);
@@ -1550,6 +1555,7 @@ const shop3=new THREE.Group();{const wood=std(0x6b4a33,0,0,{roughness:.9}),cloth
 const shopLight=new THREE.PointLight(0xffc46a,1.2,500,2);scene.add(shopLight);
 
 let camD=1200;
+function zoomChanged(){const s=1000*Math.max(1,ZOOM);Object.assign(sun.shadow.camera,{left:-s,right:s,top:s,bottom:-s,far:3200*Math.max(1,ZOOM)});sun.shadow.camera.updateProjectionMatrix();cam.far=6000*Math.max(1,ZOOM);cam.updateProjectionMatrix();decorKey=""}
 function resize3(){R3.setSize(W,H);cam.aspect=W/H;cam.updateProjectionMatrix();camD=clamp(Math.max(LH*K*1.05,LW*K/cam.aspect*.95),900,1700)}
 addEventListener("resize",resize3);resize3();
 const V=new THREE.Vector3();const toScreen=(x,y,z)=>{V.set(x,y,z).project(cam);return [(V.x+1)/2*W,(1-V.y)/2*H,V.z<1]};
@@ -1568,8 +1574,8 @@ function rockGeo(seed,det=1){const g=new THREE.IcosahedronGeometry(1,det),P=g.at
   for(let i=0;i<P.count;i++){const y=P.getY(i),t=clamp((y+.2)/1.1,0,1),n=.92+R()*.16;C[i*3]=(.15+.33*t)*n;C[i*3+1]=(.11+.25*t)*n;C[i*3+2]=(.075+.16*t)*n}
   g.setAttribute("color",new THREE.BufferAttribute(C,3));return g}
 const rockMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.95,metalness:0,flatShading:true});
-const decRocks=[rockGeo(11),rockGeo(23),rockGeo(37)].map(g=>inst(g,rockMat,220,true,true));
-const pebM=inst(rockGeo(51,0),rockMat,500,false,true);
+const decRocks=[rockGeo(11),rockGeo(23),rockGeo(37)].map(g=>inst(g,rockMat,320,true,true));
+const pebM=inst(rockGeo(51,0),rockMat,700,false,true);
 // grès sculpté des ruines : assises, cannelures, bandeau doré
 const sandstoneTex=decorTex(256,256,(x,w,h)=>{x.fillStyle="#c9a06a";x.fillRect(0,0,w,h);
   for(let i=0;i<1400;i++){x.fillStyle=Math.random()<.5?"rgba(240,214,160,.18)":"rgba(110,78,44,.16)";x.beginPath();x.arc(Math.random()*w,Math.random()*h,1+Math.random()*5,0,7);x.fill()}
@@ -1598,7 +1604,7 @@ const tuftG=(()=>{const gs=[0,1,2].flatMap(i=>{const g=new THREE.PlaneGeometry(1
   const pos=[],uv=[],idx=[];let o=0;for(const g of gs){pos.push(...g.attributes.position.array);uv.push(...g.attributes.uv.array);idx.push(...[...g.index.array].map(v=>v+o));o+=g.attributes.position.count}
   const G2=new THREE.BufferGeometry();G2.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));G2.setAttribute("uv",new THREE.Float32BufferAttribute(uv,2));G2.setIndex(idx);G2.computeVertexNormals();
   const N=G2.attributes.normal;for(let i=0;i<N.count;i++)N.setXYZ(i,0,1,0);return G2})();   // normales vers le ciel : éclairage doux comme une touffe peinte
-const tuftM=inst(tuftG,new THREE.MeshStandardMaterial({map:tuftTex,alphaTest:.45,side:THREE.FrontSide,roughness:1}),1400,false,true);
+const tuftM=inst(tuftG,new THREE.MeshStandardMaterial({map:tuftTex,alphaTest:.45,side:THREE.FrontSide,roughness:1}),2000,false,true);
 // une case de décor est calculée une fois puis gardée
 const DC=170,decorCache=new Map();
 function decorCell(i,j){const key=i+":"+j;let L=decorCache.get(key);if(L)return L;L=[];if(decorCache.size>6000)decorCache.clear();
@@ -1617,15 +1623,16 @@ function decorCell(i,j){const key=i+":"+j;let L=decorCache.get(key);if(L)return 
       if(k<2&&r<.16){const n=1+Math.floor(r*18);for(let q=0;q<n;q++){const a=q*2.4+r*9,d=q?18+q*12:0;L.push({t:"rock",x:x+Math.cos(a)*d,z:z+Math.sin(a)*d,s:(q?9:18)+H(40+q)*(q?12:30),ry:a*3,v:(k+q)%3})}}
       else if(r<.28)L.push({t:"tuft",x,z,s:16+r*40,ry:r*60,c:[1.35,1.05,.55]});else if(r<.5)L.push({t:"peb",x,z,s:3+r*7,ry:r*50,sh:r})}}
   decorCache.set(key,L);return L}
-function drawDecor(PX,PZ){const n=[0,0,0],c={peb:0,stump:0,drum:0,block:0,sun:0,tuft:0};const R0=Math.ceil(camD*1.35/DC),gx=Math.floor(PX/DC),gz=Math.floor(PZ/DC);
+let decorKey="";
+function drawDecor(PX,PZ){const R0=Math.ceil(camD*ZOOM*1.35/DC),gx=Math.floor(PX/DC),gz=Math.floor(PZ/DC),key=gx+":"+gz+":"+R0;if(key===decorKey)return;decorKey=key;const n=[0,0,0],c={peb:0,stump:0,drum:0,block:0,sun:0,tuft:0};
   for(let i=gx-R0;i<=gx+R0;i++)for(let j=gz-R0;j<=gz+R0;j++)for(const o of decorCell(i,j)){
-    if(o.t==="rock"){const M=decRocks[o.v];if(n[o.v]<220){put(M,n[o.v],o.x,o.s*.15,o.z,[o.s*1.15,o.s*.9,o.s],0,o.ry,0);M.setColorAt(n[o.v]++,tmpCol.setRGB(1,1,1))}}
-    else if(o.t==="peb"){if(c.peb<500){put(pebM,c.peb,o.x,o.s*.2,o.z,[o.s*1.3,o.s*.8,o.s],0,o.ry,0);pebM.setColorAt(c.peb++,tmpCol.setRGB(.9+o.sh*.3,.9+o.sh*.25,.9+o.sh*.2))}}
+    if(o.t==="rock"){const M=decRocks[o.v];if(n[o.v]<320){put(M,n[o.v],o.x,o.s*.15,o.z,[o.s*1.15,o.s*.9,o.s],0,o.ry,0);M.setColorAt(n[o.v]++,tmpCol.setRGB(1,1,1))}}
+    else if(o.t==="peb"){if(c.peb<700){put(pebM,c.peb,o.x,o.s*.2,o.z,[o.s*1.3,o.s*.8,o.s],0,o.ry,0);pebM.setColorAt(c.peb++,tmpCol.setRGB(.9+o.sh*.3,.9+o.sh*.25,.9+o.sh*.2))}}
     else if(o.t==="stump"){if(c.stump<70){put(stumpM,c.stump,o.x,0,o.z,[o.s,o.h,o.s],0,o.ry,0);if(o.h>110)put(ringM,c.stump,o.x,o.h*.62,o.z,[o.s,o.s,o.s],0,o.ry,0);else put(ringM,c.stump,o.x,-50,o.z,.01);c.stump++}}
     else if(o.t==="drum"){if(c.drum<90)put(drumM,c.drum++,o.x,o.s,o.z,[o.l,o.s,o.s],0,o.ry,0)}
     else if(o.t==="block"){if(c.block<140)put(blockM2,c.block++,o.x,o.h*.4,o.z,[o.w,o.h,o.d],o.tilt*.3,o.ry,o.tilt)}
     else if(o.t==="sun"){if(c.sun<40)put(sunDiscM,c.sun++,o.x,.8,o.z,o.s,0,o.ry,0)}
-    else if(o.t==="tuft"){if(c.tuft<1400){put(tuftM,c.tuft,o.x,0,o.z,[o.s*1.1,o.s,o.s*1.1],0,o.ry,0);tuftM.setColorAt(c.tuft++,tmpCol.setRGB(...o.c))}}}
+    else if(o.t==="tuft"){if(c.tuft<2000){put(tuftM,c.tuft,o.x,0,o.z,[o.s*1.1,o.s,o.s*1.1],0,o.ry,0);tuftM.setColorAt(c.tuft++,tmpCol.setRGB(...o.c))}}}
   decRocks.forEach((M,k)=>M.count=n[k]);pebM.count=c.peb;stumpM.count=c.stump;ringM.count=c.stump;drumM.count=c.drum;blockM2.count=c.block;sunDiscM.count=c.sun;tuftM.count=c.tuft;
   done(...decRocks,pebM,stumpM,ringM,drumM,blockM2,sunDiscM,tuftM)}
 // buissons façon Faille : longues feuilles larges, courbées vers l'extérieur
@@ -1633,7 +1640,7 @@ const leafTex=decorTex(64,256,(x,w,h)=>{const g=x.createLinearGradient(0,h,0,0);
   x.fillStyle=g;x.beginPath();x.moveTo(w*.5,0);x.bezierCurveTo(w*.95,h*.25,w*.92,h*.75,w*.6,h);x.lineTo(w*.4,h);x.bezierCurveTo(w*.08,h*.75,w*.05,h*.25,w*.5,0);x.fill();
   x.strokeStyle="rgba(200,240,190,.45)";x.lineWidth=2;x.beginPath();x.moveTo(w*.5,h);x.quadraticCurveTo(w*.52,h*.5,w*.5,h*.04);x.stroke()});
 const leafG=(()=>{const g=new THREE.PlaneGeometry(1,1,1,4);g.translate(0,.5,0);const P=g.attributes.position;for(let i=0;i<P.count;i++){const y=P.getY(i);P.setZ(i,y*y*.45)}g.computeVertexNormals();return g})();
-const bushM=inst(leafG,new THREE.MeshStandardMaterial({map:leafTex,alphaTest:.4,side:THREE.DoubleSide,roughness:.85}),1100,true,true),
+const bushM=inst(leafG,new THREE.MeshStandardMaterial({map:leafTex,alphaTest:.4,side:THREE.DoubleSide,roughness:.85}),1600,true,true),
   bushFade=inst(leafG,new THREE.MeshStandardMaterial({map:leafTex,transparent:true,opacity:.32,depthWrite:false,side:THREE.DoubleSide}),500,false);
 // visée au curseur : point du sol sous la souris et petit réticule doré
 const aimRay=new THREE.Raycaster(),aimPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0),aimV=new THREE.Vector3(),aimNdc=new THREE.Vector2();
@@ -1641,11 +1648,12 @@ addEventListener("pointermove",e=>{if(e.pointerType!=="mouse")return;AIM.sx=e.cl
 const aimRet=new THREE.Mesh(new THREE.RingGeometry(14,18,40),new THREE.MeshBasicMaterial({color:0xf0e6d2,transparent:true,opacity:.75,depthWrite:false}));aimRet.rotation.x=-Math.PI/2;aimRet.visible=false;scene.add(aimRet);
 function aimUpdate(){const on=aimMode==="cursor"&&AIM.on&&G&&G.ps.length&&state==="play";aimRet.visible=!!on;if(!on||AIM.sx==null)return;
   cam.updateMatrixWorld();aimNdc.set(AIM.sx/innerWidth*2-1,-(AIM.sy/innerHeight)*2+1);aimRay.setFromCamera(aimNdc,cam);if(aimRay.ray.intersectPlane(aimPlane,aimV)){AIM.x=aimV.x/K;AIM.y=aimV.z/K;aimRet.position.set(aimV.x,2,aimV.z);aimRet.rotation.z=performance.now()/600}}
+zoomChanged();
 
 // ===================== Une image du jeu =====================
 function draw(){
   const cx=G?G.cx:0,cy=G?G.cy:0,sh=G&&G.shake>0?G.shake*18:0,PX=cx*K,PZ=cy*K,el=1.0,t=G?G.t:performance.now()/1000;
-  cam.position.set(PX+rnd(-sh,sh),Math.sin(el)*camD,PZ+Math.cos(el)*camD+rnd(-sh,sh));cam.lookAt(PX,0,PZ-30);
+  const cD=camD*ZOOM;cam.position.set(PX+rnd(-sh,sh),Math.sin(el)*cD,PZ+Math.cos(el)*cD+rnd(-sh,sh));cam.lookAt(PX,0,PZ-30);
   sun.position.set(PX-500,1000,PZ+300);sun.target.position.set(PX,0,PZ);sun.target.updateMatrixWorld();
   ground.position.set(PX,0,PZ);GU.uTime.value=performance.now()/1000;GU.uVoid.value=G&&G.ps.length?clamp(G.t/RUN,0,1):.2;
   // ambiance : Faille transformée, Royaume des morts, nuit noire
@@ -1654,14 +1662,14 @@ function draw(){
   if(RF){scene.fog.color.lerp(tmpCol.set(RF.fog),tk);hemi.color.lerp(tmpCol.set(RF.hemi),tk*.7);ground.material.color.lerp(tmpCol.set(RF.gr),tk)}
   if(G&&G.realm){scene.fog.color.lerp(tmpCol.set(0x0b3a33),.8);hemi.color.lerp(tmpCol.set(0x7dffd8),.5);ground.material.color.lerp(tmpCol.set(0x5a9a90),.6)}
   scene.background.copy(scene.fog.color).multiplyScalar(.6);
-  const night=G&&G.mod.nuit;scene.fog.near=night?420:1100;scene.fog.far=night?1300:2700;
+  const night=G&&G.mod.nuit;scene.fog.near=(night?420:1100)*ZOOM;scene.fog.far=(night?1300:2700)*ZOOM;
   // décor : rochers, ruines, touffes, cailloux
   drawDecor(PX,PZ);aimUpdate();
   // buissons (une touffe de brins ; transparents quand un champion est caché dedans)
-  {let n1=0,n2=0;const R=Math.ceil(VIEW()*1.2/BC),bi=Math.floor(cx/BC),bj=Math.floor(cy/BC);
+  if((window.bushF=(window.bushF||0)+1)%2===0){let n1=0,n2=0;const R=Math.ceil(VIEW()*1.2/BC),bi=Math.floor(cx/BC),bj=Math.floor(cy/BC);
     for(let i=bi-R;i<=bi+R;i++)for(let j=bj-R;j<=bj+R;j++){const b=bushAt(i,j);if(!b)continue;const hid=G&&G.ps.some(p=>!p.down&&(p.x-b.x)**2+(p.y-b.y)**2<b.r*b.r);
       const nBl=Math.round(b.r*2.6);for(let k=0;k<nBl;k++){const a=k*2.399+i,rr=Math.sqrt((k+.5)/nBl)*b.r*K*.85,x=b.x*K+Math.cos(a)*rr,z=b.y*K+Math.sin(a)*rr,hh=70+h2(i+k,j,5)*60*(1-rr/(b.r*K)*.5),sw=Math.sin(t*1.6+k+i)*.06,ry=Math.atan2(Math.cos(a),Math.sin(a))+(h2(k,i,8)-.5)*.6,wd=20+h2(j,k,9)*14;
-        if(hid){if(n2<500)put(bushFade,n2++,x,0,z,[wd,hh,wd],0,ry,sw)}else if(n1<1100){put(bushM,n1,x,0,z,[wd,hh,wd],0,ry,sw);bushM.setColorAt(n1++,tmpCol.setRGB(.85+h2(k,j,6)*.3,.9+h2(i,k,7)*.2,.85+h2(j,i,8)*.25))}}}
+        if(hid){if(n2<500)put(bushFade,n2++,x,0,z,[wd,hh,wd],0,ry,sw)}else if(n1<1600){put(bushM,n1,x,0,z,[wd,hh,wd],0,ry,sw);bushM.setColorAt(n1++,tmpCol.setRGB(.85+h2(k,j,6)*.3,.9+h2(i,k,7)*.2,.85+h2(j,i,8)*.25))}}}
     bushM.count=n1;bushFade.count=n2;done(bushM,bushFade)}
   // terrain transformé
   {let nd=0,nsft=0,nr=0,ncr=0;if(RF){const R=Math.ceil(VIEW()*1.2/PC),pi=Math.floor(cx/PC),pj=Math.floor(cy/PC),T=G.terrain;
@@ -1920,8 +1928,9 @@ function propInst(k){const T=PROPS[k];if(!T||!T.scene)return null;if((propCount[
   if(map){for(const r in map){const cl=T.anims.find(c=>c.name.toLowerCase().split(".")[0]===map[r]);if(cl){A[r]=mixer.clipAction(cl);if(!MON_LOOP.has(r)){A[r].setLoop(THREE.LoopOnce);A[r].clampWhenFinished=true}}}}
   else for(const cl of T.anims){const n=cl.name.toLowerCase(),role=/death/.test(n)?"death":/spawn/.test(n)?"spawn":/destroy/.test(n)?"destroyed":/respawn/.test(n)?"respawn":/trigger/.test(n)?"trigger":/idle/.test(n)?"idle":/run/.test(n)?"run":/attack/.test(n)?"attack":null;
     if(role&&!A[role]){A[role]=mixer.clipAction(cl);if(["death","trigger","respawn","attack","spawn"].includes(role)){A[role].setLoop(THREE.LoopOnce);A[role].clampWhenFinished=true}}}
+  if(typeof MON!=="undefined"&&MON[k]&&!MON_BIG.has(k)&&!k.startsWith("dragon"))root.traverse(o=>{if(o.isMesh)o.castShadow=false});
   const tint=typeof MON!=="undefined"&&MON[k]&&MON[k].tint;if(tint){const tc=new THREE.Color(tint);root.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.material.color.multiply(tc);if(o.material.emissive){o.material.emissive.copy(tc).multiplyScalar(.25)}}})}
-  if(!A.idle)A.idle=A.run||A.destroyed||A.trigger;return {k,g,mixer,A,cur:null}}
+  if(!A.idle)A.idle=A.run||A.destroyed||A.trigger;const bones=[];root.traverse(o=>{if(o.isBone)bones.push(o)});return {k,g,mixer,A,cur:null,bones}}
 const USED=new Map(),FREE={};
 function useProp(k,ek){let m=USED.get(ek);if(m&&m.k===k)return m;if(m){m.g.visible=false;(FREE[m.k]=FREE[m.k]||[]).push(m);USED.delete(ek)}
   m=(FREE[k]||[]).pop()||propInst(k);if(!m)return null;m.cur=null;m.mixer.stopAllAction();USED.set(ek,m);return m}
@@ -1929,7 +1938,7 @@ function playP(m,role,speed=1){const a=m.A[role]||m.A.idle;if(!a)return;if(m.cur
 const buffRings=pool(4,()=>{const m=new THREE.Mesh(new THREE.RingGeometry(.8,1,64),glow(0xff4a2a,.7));m.rotation.x=-Math.PI/2;return m});
 const tshotM=inst(new THREE.SphereGeometry(5,12,10),glow(0x7fd0ff,.95,softTex),60,false),eshotRed=inst(new THREE.SphereGeometry(5,12,10),glow(0xff4a3a,.95,softTex),40,false);
 const tshotRib=ribbons(10,10,0x6fb8ff);
-function drawProps(t,ddt){const seen=new Set(),put1=(k,ek,x,z,ry,role,speed)=>{const m=useProp(k,ek);if(!m)return null;seen.add(ek);m.g.visible=true;m.g.position.set(x*K,0,z*K);m.g.rotation.y=ry;playP(m,role,speed);m.mixer.update(ddt);return m};
+function drawProps(t,ddt){const seen=new Set(),put1=(k,ek,x,z,ry,role,speed)=>{const m=useProp(k,ek);if(!m)return null;seen.add(ek);m.g.visible=true;m.g.position.set(x*K,0,z*K);m.g.rotation.y=ry;playP(m,role,speed);m.acc=(m.acc||0)+ddt;if(((m.fc=(m.fc||0)+1)&1)===0){m.mixer.update(m.acc);m.acc=0}return m};
   // marchand
   if(PROPS.shop&&PROPS.shop.scene){put1("shop","shop",G.shop.x,G.shop.y,0,"idle");shop3.visible=false}else shop3.visible=true;
   if(G.ps.length){
@@ -1972,19 +1981,19 @@ function propsOverlay(){if(!G.ps.length)return;ctx.textAlign="center";ctx.font="
 // Chaque modèle se charge à la demande : les monstres des vagues au lancement, chaque boss 30 s avant son arrivée.
 // Noms de clips normalisés : minuscules, sans extension (.anm, .SRT…).
 const MON={
-  minB:{f:"m_minion_b",h:95,cap:18,a:{idle:"idle1",run:"run",attack:"attack1",death:"death"}},
-  minR:{f:"m_minion_r",h:100,cap:18,a:{idle:"idle1",run:"run",attack:"attack1",death:"death"}},
-  raptorS:{f:"m_raptor_s",h:60,cap:10,a:{idle:"idle_normal1",run:"run",attack:"attack2_base",death:"death_base"}},
+  minB:{f:"m_minion_b",h:95,cap:12,a:{idle:"idle1",run:"run",attack:"attack1",death:"death"}},
+  minR:{f:"m_minion_r",h:100,cap:12,a:{idle:"idle1",run:"run",attack:"attack1",death:"death"}},
+  raptorS:{f:"m_raptor_s",h:60,cap:8,a:{idle:"idle_normal1",run:"run",attack:"attack2_base",death:"death_base"}},
   raptorB:{f:"m_raptor_b",h:105,cap:4,a:{idle:"sru_razorbeak_idle_normal5",run:"run",attack:"attack2_base",death:"death_base"}},
   wolfS:{f:"m_wolf_s",h:85,cap:8,a:{idle:"sru_murkwolfmini_idle4",run:"run_base",attack:"attack1_base",death:"death_base"}},
   wolfB:{f:"m_wolf_b",h:170,cap:4,a:{idle:"sru_murkwolf_idle1",run:"run_base",attack:"attack2_base",spawn:"sru_murkwolf_spawn"}},
-  krug1:{f:"m_krug_1",h:50,cap:10,a:{idle:"krug_idle_ag2n",run:"run",death:"death"}},
-  krug2:{f:"m_krug_2",h:95,cap:8,a:{idle:"krug_idle_aggro",run:"run",attack:"attack1_base",death:"death"}},
+  krug1:{f:"m_krug_1",h:50,cap:6,a:{idle:"krug_idle_ag2n",run:"run",death:"death"}},
+  krug2:{f:"m_krug_2",h:95,cap:6,a:{idle:"krug_idle_aggro",run:"run",attack:"attack1_base",death:"death"}},
   krug3:{f:"m_krug_3",h:160,cap:4,a:{idle:"krug_idle_ag2n",run:"run",attack:"attack2",death:"death"}},
-  gromp:{f:"m_gromp",h:112,cap:8,a:{idle:"sru_gromp_idle2",run:"run",attack:"attack1_mid",death:"death"}},
+  gromp:{f:"m_gromp",h:112,cap:6,a:{idle:"sru_gromp_idle2",run:"run",attack:"attack1_mid",death:"death"}},
   crab:{f:"m_crab",h:105,cap:3,a:{idle:"idle1",run:"run",spawn:"crab_spawn"}},
-  grub:{f:"m_grub",h:80,cap:8,a:{idle:"run",run:"run",attack:"attack1b",spawn:"spawnin",death:"death1"}},
-  poro:{f:"m_poro",h:65,cap:12,a:{idle:"idle1",run:"run1",death:"death"}},
+  grub:{f:"m_grub",h:80,cap:6,a:{idle:"run",run:"run",attack:"attack1b",spawn:"spawnin",death:"death1"}},
+  poro:{f:"m_poro",h:65,cap:8,a:{idle:"idle1",run:"run1",death:"death"}},
   blue:{f:"m_blue",h:255,cap:2,a:{idle:"sru_blue_idle_aggro",run:"run",attack:"attack1",death:"death"}},
   herald:{f:"m_herald",h:261,cap:2,a:{idle:"idle_base",run:"run",spawn:"spawn",dash:"dash",death:"death"}},
   atakhan:{f:"m_atakhan",h:408,cap:1,a:{idle:"idle1",run:"run_slow",runF:"run_fast",s1:"spell1",s2:"spell2",death:"death"}},
@@ -1998,13 +2007,14 @@ function kingTick(T){if(!(G.kingAt>0)||G.kingDone)return;if(T>=G.kingAt-30)needM
   const k=G.kingF;if(k&&!k.dead&&T>=k.until){k.dead=true;G.kingDone=1;say("Le Roi Poro s'est enfui…","#9fd8ff",2.2)}if(k&&k.dead)G.kingDone=1}
 // créatures du Néant : Voidlings de Malzahar et Void spawns (Néantins), Voidmites (Rôdeurs), super-sbires (Ravageur, Sentinelle, Gueule-Abîme)
 Object.assign(MON,{
-  voidling:{f:"m_voidling",h:60,cap:28,a:{idle:"idle1",run:"run",attack:"attack3",death:"death"}},
-  voidspawn:{f:"m_voidspawn",h:42,cap:28,a:{idle:"idle1",run:"run",attack:"voidspawn_attack2",death:"death"}},
-  voidmite:{f:"m_voidmite",h:48,cap:24,a:{idle:"idle1",run:"run1",attack:"attack1b",death:"death2"}},
-  superR:{f:"m_super_r",h:165,cap:8,a:{idle:"idle1",run:"run",attack:"attack2",death:"death_base"}},
-  superB:{f:"m_super_b",h:175,cap:6,a:{idle:"idle1",run:"run",attack:"attack1",death:"death_base"}},
+  voidling:{f:"m_voidling",h:60,cap:20,a:{idle:"idle1",run:"run",attack:"attack3",death:"death"}},
+  voidspawn:{f:"m_voidspawn",h:42,cap:20,a:{idle:"idle1",run:"run",attack:"voidspawn_attack2",death:"death"}},
+  voidmite:{f:"m_voidmite",h:48,cap:14,a:{idle:"idle1",run:"run1",attack:"attack1b",death:"death2"}},
+  superR:{f:"m_super_r",h:165,cap:6,a:{idle:"idle1",run:"run",attack:"attack2",death:"death_base"}},
+  superB:{f:"m_super_b",h:175,cap:5,a:{idle:"idle1",run:"run",attack:"attack1",death:"death_base"}},
   gueule:{f:"m_super_r",h:380,cap:1,tint:"#b07cff",a:{idle:"idle1",run:"run",attack:"attack2",death:"death_base"}},
   golden:{f:"m_voidling",h:75,cap:2,tint:"#ffd75e",a:{idle:"idle1",run:"run",attack:"attack3",death:"death"}}});
+const MON_BIG=new Set(["herald","atakhan","baron","gueule","blue","poroKing"]);
 const MON_LOOP=new Set(["idle","run","runF","fly"]);
 const MON_TYPE={minB:"minB",minR:"minR",raptor:"raptorS",raptorB:"raptorB",wolf:"wolfS",wolfB:"wolfB",krugS:"krug1",krugM:"krug2",krugB:"krug3",
   gromp:"gromp",grompV:"gromp",poroKing:"poroKing",rodeur:"voidmite",brute:"superR",elite:"superB",boss:"gueule",golden:"golden",crab:"crab",grub:"grub",bluebuff:"blue",herald:"herald",atakhan:"atakhan",baron:"baron"};
@@ -2018,11 +2028,19 @@ function monPreload(){if(!G.monPre){G.monPre=1;for(const k of ["voidling","voids
 function playM(m,role,speed,stamp){const a=m.A[role]||m.A.idle;if(!a)return;if(m.cur===role&&m.stamp===stamp){a.timeScale=speed;return}
   const prev=m.cur&&(m.A[m.cur]||m.A.idle);a.reset();a.timeScale=speed;a.setEffectiveWeight(1);a.play();if(prev&&prev!==a)a.crossFadeFrom(prev,.15,false);m.cur=role;m.stamp=stamp;m.st0=G.t}
 const clipD=(m,r)=>m.A[r]?m.A[r].getClip().duration:0;
-function drawMonsters(t,ddt,seen){
+// pose partagée : tous les petits monstres d'un même type qui marchent (ou attendent) recopient le squelette d'un modèle maître,
+// animé une seule fois par image (deux maîtres décalés par type pour éviter un essaim trop synchrone)
+const SHARED=new Set(["idle","run","runF","fly"]),MASTERS={};let MFRAME=0;
+function masterPose(k,role,ph,ddt){const key=k+"|"+role+"|"+ph;let M=MASTERS[key];
+  if(!M){const T=PROPS[k],name=MON[k].a[role],cl=T.anims.find(c=>c.name.toLowerCase().split(".")[0]===name);if(!cl)return null;
+    const root=THREE.SkeletonUtils.clone(T.scene),mixer=new THREE.AnimationMixer(root),a=mixer.clipAction(cl);a.play();a.time=ph*cl.duration*.5;
+    const bones=[];root.traverse(o=>{if(o.isBone)bones.push(o)});M=MASTERS[key]={mixer,bones,last:-1}}
+  if(M.last!==MFRAME){M.last=MFRAME;M.mixer.update(ddt)}return M}
+function drawMonsters(t,ddt,seen){MFRAME++;
   for(const f of G.foes)f.hasM=false;
   const V=VIEW()*1.3,list=[];
   for(const f of G.foes){const k=monKey(f);if(!k)continue;needMon(k);const T=PROPS[k];if(!T||!T.scene)continue;
-    const d2=(f.x-G.cx)**2+(f.y-G.cy)**2;if(!f.boss&&d2>V*V)continue;list.push([f,k,(f.boss?0:f.elite?1e7:2e7)+d2])}
+    const d2=(f.x-G.cx)**2+(f.y-G.cy)**2;if(!f.boss&&d2>V*V)continue;list.push([f,k,(f.boss?0:f.elite?1e7:2e7)+d2-(f.uid&&USED.has("m"+f.uid)?5e6:0)])}
   list.sort((a,b)=>a[2]-b[2]);
   for(const [f,k] of list){const ek="m"+(f.uid=f.uid||++UID),m=useProp(k,ek);if(!m)continue;seen.add(ek);f.hasM=true;
     const F=FOES[f.type],tp=f.tgt||G.ps[0],mv=f.px==null?0:Math.hypot(f.x-f.px,f.y-f.py)/Math.max(ddt,1e-3);
@@ -2035,7 +2053,10 @@ function drawMonsters(t,ddt,seen){
     else if(m.A.attack&&G.t-(f.atkT??-9)<.6){role="attack";sp=1.3;stamp=m.cur==="attack"&&G.t-m.st0<clipD(m,"attack")/1.3?m.stamp:f.atkT}
     else if(f.alt>0&&m.A.fly)role="fly";
     else if(mv>3)role=f.runK&&m.A[f.runK]?f.runK:"run";else role="idle";
-    playM(m,role,sp,stamp);m.mixer.update(ddt)}
+    if(!f.boss&&(SHARED.has(role)||(role==="attack"&&!f.elite))&&m.bones&&m.bones.length){const M=masterPose(k,role,f.uid&1,ddt);
+      if(M&&M.bones.length===m.bones.length){if(m.own){m.mixer.stopAllAction();m.own=0}m.cur=role;m.stamp=0;
+        for(let i=0;i<M.bones.length;i++){const a=M.bones[i],b=m.bones[i],p=b.position,ap=a.position,q=b.quaternion,aq=a.quaternion,s=b.scale,as=a.scale;p.x=ap.x;p.y=ap.y;p.z=ap.z;q._x=aq._x;q._y=aq._y;q._z=aq._z;q._w=aq._w;s.x=as.x;s.y=as.y;s.z=as.z}continue}}
+    m.own=1;playM(m,role,sp,stamp);m.acc=(m.acc||0)+ddt;if(f.boss||(m.fc=(m.fc||0)+1)%2===0){m.mixer.update(m.acc);m.acc=0}}
   for(const f of G.foes){f.px=f.x;f.py=f.y}
   // poros
   G.poroModel=!!(PROPS.poro&&PROPS.poro.scene);
@@ -2159,7 +2180,10 @@ function hud(){if(!G)return;bossHud();$("xpb").style.width=(100*G.xp/G.need).toF
     skState(p.panel.querySelector("[data-u]"),p.ultCd,ultCd(p.champ.ult,p.ultLvl)*p.ultMul);skState(p.panel.querySelector("[data-s]"),G.mod.sanschati?99:p.smiteCd,18*p.ultMul)}}
 function rushHud(){const r=$("rushBar");r.hidden=!(G.rush>0);if(G.rush>0)r.textContent=`Ruée vers l'or · ${Math.ceil(G.rush)} s`}
 function bossHud(){rushHud();const bs=G.foes.filter(f=>f.boss&&!FOES[f.type].mini).sort((a,b)=>b.max-a.max)[0];$("bossbar").hidden=!bs;if(bs){const np=bs.type==="atakhan"||bs.type==="baron"?4:bs.type==="dragon"||bs.type==="herald"?2:0;$("bossName").textContent=bs.name+(bs.lvl>1?" · niveau "+bs.lvl:"")+(np?` · phase ${bs.ph||1}/${np}`:"")+(bs.untarg>G.t?" · intouchable":"");$("bossHp").style.width=Math.max(0,100*bs.hp/bs.max)+"%"}}
-let last=0;function loop(ts){const dt=Math.min(.05,(ts-last)/1000||0);last=ts;pollPads();if(state==="play")update(dt);draw();if(state!=="menu")hud();requestAnimationFrame(loop)}
+// résolution adaptative : si les images tardent, on baisse un peu la définition (et on la remonte quand tout va bien)
+let perfT=0,perfN=0;function perf(dt){if(state!=="play")return;perfT+=dt;perfN++;if(perfT<2)return;const avg=perfT/perfN;perfT=perfN=0;
+  const np=avg>.024?Math.max(.6,PR-.15):avg<.0145?Math.min(PR_MAX,PR+.1):PR;if(Math.abs(np-PR)>.01){PR=np;R3.setPixelRatio(PR);R3.setSize(W,H)}}
+let last=0;function loop(ts){const raw=Math.min(.25,(ts-last)/1000||0),dt=Math.min(.05,raw);last=ts;perf(raw);pollPads();if(state==="play")update(dt);draw();if(state!=="menu")hud();requestAnimationFrame(loop)}
 
 // ---- montées de niveau (à deux : chacun son tour) ----
 function options(p,n=3){const o=[],kit=KITS[p.champ.id],allMax=Object.values(kit).every(k=>(p.weapons[k]||0)>=MAXL);
@@ -2214,8 +2238,8 @@ function renderShop(){const p=buyer;if(!p)return;const two=G.ps.length>1;
 // ---- menu principal : Jouer, Runes, Classement, Récompenses et règles ----
 const sel=[CHAMPS[0],CHAMPS[1]],selSkin=[null,null];let chooser=0,view="play";
 function keysHTML(two){return two?`<span><b style="color:var(--gold)">J1</b> <kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> bouger · <kbd>R</kbd> ultime · <kbd>F</kbd> châtiment</span>
-  <span><b style="color:#ff9ec7">J2</b> flèches · <kbd>Entrée</kbd> ou <kbd>0</kbd> ultime · <kbd>Maj droite</kbd> châtiment</span><span><kbd>E</kbd> marchand · <kbd>Échap</kbd> pause · manettes acceptées</span>`
-  :`<span><kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> ou flèches : bouger</span><span><kbd>R</kbd> ultime · <kbd>F</kbd> châtiment · <kbd>E</kbd> marchand</span><span><kbd>Échap</kbd> pause · manette acceptée · mobile : glisse le doigt</span>`}
+  <span><b style="color:#ff9ec7">J2</b> flèches · <kbd>Entrée</kbd> ou <kbd>0</kbd> ultime · <kbd>Maj droite</kbd> châtiment</span><span><kbd>E</kbd> marchand · <kbd>Échap</kbd> pause · manettes acceptées · molette ou <kbd>+</kbd> <kbd>−</kbd> : zoom</span>`
+  :`<span><kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> ou flèches : bouger</span><span><kbd>R</kbd> ultime · <kbd>F</kbd> châtiment · <kbd>E</kbd> marchand</span><span><kbd>Échap</kbd> pause · manette acceptée · mobile : glisse le doigt</span><span>Molette ou <kbd>+</kbd> <kbd>−</kbd> : zoom de la caméra</span>`}
 const VIEWS={play:"vPlay",runes:"vRunes",board:"vBoard",info:"vInfo"};
 function setView(v){if(v==="board"&&!IC.online)v="play";view=v;for(const k in VIEWS)$(VIEWS[k]).hidden=k!==v;
   $("nav").querySelectorAll("[data-v]").forEach(b=>b.setAttribute("aria-current",b.dataset.v===v?"page":"false"));$("mbody").scrollTop=0;
@@ -2336,6 +2360,9 @@ function renderInfo(){wallet();const pct=v=>(v>=1?"+":"")+Math.round((v-1)*100)+
 // ---- boutons ----
 $("nav").querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>setView(b.dataset.v));
 $("aimA").onclick=()=>{aimMode="auto";store.set("ic-aim",aimMode);renderMenu()};$("aimC").onclick=()=>{aimMode="cursor";store.set("ic-aim",aimMode);renderMenu()};
+$("zoomIn").onclick=()=>setZoom(ZOOM-.1);$("zoomOut").onclick=()=>setZoom(ZOOM+.1);
+addEventListener("wheel",e=>{if(state!=="play"&&state!=="pause")return;setZoom(ZOOM+(e.deltaY>0?.08:-.08))},{passive:true});
+addEventListener("keydown",e=>{if(state!=="play")return;if(e.code==="Equal"||e.code==="NumpadAdd")setZoom(ZOOM-.1);else if(e.code==="Minus"||e.code==="NumpadSubtract"||e.code==="Digit6")setZoom(ZOOM+.1)});
 $("m1").onclick=()=>setMode(1);$("m2").onclick=()=>setMode(2);
 $("shopBtn").onclick=openShop;$("shopClose").onclick=closeShop;$("resume").onclick=()=>setPause(false);$("pauseB").onclick=()=>setPause(true);$("quit").onclick=()=>{state="play";lose()};
 $("again").onclick=()=>startGame(!!chal);$("toMenu").onclick=menu;
