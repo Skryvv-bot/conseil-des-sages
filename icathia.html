@@ -262,6 +262,32 @@ h3.cat{margin:6px 0 0}
 .timeline span{font:700 13px var(--title);color:var(--gold)}
 @media (max-width:640px){.mtop{flex-wrap:wrap;gap:8px}.nav{order:3;flex-basis:100%}.nav button{padding:8px 10px;font-size:12px}.mbody{height:calc(100% - 108px)}.diffs{grid-template-columns:minmax(0,1fr)}.clock{font-size:26px}.kit{max-width:100%}}
 @media (prefers-reduced-motion:reduce){.champ,.pick,.rn,.champ img{transition:none}}
+.rgrid.shop{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.rcard{display:grid;grid-template-columns:56px minmax(0,1fr);gap:10px 14px;padding:14px;align-items:start}
+.rcard>img{width:56px;height:56px;filter:grayscale(1) brightness(.6)}
+.rcard.on>img{filter:none;filter:drop-shadow(0 0 8px color-mix(in srgb,var(--pc) 60%,transparent))}
+.rtx b{display:block;font:700 15px var(--title);letter-spacing:.04em;color:var(--gold-hi)}
+.rtx small{display:block;font:600 10px var(--pixel);letter-spacing:.14em;text-transform:uppercase;color:var(--pc)}
+.rtx p{margin:4px 0 6px;font-size:13px;color:#cdbe91}
+.pips{display:flex;gap:4px}.pips i{width:16px;height:6px;background:#1e2328;border:1px solid #3c3c41}.pips i.on{background:var(--pc);border-color:var(--pc);box-shadow:0 0 6px var(--pc)}
+.rcard .btn{grid-column:1/-1;display:flex;justify-content:space-between;gap:10px;align-items:center;padding:9px 12px;min-height:0;font-size:12px;letter-spacing:.04em;text-transform:none;font-family:var(--pixel)}
+.rcard .btn b{font:700 13px var(--title);color:#7fd3ff;white-space:nowrap}
+.rcard .maxed{grid-column:1/-1;font:700 12px var(--title);letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+/* icônes de sorts, objets et fragments dans le HUD */
+.kit{align-items:center}
+.kit .ic{position:relative;width:38px;height:38px;padding:0;border:1px solid var(--gold-lo);background:#010a13;box-shadow:0 0 0 1px #000}
+.kit .ic img{width:100%;height:100%}
+.kit .ic i{position:absolute;right:-4px;bottom:-5px;min-width:16px;height:16px;padding:0 3px;display:grid;place-items:center;background:#010a13;border:1px solid var(--gold-lo);font:700 10px var(--title);font-style:normal;color:var(--gold-hi)}
+.kit .ic.r{border-color:#8a3a6a}
+.kit .ic.max{border-color:var(--gold);box-shadow:0 0 10px rgba(200,170,110,.6)}.kit .ic.max i{color:#1e1405;background:var(--gold);border-color:var(--gold)}
+.kit .ic.sm{width:28px;height:28px}.kit .ic.sm i{font-size:9px;min-width:13px;height:13px}
+.kit .ic.it i{right:auto;left:50%;transform:translateX(-50%);bottom:-6px;white-space:nowrap}
+.pick .pic,.it .pic{width:44px;height:44px;border:1px solid var(--gold-lo);float:left;margin:0 10px 0 0}
+.pick{display:block}.pick>span,.pick>b,.pick>p{display:block}.pick .lvl{margin-bottom:4px}.pick p{margin-top:6px;clear:both}
+.it{display:block}.it>b,.it>p,.it>span{display:block}.it p{clear:both;padding-top:4px}
+.spell .key{position:relative;padding:0;overflow:hidden}
+.spell .key img{width:100%;height:100%}
+.spell .key i{position:absolute;right:0;bottom:0;font:700 10px var(--title);font-style:normal;background:rgba(1,10,19,.85);padding:0 3px;color:var(--gold-hi)}
 
 </style>
 </head>
@@ -296,7 +322,10 @@ h3.cat{margin:6px 0 0}
           <div class="opts">
             <div class="sec"><h3>Mode</h3>
               <div class="seg" role="group" aria-label="Nombre de joueurs"><button type="button" id="m1" aria-pressed="true">Solo</button><button type="button" id="m2" aria-pressed="false">À deux, même écran</button></div>
-              <div class="chooser" id="chooser" hidden></div></div>
+              <div class="chooser" id="chooser" hidden></div>
+              <h3 style="margin-top:6px">Visée</h3>
+              <div class="seg" role="group" aria-label="Visée des sorts"><button type="button" id="aimA" aria-pressed="true">Automatique</button><button type="button" id="aimC" aria-pressed="false">Curseur de la souris</button></div>
+              <p class="note" id="aimNote"></p></div>
             <div class="sec"><h3>Défi de la semaine</h3><div class="px chalcard" id="chalCard"></div></div>
           </div>
           <div class="sec"><h3>Difficulté</h3><div class="diffs" id="diffs"></div></div>
@@ -307,9 +336,9 @@ h3.cat{margin:6px 0 0}
       </div>
     </div>
     <div class="mview" id="vRunes" hidden>
-      <div class="rhead"><div><span class="eyebrow">Progression permanente</span><h2>Page de runes</h2><p class="lead">Les runes de League of Legends, adaptées à la survie. Débloque-les avec l'essence bleue gagnée en partie, puis compose ta page : elle s'applique à toutes tes parties.</p></div>
-        <div class="row"><span class="ess" id="essN"></span><button class="btn alt" type="button" id="runeReset">Page par défaut</button></div></div>
-      <div class="rgrid" id="runeGrid"></div>
+      <div class="rhead"><div><span class="eyebrow">Progression permanente</span><h2>Runes</h2><p class="lead">Chaque rune de League of Legends donne un bonus permanent, rang après rang, à toutes tes parties. Achète les rangs avec l'essence bleue gagnée en jouant ; tu peux tout te faire rembourser quand tu veux.</p></div>
+        <div class="row"><span class="ess" id="essN"></span><button class="btn alt" type="button" id="runeReset">Tout rembourser</button></div></div>
+      <div class="rgrid shop" id="runeGrid"></div>
     </div>
     <div class="mview" id="vBoard" hidden>
       <div><span class="eyebrow">CDS.TV</span><h2>Classement</h2></div>
@@ -347,6 +376,7 @@ window.IC_ASSET="cartes/";window.IC_MODELS="icathia/";window.IC_UI="icathia/ui/"
     submit:run=>{if(!run.run)return Promise.reject(new Error("Partie non enregistrée : le robot n'a pas répondu au début de la partie"));
       return call({op:"icRun",...run}).then(r=>{doc.ess=r.ess;doc.runes=r.runes;return {essence:r.essence,po:r.po,rush:r.rush,king:r.king,boosters:r.boosters,note:r.note}})},
     buyRune:k=>call({op:"icRune",rune:k}).then(r=>{doc.ess=r.ess;doc.runes=r.runes;return true}),
+    refundRunes:()=>call({op:"icRefund"}).then(r=>{doc.ess=r.ess;doc.runes=r.runes;return true}),
     board:async tab=>{const q=await db.collection("icathia").get(),rows=[],wk=weekKey();
       q.forEach(d=>{const x=d.data(),pick=tab==="week"?(x.week&&x.week.key===wk?x.week:null):tab==="all"?x.top:(x.best||{})[tab];if(pick)rows.push({...pick,pseudo:x.pseudo,me:d.id===uid})});
       return rows.sort((a,b)=>b.s-a.s).slice(0,50)}};
@@ -509,131 +539,29 @@ const OUT_LORE={Ashe:"Le Freljord perd sa reine, mais la glace d'Avarosa retient
 
 const RTREE={"Precision":[[["PressTheAttack","Attaque soutenue"],["LethalTempo","Tempo mortel"],["FleetFootwork","Jeu de jambes"],["Conqueror","Conquérant"]],[["AbsorbLife","Absorption vitale"],["Triumph","Triomphe"],["PresenceOfMind","Présence d'esprit"]],[["LegendAlacrity","Légende : alacrité"],["LegendHaste","Légende : accélération"],["LegendBloodline","Légende : sangsue"]],[["CoupDeGrace","Coup de grâce"],["CutDown","Abattage"],["LastStand","Baroud d'honneur"]]],"Domination":[[["Electrocute","Électrocution"],["DarkHarvest","Moisson noire"],["HailOfBlades","Déluge de lames"]],[["CheapShot","Coup bas"],["TasteOfBlood","Goût du sang"],["SuddenImpact","Ruée offensive"]],[["SixthSense","Sixième sens"],["GrislyMementos","Souvenirs épouvantables"],["DeepWard","Balise de profondeur"]],[["TreasureHunter","Chasseur de trésors"],["RelentlessHunter","Chasseur acharné"],["UltimateHunter","Chasseur ultime"]]],"Sorcery":[[["SummonAery","Invocation d'Aery"],["ArcaneComet","Comète arcanique"],["PhaseRush","Assaut du maraudeur"],["DeathfireTouch","Toucher de feu mortel"]],[["NullifyingOrb","Arcaniste axiomatique"],["ManaflowBand","Ruban de mana"],["NimbusCloak","Manteau nuageux"]],[["Transcendence","Transcendance"],["Celerity","Célérité"],["AbsoluteFocus","Concentration absolue"]],[["Scorch","Brûlure"],["Waterwalking","Marche sur l'eau"],["GatheringStorm","Tempête menaçante"]]],"Resolve":[[["GraspOfTheUndying","Poigne de l'immortel"],["Aftershock","Après-coup"],["Guardian","Gardien"]],[["Demolish","Démolition"],["FontOfLife","Fontaine de vie"],["ShieldBash","Coup de bouclier"]],[["Conditioning","Conditionnement"],["SecondWind","Second souffle"],["BonePlating","Plaque d'os"]],[["Overgrowth","Surcroissance"],["Revitalize","Revitalisation"],["Unflinching","Inébranlable"]]],"Inspiration":[[["GlacialAugment","Optimisation glaciale"],["UnsealedSpellbook","Grimoire déchaîné"],["FirstStrike","Premier coup"]],[["HextechFlashtraption","Canaliportation Hextech"],["MagicalFootwear","Chaussures magiques"],["CashBack","Remise immédiate"]],[["PerfectTiming","Triple tonique"],["TimeWarpTonic","Philtre de chronodistorsion"],["BiscuitDelivery","Livraison de biscuits"]],[["CosmicInsight","Savoir cosmique"],["ApproachVelocity","Vitesse d'approche"],["JackOfAllTrades","Polyvalence"]]]};
 
-// ===================== Runes de League of Legends : pages de runes =====================
-// Mêmes voies, mêmes noms et mêmes icônes que dans LoL (Data Dragon, version française). Chaque rune est adaptée au jeu.
-// Une page : une voie principale (1 rune clé + 1 rune par rangée), une voie secondaire (2 runes de rangées différentes) et 3 fragments.
-// Les runes se débloquent avec l'essence bleue (pour toujours) ; une rune clé par voie est offerte.
-const RPATH=[{k:"Precision",name:"Précision",col:"#c8aa6e",tag:"Attaques améliorées et dégâts soutenus"},{k:"Domination",name:"Domination",col:"#d44242",tag:"Chasse et dégâts explosifs"},
-  {k:"Sorcery",name:"Sorcellerie",col:"#9faafc",tag:"Sorts renforcés et manipulation de ressources"},{k:"Resolve",name:"Volonté",col:"#a1d586",tag:"Résistance et contrôle des foules"},
-  {k:"Inspiration",name:"Inspiration",col:"#49aab9",tag:"Outils créatifs et bris de règles"}];
-const RKEY={};for(const P of RPATH)RTREE[P.k].forEach((row,ri)=>row.forEach(([k,name])=>RKEY[k]={k,name,path:P.k,row:ri}));
-const RUNE_FREE=new Set(["Conqueror","Electrocute","ArcaneComet","GraspOfTheUndying","FirstStrike"]);
-const runeCost=k=>RUNE_FREE.has(k)?0:RKEY[k].row===0?400:120;
+// ===================== Runes : noms et icônes de League of Legends, bonus des PowerUps de Vampire Survivors =====================
+// Chaque rune est une amélioration permanente achetée par rangs avec l'essence bleue, comme la boutique de Vampire Survivors.
+// Coût d'un rang : prix de base × numéro du rang. Tout peut être remboursé à tout moment.
+const RKEY={};for(const P in RTREE)RTREE[P].forEach((row,ri)=>row.forEach(([k,name])=>RKEY[k]={k,name,path:P,row:ri}));
 const UI_ASSET=window.IC_UI??"ui/";
-const runeIcon=k=>`${UI_ASSET}runes/${k}.png`,pathIcon=k=>`${UI_ASSET}runes/style_${k}.png`;
-// fragments (gratuits) : trois rangées, un choix par rangée
-const SHARDS=[
-  [{k:"s_adapt",ic:"statmodsadaptiveforce",name:"Force adaptative",d:"+4 % de dégâts",a:p=>p.dmgMul+=.04},{k:"s_as",ic:"statmodsattackspeed",name:"Vitesse d'attaque",d:"Sorts 4 % plus rapides",a:p=>p.cdMul*=.96},{k:"s_ah",ic:"statmodscdrscaling",name:"Accélération de compétence",d:"Ultime 6 % plus rapide",a:p=>p.ultMul*=.94}],
-  [{k:"s_adapt2",ic:"statmodsadaptiveforce",name:"Force adaptative",d:"+4 % de dégâts",a:p=>p.dmgMul+=.04},{k:"s_ms",ic:"statmodsmovementspeed",name:"Vitesse de déplacement",d:"+3 % de vitesse",a:p=>p.spd*=1.03},{k:"s_hpl",ic:"statmodshealthplus",name:"PV croissants",d:"+1 PV max par niveau atteint",a:p=>p.rkLvlHp=(p.rkLvlHp||0)+1}],
-  [{k:"s_hp",ic:"statmodshealthscaling",name:"PV",d:"+15 PV max",a:p=>{p.maxHp+=15;p.hp+=15}},{k:"s_ten",ic:"statmodstenacity",name:"Ténacité",d:"Les coups reçus sont réduits de 1",a:p=>p.armor+=1},{k:"s_hpl2",ic:"statmodshealthplus",name:"PV croissants",d:"+1 PV max par niveau atteint",a:p=>p.rkLvlHp=(p.rkLvlHp||0)+1}]];
-const SHARDK=Object.fromEntries(SHARDS.flat().map(s=>[s.k,s]));
-const isElite=f=>f.boss||f.elite;
-const hpF=p=>p.hp/p.maxHp;
-// rafale bonus : ne relance pas les effets de runes (évite les boucles)
-function rBurst(p,f,dmg){if(!f||f.dead)return;p._rb=1;hurt(f,dmg,0,0,p);p._rb=0}
-function rArea(p,x,y,R,dmg,col){p._rb=1;near(x,y,R+20,o=>{if((o.x-x)**2+(o.y-y)**2<(R+o.r)**2)hurt(o,dmg,0,0,p)});p._rb=0;G.fx.push({k:"blast",x,y,r:R,t:.45,max:.45,col})}
-const rHeal=(p,h)=>{if(!p.down)p.hp=Math.min(p.maxHp,p.hp+h*(p.healMul||1))};
-// effets : d = description, a = au départ, h = coup porté (renvoie un multiplicateur), k = monstre tué, x = coup reçu (renvoie les dégâts), t = chaque image
-const RE={
-  // ---- Précision ----
-  PressTheAttack:{d:"Toucher 3 fois le même monstre l'expose : il subit +12 % de dégâts pendant 4 s.",h:(p,f)=>{f.ptN=(f.ptN||0)+1;if(f.ptN>=3)f.exp=G.t+4;return f.exp>G.t?1.12:1}},
-  LethalTempo:{d:"Chaque coup accélère tes sorts de 1 % (jusqu'à 15 %). La cadence retombe après 3 s sans frapper.",h:p=>{if(G.t-(p.ltH||0)>.12){p.ltH=G.t;p.ltS=Math.min(15,(p.ltS||0)+1)}p.ltT=G.t;return 1},
-    t:(p,dt)=>{if(G.t-(p.ltT||0)>3)p.ltS=Math.max(0,(p.ltS||0)-dt*5);p.rcd*=1-.01*(p.ltS||0)}},
-  FleetFootwork:{d:"Toutes les 6 s, ton prochain coup te soigne de 4 % de tes PV max et te donne +20 % de vitesse pendant 1,5 s.",h:p=>{if(G.t>=(p.ffCd||0)){p.ffCd=G.t+6;rHeal(p,p.maxHp*.04);p.ffT=G.t+1.5}return 1},t:p=>{if(p.ffT>G.t)p.rspd*=1.2}},
-  Conqueror:{d:"Chaque coup donne +1 % de dégâts (jusqu'à 12 %, 4 s). Au maximum, 3 % de tes dégâts te soignent.",h:(p,f,d)=>{if(G.t-(p.cqH||0)>.15){p.cqH=G.t;p.cqS=Math.min(12,(p.cqS||0)+1)}p.cqT=G.t;if(p.cqS>=12)rHeal(p,d*.03);return 1+.01*(p.cqS||0)},
-    t:p=>{if(G.t-(p.cqT||0)>4)p.cqS=0}},
-  AbsorbLife:{d:"Chaque monstre tué te soigne de 1 PV (4 pour un élite ou un boss).",k:(p,f)=>rHeal(p,isElite(f)?4:1)},
-  Triumph:{d:"Tuer un élite ou un boss te soigne de 12 % de tes PV max et rapporte 20 or.",k:(p,f)=>{if(isElite(f)){rHeal(p,p.maxHp*.12);addGold(p,20)}}},
-  PresenceOfMind:{d:"Chaque monstre tué réduit la recharge de ton ultime de 0,2 s (1 s pour un élite ou un boss).",k:(p,f)=>{p.ultCd=Math.max(0,p.ultCd-(isElite(f)?1:.2))}},
-  LegendAlacrity:{d:"Sorts 1 % plus rapides par tranche de 100 monstres tués (jusqu'à 10 %).",t:p=>{p.rcd*=1-Math.min(.1,Math.floor(p.kills/100)*.01)}},
-  LegendHaste:{d:"Ultime 6 % plus rapide, puis +1 % par tranche de 150 monstres tués (jusqu'à 12 %).",t:p=>{p.rult*=1-(.06+Math.min(.06,Math.floor(p.kills/150)*.01))}},
-  LegendBloodline:{d:"0,5 % de vol de vie, puis +0,5 % par tranche de 150 monstres tués (jusqu'à 4 %).",t:p=>{p.rls+=.005+Math.min(.035,Math.floor(p.kills/150)*.005)}},
-  CoupDeGrace:{d:"+10 % de dégâts contre les monstres sous 40 % de leurs PV.",h:(p,f)=>f.hp/f.max<.4?1.1:1},
-  CutDown:{d:"+12 % de dégâts contre les élites et les boss.",h:(p,f)=>isElite(f)?1.12:1},
-  LastStand:{d:"Jusqu'à +15 % de dégâts quand tes PV sont bas (dès 60 %).",h:p=>1+.15*clamp((.6-hpF(p))/.5,0,1)},
-  // ---- Domination ----
-  Electrocute:{d:"Toucher 3 fois le même monstre en 3 s déclenche une décharge de foudre sur lui et autour (recharge 4 s).",h:(p,f)=>{if(G.t-(f.ecT||-9)>3){f.ecN=0;f.ecT=G.t}f.ecN=(f.ecN||0)+1;
-      if(f.ecN>=3&&G.t>=(p.ecCd||0)){p.ecCd=G.t+4;f.ecN=0;rArea(p,f.x,f.y,24,30+G.t*.12,"#ff4a6a");sfx("boom")}return 1}},
-  DarkHarvest:{d:"Frapper un monstre sous 50 % de ses PV récolte son âme : gros coup bonus (recharge 3 s). Chaque âme rend le suivant plus fort.",h:(p,f)=>{if(f.hp/f.max<.5&&G.t>=(p.dhCd||0)){p.dhCd=G.t+3;p.souls=(p.souls||0)+1;rBurst(p,f,20+p.souls*3+G.t*.05);G.fx.push({k:"star",x:f.x,y:f.y,t:.35,max:.35,col:"#c43c4a"})}return 1}},
-  HailOfBlades:{d:"Toutes les 8 s, tes sorts sont 40 % plus rapides pendant 2,5 s.",t:p=>{if(G.t%8<2.5)p.rcd*=.6}},
-  CheapShot:{d:"+10 % de dégâts contre les monstres ralentis ou étourdis.",h:(p,f)=>f.slow>0||f.stun>0?1.1:1},
-  TasteOfBlood:{d:"Toucher un monstre te soigne (2 PV, plus avec le temps ; une fois toutes les 2 s).",h:p=>{if(G.t>=(p.tbCd||0)){p.tbCd=G.t+2;rHeal(p,2+G.t*.004)}return 1}},
-  SuddenImpact:{d:"Après une ruée, un saut ou une charge, tes coups font +15 % de dégâts pendant 3 s.",h:p=>p.siT>G.t?1.15:1,t:p=>{if(p.dash||p.charging||p.flying||p.jumpT>0)p.siT=G.t+3}},
-  SixthSense:{d:"Les monstres dorés, les buffs et les tourelles du Néant sont signalés au bord de l'écran.",t:()=>{G.reveal=Math.max(G.reveal||0,.3)}},
-  GrislyMementos:{d:"Chaque élite ou boss tué donne +2 % de dégâts pour la partie (jusqu'à 10 %).",k:(p,f)=>{if(isElite(f))p.gmS=Math.min(5,(p.gmS||0)+1)},t:p=>{p.rdmg+=.02*(p.gmS||0)}},
-  DeepWard:{d:"+25 % de portée de ramassage de l'expérience et de l'or.",a:p=>p.magnet*=1.25},
-  TreasureHunter:{d:"Commence la partie avec 150 or ; chaque élite tué rapporte 3 or de plus.",a:p=>p.gold+=150,k:(p,f)=>{if(f.elite)addGold(p,3)}},
-  RelentlessHunter:{d:"+5 % de vitesse de déplacement.",a:p=>p.spd*=1.05},
-  UltimateHunter:{d:"Ultime 10 % plus rapide, puis +1 % par élite ou boss tué (jusqu'à 20 %).",k:(p,f)=>{if(isElite(f))p.uhS=Math.min(10,(p.uhS||0)+1)},t:p=>{p.rult*=1-(.1+.01*(p.uhS||0))}},
-  // ---- Sorcellerie ----
-  SummonAery:{d:"Aery file vers le monstre que tu touches et le blesse (toutes les 1,5 s).",h:(p,f)=>{if(G.t>=(p.aeCd||0)){p.aeCd=G.t+1.5;rBurst(p,f,8+G.t*.04);G.fx.push({k:"star",x:f.x,y:f.y,t:.3,max:.3,col:"#d6b4ff"})}return 1}},
-  ArcaneComet:{d:"Toutes les 5 s, une comète s'abat sur un monstre que tu viens de toucher et blesse tout autour.",h:(p,f)=>{if(G.t>=(p.acCd||0)){p.acCd=G.t+5;(p.comets=p.comets||[]).push({x:f.x,y:f.y,t:.6})}return 1},
-    t:(p,dt)=>{if(!p.comets)return;for(const c of p.comets){c.t-=dt;if(c.t<=0){c.done=1;rArea(p,c.x,c.y,28,35+G.t*.12,"#b48cff");sfx("boom")}}p.comets=p.comets.filter(c=>!c.done)}},
-  PhaseRush:{d:"Toucher 3 monstres différents en 3 s donne +35 % de vitesse pendant 2 s (recharge 8 s).",h:(p,f)=>{const m=p.prM=p.prM||new Map();m.set(f,G.t);for(const [o,t] of m)if(G.t-t>3)m.delete(o);
-      if(m.size>=3&&G.t>=(p.prCd||0)){p.prCd=G.t+8;p.prT=G.t+2;m.clear()}return 1},t:p=>{if(p.prT>G.t)p.rspd*=1.35}},
-  DeathfireTouch:{d:"Tes coups enflamment les monstres : ils brûlent pendant 3 s.",h:(p,f)=>{f.burnT=Math.max(f.burnT||0,G.t+3);f.burnDps=Math.max(f.burnDps||0,5+G.t*.02);f.burnBy=f.burnBy||p;return 1}},
-  NullifyingOrb:{d:"Pendant 3 s après ton ultime, tes dégâts augmentent de 12 %.",h:p=>G.t-(p.ultT??-99)<3?1.12:1},
-  ManaflowBand:{d:"Toutes les minutes, tes sorts deviennent 1 % plus rapides (jusqu'à 8 %).",t:p=>{p.rcd*=1-Math.min(.08,Math.floor(G.t/60)*.01)}},
-  NimbusCloak:{d:"Après ton ultime, +25 % de vitesse pendant 2,5 s.",t:p=>{if(G.t-(p.ultT??-99)<2.5)p.rspd*=1.25}},
-  Transcendence:{d:"Sorts et ultime 5 % plus rapides.",a:p=>{p.cdMul*=.95;p.ultMul*=.95}},
-  Celerity:{d:"+4 % de vitesse de déplacement.",a:p=>p.spd*=1.04},
-  AbsoluteFocus:{d:"+8 % de dégâts tant que tu as plus de 70 % de tes PV.",h:p=>hpF(p)>.7?1.08:1},
-  Scorch:{d:"Toutes les 4 s, ton prochain coup brûle sa cible pour des dégâts bonus.",h:(p,f)=>{if(G.t>=(p.scCd||0)){p.scCd=G.t+4;rBurst(p,f,15+G.t*.05)}return 1}},
-  Waterwalking:{d:"Dans l'herbe de la Faille : +6 % de vitesse et +4 % de dégâts.",h:p=>p.wwOn?1.04:1,t:p=>{if(G.t>=(p.wwC||0)){p.wwC=G.t+.3;const m=GJ.at(p.x*K,p.y*K);p.wwOn=m.g>.5}if(p.wwOn)p.rspd*=1.06}},
-  GatheringStorm:{d:"Toutes les 2 minutes, +2 % de dégâts (cumulatif).",t:p=>{p.rdmg+=.02*Math.floor(G.t/120)}},
-  // ---- Volonté ----
-  GraspOfTheUndying:{d:"Toutes les 4 s, ton prochain coup inflige 4 % de tes PV max en plus, te soigne de 2 % et te donne +1 PV max pour la partie.",
-    h:(p,f)=>{if(G.t>=(p.gpCd||0)){p.gpCd=G.t+4;rBurst(p,f,p.maxHp*.04);rHeal(p,p.maxHp*.02);p.rkHpGain=(p.rkHpGain||0)+1}return 1}},
-  Aftershock:{d:"Quand tu reçois un coup : +6 d'armure pendant 2,5 s, puis une onde de choc frappe autour de toi (recharge 8 s).",x:(p,dm)=>{if(G.t>=(p.asCd||0)){p.asCd=G.t+8;p.asT=G.t+2.5;p.asP=1}return dm},
-    t:p=>{if(p.asT>G.t)p.rarm+=6;else if(p.asP){p.asP=0;rArea(p,p.x,p.y,34,25+G.t*.1+p.maxHp*.05,"#a1d586")}}},
-  Guardian:{d:"Quand tes PV passent sous 40 %, tu reçois un bouclier de 20 % de tes PV max (recharge 30 s).",x:(p,dm)=>{if((p.hp-dm)/p.maxHp<.4&&G.t>=(p.gdCd||0)){p.gdCd=G.t+30;p.shield=Math.max(p.shield,p.maxHp*.2);say("Gardien : bouclier !","#a1d586",1)}return dm}},
-  Demolish:{d:"+20 % de dégâts contre les tourelles du Néant et le Baron Nashor.",h:(p,f)=>FOES[f.type].fixed||f.type==="baron"?1.2:1},
-  FontOfLife:{d:"+0,5 PV par seconde.",a:p=>p.regen+=.5},
-  ShieldBash:{d:"Tant que tu as un bouclier, tes coups font +10 % de dégâts.",h:p=>p.shield>0?1.1:1},
-  Conditioning:{d:"Après 5 minutes : +3 d'armure et +5 % de PV max.",t:p=>{if(G.t>300){p.rarm+=3;p.rhp+=Math.round(p.champ.hp*.05)}}},
-  SecondWind:{d:"Après avoir reçu un coup, tu récupères 1 PV par seconde pendant 5 s.",x:(p,dm)=>{p.swT=G.t+5;return dm},t:(p,dt)=>{if(p.swT>G.t)rHeal(p,dt)}},
-  BonePlating:{d:"Après un coup reçu, les 3 suivants sont réduits de 3 (recharge 20 s).",x:(p,dm)=>{if(p.bpN>0){p.bpN--;return Math.max(1,dm-3)}if(G.t>=(p.bpCd||0)){p.bpCd=G.t+20;p.bpN=3}return dm}},
-  Overgrowth:{d:"+1 PV max tous les 40 monstres tués ; +3,5 % de PV max à partir de 400.",t:p=>{p.rhp+=Math.floor(p.kills/40)+(p.kills>=400?Math.round(p.champ.hp*.035):0)}},
-  Revitalize:{d:"Les soins que tu reçois sont 10 % plus forts (20 % sous 40 % de PV).",a:p=>{p.healMul=(p.healMul||1)*1.1;p.revLow=1}},
-  Unflinching:{d:"+2 d'armure, et +2 de plus sous 50 % de PV.",a:p=>p.armor+=2,t:p=>{if(hpF(p)<.5)p.rarm+=2}},
-  // ---- Inspiration ----
-  GlacialAugment:{d:"Tes coups ralentissent les monstres (une fois toutes les 3 s par cible) ; les monstres ralentis te font 10 % de dégâts en moins.",
-    h:(p,f)=>{if(G.t>=(f.gaT||0)){f.gaT=G.t+3;f.slow=Math.max(f.slow,1.5)}return 1},x:(p,dm,src)=>src&&src.slow>0?dm*.9:dm},
-  UnsealedSpellbook:{d:"Châtiment 25 % plus rapide ; chaque Châtiment donne +10 % de dégâts pendant 5 s.",h:p=>p.usT>G.t?1.1:1,
-    t:(p,dt)=>{if(p.smiteCd>0)p.smiteCd=Math.max(0,p.smiteCd-dt*.33);if(p.smiteCd>(p.usLast||0)+1)p.usT=G.t+5;p.usLast=p.smiteCd}},
-  FirstStrike:{d:"Le premier coup sur un monstre intact fait +12 % de dégâts et rapporte de l'or.",h:(p,f)=>{if(f.hp>=f.max-.01){addGold(p,isElite(f)?3:.15);return 1.12}return 1}},
-  HextechFlashtraption:{d:"Toutes les 20 s, une Hexflash te rend intouchable 0,5 s au moment où un coup t'atteint.",x:(p,dm)=>{if(G.t>=(p.hfCd||0)){p.hfCd=G.t+20;p.inv=.5;G.fx.push({k:"star",x:p.x,y:p.y,t:.3,max:.3,col:"#49aab9"});return 0}return dm}},
-  MagicalFootwear:{d:"À 3 minutes (ou après 60 monstres tués), +8 % de vitesse de déplacement.",t:p=>{if(G.t>180||p.kills>=60)p.rspd*=1.08}},
-  CashBack:{d:"Les objets du marchand te rendent 6 % de leur prix."},
-  PerfectTiming:{d:"Toutes les 3 minutes, un tonique te donne +10 % de dégâts pendant 30 s.",t:p=>{if(G.t>30&&G.t%180<30)p.rdmg+=.1}},
-  TimeWarpTonic:{d:"Soins reçus 10 % plus forts ; être soigné donne +5 % de vitesse pendant 3 s.",a:p=>{p.healMul=(p.healMul||1)*1.1;p.twt=1},t:p=>{if(p.twtT>G.t)p.rspd*=1.05}},
-  BiscuitDelivery:{d:"Toutes les 2 minutes (6 fois), un biscuit te soigne de 8 % de tes PV max et donne +4 PV max.",t:p=>{const n=Math.min(6,Math.floor(G.t/120));while((p.bisN||0)<n){p.bisN=(p.bisN||0)+1;p.rkHpGain=(p.rkHpGain||0)+4;rHeal(p,p.maxHp*.08);say("Livraison de biscuits !","#49aab9",1.2)}}},
-  CosmicInsight:{d:"Ultime et Châtiment 8 % plus rapides.",a:p=>p.ultMul*=.92},
-  ApproachVelocity:{d:"+6 % de vitesse quand un monstre ralenti ou étourdi est proche.",t:p=>{if(G.t>=(p.avC||0)){p.avC=G.t+.3;let on=false;near(p.x,p.y,80,f=>{if(f.slow>0||f.stun>0)on=true});p.avOn=on}if(p.avOn)p.rspd*=1.06}},
-  JackOfAllTrades:{d:"Pour chaque objet légendaire : +1 % de dégâts et sorts 1 % plus rapides ; bonus à 3 et 5 objets.",t:p=>{const n=Math.min(6,p.items.length);p.rdmg+=.01*n+(n>=3?.02:0)+(n>=5?.03:0);p.rcd*=1-.01*n}}};
-// ---- page de runes ----
-const PAGE0={P:"Precision",k:"Conqueror",r:[null,null,null],S:"Resolve",s:[null,null],sh:["s_adapt","s_adapt2","s_hp"]};
-function runePage(){const p=store.get("ic-page",null);return p&&p.P?{...PAGE0,...p,r:[...(p.r||[null,null,null])],s:[...(p.s||[null,null])],sh:[...(p.sh||PAGE0.sh)]}:JSON.parse(JSON.stringify(PAGE0))}
-const runeOwned=k=>RUNE_FREE.has(k)||!!(IC.runes()||{})[k];
-// runes réellement actives (débloquées et bien placées)
-function pageRunes(pg=runePage()){const out=[];const ok=(k,path,row)=>k&&RKEY[k]&&RKEY[k].path===path&&(row==null||RKEY[k].row===row)&&runeOwned(k);
-  if(ok(pg.k,pg.P,0))out.push(pg.k);pg.r.forEach((k,i)=>{if(ok(k,pg.P,i+1))out.push(k)});
-  const rows=new Set();if(pg.S!==pg.P)for(const k of pg.s)if(k&&ok(k,pg.S)&&RKEY[k].row>0&&!rows.has(RKEY[k].row)){rows.add(RKEY[k].row);out.push(k)}
-  return out}
-function applyRunes(p){const ks=pageRunes(),pg=runePage();p.runeIds=new Set(ks);p.RH=null;
-  for(const k of ks){const e=RE[k];if(e&&e.a)e.a(p)}
-  pg.sh.forEach((k,i)=>{const s=SHARDK[k];if(s&&SHARDS[i].includes(s))s.a(p)});
-  const H={h:[],k:[],x:[],t:[]};for(const k of ks){const e=RE[k];if(!e)continue;for(const w of ["h","k","x","t"])if(e[w])H[w].push(e[w])}
-  if(H.h.length||H.k.length||H.x.length||H.t.length||p.rkLvlHp)p.RH=H}
-// valeurs qui changent pendant la partie : appliquées par écart pour rester justes après une reconstruction des statistiques
-function rDelta(p,key,stat,val,mul){const prev=p[key]??(mul?1:0);if(mul)p[stat]*=val/prev;else p[stat]+=val-prev;p[key]=val}
-function runeTick(p,dt){const H=p.RH;p.rcd=1;p.rult=1;p.rspd=1;p.rdmg=0;p.rarm=0;p.rls=0;p.rhp=(p.rkHpGain||0)+(p.rkLvlHp||0)*(G.lvl-1);
-  for(const f of H.t)f(p,dt);
-  rDelta(p,"rk_cd","cdMul",p.rcd,1);rDelta(p,"rk_ult","ultMul",p.rult,1);rDelta(p,"rk_spd","spd",p.rspd,1);rDelta(p,"rk_dmg","dmgMul",p.rdmg,0);rDelta(p,"rk_arm","armor",p.rarm,0);rDelta(p,"rk_ls","ls",p.rls,0);
-  const before=p.maxHp;rDelta(p,"rk_hp","maxHp",p.rhp,0);if(p.maxHp>before)p.hp+=p.maxHp-before;p.hp=Math.min(p.hp,p.maxHp)}
-function runeHit(p,f,d){let m=1;for(const h of p.RH.h)m*=h(p,f,d);return m}
-function runeKill(p,f){for(const k of p.RH.k)k(p,f)}
-function runeHurt(p,dm,src){for(const x of p.RH.x){dm=x(p,dm,src);if(dm<=0)return 0}return dm}
+const runeIcon=k=>`${UI_ASSET}runes/${k}.png`;
+const RPCOL={Precision:"#c8aa6e",Domination:"#d44242",Sorcery:"#9faafc",Resolve:"#a1d586",Inspiration:"#49aab9"};
+const RUNES=[
+  {k:"Conqueror",vs:"Puissance",max:5,base:100,d:l=>`+${5*l} % de dégâts`,a:(p,l)=>p.dmgMul+=.05*l},
+  {k:"BonePlating",vs:"Armure",max:3,base:250,d:l=>`−${l} dégât${l>1?"s":""} sur chaque coup reçu`,a:(p,l)=>p.armor+=l},
+  {k:"Overgrowth",vs:"PV max",max:3,base:100,d:l=>`+${10*l} % de PV max`,a:(p,l)=>{const h=Math.round(p.maxHp*.1*l);p.maxHp+=h;p.hp+=h}},
+  {k:"SecondWind",vs:"Récupération",max:5,base:100,d:l=>`+${String(Math.round(l)/10).replace(".",",")} PV par seconde`,a:(p,l)=>p.regen+=.1*l},
+  {k:"Transcendence",vs:"Recharge",max:2,base:400,d:l=>`Sorts et ultime ${String(2.5*l).replace(".",",")} % plus rapides`,a:(p,l)=>{p.cdMul*=1-.025*l;p.ultMul*=1-.025*l}},
+  {k:"Celerity",vs:"Vitesse",max:2,base:150,d:l=>`+${5*l} % de vitesse de déplacement`,a:(p,l)=>p.spd*=1+.05*l},
+  {k:"ApproachVelocity",vs:"Aimant",max:2,base:150,d:l=>`+${25*l} % de portée de ramassage`,a:(p,l)=>p.magnet*=1+.25*l},
+  {k:"CoupDeGrace",vs:"Chance",max:3,base:250,d:l=>`+${3*l} % de chance de coup critique`,a:(p,l)=>p.crit+=.03*l},
+  {k:"DarkHarvest",vs:"Croissance",max:5,base:400,d:l=>`+${3*l} % d'expérience`,a:(p,l)=>p.xpMul+=.03*l},
+  {k:"TreasureHunter",vs:"Avidité",max:5,base:100,d:l=>`+${10*l} % d'or gagné`,a:(p,l)=>p.goldMul+=.1*l},
+  {k:"LastStand",vs:"Résurrection",max:1,base:1500,d:()=>`Te relève une fois par partie`,a:p=>p.revive=(p.revive||0)+1}];
+const RUNEK=Object.fromEntries(RUNES.map(r=>[r.k,r]));
+const runeCost=(k,lv)=>RUNEK[k].base*(lv+1);
+const runeSpent=R=>RUNES.reduce((s,r)=>{const l=Math.min(r.max,R[r.k]||0);for(let i=0;i<l;i++)s+=runeCost(r.k,i);return s},0);
+function applyRunes(p){const R=IC.runes()||{};for(const r of RUNES){const l=Math.min(r.max,R[r.k]||0);if(l>0)r.a(p,l)}}
 
 // ===================== Kits des champions : Q, W, E (5 niveaux + MAX) et R (5 niveaux + MAX) =====================
 // Le sort principal de chaque champion est donné au départ ; les deux autres arrivent en montant de niveau.
@@ -734,9 +662,12 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 const fmt=n=>Math.floor(n).toLocaleString("fr-FR");
 // progression hors ligne (artifact) ; la version CDS.TV remplace IC par le compte du site
 window.IC=window.IC||{online:false,
-  runes:()=>{const r=store.get("ic-runes",{});let ref=0;for(const k of ["conq","poigne","celerite","transc","savoir","souffle","tresor","moisson"])if(r[k]){ref+=[0,150,450,950][Math.min(3,r[k])];delete r[k]}
-    if(ref){store.set("ic-runes",r);store.set("ic-ess",store.get("ic-ess",0)+ref)}return r},essence:()=>store.get("ic-ess",0),
-  buyRune(k){const r=this.runes(),c=runeCost(k);if(!RKEY[k]||r[k]||this.essence()<c)return Promise.resolve(false);r[k]=1;store.set("ic-runes",r);store.set("ic-ess",this.essence()-c);return Promise.resolve(true)},
+  runes:()=>{const r=store.get("ic-runes",{});let ref=0;
+    for(const k of Object.keys(r)){if(RUNEK[k])continue;const old=["conq","poigne","celerite","transc","savoir","souffle","tresor","moisson"].includes(k);ref+=old?[0,150,450,950][Math.min(3,r[k])]:RKEY[k]&&RKEY[k].row===0?400:120;delete r[k]}
+    if(ref){store.set("ic-runes",r);store.set("ic-ess",store.get("ic-ess",0)+ref)}return r},
+  essence:()=>store.get("ic-ess",0),
+  buyRune(k){const r=this.runes(),R=RUNEK[k];if(!R)return Promise.resolve(false);const lv=r[k]||0,c=runeCost(k,lv);if(lv>=R.max||this.essence()<c)return Promise.resolve(false);r[k]=lv+1;store.set("ic-runes",r);store.set("ic-ess",this.essence()-c);return Promise.resolve(true)},
+  refundRunes(){const r=this.runes();store.set("ic-ess",this.essence()+runeSpent(r));store.set("ic-runes",{});return Promise.resolve(true)},
   unlocked:()=>true,skins:()=>[],
   start:()=>Promise.resolve({run:null,king:Math.random()<.5,kingAt:150+Math.floor(Math.random()*390)}),
   submit(run){store.set("ic-ess",this.essence()+run.essence);return Promise.resolve({essence:run.essence})}};
@@ -840,11 +771,16 @@ const CELL=24;let grid=new Map();
 function build(){grid=new Map();for(const f of G.foes){const k=(Math.floor(f.x/CELL)*73856093)^(Math.floor(f.y/CELL)*19349663);let a=grid.get(k);if(!a)grid.set(k,a=[]);a.push(f)}}
 function near(x,y,r,fn){const x0=Math.floor((x-r)/CELL),x1=Math.floor((x+r)/CELL),y0=Math.floor((y-r)/CELL),y1=Math.floor((y+r)/CELL);
   for(let i=x0;i<=x1;i++)for(let j=y0;j<=y1;j++){const a=grid.get((i*73856093)^(j*19349663));if(a)for(const f of a)if(!f.dead&&fn(f)===false)return}}
-function nearest(x,y,max=400,pred){let b=null,bd=max*max;for(const f of G.foes){if(f.dead||(pred&&!pred(f)))continue;if(G.realm&&f!==G.realm.tgt)continue;const d=(f.x-x)**2+(f.y-y)**2;if(d<bd){bd=d;b=f}}return b}
+// les sorts ne visent que les monstres visibles à l'écran ; en visée au curseur, le joueur 1 vise le monstre le plus proche de sa souris
+const onScr=f=>Math.abs(f.x-G.cx)<LW/2+f.r&&Math.abs(f.y-G.cy)<LH/2+f.r;
+let aimMode=store.get("ic-aim","auto");const AIM={x:0,y:0,on:false};
+const aimFor=(x,y)=>aimMode==="cursor"&&AIM.on&&G.p&&G.p===G.ps[0]&&x===G.p.x&&y===G.p.y;
+function nearest(x,y,max=400,pred){let b=null,bd=1e18;const cur=aimFor(x,y);for(const f of G.foes){if(f.dead||(pred&&!pred(f)))continue;if(G.realm&&f!==G.realm.tgt)continue;if(!onScr(f))continue;const d=(f.x-x)**2+(f.y-y)**2;if(d>max*max)continue;
+  const s=cur?(f.x-AIM.x)**2+(f.y-AIM.y)**2:d;if(s<bd){bd=s;b=f}}return b}
 // la plus grosse mêlée autour d'un point (pour viser les zones)
-function densest(x,y,range,rad){let b=null,bn=0;for(let k=0;k<40&&k<G.foes.length;k++){const f=G.foes[Math.floor(Math.random()*G.foes.length)];if(f.dead||(f.x-x)**2+(f.y-y)**2>range*range)continue;let n=0;near(f.x,f.y,rad,o=>{if((o.x-f.x)**2+(o.y-f.y)**2<rad*rad)n+=o.boss?8:o.elite?3:1});if(n>bn){bn=n;b=f}}return b}
+function densest(x,y,range,rad){if(aimFor(x,y))return nearest(x,y,range);let b=null,bn=0;for(let k=0;k<40&&k<G.foes.length;k++){const f=G.foes[Math.floor(Math.random()*G.foes.length)];if(f.dead||!onScr(f)||(f.x-x)**2+(f.y-y)**2>range*range)continue;let n=0;near(f.x,f.y,rad,o=>{if((o.x-f.x)**2+(o.y-f.y)**2<rad*rad)n+=o.boss?8:o.elite?3:1});if(n>bn){bn=n;b=f}}return b}
 // cible prioritaire : boss, puis élite, puis la plus proche
-function bigTarget(x,y,range){let b=null,bs=-1;for(const f of G.foes){if(f.dead)continue;const d=Math.hypot(f.x-x,f.y-y);if(d>range)continue;const s=(f.boss?1e6:f.elite?1e4:0)+f.max-d;if(s>bs){bs=s;b=f}}return b}
+function bigTarget(x,y,range){if(aimFor(x,y))return nearest(x,y,range);let b=null,bs=-1;for(const f of G.foes){if(f.dead||!onScr(f))continue;const d=Math.hypot(f.x-x,f.y-y);if(d>range)continue;const s=(f.boss?1e6:f.elite?1e4:0)+f.max-d;if(s>bs){bs=s;b=f}}return b}
 
 // ===================== Ennemis =====================
 const VIEW=()=>Math.hypot(LW,LH)/2*1.3;
@@ -879,7 +815,7 @@ function faillePlan(dt){const t=G.t,swarm=G.mod.essaim?2:1;
 // dégâts infligés aux monstres (o = le joueur qui frappe)
 function hurt(f,dmg,kx=0,ky=0,o=G.p){if(!f||f.dead||!o)return 0;if(f.untarg>G.t)return 0;if(G.realm&&f!==G.realm.tgt)return 0;
   const bl=o.weapons&&o.weapons.bloodlust?WEAPONS.bloodlust.st(o.weapons.bloodlust).bonus:0;
-  let d=dmg*(o.dmgMul+bl)*(f.moon>G.t?1.4:1)*(f.hawk>G.t?1.15:1)*(o.rageT>0?1+(o.rageV||.3):1);if(o.RH&&!o._rb)d*=runeHit(o,f,d);const cr=o.crit>0&&Math.random()<o.crit;if(cr)d*=2;
+  let d=dmg*(o.dmgMul+bl)*(f.moon>G.t?1.4:1)*(f.hawk>G.t?1.15:1)*(o.rageT>0?1+(o.rageV||.3):1);const cr=o.crit>0&&Math.random()<o.crit;if(cr)d*=2;
   if(o.redT>0){f.burnT=G.t+2.5;f.burnDps=4+G.t*.02;f.burnBy=o;f.slow=Math.max(f.slow,.4)}
   f.hp-=d;f.flash=.08;f.kx+=kx;f.ky+=ky;sfx("hit");o.dmgDone+=d;
   if(bl)o.fury=Math.min(100,(o.fury||0)+1);if(o.weapons&&o.weapons.indestr)o.mStore=(o.mStore||0)+d*WEAPONS.indestr.st(o.weapons.indestr).ratio;
@@ -887,7 +823,7 @@ function hurt(f,dmg,kx=0,ky=0,o=G.p){if(!f||f.dead||!o)return 0;if(f.untarg>G.t)
   if(G.texts.length<30)G.texts.push({x:f.x+rnd(-3,3),y:f.y-f.r-2,s:String(Math.round(d))+(cr?"!":""),col:cr?"#ff9b3d":f.boss||f.elite?"#ffcc4d":"#ffffff",t:.5,max:.5,small:!cr});
   if(f.hp<=0)killFoe(f,o);return d}
 function addGold(p,g){p.goldF+=g*p.goldMul;const n=Math.floor(p.goldF);if(n>0){p.gold+=n;p.goldF-=n}}
-function killFoe(f,o){if(f.dead)return;f.dead=true;if(o&&o.RH&&o.kills!=null)runeKill(o,f);if(f.hasM)monDeath(f);f.hp=0;G.kills++;o.kills=(o.kills||0)+1;if(o.weapons&&o.weapons.bloodlust)o.fury=Math.min(100,(o.fury||0)+3);
+function killFoe(f,o){if(f.dead)return;f.dead=true;if(f.hasM)monDeath(f);f.hp=0;G.kills++;o.kills=(o.kills||0)+1;if(o.weapons&&o.weapons.bloodlust)o.fury=Math.min(100,(o.fury||0)+3);
   if(f.type==="golden"){G.rush=(G.rush||0)+20;say("Ruée vers l'or ! Pendant 20 s, l'expérience se change en or","#ffd75e",2.6);sfx("chest");for(let i=0;i<30;i++)G.fx.push({k:"px",x:f.x,y:f.y,vx:rnd(-90,90),vy:rnd(-90,90),t:rnd(.4,.9),col:"#ffe14d"})}if(o.courage!=null&&!o.mounted)o.courage+=f.boss?3:f.elite?1:.05;const F=FOES[f.type];
   const g=(F.g||0)*(G.mod.pauvre?.5:1);for(const p of G.ps)addGold(p,g);
   if(g>=10){G.texts.push({x:f.x,y:f.y-f.r-10,s:`+${Math.round(g)} or`,col:"#ffd75e",t:1,max:1,small:true});sfx("coin")}
@@ -898,12 +834,11 @@ function killFoe(f,o){if(f.dead)return;f.dead=true;if(o&&o.RH&&o.kills!=null)run
   if((f.elite&&!F.shape)||(f.boss&&!F.mini))G.gems.push({x:f.x+6,y:f.y,chest:1,r:5});else if(Math.random()<.006)G.gems.push({x:f.x,y:f.y,heal:1,r:4});
   for(let i=0;i<(f.boss?26:f.elite?12:4);i++)G.fx.push({k:"px",x:f.x,y:f.y,vx:rnd(-60,60),vy:rnd(-60,60),t:rnd(.2,.5),col:i%2?"#b073ff":"#ffe14d"})}
 function say(s,col,life=1.6){const n=G.texts.filter(t=>!t.small&&t.say&&t.t>.3).length;G.texts.push({x:G.cx,y:G.cy-22-n*7,s,col,t:life,max:life,small:false,say:1})}
-function heal(p,h){if(p.down)return;h*=(p.healMul||1)*(p.revLow&&p.hp<p.maxHp*.4?1.1:1);if(p.twt)p.twtT=G.t+3;p.hp=Math.min(p.maxHp,p.hp+h);G.texts.push({x:p.x,y:p.y-12,s:"+"+Math.round(h),col:"#6cff8a",t:.8,max:.8,small:true})}
+function heal(p,h){if(p.down)return;p.hp=Math.min(p.maxHp,p.hp+h);G.texts.push({x:p.x,y:p.y-12,s:"+"+Math.round(h),col:"#6cff8a",t:.8,max:.8,small:true})}
 
 // dégâts reçus par un champion (src = le monstre responsable)
 function damagePlayer(dm,p,src){if(!p||p.down||p.inv>0||G.dead||p.stasis>0||p.dash)return;
   if(G.realm&&src&&src!==G.realm.tgt)return;
-  if(p.RH){dm=runeHurt(p,dm,src);if(dm<=0)return}
   if(src&&src.weak>G.t)dm*=1-(src.weakV||.3);if(p.drT>0)dm*=1-(p.drV||0);
   const arm=p.armor+(p.grit||0)*(p.gritV||0),blocked=Math.min(Math.max(0,dm-1),arm);dm=Math.max(1,dm-arm);
   if(p.thorns&&src&&!src.dead&&src.max)hurt(src,blocked*3+2,0,0,p);
@@ -1003,7 +938,7 @@ function update(dt){G.t+=dt;const two=G.ps.length>1;
   if(two){const [a,b]=G.ps,mx=LW*.8,my=LH*.72,dx=b.x-a.x,dy=b.y-a.y;if(Math.abs(dx)>mx){const e=(Math.abs(dx)-mx)/2*Math.sign(dx);a.x+=e;b.x-=e}if(Math.abs(dy)>my){const e=(Math.abs(dy)-my)/2*Math.sign(dy);a.y+=e;b.y-=e}}
   const al=alive().length?alive():G.ps;G.cx=al.reduce((s,p)=>s+p.x,0)/al.length;G.cy=al.reduce((s,p)=>s+p.y,0)/al.length;
   faillePlan(dt);build();
-  for(const p of G.ps){if(p.down)continue;G.p=p;if(p.RH)runeTick(p,dt);const w=p.champ.weapon,c0=p.cds[w]||0,a0=p.aimA;weapons(dt,p);if((p.cds[w]||0)>c0+.01){p.atkT=G.t;if(p.aimA===a0){const t=nearest(p.x,p.y,260);if(t)p.aimA=Math.atan2(t.y-p.y,t.x-p.x)}}}
+  for(const p of G.ps){if(p.down)continue;G.p=p;const w=p.champ.weapon,c0=p.cds[w]||0,a0=p.aimA;weapons(dt,p);if((p.cds[w]||0)>c0+.01){p.atkT=G.t;if(p.aimA===a0){const t=nearest(p.x,p.y,260);if(t)p.aimA=Math.atan2(t.y-p.y,t.x-p.x)}}}
   G.p=G.ps[0];shots(dt);spells(dt);if(state!=="play")return;
   const realm=G.realm;
   for(const f of G.foes){if(f.dead)continue;f.flash-=dt;
@@ -1037,7 +972,7 @@ function update(dt){G.t+=dt;const two=G.ps.length>1;
 
 // ===================== Sorts lancés automatiquement =====================
 function inRect(f,x,y,dx,dy,len,w){const rx=f.x-x,ry=f.y-y,al=rx*dx+ry*dy;return al>=-f.r&&al<=len+f.r&&Math.abs(rx*dy-ry*dx)<w/2+f.r}
-function closestFoes(x,y,range,n){return G.foes.filter(f=>!f.dead&&(!G.realm||f===G.realm.tgt)&&(f.x-x)**2+(f.y-y)**2<range*range).sort((a,b)=>((a.x-x)**2+(a.y-y)**2)-((b.x-x)**2+(b.y-y)**2)).slice(0,n)}
+function closestFoes(x,y,range,n){const cx=aimFor(x,y)?AIM.x:x,cy=aimFor(x,y)?AIM.y:y;return G.foes.filter(f=>!f.dead&&onScr(f)&&(!G.realm||f===G.realm.tgt)&&(f.x-x)**2+(f.y-y)**2<range*range).sort((a,b)=>((a.x-cx)**2+(a.y-cy)**2)-((b.x-cx)**2+(b.y-cy)**2)).slice(0,n)}
 const fan=(a0,n,step)=>Array.from({length:n},(_,i)=>a0+(i-(n-1)/2)*step);
 const pulse=(x,y,r,col,t=.45)=>G.fx.push({k:"pulse",x,y,r,col,t,max:t});
 function dashTo(p,a,len,T,dmg,w,col,onEnd){const dx=Math.cos(a),dy=Math.sin(a),hit=new Set();
@@ -1700,6 +1635,12 @@ const leafTex=decorTex(64,256,(x,w,h)=>{const g=x.createLinearGradient(0,h,0,0);
 const leafG=(()=>{const g=new THREE.PlaneGeometry(1,1,1,4);g.translate(0,.5,0);const P=g.attributes.position;for(let i=0;i<P.count;i++){const y=P.getY(i);P.setZ(i,y*y*.45)}g.computeVertexNormals();return g})();
 const bushM=inst(leafG,new THREE.MeshStandardMaterial({map:leafTex,alphaTest:.4,side:THREE.DoubleSide,roughness:.85}),1100,true,true),
   bushFade=inst(leafG,new THREE.MeshStandardMaterial({map:leafTex,transparent:true,opacity:.32,depthWrite:false,side:THREE.DoubleSide}),500,false);
+// visée au curseur : point du sol sous la souris et petit réticule doré
+const aimRay=new THREE.Raycaster(),aimPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0),aimV=new THREE.Vector3(),aimNdc=new THREE.Vector2();
+addEventListener("pointermove",e=>{if(e.pointerType!=="mouse")return;AIM.sx=e.clientX;AIM.sy=e.clientY;AIM.on=true});
+const aimRet=new THREE.Mesh(new THREE.RingGeometry(14,18,40),new THREE.MeshBasicMaterial({color:0xf0e6d2,transparent:true,opacity:.75,depthWrite:false}));aimRet.rotation.x=-Math.PI/2;aimRet.visible=false;scene.add(aimRet);
+function aimUpdate(){const on=aimMode==="cursor"&&AIM.on&&G&&G.ps.length&&state==="play";aimRet.visible=!!on;if(!on||AIM.sx==null)return;
+  cam.updateMatrixWorld();aimNdc.set(AIM.sx/innerWidth*2-1,-(AIM.sy/innerHeight)*2+1);aimRay.setFromCamera(aimNdc,cam);if(aimRay.ray.intersectPlane(aimPlane,aimV)){AIM.x=aimV.x/K;AIM.y=aimV.z/K;aimRet.position.set(aimV.x,2,aimV.z);aimRet.rotation.z=performance.now()/600}}
 
 // ===================== Une image du jeu =====================
 function draw(){
@@ -1715,7 +1656,7 @@ function draw(){
   scene.background.copy(scene.fog.color).multiplyScalar(.6);
   const night=G&&G.mod.nuit;scene.fog.near=night?420:1100;scene.fog.far=night?1300:2700;
   // décor : rochers, ruines, touffes, cailloux
-  drawDecor(PX,PZ);
+  drawDecor(PX,PZ);aimUpdate();
   // buissons (une touffe de brins ; transparents quand un champion est caché dedans)
   {let n1=0,n2=0;const R=Math.ceil(VIEW()*1.2/BC),bi=Math.floor(cx/BC),bj=Math.floor(cy/BC);
     for(let i=bi-R;i<=bi+R;i++)for(let j=bj-R;j<=bj+R;j++){const b=bushAt(i,j);if(!b)continue;const hid=G&&G.ps.some(p=>!p.down&&(p.x-b.x)**2+(p.y-b.y)**2<b.r*b.r);
@@ -2186,12 +2127,19 @@ const bestKey=(id,d)=>d&&d!=="normal"?id+"@"+d:id;
 const keyOf=(p,k)=>Object.entries(KITS[p.champ.id]).find(([,v])=>v===k)?.[0]||"";
 const lvTxt=l=>l>=MAXL?"MAX":l;
 // ---- HUD ----
-function kitHTML(p,withBuffs){const two=G.ps.length>1;
-  return (two?`<span class="who" style="--c:${p.champ.col}">J${p.i+1} · ${esc(p.champ.name)}</span>`:"")+
-    Object.entries(p.weapons).map(([k,l])=>`<span${l>=MAXL?' style="color:var(--gold)"':""}>${keyOf(p,k)} · ${WEAPONS[k].name} <i>${lvTxt(l)}</i></span>`).join("")+`<span style="color:${p.champ.col}">R · ${ULTS[p.champ.ult].name} <i>${lvTxt(p.ultLvl)}</i></span>`+
-    Object.entries(p.frags).map(([k,l])=>`<span class="p">${FRAGS[k].name} <i>${l}</i></span>`).join("")+
-    p.items.map(k=>`<span class="p" style="color:var(--gold)">${SHOPK[k].name}</span>`).join("")+
-    Object.entries(p.elix).map(([k,s])=>`<span class="p" style="color:#9fd8ff">${SHOPK[k].name} <i>${mmss(s)}</i></span>`).join("")+
+// icônes officielles : sorts des champions, objets du marchand, fragments
+const spellIcon=(c,key)=>`${UI_ASSET}spells/${c.id}_${key}.png`;
+const FRAG_IC={force:"runes/shard_statmodsadaptiveforce",hate:"runes/shard_statmodscdrscaling",sante:"runes/shard_statmodshealthscaling",armure:"runes/shard_statmodsarmor",vitesse:"runes/shard_statmodsmovementspeed",regen:"runes/Revitalize",attraction:"runes/ApproachVelocity",cupidite:"runes/CashBack"};
+const ITEM_IC=new Set(["potion","fer","sorcellerie","bottes","epines","sterak","zhonya","ange","warmog","soif","rabadon","infini"]);
+const fragIcon=k=>FRAG_IC[k]?`${UI_ASSET}${FRAG_IC[k]}.png`:null,itemIcon=k=>ITEM_IC.has(k)?`${UI_ASSET}items/${k}.png`:null;
+const icTile=(src,badge,title,cls="")=>`<span class="ic ${cls}" title="${esc(title)}"><img src="${src}" alt="">${badge!=null&&badge!==""?`<i>${badge}</i>`:""}</span>`;
+function kitHTML(p,withBuffs){const two=G.ps.length>1,c=p.champ;
+  return (two?`<span class="who" style="--c:${c.col}">J${p.i+1}</span>`:"")+
+    Object.entries(p.weapons).map(([k,l])=>icTile(spellIcon(c,keyOf(p,k)),lvTxt(l),`${keyOf(p,k)} · ${WEAPONS[k].name} · niveau ${lvTxt(l)}`,l>=MAXL?"max":"")).join("")+
+    icTile(spellIcon(c,"R"),lvTxt(p.ultLvl),`R · ${ULTS[c.ult].name} · niveau ${lvTxt(p.ultLvl)}`,"r"+(p.ultLvl>=MAXL?" max":""))+
+    Object.entries(p.frags).map(([k,l])=>fragIcon(k)?icTile(fragIcon(k),l,`${FRAGS[k].name} · ${l}`,"sm"):`<span class="p">${FRAGS[k].name} <i>${l}</i></span>`).join("")+
+    p.items.map(k=>itemIcon(k)?icTile(itemIcon(k),"",SHOPK[k].name,"sm it"):`<span class="p" style="color:var(--gold)">${SHOPK[k].name}</span>`).join("")+
+    Object.entries(p.elix).map(([k,s])=>itemIcon(k)?icTile(itemIcon(k),mmss(s),SHOPK[k].name,"sm it"):`<span class="p" style="color:#9fd8ff">${SHOPK[k].name} <i>${mmss(s)}</i></span>`).join("")+
     (withBuffs?Object.entries(G.buffs).map(([k,l])=>`<span class="p" style="color:#ffcc4d">${BUFFNAME[k]||k}${l>1?` <i>×${l}</i>`:""}</span>`).join(""):"")+
     (p.redT>0?`<span class="p" style="color:#ff6a3a">Buff rouge <i>${mmss(p.redT)}</i></span>`:"")+(p.blueT>0?`<span class="p" style="color:#5fa8ff">Buff bleu <i>${mmss(p.blueT)}</i></span>`:"")+
     (p.revive?`<span class="p" style="color:#ff4f6a">Relève <i>${p.revive}</i></span>`:"")}
@@ -2200,7 +2148,7 @@ function buildPanels(){const box=$("pps");box.innerHTML="";const two=G.ps.length
   G.ps.forEach(p=>{const d=document.createElement("div");d.className="pp px";d.style.setProperty("--c",p.champ.col);
     const ult=two&&p.i===1?"Entrée":"R",sm=two&&p.i===1?"Maj dr.":"F";
     d.innerHTML=`<div class="gold"><span data-g>0</span> or<small>${two?"J"+(p.i+1)+" · ":""}${esc(p.champ.name)}</small></div>
-      <button class="sk" type="button" data-u style="--c:${p.champ.col}" aria-label="Ultime : ${esc(ULTS[p.champ.ult].name)}"><i></i><b>R</b><small>${ult}</small><span></span></button>
+      <button class="sk" type="button" data-u style="--c:${p.champ.col};background:#010a13 url('${spellIcon(p.champ,"R")}') center/cover" aria-label="Ultime : ${esc(ULTS[p.champ.ult].name)}"><i></i><b>R</b><small>${ult}</small><span></span></button>
       <button class="sk" type="button" data-s style="--c:#ffd75e" aria-label="Châtiment"><i></i><b>F</b><small>${sm}</small><span></span></button>`;
     d.prepend(portraitImg(p.champ));d.querySelector("[data-u]").onclick=()=>castUlt(p);d.querySelector("[data-s]").onclick=()=>smite(p);p.panel=d;box.appendChild(d)})}
 function skState(b,cd,max){const r=b.querySelector("i"),s=b.querySelector("span"),ready=cd<=0;b.classList.toggle("ready",ready);r.style.height=ready?"0":(100*clamp(cd/max,0,1))+"%";const txt=ready?"":Math.ceil(cd);if(s.textContent!==String(txt))s.textContent=txt}
@@ -2223,9 +2171,9 @@ function options(p,n=3){const o=[],kit=KITS[p.champ.id],allMax=Object.values(kit
   if(!out.length)out.push({kind:"heal"});return out}
 function applyOpt(p,c){if(c.kind==="w")p.weapons[c.k]=c.l;else if(c.kind==="r"){p.ultLvl=c.l;p.ultCd=Math.min(p.ultCd,ultCd(p.champ.ult,c.l)*p.ultMul)}else if(c.kind==="f"){p.frags[c.k]=c.l;FRAGS[c.k].apply(p)}else p.hp=p.maxHp}
 function optHTML(c,i){if(c.kind==="heal")return `<button class="pick px" type="button" data-i="${i}"><b>Fontaine de soin</b><p>Tout est au maximum : récupère tous tes PV.</p></button>`;
-  if(c.kind==="r"){const u=ULTS[G.ps.find(p=>p===levelFor)?.champ.ult||"crystal"];return `<button class="pick px" type="button" data-i="${i}" style="--c:#ff9ec7"><span class="lvl">Ultime · ${c.l>=MAXL?"MAX":"niveau "+c.l} · ${i+1}</span><b>R · ${u.name}</b><p>${c.l>=MAXL?u.max:ULVL[c.l-1]}</p><span class="lore">Recharge : ${Math.round(ultCd(levelFor.champ.ult,c.l))} s</span></button>`}
-  if(c.kind==="w"){const w=WEAPONS[c.k];return `<button class="pick px" type="button" data-i="${i}" style="--c:${w.col}"><span class="lvl">${c.l===1?"Nouveau sort":c.l>=MAXL?"Niveau MAX":"Niveau "+c.l} · ${i+1}</span><b>${keyOf(levelFor,c.k)} · ${w.name}</b><p>${w.desc[c.l-1]}</p><span class="lore">Le ${keyOf(levelFor,c.k)} de ${w.by}</span></button>`}
-  const f=FRAGS[c.k];return `<button class="pick px" type="button" data-i="${i}" style="--c:#9fd8ff"><span class="lvl">Fragment${c.l>1?" · niveau "+c.l:""} · ${i+1}</span><b>${f.name}</b><p>${f.desc}</p><span class="lore">${f.lore}</span></button>`}
+  if(c.kind==="r"){const u=ULTS[G.ps.find(p=>p===levelFor)?.champ.ult||"crystal"];return `<button class="pick px" type="button" data-i="${i}" style="--c:#ff9ec7"><img class="pic" src="${spellIcon(levelFor.champ,"R")}" alt=""><span class="lvl">Ultime · ${c.l>=MAXL?"MAX":"niveau "+c.l} · ${i+1}</span><b>R · ${u.name}</b><p>${c.l>=MAXL?u.max:ULVL[c.l-1]}</p><span class="lore">Recharge : ${Math.round(ultCd(levelFor.champ.ult,c.l))} s</span></button>`}
+  if(c.kind==="w"){const w=WEAPONS[c.k];return `<button class="pick px" type="button" data-i="${i}" style="--c:${w.col}"><img class="pic" src="${spellIcon(levelFor.champ,keyOf(levelFor,c.k))}" alt=""><span class="lvl">${c.l===1?"Nouveau sort":c.l>=MAXL?"Niveau MAX":"Niveau "+c.l} · ${i+1}</span><b>${keyOf(levelFor,c.k)} · ${w.name}</b><p>${w.desc[c.l-1]}</p><span class="lore">Le ${keyOf(levelFor,c.k)} de ${w.by}</span></button>`}
+  const f=FRAGS[c.k];return `<button class="pick px" type="button" data-i="${i}" style="--c:#9fd8ff">${fragIcon(c.k)?`<img class="pic" src="${fragIcon(c.k)}" alt="">`:""}<span class="lvl">Fragment${c.l>1?" · niveau "+c.l:""} · ${i+1}</span><b>${f.name}</b><p>${f.desc}</p><span class="lore">${f.lore}</span></button>`}
 let levelFor=null;
 function levelUp(){let p=G.ps[G.pickTurn%G.ps.length];if(p.down)p=G.ps.find(o=>!o.down)||p;levelFor=p;G.pickTurn++;state="lvup";G.pending--;sfx("lvl");
   const n=3+(p.extraPick?1:0);p.extraPick=0;const opts=options(p,n);$("lvT").textContent=`Niveau ${G.lvl-G.pending}`;
@@ -2240,7 +2188,7 @@ let buyer=null;
 function openShop(){if(state!=="play"||!G.nearShop)return;buyer=G.nearShop;state="shop";$("shopBtn").hidden=true;renderShop();$("shop").hidden=false;$("shop").scrollTop=0;($("shopList").querySelector("[data-buy]:not([disabled])")||$("shopClose")).focus({preventScroll:true})}
 function closeShop(){if(state!=="shop")return;state="play";$("shop").hidden=true;last=performance.now()}
 function canBuy(p,s){if(p.gold<s.cost)return "Pas assez d'or";if(s.cat==="leg"){if(p.items.includes(s.k))return "Déjà acheté";if(p.items.length>=ITEM_SLOTS)return "6 objets au maximum"}return ""}
-function buy(p,k){const s=SHOPK[k];if(canBuy(p,s))return;p.gold-=s.cost;sfx("buy");if(p.runeIds&&p.runeIds.has("CashBack"))p.gold+=Math.round(s.cost*.06);
+function buy(p,k){const s=SHOPK[k];if(canBuy(p,s))return;p.gold-=s.cost;sfx("buy");
   if(s.cat==="leg"){p.items.push(k);s.apply(p)}else if(s.elix){if(!p.elix[k])elixir(p,k,1);p.elix[k]=180}
   else if(k==="potion")heal(p,p.maxHp*.35);else if(k==="relance")p.extraPick=1;else if(k==="sceau"){G.xp=G.need;G.lvl++;G.xp=0;G.need=need(G.lvl);G.pending++}
   renderShop()}
@@ -2248,7 +2196,7 @@ function sell(p,k){const i=p.items.indexOf(k);if(i<0)return;const s=SHOPK[k];p.i
   // on retire l'effet de l'objet en reconstruisant ses statistiques
   rebuildStats(p);sfx("coin");renderShop()}
 function rebuildStats(p){const c=p.champ,keep={hp:p.hp,gold:p.gold,goldF:p.goldF},f={...p.frags},items=[...p.items],el={...p.elix},rev=p.revive;const q=mkPlayer(c,p.i,p.skin);
-  for(const k of ["maxHp","spd","dmgMul","cdMul","ultMul","xpMul","magnet","armor","regen","ls","crit","goldMul","healMul"])p[k]=q[k];p.thorns=0;for(const k of Object.keys(p))if(k.startsWith("rk_"))delete p[k];
+  for(const k of ["maxHp","spd","dmgMul","cdMul","ultMul","xpMul","magnet","armor","regen","ls","crit","goldMul"])p[k]=q[k];p.thorns=0;
   for(const [k,l] of Object.entries(f))for(let i=0;i<l;i++)FRAGS[k].apply(p);for(const k of items)SHOPK[k].apply(p);for(const k in el)elixir(p,k,1);
   for(const [k,n] of Object.entries(G.buffs)){for(let i=0;i<n;i++){if(k==="grub")p.dmgMul+=.04;else if(k==="herald")p.spd*=1.06;else if(k==="baron")p.dmgMul+=.25;else if(k==="ame"&&G.ameBy===p)p.dmgMul+=.05;else{const d=DRAGONS.find(x=>x.k===k);if(d)d.apply(p)}}}
   p.hp=Math.min(keep.hp,p.maxHp);p.gold=keep.gold;p.goldF=keep.goldF;p.revive=rev}
@@ -2260,7 +2208,7 @@ function renderShop(){const p=buyer;if(!p)return;const two=G.ps.length>1;
   $("shopInv").querySelectorAll("[data-sell]").forEach(b=>b.onclick=()=>sell(p,b.dataset.sell));
   const cats=[["conso","Consommables"],["leg","Objets légendaires"],["serv","Services"]];
   $("shopList").innerHTML=cats.map(([c,t])=>`<h3 class="cat">${t}</h3><div class="shopg">${SHOP.filter(s=>s.cat===c).map(s=>{const why=canBuy(p,s),own=p.items.includes(s.k)||p.elix[s.k];
-    return `<button class="it px${own?" own":""}" type="button" data-buy="${s.k}" ${why?"disabled":""} style="--c:${c==="leg"?"#ffcc4d":c==="conso"?"#9fd8ff":"#c48bff"}"><b>${s.name}</b><p>${s.desc}</p><span class="cost">${s.cost} or${why&&why!=="Pas assez d'or"?" · "+why:""}${p.elix[s.k]?" · actif "+mmss(p.elix[s.k]):""}</span></button>`}).join("")}</div>`).join("");
+    return `<button class="it px${own?" own":""}" type="button" data-buy="${s.k}" ${why?"disabled":""} style="--c:${c==="leg"?"#ffcc4d":c==="conso"?"#9fd8ff":"#c48bff"}">${itemIcon(s.k)?`<img class="pic" src="${itemIcon(s.k)}" alt="">`:""}<b>${s.name}</b><p>${s.desc}</p><span class="cost">${s.cost} or${why&&why!=="Pas assez d'or"?" · "+why:""}${p.elix[s.k]?" · actif "+mmss(p.elix[s.k]):""}</span></button>`}).join("")}</div>`).join("");
   $("shopList").querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>buy(p,b.dataset.buy))}
 
 // ---- menu principal : Jouer, Runes, Classement, Récompenses et règles ----
@@ -2276,6 +2224,8 @@ function wallet(){$("walletBE").textContent=fmt(IC.essence())}
 function setMode(n){nPlayers=n;$("m1").setAttribute("aria-pressed",n===1);$("m2").setAttribute("aria-pressed",n===2);chooser=0;if(n===2&&sel[1]===sel[0])sel[1]=CHAMPS.find(c=>c!==sel[0]&&IC.unlocked(c.id))||CHAMPS[1];renderMenu()}
 const diffDesc=d=>d.desc.replace(/\s*Victoire :.*$/,"");
 function renderMenu(){const two=nPlayers===2;wallet();
+  $("aimA").setAttribute("aria-pressed",aimMode!=="cursor");$("aimC").setAttribute("aria-pressed",aimMode==="cursor");
+  $("aimNote").textContent=aimMode==="cursor"?"Tes sorts visent le monstre le plus proche de ta souris"+(two?" (joueur 1 ; le joueur 2 reste en visée automatique).":"."):"Tes sorts visent seuls les monstres visibles à l'écran.";
   $("chooser").hidden=!two;$("chooser").innerHTML=two?`Choix pour`+[0,1].map(i=>`<button type="button" data-c="${i}" aria-pressed="${chooser===i}">Joueur ${i+1} · ${esc(sel[i].name)}</button>`).join(""):"";
   $("chooser").querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{chooser=+b.dataset.c;renderMenu()});
   const ch=weekChallenge(),cc=CH(ch.champ);
@@ -2287,17 +2237,16 @@ function renderMenu(){const two=nPlayers===2;wallet();
     b.setAttribute("aria-pressed",sel[chooser]===c);b.setAttribute("aria-label",c.name+(lock?" (verrouillé)":""));
     b.innerHTML=`<img src="${loadArt(c)}" alt="" loading="lazy"><span class="cn"><b>${c.name}</b><small>${c.region}</small></span>${two&&sel[0]===c?'<span class="tag">J1</span>':""}${two&&sel[1]===c?'<span class="tag p2">J2</span>':""}${lock?'<span class="tag lk">Verrouillé</span>':""}`;
     b.onclick=()=>{if(two&&sel[1-chooser]===c)return;sel[chooser]=c;selSkin[chooser]=null;renderMenu()};b.ondblclick=()=>{if(!lock&&!two){sel[0]=c;startGame(false)}};$("champs").appendChild(b)}
-  const c=sel[chooser],u=ULTS[c.ult],b=best()[bestKey(c.id,diff)],lock=!IC.unlocked(c.id),sk=IC.skins(c.id),ks=pageRunes(),pg=runePage(),key=ks.find(k=>RKEY[k].row===0);
+  const c=sel[chooser],u=ULTS[c.ult],b=best()[bestKey(c.id,diff)],lock=!IC.unlocked(c.id),sk=IC.skins(c.id),RR=IC.runes()||{},owned=RUNES.filter(r=>RR[r.k]>0);
   $("detail").style.setProperty("--c",c.col);
   $("detail").innerHTML=`<div class="splash" style="background-image:url('${splashArt(c)}')"></div><div class="dbody">
     <div class="ttl"><small>${c.region}</small><h2>${c.name}</h2><p>${c.title}</p></div>
     <div class="stats"><span>PV <b>${c.hp}</b></span><span>Vitesse <b>${c.spd}</b></span><span>Record <b>${b?mmss(b.t):"–"}</b></span></div>
     <p class="lore">${c.lore}</p>
-    <div class="spells">${Object.entries(KITS[c.id]).map(([key,k])=>`<div class="spell"><span class="key">${key}</span><div><b>${WEAPONS[k].name}</b><p>${WEAPONS[k].desc[0]} <em>${WEAPONS[k].desc[5]}</em></p></div></div>`).join("")}
-      <div class="spell"><span class="key r">R</span><div><b>${u.name}</b><p>${u.desc} <em>${u.max}</em></p></div></div></div>
+    <div class="spells">${Object.entries(KITS[c.id]).map(([key,k])=>`<div class="spell"><span class="key"><img src="${spellIcon(c,key)}" alt=""><i>${key}</i></span><div><b>${WEAPONS[k].name}</b><p>${WEAPONS[k].desc[0]} <em>${WEAPONS[k].desc[5]}</em></p></div></div>`).join("")}
+      <div class="spell"><span class="key r"><img src="${spellIcon(c,"R")}" alt=""><i>R</i></span><div><b>${u.name}</b><p>${u.desc} <em>${u.max}</em></p></div></div></div>
     ${sk.length?`<div class="skins"><button type="button" data-sk="" aria-pressed="${selSkin[chooser]==null}">Skin de base</button>${sk.map(s=>`<button type="button" data-sk="${s.num}" aria-pressed="${String(selSkin[chooser])===String(s.num)}">${esc(s.name)}</button>`).join("")}</div>`:""}
-    <button type="button" class="pagesum" id="pageSum">${key?`<img class="ks" src="${runeIcon(key)}" alt="">`:""}<img class="pa" src="${pathIcon(pg.P)}" alt=""><img class="pa" src="${pathIcon(pg.S)}" alt="" style="width:16px;height:16px">
-      <span><b>Page de runes${key?" · "+RKEY[key].name:""}</b>${ks.length} rune${ks.length>1?"s":""} active${ks.length>1?"s":""} · modifier</span></button>
+    <button type="button" class="pagesum" id="pageSum">${owned.slice(0,5).map(r=>`<img class="pa" src="${runeIcon(r.k)}" alt="">`).join("")}<span><b>Runes</b>${owned.length?`${owned.reduce((a,r)=>a+Math.min(r.max,RR[r.k]),0)} rangs actifs`:"Aucune rune achetée"} · modifier</span></button>
     ${lock?`<p class="lockmsg">Verrouillé : obtiens au moins une carte ${esc(c.name)} dans LolMaster pour le débloquer.</p>`:""}
     <button class="btn play" id="go" type="button">Entrer dans la brèche</button></div>`;
   $("detail").querySelectorAll("[data-sk]").forEach(x=>x.onclick=()=>{selSkin[chooser]=x.dataset.sk===""?null:x.dataset.sk;renderMenu()});
@@ -2330,40 +2279,15 @@ function finish(won){const P=G.ps[0],c=P.champ,b=best(),bk=bestKey(c.id,G.diff),
 function lose(){if(state!=="play"&&state!=="shop")return;G.dead=true;state="over";sfx("die");finish(false)}
 function win(){if(state!=="play"||G.won)return;G.won=true;state="over";sfx("chest");finish(true)}
 
-// ---- runes : page façon LoL ----
-let rsel=null;
-const rTag=k=>runeOwned(k)?"":`<span class="lk"></span>`;
-function rBtn(k,on,extra=""){return `<button type="button" class="rn${rsel===k?" sel":""}" data-rk="${k}" aria-pressed="${on}" aria-label="${esc(RKEY[k].name)}${runeOwned(k)?"":" (verrouillée)"}" ${extra}><img src="${runeIcon(k)}" alt="">${rTag(k)}</button>`}
-function renderRunes(){wallet();const pg=runePage(),E=IC.essence(),PP=RPATH.find(x=>x.k===pg.P),SP=RPATH.find(x=>x.k===pg.S)||RPATH.find(x=>x.k!==pg.P);
-  $("essN").textContent=`${fmt(E)} essence bleue`;
-  const paths=(cur,skip,attr)=>`<div class="paths">${RPATH.filter(x=>x.k!==skip).map(x=>`<button type="button" ${attr}="${x.k}" aria-pressed="${x.k===cur}" style="--pc:${x.col}" aria-label="${x.name}" title="${x.name}"><img src="${pathIcon(x.k)}" alt=""></button>`).join("")}</div>`;
-  const prim=`<div class="px rcol" style="--pc:${PP.col}"><h3>Voie principale</h3>${paths(pg.P,null,"data-pp")}<div class="ptitle"><b>${PP.name}</b><span>${PP.tag}</span></div>
-    <div class="rrow key">${RTREE[pg.P][0].map(([k])=>rBtn(k,pg.k===k)).join("")}</div>
-    ${[1,2,3].map(r=>`<div class="rrow">${RTREE[pg.P][r].map(([k])=>rBtn(k,pg.r[r-1]===k)).join("")}</div>`).join("")}</div>`;
-  const sec=`<div class="px rcol" style="--pc:${SP.col}"><h3>Voie secondaire</h3>${paths(SP.k,pg.P,"data-sp")}<div class="ptitle"><b>${SP.name}</b><span>Deux runes de rangées différentes</span></div>
-    ${[1,2,3].map(r=>`<div class="rrow">${RTREE[SP.k][r].map(([k])=>rBtn(k,pg.s.includes(k))).join("")}</div>`).join("")}</div>`;
-  const sh=`<div class="px rcol"><h3>Fragments</h3><p class="note">Gratuits : un par rangée.</p><div class="shards">${SHARDS.map((row,i)=>`<div class="rrow"><span>${["Attaque","Polyvalent","Défense"][i]}</span>${row.map(s=>`<button type="button" class="rn${rsel===s.k?" sel":""}" data-sh="${i}:${s.k}" aria-pressed="${pg.sh[i]===s.k}" aria-label="${s.name}" style="--pc:var(--gold)"><img src="${UI_ASSET}runes/shard_${s.ic}.png" alt=""></button>`).join("")}</div>`).join("")}</div></div>`;
-  $("runeGrid").innerHTML=prim+sec+sh+`<div class="px rinfo" id="rinfo"></div>`;
-  const save=()=>{store.set("ic-page",pg);renderRunes()};
-  $("runeGrid").querySelectorAll("[data-pp]").forEach(b=>b.onclick=()=>{const P=b.dataset.pp;if(P===pg.P)return;pg.P=P;pg.k=RTREE[P][0].map(x=>x[0]).find(runeOwned)||null;pg.r=[null,null,null];if(pg.S===P){pg.S=RPATH.find(x=>x.k!==P).k;pg.s=[null,null]}save()});
-  $("runeGrid").querySelectorAll("[data-sp]").forEach(b=>b.onclick=()=>{if(b.dataset.sp===pg.S)return;pg.S=b.dataset.sp;pg.s=[null,null];save()});
-  $("runeGrid").querySelectorAll("[data-sh]").forEach(b=>{const [i,k]=b.dataset.sh.split(":");b.onclick=()=>{pg.sh[+i]=k;rsel=k;save()};b.onmouseenter=b.onfocus=()=>rInfo(k)});
-  $("runeGrid").querySelectorAll("[data-rk]").forEach(b=>{const k=b.dataset.rk;b.onmouseenter=b.onfocus=()=>rInfo(k);b.onmouseleave=()=>rInfo(rsel);
-    b.onclick=()=>{rsel=k;if(!runeOwned(k)){renderRunes();return}equipRune(pg,k);save()}});
-  if(pg.S!==SP.k){pg.S=SP.k;store.set("ic-page",pg)}
-  rInfo(rsel)}
-function equipRune(pg,k){const R=RKEY[k];if(R.path===pg.P){if(R.row===0)pg.k=k;else pg.r[R.row-1]=k;return}
-  if(R.path!==pg.S||R.row===0)return;if(pg.s.includes(k)){pg.s=pg.s.map(x=>x===k?null:x);return}
-  const same=pg.s.findIndex(x=>x&&RKEY[x].row===R.row);if(same>=0)pg.s[same]=k;else{const free=pg.s.indexOf(null);if(free>=0)pg.s[free]=k;else pg.s=[pg.s[1],k]}}
-function rInfo(k){const box=$("rinfo");if(!box)return;const pg=runePage(),E=IC.essence();
-  if(!k){box.innerHTML=`<h3>Ta page</h3><p class="note">Survole une rune pour lire son effet. Clique pour l'équiper ; les runes verrouillées se débloquent avec l'essence bleue (400 pour une rune clé, 120 pour une mineure).</p>
-    <div class="spells">${pageRunes(pg).map(x=>`<div class="spell"><img src="${runeIcon(x)}" alt="" style="width:34px;height:34px"><div><b>${RKEY[x].name}</b><p>${RE[x].d}</p></div></div>`).join("")||`<p class="note">Aucune rune active pour l'instant.</p>`}</div>`;return}
-  const S=SHARDK[k];if(S){box.style.setProperty("--pc","var(--gold)");box.innerHTML=`<div class="top"><img src="${UI_ASSET}runes/shard_${S.ic}.png" alt="" style="width:40px;height:40px"><div><small>Fragment</small><b>${S.name}</b></div></div><p>${S.d}</p><span class="state">Gratuit</span>`;return}
-  const R=RKEY[k],P=RPATH.find(x=>x.k===R.path),own=runeOwned(k),c=runeCost(k),on=pageRunes(pg).includes(k);box.style.setProperty("--pc",P.col);
-  box.innerHTML=`<div class="top"><img src="${runeIcon(k)}" alt=""><div><small>${P.name} · ${R.row===0?"rune clé":"rangée "+R.row}</small><b>${R.name}</b></div></div><p>${RE[k].d}</p>
-    ${own?`<span class="state">${on?"Équipée":"Débloquée"}</span>`:`<span class="state no">Verrouillée</span><button class="btn play" type="button" id="rBuy" ${E<c?"disabled":""}>Débloquer · ${c} essence</button>${E<c?`<p class="note">Il te manque ${c-E} essence bleue.</p>`:""}`}`;
-  const bb=$("rBuy");if(bb)bb.onclick=async()=>{bb.disabled=true;const ok=await IC.buyRune(k).catch(e=>{say(e.message||"Achat impossible","#ff9aa8",2);return false});if(ok!==false){sfx("buy");const pg2=runePage();equipRune(pg2,k);store.set("ic-page",pg2)}renderRunes()}}
-$("runeReset").onclick=()=>{store.set("ic-page",null);rsel=null;renderRunes()};
+// ---- runes : boutique de bonus permanents ----
+function renderRunes(){wallet();const R=IC.runes()||{},E=IC.essence(),spent=runeSpent(R);
+  $("essN").textContent=`${fmt(E)} essence bleue`;$("runeReset").disabled=!spent;
+  $("runeGrid").innerHTML=RUNES.map(r=>{const lv=Math.min(r.max,R[r.k]||0),c=lv<r.max?runeCost(r.k,lv):0,nm=RKEY[r.k].name,col=RPCOL[RKEY[r.k].path];
+    return `<div class="px rcard${lv?" on":""}" style="--pc:${col}"><img src="${runeIcon(r.k)}" alt=""><div class="rtx"><b>${nm}</b><small>${r.vs}</small>
+      <p>${lv?r.d(lv):"Pas encore achetée"}</p><div class="pips">${Array.from({length:r.max},(_,i)=>`<i class="${i<lv?"on":""}"></i>`).join("")}</div></div>
+      ${lv<r.max?`<button class="btn" type="button" data-r="${r.k}" ${E<c?"disabled":""}><span>Rang ${lv+1} · ${r.d(lv+1)}</span><b>${fmt(c)} essence</b></button>`:`<span class="maxed">Rang maximum</span>`}</div>`}).join("");
+  $("runeGrid").querySelectorAll("[data-r]").forEach(b=>b.onclick=async()=>{b.disabled=true;const ok=await IC.buyRune(b.dataset.r).catch(e=>{say(e.message||"Achat impossible","#ff9aa8",2);return false});if(ok!==false)sfx("buy");renderRunes()})}
+$("runeReset").onclick=async()=>{$("runeReset").disabled=true;await IC.refundRunes().catch(()=>{});renderRunes()};
 // ---- classement (CDS.TV) ----
 let boardTab="week";
 async function renderBoard(){wallet();const ch=weekChallenge();const tabs=[["week",`Défi ${ch.key}`],["all","Meilleurs scores"],...CHAMPS.map(c=>[c.id,c.name])];
@@ -2406,11 +2330,12 @@ function renderInfo(){wallet();const pct=v=>(v>=1?"+":"")+Math.round((v-1)*100)+
     <p class="note">Il faut avoir ouvert son coffre sur la page Banque pour recevoir des PO.</p></div>
   <div class="px card"><h3>Essence bleue et runes</h3><ul>
     <li>Chaque partie rapporte de l'essence : <b>12 par minute</b> tenue, 1 pour 40 monstres, <b>15 par boss</b>, <b>120 pour une victoire</b>, multipliée par la difficulté.</li>
-    <li>L'essence débloque les <b>runes de League of Legends</b> pour toujours : 400 pour une rune clé, 120 pour une mineure. Une rune clé par voie est offerte.</li>
-    <li>Ta page : une voie principale (rune clé + 3 runes), une voie secondaire (2 runes) et 3 fragments gratuits.</li></ul></div>
+    <li>L'essence achète les <b>rangs des runes</b> : noms et icônes de League of Legends, bonus permanents comme les PowerUps de Vampire Survivors (puissance, armure, PV max, récupération, recharge, vitesse, aimant, chance, croissance, avidité, résurrection).</li>
+    <li>Un rang coûte son prix de base multiplié par son numéro. <b>Tout rembourser</b> rend toute l'essence dépensée.</li></ul></div>
   <div class="px card"><h3>Contrôles</h3><div class="keys2" style="grid-template-columns:minmax(0,1fr)">${keysHTML(false)}</div><div class="keys2" style="grid-template-columns:minmax(0,1fr)">${keysHTML(true)}</div></div>`}
 // ---- boutons ----
 $("nav").querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>setView(b.dataset.v));
+$("aimA").onclick=()=>{aimMode="auto";store.set("ic-aim",aimMode);renderMenu()};$("aimC").onclick=()=>{aimMode="cursor";store.set("ic-aim",aimMode);renderMenu()};
 $("m1").onclick=()=>setMode(1);$("m2").onclick=()=>setMode(2);
 $("shopBtn").onclick=openShop;$("shopClose").onclick=closeShop;$("resume").onclick=()=>setPause(false);$("pauseB").onclick=()=>setPause(true);$("quit").onclick=()=>{state="play";lose()};
 $("again").onclick=()=>startGame(!!chal);$("toMenu").onclick=menu;
