@@ -231,6 +231,7 @@ h3.cat{margin:6px 0 0;font:700 14px var(--pixel);color:var(--gold);text-transfor
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
 <script>
 // ===================== Version CDS.TV : compte du site, cartes LolMaster, robot =====================
 window.IC_ASSET="cartes/";window.IC_MODELS="icathia/";
@@ -358,6 +359,9 @@ const FOES={
   rodeur:{name:"Rôdeur du Néant",hp:8,spd:42,r:3.5,dmg:5,xp:1,g:0.15},
   brute:{name:"Ravageur",hp:72,spd:17,r:7,dmg:12,xp:5,g:1},
   elite:{name:"Sentinelle corrompue",hp:520,spd:24,r:9,dmg:18,xp:25,elite:true,g:20},
+  redbuff:{name:"Ronceux rouge",hp:900,spd:22,r:12,dmg:20,xp:30,g:60,model:"red",col:"#ff5a2a",tag:1,buff:"red"},
+  bluebuff:{name:"Sentinelle bleue",hp:1000,spd:18,r:12,dmg:18,xp:30,g:60,shape:"krug",col:"#3d8bff",tag:1,buff:"blue"},
+  turretR:{name:"Tourelle du Néant",hp:1800,spd:0,r:13,dmg:16,xp:50,g:150,model:"turretB",col:"#ff4a3a",tag:1,fixed:1,ai:"turret"},
   golden:{name:"Néantin doré",hp:70,spd:44,r:5.5,dmg:0,xp:5,g:10,shape:"grub",col:"#ffd75e",flee:1,tag:1},
   boss:{name:"Gueule-Abîme",hp:4200,spd:21,r:15,dmg:26,xp:120,boss:true,g:150},
   // monstres de la Faille (pions provisoires en attendant les modèles 3D)
@@ -613,7 +617,7 @@ const VIEW=()=>Math.hypot(LW,LH)/2*1.3;
 function spawnAt(type,x,y,o={}){const F=FOES[type],lv=o.lvl||1,boss=F.boss,D=G.D||DIFFS[1],sc=(boss?(1+G.t/900)*(1+.65*(lv-1))*(G.mod.boss&&!F.mini?1.6:1)*(F.mini?D.hp:D.boss):(F.shape?1+G.t/220:(F.elite?1+G.t/600:1+G.t/150))*D.hp);
   const f={type,x,y,r:F.r*(boss&&lv>1?1+.12*(lv-1):1),hp:F.hp*sc,max:F.hp*sc,spd:F.spd*(boss?1:1+Math.min(F.shape?.3:.35,G.t/(F.shape?1500:1200)))*(G.mod.rage?1.25:1)*D.spd,
     dmg:F.dmg*(boss?1+.3*(lv-1):1+G.t/(F.shape?600:400))*D.dmg,xp:F.xp*lv,elite:F.elite||F.tag,boss,kx:0,ky:0,flash:0,seed:Math.random()*6,slow:0,stun:0,lvl:lv,ai:F.ai,cd:2+Math.random()*2,
-    name:o.name||F.name,col:o.col||F.col,drag:o.drag,tt:0,tgt:null,lx:null,ly:null,wa:Math.random()*6};
+    name:o.name||F.name,col:o.col||F.col,drag:o.drag,born:G.t,ax:x,ay:y,tt:0,tgt:null,lx:null,ly:null,wa:Math.random()*6};
   G.foes.push(f);return f}
 function edgePoint(ang){const a=ang??rnd(0,Math.PI*2),d=VIEW()+18;return [G.cx+Math.cos(a)*d,G.cy+Math.sin(a)*d]}
 function spawn(type,ang){const [x,y]=edgePoint(ang);return spawnAt(type,x,y)}
@@ -628,7 +632,7 @@ function spawnBoss(type,lvl){const [x,y]=edgePoint();let o={lvl};
   else{const f=spawnAt(type,x,y,o);say(`${f.name}${lvl>1?" niv. "+lvl:""} entre dans la brèche !`,f.col,2.6)}
   sfx("boss")}
 function faillePlan(dt){const t=G.t,swarm=G.mod.essaim?2:1;
-  G.acc+=Math.min(10,.7+t/40)*dt*swarm*(G.D?G.D.spawn:1);while(G.acc>=1&&G.foes.length<420*Math.min(1.4,swarm)){G.acc--;const r=Math.random();let ty="larve";if(t>45&&r<.28)ty="rodeur";if(t>100&&r>.92)ty="brute";spawn(ty)}
+  if(G.waveSlow>0)G.waveSlow-=dt;G.acc+=Math.min(10,.7+t/40)*dt*swarm*(G.D?G.D.spawn:1)*(G.waveSlow>0?.6:1);while(G.acc>=1&&G.foes.length<420*Math.min(1.4,swarm)){G.acc--;const r=Math.random();let ty="larve";if(t>45&&r<.28)ty="rodeur";if(t>100&&r>.92)ty="brute";spawn(ty)}
   if(t>=(G.nextMin??15)){G.nextMin=t+25;minionWave()}
   if(t>=(G.nextCamp??60)){const open=CAMPS.filter(c=>t>=c.at);G.nextCamp=t+Math.max(9,20-t/60);if(open.length)camp(open[Math.floor(Math.random()*open.length)].k)}
   if(t>=(G.nextGold??rnd(40,70))){G.nextGold=t+rnd(55,95);const [x,y]=edgePoint();spawnAt("golden",x,y);say("Un Néantin doré passe : attrape-le !","#ffd75e",2)}
@@ -642,6 +646,7 @@ function faillePlan(dt){const t=G.t,swarm=G.mod.essaim?2:1;
 function hurt(f,dmg,kx=0,ky=0,o=G.p){if(!f||f.dead||!o)return 0;if(G.realm&&f!==G.realm.tgt)return 0;
   const bl=o.weapons&&o.weapons.bloodlust?WEAPONS.bloodlust.st(o.weapons.bloodlust).bonus:0;
   let d=dmg*(o.dmgMul+bl)*(f.moon>G.t?1.4:1)*(f.hawk>G.t?1.15:1)*(o.rageT>0?1+(o.rageV||.3):1);const cr=o.crit>0&&Math.random()<o.crit;if(cr)d*=2;
+  if(o.redT>0){f.burnT=G.t+2.5;f.burnDps=4+G.t*.02;f.burnBy=o;f.slow=Math.max(f.slow,.4)}
   f.hp-=d;f.flash=.08;f.kx+=kx;f.ky+=ky;sfx("hit");o.dmgDone+=d;
   if(bl)o.fury=Math.min(100,(o.fury||0)+1);if(o.weapons&&o.weapons.indestr)o.mStore=(o.mStore||0)+d*WEAPONS.indestr.st(o.weapons.indestr).ratio;
   if(o.ls>0&&!o.down){const cap=o.maxHp*.06,h=Math.min(d*o.ls,cap-o.lsUsed);if(h>0){o.hp=Math.min(o.maxHp,o.hp+h);o.lsUsed+=h}}
@@ -653,7 +658,7 @@ function killFoe(f,o){if(f.dead)return;f.dead=true;f.hp=0;G.kills++;o.kills=(o.k
   const g=(F.g||0)*(G.mod.pauvre?.5:1);for(const p of G.ps)addGold(p,g);
   if(g>=10){G.texts.push({x:f.x,y:f.y-f.r-10,s:`+${Math.round(g)} or`,col:"#ffd75e",t:1,max:1,small:true});sfx("coin")}
   if(f.boss&&!F.mini)G.bossKills++;
-  if(F.shape)onKill(f,o);
+  if(F.shape||F.model)onKill(f,o);if(F.model||F.buff)propKill(f,o);
   if(G.realm&&f===G.realm.tgt){const p=G.realm.p,sv=G.realm.soul||.05;p.dmgMul+=sv;G.ameBy=p;G.buffs.ame=(G.buffs.ame||0)+1;say(`Âme volée : +${Math.round(sv*100)} % de dégâts pour la partie`,"#4fe0b0",2.4);G.realm.t=Math.min(G.realm.t,.6)}
   G.gems.push({x:f.x,y:f.y,v:f.xp,r:f.xp>=20?3:f.xp>=5?2.5:2});
   if((f.elite&&!F.shape)||(f.boss&&!F.mini))G.gems.push({x:f.x+6,y:f.y,chest:1,r:5});else if(Math.random()<.006)G.gems.push({x:f.x,y:f.y,heal:1,r:4});
@@ -695,6 +700,7 @@ function brain(f,dt,dx,dy,d,tp){const F=FOES[f.type];f.cd-=dt;
   if(F.flee){const a=Math.atan2(-dy,-dx)+Math.sin(G.t*1.5+f.seed)*.9;return [Math.cos(a)*f.spd,Math.sin(a)*f.spd]}
   if(!tp)return null;
   if(F.ranged){if(f.cd<=0&&d<130){f.cd=2.6;const s=70;G.eshots.push({x:f.x,y:f.y,vx:dx/d*s,vy:dy/d*s,t:2.5,dmg:f.dmg*.8,r:3,src:f})}return d<60?[0,0]:null}
+  if(f.ai==="turret"){if(f.cd<=0&&d<100&&G.t-f.born>3){f.cd=1.1;f.atkT=G.t;const s=120;G.eshots.push({x:f.x,y:f.y,vx:dx/d*s,vy:dy/d*s,t:1.4,dmg:f.dmg*1.2,r:4,src:f,red:1});sfx("shoot")}return [0,0]}
   if(f.ai==="charge"){if(f.dash>0){f.dash-=dt;return [Math.cos(f.ca)*165,Math.sin(f.ca)*165]}
     if(f.tele>0){f.tele-=dt;if(f.tele<=0)f.dash=.7;return [0,0]}
     if(f.cd<=0&&d<160){f.cd=4.5-.5*(f.lvl-1);f.tele=.9;f.ca=Math.atan2(dy,dx);G.fx.push({k:"tele",x:f.x,y:f.y,a:f.ca,len:120,w:f.r*1.6,t:.9,max:.9})}return null}
@@ -772,10 +778,11 @@ function update(dt){G.t+=dt;const two=G.ps.length>1;
     let vx=0,vy=0;
     if(f.stun>0){f.stun-=dt}else{const v=(f.ai||FOES[f.type].flee||FOES[f.type].ranged)?brain(f,dt,dx,dy,d,tp):null;vx=v?v[0]:dx/d*f.spd*(tp?1:.5);vy=v?v[1]:dy/d*f.spd*(tp?1:.5)}
     f.x+=(vx*sl+f.kx)*dt+sx*.5;f.y+=(vy*sl+f.ky)*dt+sy*.5;f.kx*=Math.pow(.02,dt);f.ky*=Math.pow(.02,dt);
-    for(const w of G.walls)wallPush(f,w);if(G.terrain==="montagne")rockPush(f,f.r);
-    if(f.stun<=0&&f.dmg>0)for(const p of G.ps)if(!p.down&&p.inv<=0&&(p.x-f.x)**2+(p.y-f.y)**2<(f.r+p.r)**2){damagePlayer(f.dmg*(f.dash>0?1.6:1),p,f);if(state!=="play")return}
-    if(!f.boss&&f.type!=="crab"&&(f.x-G.cx)**2+(f.y-G.cy)**2>(VIEW()*1.6)**2){const a=Math.atan2(f.y-G.cy,f.x-G.cx)+Math.PI+rnd(-.6,.6),R=VIEW()+14;f.x=G.cx+Math.cos(a)*R;f.y=G.cy+Math.sin(a)*R;f.lx=null}}
-  G.foes=G.foes.filter(f=>!f.dead);hazards(dt);friends(dt);terrainTick(dt);if(state!=="play")return;
+    for(const w of G.walls)wallPush(f,w);if(G.terrain==="montagne")rockPush(f,f.r);if(FOES[f.type].fixed){f.x=f.ax;f.y=f.ay;f.kx=f.ky=0}
+    if(f.stun<=0&&f.dmg>0)for(const p of G.ps)if(!p.down&&p.inv<=0&&(p.x-f.x)**2+(p.y-f.y)**2<(f.r+p.r)**2){f.atkT=G.t;damagePlayer(f.dmg*(f.dash>0?1.6:1),p,f);if(state!=="play")return}
+    if(FOES[f.type].fixed){if((f.x-G.cx)**2+(f.y-G.cy)**2>(VIEW()*2.6)**2)f.dead=true}
+    else if(!f.boss&&f.type!=="crab"&&(f.x-G.cx)**2+(f.y-G.cy)**2>(VIEW()*1.6)**2){const a=Math.atan2(f.y-G.cy,f.x-G.cx)+Math.PI+rnd(-.6,.6),R=VIEW()+14;f.x=G.cx+Math.cos(a)*R;f.y=G.cy+Math.sin(a)*R;f.lx=null}}
+  G.foes=G.foes.filter(f=>!f.dead);hazards(dt);friends(dt);terrainTick(dt);propsTick(dt);if(state!=="play")return;
   const xpMul=G.ps[0].xpMul;
   for(const g of G.gems){let pl=null,pd=1e9;for(const p of G.ps){if(p.down)continue;const d=Math.hypot(p.x-g.x,p.y-g.y);if(d<pd){pd=d;pl=p}}if(!pl)break;
     const dx=pl.x-g.x,dy=pl.y-g.y,d=pd||1;if(d<pl.magnet||g.pull){g.pull=1;const sp=Math.max(110,220-d);g.x+=dx/d*sp*dt;g.y+=dy/d*sp*dt}
@@ -799,7 +806,7 @@ function dashTo(p,a,len,T,dmg,w,col,onEnd){const dx=Math.cos(a),dy=Math.sin(a),h
   p.dash={vx:dx*len/T,vy:dy*len/T,t:T,onStep:pp=>dmg>0&&near(pp.x,pp.y,w+12,f=>{if(!hit.has(f)&&(f.x-pp.x)**2+(f.y-pp.y)**2<(w+f.r)**2){hit.add(f);hurt(f,dmg,dx*30,dy*30,pp);if(col==="air"){f.stun=Math.max(f.stun,.8);f.air=G.t+.7}}}),onEnd};
   G.fx.push({k:"trail",o:p,col:col==="air"?"#ffe7a0":col,t:T+.2,max:T+.2,pts:[]})}
 function weapons(dt,p){
-  for(const [k,l] of Object.entries(p.weapons)){const s=WEAPONS[k].st(l),mx=l>=MAXL;p.cds[k]=(p.cds[k]||0)-dt;const ready=p.cds[k]<=0,cd=()=>p.cds[k]=s.cd*p.cdMul;
+  for(const [k,l] of Object.entries(p.weapons)){const s=WEAPONS[k].st(l),mx=l>=MAXL;p.cds[k]=(p.cds[k]||0)-dt;const ready=p.cds[k]<=0,cd=()=>p.cds[k]=s.cd*p.cdMul*(p.blueT>0?.8:1);
     // ----- Ashe -----
     if(k==="volley"&&ready){const t=nearest(p.x,p.y);if(!t)continue;cd();sfx("shoot");const a0=Math.atan2(t.y-p.y,t.x-p.x);p.aimA=a0;
       for(let r=0;r<s.rings;r++)for(const a of fan(a0+r*Math.PI*2/s.rings,s.n,.09))G.shots.push({k:"arrow",o:p,x:p.x,y:p.y,vx:Math.cos(a)*s.spd,vy:Math.sin(a)*s.spd,t:1.2,dmg:s.dmg,pierce:s.pierce,hit:new Set(),r:2})}
@@ -906,6 +913,8 @@ function shots(dt){
         near(s.x,s.y,s.blast+12,f=>{if((f.x-s.x)**2+(f.y-s.y)**2<(s.blast+f.r)**2){hurt(f,s.dmg,0,0,o);f.moon=G.t+3}});continue}
       if(Math.random()<.7)G.fx.push({k:"px",x:s.x+rnd(-2,2),y:s.y+rnd(-2,2),vx:rnd(-8,8),vy:rnd(-8,8),t:.35,col:"#dfe9ff"})}
     else if(s.k==="gust"){if(bez(s,dt)){s.t=0;if(s.last){G.tornados.push({x:s.x,y:s.y,o,r:s.tor.r,dps:s.tor.dps,t:s.tor.t,max:s.tor.t,tick:0,seed:Math.random()*6});G.fx.push({k:"puff",x:s.x,y:s.y,r:s.tor.r,t:.35,max:.35})}continue}}
+    else if(s.k==="tshot"){const f=s.tgt;if(!f||f.dead){s.t=0;continue}const dx=f.x-s.x,dy=f.y-s.y,d=Math.hypot(dx,dy)||1;s.trail.unshift([s.x,s.y]);if(s.trail.length>10)s.trail.length=10;s.x+=dx/d*260*dt;s.y+=dy/d*260*dt;
+      if(d<f.r+4){s.t=0;hurt(f,s.dmg,dx/d*20,dy/d*20,o);G.fx.push({k:"star",x:f.x,y:f.y,t:.25,max:.25,col:"#9fd8ff"})}continue}
     else if(s.k==="crystal"){s.x+=s.vx*dt;s.y+=s.vy*dt;s.trail.unshift([s.x,s.y]);if(s.trail.length>22)s.trail.length=22;
       if(Math.random()<.9)G.fx.push({k:"px",x:s.x+rnd(-3,3),y:s.y+rnd(-3,3),vx:rnd(-10,10),vy:rnd(-10,10),t:.5,col:"#dfe9ff"});if(s.t<=0)crystalBoom(s)}
     else{s.x+=s.vx*dt;s.y+=s.vy*dt;if(s.trail){s.trail.unshift([s.x,s.y]);if(s.trail.length>(s.k==="hawk"?14:8))s.trail.length=s.k==="hawk"?14:8}
@@ -1002,7 +1011,7 @@ function castUlt(p){if(!G||state!=="play"||!p||p.down||p.ultCd>0||p.stasis>0)ret
   if(ULT_FN[u](p,l)===false)return;p.ultCd=ultCd(u,l)*p.ultMul;p.ultT=G.t;sfx("ult");G.texts.push({x:p.x,y:p.y-28,s:U.name+(l>=MAXL?" MAX":""),col:p.champ.col,t:1.4,max:1.4,small:false})}
 // Châtiment (F) : achève les monstres de la Faille, avec un bonus si le coup tue
 function smite(p){if(!G||state!=="play"||!p||p.down)return;if(G.mod.sanschati){say("Pas de Châtiment pour ce défi !","#ff5d73",1.2);return}if(p.smiteCd>0)return;
-  let b=null,bs=-1;for(const f of G.foes){if(f.dead||(G.realm&&f!==G.realm.tgt))continue;const d=Math.hypot(f.x-p.x,f.y-p.y);if(d>110)continue;const F=FOES[f.type];const s=(f.boss?3e6:F.shape?2e6:f.elite?1e6:0)-d;if(s>bs){bs=s;b=f}}
+  let b=null,bs=-1;for(const f of G.foes){if(f.dead||(G.realm&&f!==G.realm.tgt))continue;const d=Math.hypot(f.x-p.x,f.y-p.y);if(d>110)continue;const F=FOES[f.type];const s=(f.boss?3e6:(F.shape||F.model)?2e6:f.elite?1e6:0)-d;if(s>bs){bs=s;b=f}}
   if(!b){G.texts.push({x:p.x,y:p.y-20,s:"Rien à châtier",col:"#ffcc4d",t:.8,max:.8,small:true});return}
   const F=FOES[b.type],epic=b.boss&&!F.mini,dmg=epic?600+G.t*2.2:(F.shape||b.elite)?300+G.t*.8:120+G.t*.3;p.smiteCd=18*p.ultMul;
   b.hp-=dmg;b.flash=.2;sfx("smite");G.shake=Math.max(G.shake,.25);G.fx.push({k:"smite",x:b.x,y:b.y,r:b.r,t:.45,max:.45});G.texts.push({x:b.x,y:b.y-b.r-6,s:"Châtiment "+Math.round(dmg),col:"#ffd75e",t:.9,max:.9,small:false});
@@ -1346,7 +1355,7 @@ function draw(){
   // champions (figurine ou modèle 3D animé)
   const used=new Set();
   FIGS.forEach((F,i)=>{const p=G.ps[i];if(!p){F.fig.visible=false;champLights[i].intensity=0;return}
-    let X=p.x*K,Z=p.y*K,Y=0;const ez=p.flying&&G.zones.find(z=>z.k==="entrance"&&z.o===p);if(ez){const u=1-ez.t/ez.max;X+=(ez.x-p.x)*K*u;Z+=(ez.y-p.y)*K*u;Y=Math.sin(u*Math.PI)*420}
+    let X=p.x*K,Z=p.y*K,Y=0;if(p.jumpT>0){p.jumpT-=ddt;Y=Math.sin(Math.PI*(1-Math.max(0,p.jumpT)/p.jumpMax))*140}const ez=p.flying&&G.zones.find(z=>z.k==="entrance"&&z.o===p);if(ez){const u=1-ez.t/ez.max;X+=(ez.x-p.x)*K*u;Z+=(ez.y-p.y)*K*u;Y=Math.sin(u*Math.PI)*420}
     const blink=p.down||G.dead||p.dash||!(p.inv>0&&Math.floor(p.inv*20)%2),mk=p.skaarlMax&&!p.mounted?p.champ.id+"_d":p.champ.id,M=MODELS[mk]?.holder?MODELS[mk]:MODELS[p.champ.id],useM=M&&M.holder&&p.skin==null;p.handY=useM?(p.mounted?95:60):60;
     setFigure(F,p);F.fig.visible=!useM&&blink;F.fig.position.set(X,Y,Z);
     F.stand.rotation.z=p.moving&&!p.down?Math.sin(p.walk*12)*.08:0;F.stand.rotation.x=p.down?-1.35:-.32;F.stand.position.y=8+(p.moving&&!p.down?Math.abs(Math.sin(p.walk*12))*4:0);
@@ -1366,7 +1375,7 @@ function draw(){
     if(f.r>=7)for(let k=0;k<(f.boss?7:4)&&nsp<900;k++){const a=k/(f.boss?7:4)*Math.PI*2+f.seed;put(spikes,nsp++,x+Math.cos(a)*R*.55,y+R*.75,z+Math.sin(a)*R*.55,R*.55,Math.sin(a)*.6,0,-Math.cos(a)*.6)}}
   for(const k in FM)FM[k].count=cnt[k];done(...Object.values(FM));eyes.count=ne;spikes.count=nsp;done(eyes,spikes);
   for(const f of G.foes)if(f.frozen>t&&nice<120){const R=f.r*K*1.5;put(iceM,nice++,f.x*K,R*.9,f.y*K,[R*1.7,R*1.8,R*1.7],0,f.seed,0)}iceM.count=nice;done(iceM);
-  drawFaille(t);
+  drawFaille(t);drawProps(t,ddt);
   // butin
   const ng=[0,0,0,0];let nch=0,nh=0;
   for(const g of G.gems){const x=g.x*K,z=g.y*K;if(g.chest){if(nch<40)put(chestM,nch++,x,10+Math.sin(t*3)*2,z,1,0,t,0);continue}if(g.heal){if(nh<40)put(healM,nh++,x,11+Math.sin(t*4)*2,z,1);continue}
@@ -1482,7 +1491,7 @@ function draw(){
     if(two){const [sx,sy,ok]=toScreen(X,0,Z+110);if(ok){ctx.font="700 12px Silkscreen,monospace";ctx.fillStyle="#120818";ctx.fillText("J"+(p.i+1),sx+1,sy+1);ctx.fillStyle=p.champ.col;ctx.fillText("J"+(p.i+1),sx,sy)}}
     if(p.hidden){const [sx,sy,ok]=toScreen(X,0,Z+130);if(ok){ctx.font="400 11px Silkscreen,monospace";ctx.fillStyle="#7fe0a8";ctx.fillText("caché",sx,sy)}}});
   for(const f of G.foes)if(f.boss||f.elite)bar(f.x*K,f.r*K*2.9,f.y*K,f.boss?100:60,f.hp/f.max,f.boss?"#ff4fa8":"#ffcc4d");
-  failleOverlay();
+  failleOverlay();propsOverlay();
   ctx.textAlign="center";
   for(const tx of G.texts){const [sx,sy,ok]=toScreen(tx.x*K,40+(tx.max-tx.t)*60,tx.y*K);if(!ok)continue;ctx.globalAlpha=Math.min(1,tx.t/tx.max*2);ctx.font=`${tx.small?400:700} ${tx.small?13:20}px Silkscreen,monospace`;
     ctx.fillStyle="#120818";ctx.fillText(tx.s,sx+2,sy+2);ctx.fillStyle=tx.col;ctx.fillText(tx.s,sx,sy)}
@@ -1499,7 +1508,7 @@ function drawFaille(t){
     put(m,i,x,sy+bob+R*.15+air,z,R,0,Math.PI/2-ea+(F.flee?Math.PI:0),F.shape==="crab"?Math.sin(t*10+f.seed)*.15:0);m.setColorAt(i,f.flash>0?WHITE:realm&&f!==realm.tgt?tmpCol.set(f.col).multiplyScalar(.3):tmpCol.set(f.col));
     if(nb.n<900){put(baseM,nb.n,x,1,z,[R*.95,1,R*.95]);baseM.setColorAt(nb.n++,tmpCol.set(f.boss?"#8a6414":F.tag?"#4a2f78":"#22182e"))}}
   for(const k in SM)SM[k].count=cnt[k];done(...Object.values(SM));baseM.count=nb.n;done(baseM);
-  let ne=0;for(const s of G.eshots)if(ne<120)put(eshotM,ne++,s.x*K,14,s.y*K,1);eshotM.count=ne;done(eshotM);
+  let ne=0;for(const s of G.eshots)if(!s.red&&ne<120)put(eshotM,ne++,s.x*K,14,s.y*K,1);eshotM.count=ne;done(eshotM);
   let np=0;for(const o of G.poros)if(np<20)put(poroM,np++,o.x*K,12+Math.abs(Math.sin(t*6+o.seed))*6,o.y*K,[13,11,13]);poroM.count=np;done(poroM);
   hazards3.forEach(h=>h.g.visible=false);G.haz.slice(0,hazards3.length).forEach((h,i)=>{const o=hazards3[i],k=1-h.t/h.max;o.g.visible=true;o.g.position.set(h.x*K,0,h.y*K);o.edge.scale.setScalar(h.r*K);o.fill.scale.setScalar(h.r*K*k);
     o.edge.material.color.set(h.col||"#ff3b3b");o.fill.material.color.set(h.col||"#ff3b3b");o.fill.material.opacity=.18+.25*k});
@@ -1509,13 +1518,119 @@ function drawFaille(t){
   shop3.position.set(G.shop.x*K,0,G.shop.y*K);shopLight.position.set(G.shop.x*K+40,120,G.shop.y*K+60)}
 function failleOverlay(){ctx.textAlign="center";ctx.font="400 12px Silkscreen,monospace";
   const label=(x,y,z,s,col)=>{const [sx,sy,ok]=toScreen(x,y,z);if(!ok||sx<-50||sx>W+50||sy<0||sy>H)return;ctx.fillStyle="#120818";ctx.fillText(s,sx+1,sy+1);ctx.fillStyle=col;ctx.fillText(s,sx,sy)};
-  for(const f of G.foes){const F=FOES[f.type];if(F.shape&&(F.tag||f.boss))label(f.x*K,f.r*K*(F.shape==="dragon"?3.6:3.1),f.y*K,f.name+(f.lvl>1?" niv. "+f.lvl:""),f.boss?"#ffcc4d":f.col)}
+  for(const f of G.foes){const F=FOES[f.type];if((F.shape||F.model)&&(F.tag||f.boss))label(f.x*K,f.r*K*(F.shape==="dragon"?3.6:3.1),f.y*K,f.name+(f.lvl>1?" niv. "+f.lvl:""),f.boss?"#ffcc4d":f.col)}
   for(const o of G.poros)label(o.x*K,45,o.y*K,"Poro","#ffd0e6");
   for(const e of G.fx)if(e.k==="heart"){const [sx,sy,ok]=toScreen(e.x*K,30+(1-e.t/e.max)*60,e.y*K);if(ok){ctx.globalAlpha=e.t/e.max;ctx.fillStyle="#ff7ab0";ctx.font="700 18px sans-serif";ctx.fillText("♥",sx,sy);ctx.globalAlpha=1;ctx.font="400 12px Silkscreen,monospace"}}
   const [sx,sy,ok]=toScreen(G.shop.x*K,150,G.shop.y*K);
   if(ok&&sx>20&&sx<W-20&&sy>60&&sy<H-20)label(G.shop.x*K,150,G.shop.y*K,G.nearShop?"Marchand · touche E":"Marchand","#ffcc4d");
   else{const a=Math.atan2(G.shop.y-G.cy,G.shop.x-G.cx),ax=W/2+Math.cos(a)*(Math.min(W,H)/2-50),ay=H/2+Math.sin(a)*(Math.min(W,H)/2-50);
     ctx.save();ctx.translate(ax,ay);ctx.rotate(a);ctx.fillStyle="#ffcc4d";ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(-8,-9);ctx.lineTo(-8,9);ctx.fill();ctx.restore();ctx.fillStyle="#ffcc4d";ctx.fillText("Marchand",ax,ay+24)}}
+
+// ===================== Carte vivante : marchand, tourelles, buffs rouge et bleu, plantes (modèles 3D fournis) =====================
+// Tourelles bleues d'Icathia : en ruine ; reste 3 s à côté pour la réveiller, elle tire sur la horde pendant 45 s.
+// Tourelles rouges du Néant : surgissent du sol et tirent sur les champions ; les détruire rapporte de l'or et ralentit la horde.
+// Ronceux rouge (buff rouge : les sorts brûlent et ralentissent) et Sentinelle bleue (buff bleu : recharges plus rapides, or) : 90 s.
+// Plantes : Fruit de miel (soin), Bulbe explosif (te projette par-dessus la horde), Fleur de clairvoyance (révèle la carte).
+const TC=380,PLC=140,BUFF_T=90;
+function towerAt(i,j){if(h2(i,j,21)>.42)return null;const x=i*TC+TC*(.25+.5*h2(i,j,22)),y=j*TC+TC*(.25+.5*h2(i,j,23));if(Math.hypot(x,y)<110||Math.hypot(x,y+170)<90)return null;return {x,y,key:"t"+i+":"+j}}
+function plantAt(i,j){if(h2(i,j,31)>.3)return null;const x=i*PLC+PLC*(.2+.6*h2(i,j,32)),y=j*PLC+PLC*(.2+.6*h2(i,j,33));if(Math.hypot(x,y+170)<45||Math.hypot(x,y)<35)return null;
+  const r=h2(i,j,34);return {x,y,key:"p"+i+":"+j,type:r<.38?"honey":r<.72?"cone":"bloom"}}
+const PLANT={honey:{name:"Fruit de miel",col:"#ffd75e"},cone:{name:"Bulbe explosif",col:"#ff8a5a"},bloom:{name:"Fleur de clairvoyance",col:"#6fd8ff"}};
+function cellsAround(x,y,C,R,fn){const i0=Math.floor(x/C),j0=Math.floor(y/C),n=Math.ceil(R/C);for(let i=i0-n;i<=i0+n;i++)for(let j=j0-n;j<=j0+n;j++)fn(i,j)}
+let UID=0;
+function propsTick(dt){const T=G.t;
+  // apparitions : buffs et tourelles du Néant
+  if(T>=(G.nextRed??100)){G.nextRed=T+150;const [x,y]=edgePoint();spawnAt("redbuff",x,y);say("Le Ronceux rouge apparaît : son buff fait brûler tes sorts","#ff6a3a",2.4)}
+  if(T>=(G.nextBlue??130)){G.nextBlue=T+150;const [x,y]=edgePoint();spawnAt("bluebuff",x,y);say("La Sentinelle bleue apparaît : son buff accélère tes sorts","#5fa8ff",2.4)}
+  if(T>=(G.nextTurret??150)){G.nextTurret=T+110;if(G.foes.filter(f=>f.type==="turretR").length<2){const a=rnd(0,Math.PI*2),d=VIEW()*.8,x=G.cx+Math.cos(a)*d,y=G.cy+Math.sin(a)*d;
+    const f=spawnAt("turretR",x,y);f.ax=x;f.ay=y;f.born=T;say("Une tourelle du Néant surgit du sol !","#ff4a3a",2.4);sfx("boss");G.shake=.3}}
+  // buffs des champions
+  for(const p of G.ps){if(p.redT>0)p.redT-=dt;if(p.blueT>0){p.blueT-=dt;p.ultCd-=dt*.3;p.blueG=(p.blueG||0)+dt;if(p.blueG>=1){p.blueG-=1;addGold(p,1)}}}
+  // brûlure du buff rouge
+  for(const f of G.foes){if(!(f.burnT>T)||f.dead)continue;f.burnTick=(f.burnTick||0)-dt;if(f.burnTick<=0){f.burnTick=.33;hurt(f,f.burnDps*.33,0,0,f.burnBy||ENV);if(Math.random()<.5)G.fx.push({k:"px",x:f.x+rnd(-3,3),y:f.y+rnd(-3,3),vx:0,vy:-20,t:.4,col:"#ff9b3d"})}}
+  // tourelles d'Icathia (alliées)
+  G.towerSt=G.towerSt||{};
+  cellsAround(G.cx,G.cy,TC,VIEW()*1.4,(i,j)=>{const w=towerAt(i,j);if(!w)return;const st=G.towerSt[w.key]||(G.towerSt[w.key]={s:"dead",cap:0,cd:0,fire:0});
+    if(st.s==="dead"){if(st.cd>0){st.cd-=dt;return}const near1=G.ps.some(p=>!p.down&&Math.hypot(p.x-w.x,p.y-w.y)<28);st.cap=near1?st.cap+dt:Math.max(0,st.cap-dt*.5);
+      if(st.cap>=3){st.s="wake";st.t=3;st.cap=0;say("Une tourelle d'Icathia se réveille !","#6fb8ff",2);sfx("ult")}}
+    else if(st.s==="wake"){st.t-=dt;if(st.t<=0){st.s="on";st.t=45}}
+    else if(st.s==="on"){st.t-=dt;st.fire-=dt;if(st.fire<=0){const f=nearest(w.x,w.y,95);if(f){st.fire=.7;st.atkT=T;const o=G.ps.filter(p=>!p.down).sort((a,b)=>Math.hypot(a.x-w.x,a.y-w.y)-Math.hypot(b.x-w.x,b.y-w.y))[0]||G.ps[0];
+        G.shots.push({k:"tshot",o,x:w.x,y:w.y,tgt:f,t:1.6,dmg:40+T*.12,r:3,trail:[]});sfx("shoot")}}
+      if(st.t<=0){st.s="dead";st.cd=60;say("La tourelle d'Icathia s'éteint","#6fb8ff",1.4)}}});
+  // plantes
+  G.plantSt=G.plantSt||{};
+  cellsAround(G.cx,G.cy,PLC,VIEW()*1.2,(i,j)=>{const pl=plantAt(i,j);if(!pl)return;const st=G.plantSt[pl.key];if(st&&T<st.until)return;
+    for(const p of G.ps){if(p.down||p.dash||Math.hypot(p.x-pl.x,p.y-pl.y)>p.r+7)continue;G.plantSt[pl.key]={until:T+60,trig:T};usePlant(p,pl);break}});
+  if(G.reveal>0)G.reveal-=dt;
+  G.corpses=(G.corpses||[]).filter(c=>(c.t-=dt)>0||c.keep)}
+function usePlant(p,pl){
+  if(pl.type==="honey"){const h=p.maxHp*.25;heal(p,h);say("Fruit de miel : +"+Math.round(h)+" PV","#ffd75e",1.4);sfx("gem");near(pl.x,pl.y,40,f=>{f.slow=1.5})}
+  else if(pl.type==="cone"){let a=p.moving?Math.atan2(p.mvy,p.mvx):null;if(a==null){const f=nearest(p.x,p.y,80);a=f?Math.atan2(p.y-f.y,p.x-f.x):p.dir||0}
+    const L=85,T=.6;p.dash={vx:Math.cos(a)*L/T,vy:Math.sin(a)*L/T,t:T};p.jumpT=T;p.jumpMax=T;p.inv=Math.max(p.inv,T+.2);sfx("bigboom");G.shake=.25;
+    G.fx.push({k:"blast",x:pl.x,y:pl.y,r:22,t:.45,max:.45});near(pl.x,pl.y,45,f=>{const dx=f.x-pl.x,dy=f.y-pl.y,d=Math.hypot(dx,dy)||1;if(d<26+f.r){f.kx+=dx/d*120;f.ky+=dy/d*120;f.stun=Math.max(f.stun,.5)}})}
+  else{G.reveal=12;say("Fleur de clairvoyance : la carte est révélée pendant 12 s","#6fd8ff",2);sfx("chest");pulse(pl.x,pl.y,120,"#6fd8ff",.9)}}
+// ce qui se passe quand un monstre « à modèle » tombe (appelé depuis onKill)
+function propKill(f,o){const F=FOES[f.type];
+  if(F.buff){const p=o&&o.champ?o:(G.ps.filter(q=>!q.down).sort((a,b)=>Math.hypot(a.x-f.x,a.y-f.y)-Math.hypot(b.x-f.x,b.y-f.y))[0]);
+    if(p){if(F.buff==="red"){p.redT=BUFF_T;say(`Buff rouge pour ${p.champ.name} : tes sorts brûlent et ralentissent`,"#ff6a3a",2.4)}else{p.blueT=BUFF_T;say(`Buff bleu pour ${p.champ.name} : recharges −20 %, ultime plus rapide, or`,"#5fa8ff",2.4)}}}
+  if(F.model==="red")G.corpses.push({model:"red",role:"death",x:f.x,y:f.y,ry:f.ry||0,t:2.6,id:++UID});
+  if(f.type==="turretR"){G.corpses.push({model:"turretB_dead",role:"destroyed",x:f.x,y:f.y,ry:0,t:60,id:++UID});G.waveSlow=30;say("Tourelle du Néant détruite : la horde ralentit pendant 30 s","#ffcc4d",2.4);G.shake=.4}}
+
+// ---------- modèles ----------
+const PROP_FILES={shop:["shop.glb.txt",230],red:["red.glb.txt",120],turretA:["turretA.glb.txt",340],turretA_dead:["turretA_dead.glb.txt",340],turretB:["turretB.glb.txt",340],turretB_dead:["turretB_dead.glb.txt",340],
+  bloom:["bloom.glb.txt",120],honey:["honey.glb.txt",140],cone:["cone.glb.txt",105]};
+const PCAP={shop:1,red:3,turretA:4,turretA_dead:6,turretB:2,turretB_dead:4,bloom:8,honey:8,cone:8};
+const PROPS={};
+function loadProp(k){const [file,H]=PROP_FILES[k];PROPS[k]={loading:true};
+  fetch((window.IC_MODELS??ASSET)+file).then(r=>{if(!r.ok)throw 0;return r.text()}).then(b64=>{const bin=atob(b64.trim()),buf=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)buf[i]=bin.charCodeAt(i);
+    new THREE.GLTFLoader().parse(buf.buffer,"",g=>{g.scene.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false}});const box=new THREE.Box3().setFromObject(g.scene),h=box.max.y-box.min.y||1;
+      PROPS[k]={scene:g.scene,anims:g.animations,sc:H/h,y0:-box.min.y*H/h}},()=>PROPS[k]={failed:true})}).catch(()=>PROPS[k]={failed:true})}
+for(const k in PROP_FILES)loadProp(k);
+const propCount={};
+function propInst(k){const T=PROPS[k];if(!T||!T.scene)return null;if((propCount[k]||0)>=PCAP[k])return null;propCount[k]=(propCount[k]||0)+1;
+  const root=THREE.SkeletonUtils?THREE.SkeletonUtils.clone(T.scene):T.scene.clone();root.scale.setScalar(T.sc);root.position.y=T.y0;const g=new THREE.Group();g.add(root);g.visible=false;scene.add(g);
+  const mixer=new THREE.AnimationMixer(root),A={};
+  for(const cl of T.anims){const n=cl.name.toLowerCase(),role=/death/.test(n)?"death":/destroy/.test(n)?"destroyed":/respawn/.test(n)?"respawn":/trigger/.test(n)?"trigger":/idle/.test(n)?"idle":/run/.test(n)?"run":/attack/.test(n)?"attack":null;
+    if(role&&!A[role]){A[role]=mixer.clipAction(cl);if(["death","trigger","respawn","attack"].includes(role)){A[role].setLoop(THREE.LoopOnce);A[role].clampWhenFinished=true}}}
+  if(!A.idle)A.idle=A.run||A.destroyed||A.trigger;return {k,g,mixer,A,cur:null}}
+const USED=new Map(),FREE={};
+function useProp(k,ek){let m=USED.get(ek);if(m&&m.k===k)return m;if(m){m.g.visible=false;(FREE[m.k]=FREE[m.k]||[]).push(m);USED.delete(ek)}
+  m=(FREE[k]||[]).pop()||propInst(k);if(!m)return null;m.cur=null;m.mixer.stopAllAction();USED.set(ek,m);return m}
+function playP(m,role,speed=1){const a=m.A[role]||m.A.idle;if(!a)return;if(m.cur===role)return;const prev=m.cur&&(m.A[m.cur]||m.A.idle);a.reset();a.timeScale=speed;a.fadeIn(.15);a.play();if(prev&&prev!==a)prev.fadeOut(.15);m.cur=role}
+const buffRings=pool(4,()=>{const m=new THREE.Mesh(new THREE.RingGeometry(.8,1,64),glow(0xff4a2a,.7));m.rotation.x=-Math.PI/2;return m});
+const tshotM=inst(new THREE.SphereGeometry(5,12,10),glow(0x7fd0ff,.95,softTex),60,false),eshotRed=inst(new THREE.SphereGeometry(5,12,10),glow(0xff4a3a,.95,softTex),40,false);
+const tshotRib=ribbons(10,10,0x6fb8ff);
+function drawProps(t,ddt){const seen=new Set(),put1=(k,ek,x,z,ry,role,speed)=>{const m=useProp(k,ek);if(!m)return null;seen.add(ek);m.g.visible=true;m.g.position.set(x*K,0,z*K);m.g.rotation.y=ry;playP(m,role,speed);m.mixer.update(ddt);return m};
+  // marchand
+  if(PROPS.shop&&PROPS.shop.scene){put1("shop","shop",G.shop.x,G.shop.y,0,"idle");shop3.visible=false}else shop3.visible=true;
+  if(G.ps.length){
+    // monstres à modèle (Ronceux rouge, tourelles du Néant)
+    for(const f of G.foes){const F=FOES[f.type];if(!F.model)continue;f.uid=f.uid||++UID;const tp=f.tgt||G.ps[0];
+      if(f.type==="turretR"){put1("turretB","f"+f.uid,f.x,f.y,0,G.t-(f.born||0)<3?"respawn":G.t-(f.atkT||-9)<.8?"attack":"idle",G.t-(f.born||0)<3?5:1);continue}
+      const a=Math.atan2(tp.y-f.y,tp.x-f.x);f.ry=Math.PI/2-a;put1(F.model,"f"+f.uid,f.x,f.y,f.ry,G.t-(f.atkT||-9)<.6?"attack":f.stun>0?"idle":"run")}
+    for(const c of G.corpses||[])put1(c.model,"c"+c.id,c.x,c.y,c.ry,c.role);
+    // tourelles d'Icathia
+    cellsAround(G.cx,G.cy,TC,VIEW()*1.3,(i,j)=>{const w=towerAt(i,j);if(!w)return;const st=(G.towerSt||{})[w.key]||{s:"dead"};
+      if(st.s==="dead")put1("turretA_dead",w.key,w.x,w.y,0,"destroyed");else put1("turretA",w.key,w.x,w.y,0,st.s==="wake"?"respawn":G.t-(st.atkT||-9)<.6?"attack":"idle",st.s==="wake"?5.1:1)});
+    // plantes
+    cellsAround(G.cx,G.cy,PLC,VIEW()*1.15,(i,j)=>{const pl=plantAt(i,j);if(!pl)return;const st=(G.plantSt||{})[pl.key];
+      if(st&&G.t<st.until){if(G.t-st.trig<1.8)put1(pl.type,pl.key,pl.x,pl.y,h2(i,j,35)*6,"trigger");return}put1(pl.type,pl.key,pl.x,pl.y,h2(i,j,35)*6,"idle")})}
+  for(const [ek,m] of USED)if(!seen.has(ek)){m.g.visible=false;(FREE[m.k]=FREE[m.k]||[]).push(m);USED.delete(ek)}
+  // auras des buffs, tirs des tourelles
+  buffRings.forEach(r=>r.visible=false);let nr=0;
+  for(const p of G.ps){if(p.down)continue;for(const [v,col] of [[p.redT,0xff4a2a],[p.blueT,0x3d8bff]]){if(!(v>0)||nr>=buffRings.length)continue;const r=buffRings[nr++];r.visible=true;r.material.color.set(col);r.position.set(p.x*K,3+nr,p.y*K);r.scale.setScalar(34*K*(1+.06*Math.sin(t*5+nr)));r.material.opacity=v<5?.35+.35*Math.sin(t*12):.7}}
+  let ns=0;tshotRib.forEach(r=>r.hide());for(const s of G.shots){if(s.k!=="tshot"||ns>=60)continue;put(tshotM,ns,s.x*K,60,s.y*K,1);if(ns<tshotRib.length)tshotRib[ns].set([[s.x*K,60,s.y*K],...s.trail.map(([a,b])=>[a*K,60,b*K])],10,1);ns++}
+  tshotM.count=ns;let ne=0;for(const s of G.eshots)if(s.red&&ne<40)put(eshotRed,ne++,s.x*K,70,s.y*K,1.2);eshotRed.count=ne;done(tshotM,eshotRed)}
+// étiquettes : réveil des tourelles, plantes proches, flèches de la Fleur de clairvoyance
+function propsOverlay(){if(!G.ps.length)return;ctx.textAlign="center";ctx.font="400 12px Silkscreen,monospace";
+  const label=(x,y,z,s,col)=>{const [sx,sy,ok]=toScreen(x,y,z);if(!ok||sx<-50||sx>W+50||sy<0||sy>H)return;ctx.fillStyle="#120818";ctx.fillText(s,sx+1,sy+1);ctx.fillStyle=col;ctx.fillText(s,sx,sy)};
+  cellsAround(G.cx,G.cy,TC,VIEW()*1.2,(i,j)=>{const w=towerAt(i,j);if(!w)return;const st=(G.towerSt||{})[w.key]||{s:"dead",cap:0,cd:0};
+    if(st.s==="dead")label(w.x*K,380,w.y*K,st.cd>0?`Tourelle éteinte · ${Math.ceil(st.cd)} s`:st.cap>0?`Réveil ${Math.round(st.cap/3*100)} %`:"Tourelle d'Icathia · reste à côté",st.cap>0?"#9fd8ff":"#6f8fb8");
+    else label(w.x*K,420,w.y*K,st.s==="wake"?"Réveil…":`Tourelle d'Icathia · ${Math.ceil(st.t)} s`,"#6fd8ff")});
+  cellsAround(G.cx,G.cy,PLC,VIEW(),(i,j)=>{const pl=plantAt(i,j);if(!pl)return;const st=(G.plantSt||{})[pl.key];if(st&&G.t<st.until)return;if(!G.ps.some(p=>Math.hypot(p.x-pl.x,p.y-pl.y)<55))return;label(pl.x*K,120,pl.y*K,PLANT[pl.type].name,PLANT[pl.type].col)});
+  if(G.reveal>0){const tg=G.foes.filter(f=>f.type==="golden"||FOES[f.type].buff||f.type==="turretR");
+    for(const f of tg){const [sx,sy,ok]=toScreen(f.x*K,0,f.y*K);if(ok&&sx>30&&sx<W-30&&sy>60&&sy<H-30)continue;const a=Math.atan2(f.y-G.cy,f.x-G.cx),ax=W/2+Math.cos(a)*(Math.min(W,H)/2-70),ay=H/2+Math.sin(a)*(Math.min(W,H)/2-70);
+      ctx.save();ctx.translate(ax,ay);ctx.rotate(a);ctx.fillStyle=f.col||"#6fd8ff";ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(-8,-9);ctx.lineTo(-8,9);ctx.fill();ctx.restore();ctx.fillStyle=f.col||"#6fd8ff";ctx.fillText(f.name,ax,ay+24)}}}
 
 // ===================== Interface =====================
 // portraits : l'illustration officielle recadrée sur le visage, en pixels
@@ -1535,6 +1650,7 @@ function kitHTML(p,withBuffs){const two=G.ps.length>1;
     p.items.map(k=>`<span class="p" style="color:var(--gold)">${SHOPK[k].name}</span>`).join("")+
     Object.entries(p.elix).map(([k,s])=>`<span class="p" style="color:#9fd8ff">${SHOPK[k].name} <i>${mmss(s)}</i></span>`).join("")+
     (withBuffs?Object.entries(G.buffs).map(([k,l])=>`<span class="p" style="color:#ffcc4d">${BUFFNAME[k]||k}${l>1?` <i>×${l}</i>`:""}</span>`).join(""):"")+
+    (p.redT>0?`<span class="p" style="color:#ff6a3a">Buff rouge <i>${mmss(p.redT)}</i></span>`:"")+(p.blueT>0?`<span class="p" style="color:#5fa8ff">Buff bleu <i>${mmss(p.blueT)}</i></span>`:"")+
     (p.revive?`<span class="p" style="color:#ff4f6a">Relève <i>${p.revive}</i></span>`:"")}
 function kitsHTML(){return G.ps.map((p,i)=>`<div class="kit">${kitHTML(p,i===G.ps.length-1)}</div>`).join("")}
 function buildPanels(){const box=$("pps");box.innerHTML="";const two=G.ps.length>1;
