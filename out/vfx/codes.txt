@@ -14,3 +14,5 @@ Mordekaiser_Q 200 899077
 Mordekaiser_R 200 4882769
 Tryndamere_E 200 2033840
 Tryndamere_R 200 1675504
+Graves_Q 200
+Graves_R 200
