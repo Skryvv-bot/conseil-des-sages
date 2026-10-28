@@ -482,7 +482,7 @@ const WEAPONS={
   shout:{name:"Cri railleur",by:"Tryndamere",col:"#ff8a8a",desc:["Un cri qui ralentit les ennemis proches et réduit leurs dégâts pendant 4 s.","Rayon plus large","Dégâts des ennemis encore réduits","Recharge plus courte","Rayon plus large","MAX : toutes les 2,5 s, un cri immense qui repousse, blesse et réduit leurs dégâts de 70 %."],
     st:l=>({cd:LV(8,7.5,7,6.2,6,2.5)(l),R:LV(40,46,46,48,56,110)(l),weak:LV(.3,.3,.4,.4,.45,.7)(l),dmg:l>=6?40:0})},
   slash:{name:"Tourbillon tranchant",by:"Tryndamere",col:"#ff4f4f",desc:["Tryndamere tournoie vers l'avant et tranche tout sur son passage (il est intouchable pendant la ruée).","+30 % de dégâts","Ruée plus longue","Lame plus large, +20 % de dégâts","Recharge bien plus rapide","MAX : un tourbillon toutes les 0,45 s, immense et dévastateur."],
-    st:l=>({cd:LV(2.6,2.5,2.4,2.3,1.55,.45)(l),dmg:LV(26,34,35,42,46,90)(l),len:LV(46,48,58,60,64,90)(l),w:LV(12,12,13,16,17,26)(l)})},
+    st:l=>({cd:LV(2.6,2.5,2.4,2.3,1.55,.45)(l),dmg:LV(26,34,35,42,46,90)(l),len:LV(46,48,58,60,64,90)(l),w:LV(26,26,28,32,34,46)(l)})},
   // ---- Graves ----
   eol:{name:"Fin de partie",by:"Graves",col:"#ffb04a",desc:["Graves tire un obus qui laisse une traînée de poudre : il blesse en passant, puis explose au bout et la poudre s'embrase en revenant vers lui.","+25 % de dégâts","Ligne plus longue","+25 % de dégâts","2 obus en éventail","MAX : 3 obus toutes les 0,6 s, explosion presque immédiate."],
     st:l=>({cd:LV(2.2,2.1,2,1.8,1.6,.6)(l),len:LV(80,82,92,94,100,130)(l),dmg:LV(20,25,26,32,34,70)(l),dmg2:LV(30,38,40,50,54,110)(l),n:LV(1,1,1,1,2,3)(l),delay:LV(.75,.75,.7,.7,.6,.25)(l)})},
@@ -848,7 +848,7 @@ function weapons(dt,p){
       p.cds[k]=marked?s.reset:s.cd*p.cdMul;sfx("shoot");dashTo(p,a,Math.max(4,d-6),.14,s.dmg,8,"#9fc4ff",()=>{hurt(t,s.dmg,0,0,p);G.fx.push({k:"moon",x:t.x,y:t.y,r:14,t:.35,max:.35})});p.inv=Math.max(p.inv,.2)}
     // ----- Azir -----
     else if(k==="sand"){p.sandA=(p.sandA||0)+dt*.5;const prev=p.soldiers||[];p.soldiers=[];
-      for(let i=0;i<s.n;i++){const a=p.sandA+i/s.n*Math.PI*2,o=prev[i];p.soldiers.push({x:p.x+Math.cos(a)*24,y:p.y+Math.sin(a)*24,a:o?o.a:a+Math.PI/2,hit:o?.hit,born:o?o.born:G.t})}
+      for(let i=0;i<s.n;i++){const a=p.sandA+i/s.n*Math.PI*2,o=prev[i];p.soldiers.push({x:p.x+Math.cos(a)*38,y:p.y+Math.sin(a)*38,a:o?o.a:a+Math.PI/2,hit:o?.hit,born:o?o.born:G.t})}
       for(let i=prev.length;i<s.n;i++)G.fx.push({k:"vortex",x:p.soldiers[i].x,y:p.soldiers[i].y,t:.9,max:.9});
       if(ready){let any=false;for(const so of p.soldiers){const t=nearest(so.x,so.y,s.len+10);if(!t)continue;any=true;const a=Math.atan2(t.y-so.y,t.x-so.x),dx=Math.cos(a),dy=Math.sin(a);so.a=a;so.hit=G.t;
           G.fx.push({k:"thrust",x:so.x,y:so.y,a,len:s.len,w:s.w,t:.25,max:.25});
@@ -1262,7 +1262,7 @@ const kegs3=pool(12,()=>{const g=new THREE.Group(),wood=std(0x8a5a32,0,0,{roughn
   const lid=new THREE.Mesh(new THREE.CylinderGeometry(8.4,8.4,1,14),std(0x5a3a20));lid.position.y=22.5;
   const ringG=new THREE.RingGeometry(13,15.5,32,1);const ring=new THREE.Mesh(ringG,glow(0x6fd0ff,.9));ring.rotation.x=-Math.PI/2;ring.position.y=1.5;
   const back=new THREE.Mesh(new THREE.RingGeometry(13,15.5,32,1),glow(0x2a4a6a,.5));back.rotation.x=-Math.PI/2;back.position.y=1.2;
-  const fuse=new THREE.Mesh(new THREE.SphereGeometry(2.4,8,6),glow(0xffd36a,1,softTex));fuse.position.y=25;
+  const fuse=new THREE.Mesh(new THREE.SphereGeometry(2.4,8,6),glow(0xffd36a,1,softTex));fuse.position.y=88;
   g.add(body,b1,b2,lid,ring,back,fuse);g.scale.setScalar(2.1);return {g,ring,fuse}});
 const tracers=pool(8,()=>{const m=new THREE.Mesh(streakG,glow(0xffd27a,.9));return m});
 const blasts=pool(18,()=>{const g=new THREE.Group(),core=new THREE.Mesh(new THREE.SphereGeometry(1,20,14),glow(0xffd27a,.95,softTex)),fire=new THREE.Mesh(new THREE.SphereGeometry(1,20,14),glow(0xff5a1a,.75,softTex)),
@@ -1742,14 +1742,14 @@ function propKill(f,o){const F=FOES[f.type];
   if(f.type==="turretR"){G.corpses.push({model:"turretB_dead",role:"destroyed",x:f.x,y:f.y,ry:0,t:60,id:++UID});G.waveSlow=30;say("Tourelle du Néant détruite : la horde ralentit pendant 30 s","#ffcc4d",2.4);G.shake=.4}}
 
 // ---------- modèles ----------
-const PROP_FILES={keg:["keg.glb.txt",55],shop:["shop.glb.txt",300],red:["red.glb.txt",250],turretA:["turretA.glb.txt",520],turretA_dead:["turretA_dead.glb.txt",520],turretB:["turretB.glb.txt",520],turretB_dead:["turretB_dead.glb.txt",520],
-  soldier:["soldier.glb.txt",185],soldierR:["soldierR.glb.txt",185],bloom:["bloom.glb.txt",280],honey:["honey.glb.txt",140],cone:["cone.glb.txt",75]};
+const PROP_FILES={keg:["keg.glb.txt",85],shop:["shop.glb.txt",290],red:["red.glb.txt",245],turretA:["turretA.glb.txt",480],turretA_dead:["turretA_dead.glb.txt",480],turretB:["turretB.glb.txt",480],turretB_dead:["turretB_dead.glb.txt",480],
+  soldier:["soldier.glb.txt",170],soldierR:["soldierR.glb.txt",185],bloom:["bloom.glb.txt",260],honey:["honey.glb.txt",140],cone:["cone.glb.txt",75]};
 const PCAP={keg:16,soldier:6,soldierR:24,shop:1,red:3,turretA:4,turretA_dead:6,turretB:2,turretB_dead:4,bloom:8,honey:8,cone:8};
 const PROPS={};
 function loadProp(k){const [file,H]=PROP_FILES[k];PROPS[k]={loading:true};
   fetch((window.IC_MODELS??ASSET)+file).then(r=>{if(!r.ok)throw 0;return r.text()}).then(b64=>{const bin=atob(b64.trim()),buf=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)buf[i]=bin.charCodeAt(i);
     new THREE.GLTFLoader().parse(buf.buffer,"",g=>{g.scene.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false}});const box=new THREE.Box3().setFromObject(g.scene),h=box.max.y-box.min.y||1;
-      PROPS[k]={scene:g.scene,anims:g.animations,sc:H/h,y0:-box.min.y*H/h}},()=>PROPS[k]={failed:true})}).catch(()=>PROPS[k]={failed:true})}
+      const top=box.max.y>.01?box.max.y:h;PROPS[k]={scene:g.scene,anims:g.animations,sc:H/top,y0:0}},()=>PROPS[k]={failed:true})}).catch(()=>PROPS[k]={failed:true})}
 for(const k in PROP_FILES)loadProp(k);
 const propCount={};
 function propInst(k){const T=PROPS[k];if(!T||!T.scene)return null;if((propCount[k]||0)>=PCAP[k])return null;propCount[k]=(propCount[k]||0)+1;
@@ -1820,16 +1820,16 @@ const MON={
   krug1:{f:"m_krug_1",h:50,cap:10,a:{idle:"krug_idle_ag2n",run:"run",death:"death"}},
   krug2:{f:"m_krug_2",h:95,cap:8,a:{idle:"krug_idle_aggro",run:"run",attack:"attack1_base",death:"death"}},
   krug3:{f:"m_krug_3",h:160,cap:4,a:{idle:"krug_idle_ag2n",run:"run",attack:"attack2",death:"death"}},
-  gromp:{f:"m_gromp",h:140,cap:8,a:{idle:"sru_gromp_idle2",run:"run",attack:"attack1_mid",death:"death"}},
+  gromp:{f:"m_gromp",h:112,cap:8,a:{idle:"sru_gromp_idle2",run:"run",attack:"attack1_mid",death:"death"}},
   crab:{f:"m_crab",h:105,cap:3,a:{idle:"idle1",run:"run",spawn:"crab_spawn"}},
   grub:{f:"m_grub",h:80,cap:8,a:{idle:"run",run:"run",attack:"attack1b",spawn:"spawnin",death:"death1"}},
   poro:{f:"m_poro",h:65,cap:12,a:{idle:"idle1",run:"run1",death:"death"}},
   blue:{f:"m_blue",h:255,cap:2,a:{idle:"sru_blue_idle_aggro",run:"run",attack:"attack1",death:"death"}},
-  herald:{f:"m_herald",h:270,cap:2,a:{idle:"idle_base",run:"run",spawn:"spawn",dash:"dash",death:"death"}},
-  atakhan:{f:"m_atakhan",h:430,cap:1,a:{idle:"idle1",run:"run_slow",runF:"run_fast",s1:"spell1",s2:"spell2",death:"death"}},
-  baron:{f:"m_baron",h:450,cap:1,a:{idle:"idle1_base",spawn:"spawn_crawlout",s2:"spell2_base",s3:"spell3_base",s5:"spell5",s6w:"spell6_windup",s6:"spell6",s9:"spell9",death:"death"}}};
+  herald:{f:"m_herald",h:261,cap:2,a:{idle:"idle_base",run:"run",spawn:"spawn",dash:"dash",death:"death"}},
+  atakhan:{f:"m_atakhan",h:408,cap:1,a:{idle:"idle1",run:"run_slow",runF:"run_fast",s1:"spell1",s2:"spell2",death:"death"}},
+  baron:{f:"m_baron",h:365,cap:1,a:{idle:"idle1_base",spawn:"spawn_crawlout",s2:"spell2_base",s3:"spell3_base",s5:"spell5",s6w:"spell6_windup",s6:"spell6",s9:"spell9",death:"death"}}};
 for(const k of ["infernal","ocean","nuage","montagne","hextech","chemtech"])
-  MON["dragon_"+k]={f:"m_dragon_"+k,h:500,cap:2,a:{idle:"sru_dragon_idle_normal",run:"run",fly:"sru_dragon_flying_run",breath:"spell2",attack:"attack1",land:"landing",death:"death"}};
+  MON["dragon_"+k]={f:"m_dragon_"+k,h:270,cap:2,a:{idle:"sru_dragon_idle_normal",run:"run",fly:"sru_dragon_flying_run",breath:"spell2",attack:"attack1",land:"landing",death:"death"}};
 // Roi Poro : 50 % de chance par partie (tirage du robot), s'enfuit après 40 s
 MON.poroKing={f:"m_poro_king",h:150,cap:1,a:{idle:"idle1",run:"run",spawn:"spawn",jump:"jump",death:"death"}};
 function kingTick(T){if(!(G.kingAt>0)||G.kingDone)return;if(T>=G.kingAt-30)needMon("poroKing");
