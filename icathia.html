@@ -264,23 +264,23 @@ window.IC_ASSET="cartes/";window.IC_MODELS="icathia/";
 const RUN=900;
 // les 8 champions : un sort de départ (lancé tout seul) et un ultime (touche R)
 const CHAMPS=[
-  {id:"Ashe",name:"Ashe",title:"Archère de givre",region:"Freljord",col:"#8fd8ff",hp:90,spd:62,weapon:"volley",ult:"crystal",crop:[95,63,90,90],
+  {id:"Ashe",name:"Ashe",title:"Archère de givre",region:"Freljord",col:"#8fd8ff",hp:90,spd:62,weapon:"volley",ult:"crystal",model:"ashe.glb.txt",modelH:180,crop:[95,63,90,90],
     lore:"Reine des Avarosans, elle porte l'arc de cristal de la légendaire Avarosa. Le froid du Freljord ralentit tout ce qu'elle touche."},
   {id:"Diana",name:"Diana",title:"Mépris de la lune",region:"Mont Targon",col:"#9fc4ff",hp:105,spd:60,weapon:"lunar",ult:"moonfall",crop:[80,70,90,90],model:"diana.glb.txt",
     lore:"Guerrière du Mont Targon, elle a embrassé le culte de la lune que les Solaris avaient fait disparaître. Sa lame en croissant décrit des arcs de lumière pâle qui tranchent tout sur leur passage."},
   {id:"Azir",name:"Azir",title:"Empereur des sables",region:"Shurima",col:"#e8c27a",hp:100,spd:58,weapon:"sand",ult:"divide",crop:[100,25,90,90],model:"azir.glb.txt",
     lore:"Empereur de Shurima revenu d'entre les morts sous la forme d'un Élevé. Icathia fut jadis une cité vassale de son empire : c'est sa propre terre que le Néant ronge. Ses soldats de sable tiennent la ligne à sa place."},
-  {id:"Gangplank",name:"Gangplank",title:"Fléau des mers",region:"Bilgewater",col:"#ff9b3d",hp:115,spd:58,weapon:"keg",ult:"barrage",crop:[80,50,100,100],
+  {id:"Gangplank",name:"Gangplank",title:"Fléau des mers",region:"Bilgewater",col:"#ff9b3d",hp:115,spd:58,weapon:"keg",ult:"barrage",model:"gangplank.glb.txt",modelH:190,crop:[80,50,100,100],
     lore:"Ancien maître de Bilgewater, chassé de son trône et revenu le reprendre. Pour lui, le Néant n'est qu'une flotte ennemie de plus : il sème ses barils de poudre et fait tout sauter d'un coup de pistolet."},
   {id:"Kled",name:"Kled",title:"Le cavalier colérique",region:"Noxus",col:"#ff7a4d",hp:120,spd:64,weapon:"trap",ult:"charge",crop:[70,40,110,110],model:"kled.glb.txt",modelH:200,model2:"kledd.glb.txt",model2H:120,
     lore:"Yordle noxien, chevalier autoproclamé, juché sur Skaarl, un lézard bien plus peureux que lui. Skaarl encaisse les coups à sa place ; quand il s'enfuit, Kled continue à pied jusqu'à ce que son courage revienne."},
-  {id:"Galio",name:"Galio",title:"Le colosse",region:"Demacia",col:"#f3d48a",hp:140,spd:54,weapon:"winds",ult:"entrance",crop:[70,10,110,110],
+  {id:"Galio",name:"Galio",title:"Le colosse",region:"Demacia",col:"#f3d48a",hp:140,spd:54,weapon:"winds",ult:"entrance",model:"galio.glb.txt",modelH:235,crop:[70,10,110,110],
     lore:"Statue de pétricite géante qui protège Demacia de la magie. La magie du Néant suffit à le réveiller : il n'a jamais eu autant de raisons de se battre."},
-  {id:"Mordekaiser",name:"Mordekaiser",title:"Le revenant de fer",region:"Noxus",col:"#4fe0b0",hp:135,spd:52,weapon:"mace",ult:"realm",crop:[60,20,110,110],
+  {id:"Mordekaiser",name:"Mordekaiser",title:"Le revenant de fer",region:"Noxus",col:"#4fe0b0",hp:135,spd:52,weapon:"mace",ult:"realm",model:"mordekaiser.glb.txt",modelH:225,crop:[60,20,110,110],
     lore:"Seigneur de guerre revenu deux fois d'entre les morts, il règne sur un royaume des âmes. Les créatures du Néant n'ont pas d'âme ; il compte bien leur en arracher une quand même."},
-  {id:"Tryndamere",name:"Tryndamere",title:"Le roi barbare",region:"Freljord",col:"#ff4f4f",hp:125,spd:60,weapon:"slash",ult:"rage",crop:[40,20,110,110],
+  {id:"Tryndamere",name:"Tryndamere",title:"Le roi barbare",region:"Freljord",col:"#ff4f4f",hp:125,spd:60,weapon:"slash",ult:"rage",model:"tryndamere.glb.txt",modelH:190,crop:[40,20,110,110],
     lore:"Dernier survivant de son clan, massacré par une créature venue d'ailleurs. Sa rage l'empêche de mourir, et la brèche d'Icathia est l'occasion qu'il attendait depuis toujours."},
-  {id:"Graves",name:"Graves",title:"Le hors-la-loi",region:"Bilgewater",col:"#d8a35a",hp:115,spd:60,weapon:"eol",ult:"collat",crop:[85,25,90,90],
+  {id:"Graves",name:"Graves",title:"Le hors-la-loi",region:"Bilgewater",col:"#d8a35a",hp:115,spd:60,weapon:"eol",ult:"collat",model:"graves.glb.txt",modelH:185,crop:[85,25,90,90],
     lore:"Mercenaire, contrebandier et joueur de Bilgewater, toujours accompagné de « Destin », son fusil à pompe. Le Néant ne paie pas ses dettes ; Graves vient quand même encaisser."}
 ];
 const CH=id=>CHAMPS.find(c=>c.id===id);
@@ -345,6 +345,17 @@ function weekChallenge(key=weekKey()){let h=2166136261;for(const c of key)h=Math
   const champ=CHAMPS[h%CHAMPS.length],a=MODS[(h>>>4)%MODS.length];let b=MODS[(h>>>9)%MODS.length];if(b===a)b=MODS[(MODS.indexOf(a)+3)%MODS.length];
   return {key,champ:champ.id,mods:[a.k,b.k]}}
 // niveaux de difficulté : résistance, dégâts, vitesse et nombre de monstres ; le score et l'essence suivent
+// animations précises par champion (noms de clips normalisés : minuscules, sans préfixe ni .anm)
+const ANIMS={
+  Ashe:{idle:"idle1",run:"run",sig:"spell2",ult:"spell4"},
+  Azir:{idle:"idle1_base",run:"run_in",death:"ga_death",sig:"attack_command",ult:"spell4"},
+  Diana:{idle:"idle1",run:"run_base",death:"death_anim",sig:"spell1",ult:"attack1"},
+  Kled:{idle:"idle0",run:"run_base",death:"death",mount:"mount_on_to_run",sig:"spell1",ult:"spell4_into",ultEnd:"spell4_outattack"},
+  Gangplank:{idle:"idle1",run:"run_base",death:"death",sig:"spell3",ult:"spell4",shoot:"spell1"},
+  Galio:{idle:"idle1_base",run:"run_base",death:"death",sig:"spell1",ult:"spell4_in",chan:"spell4_channel",ultEnd:"spell4_out"},
+  Mordekaiser:{idle:"battle_idle",run:"walk",death:"death",sig:"spell1",ult:"spell4_to_idle"},
+  Tryndamere:{idle:"idle1",run:"run",death:"death",sig:"spell3",ult:"spell4"},
+  Graves:{idle:"idle1",run:"run",death:"death",sig:"spell1",ult:"spell4",ultEnd:"spell4_back",endAfter:1}};
 const DIFFS=[
   {k:"normal",name:"Normal",desc:"L'équilibre d'origine. Victoire : 2 boosters LolMaster.",hp:1,dmg:1,spd:1,spawn:1,boss:1,score:1,ess:1,boost:2,col:"#ffcc4d"},
   {k:"hard",name:"Difficile",desc:"Une horde plus dense, plus rapide et plus solide, des boss qui frappent fort. Victoire : 4 boosters LolMaster.",hp:1.45,dmg:1.4,spd:1.12,spawn:1.3,boss:1.5,score:1.6,ess:1.4,boost:4,col:"#ff8a3d"},
@@ -949,7 +960,7 @@ function crystalBoom(s,f){s.t=0;const x=f?f.x:s.x,y=f?f.y:s.y,R=s.R||40,st=s.stu
 function spells(dt){
   for(const b of G.kegs){b.t+=dt;if(b.fuse>0){b.fuse-=dt;if(b.fuse<=0)kegBoom(b);continue}
     if(b.t<b.arm)continue;let trig=b.t>b.life;if(!trig)near(b.x,b.y,b.blast,f=>{if((f.x-b.x)**2+(f.y-b.y)**2<(b.blast*.7+f.r)**2){trig=true;return false}});
-    if(trig){b.fuse=.12;G.fx.push({k:"tracer",x:b.o.x,y:b.o.y,tx:b.x,ty:b.y,t:.12,max:.12});sfx("shoot")}}
+    if(trig){b.fuse=.12;b.o.shootT=G.t;b.o.aimA=Math.atan2(b.y-b.o.y,b.x-b.o.x);G.fx.push({k:"tracer",x:b.o.x,y:b.o.y,tx:b.x,ty:b.y,t:.12,max:.12});sfx("shoot")}}
   G.kegs=G.kegs.filter(b=>!b.done);
   for(const te of G.tethers){const f=te.f,o=te.o;if(f.dead||o.down){te.t=0;continue}te.t-=dt;te.tick-=dt;
     if(te.tick<=0){te.tick=.25;hurt(f,te.bleed*.25,0,0,o)}
@@ -964,7 +975,7 @@ function spells(dt){
     w.x1=w.cx-w.ny*w.half;w.y1=w.cy+w.nx*w.half;w.x2=w.cx+w.ny*w.half;w.y2=w.cy-w.nx*w.half}
   G.walls=G.walls.filter(w=>w.t>0);
   if(G.realm){const R=G.realm;R.t-=dt;if(R.t<=0||R.tgt.dead||R.p.down){R.p.dmgMul-=R.bonus;G.realm=null;say("Fin du Royaume des morts","#4fe0b0",1.4)}}}
-function kegBoom(b){if(b.done)return;b.done=true;const R=b.blast;sfx("bigboom");G.shake=Math.max(G.shake,.18);G.fx.push({k:"blast",x:b.x,y:b.y,r:R,t:.55,max:.55});
+function kegBoom(b){if(b.done)return;b.done=true;(G.corpses=G.corpses||[]).push({model:"keg",role:"death",x:b.x,y:b.y,ry:b.seed,t:1.5,sp:2,id:++UID});const R=b.blast;sfx("bigboom");G.shake=Math.max(G.shake,.18);G.fx.push({k:"blast",x:b.x,y:b.y,r:R,t:.55,max:.55});
   for(let i=0;i<14;i++)G.fx.push({k:"px",x:b.x,y:b.y,vx:rnd(-80,80),vy:rnd(-80,80),t:rnd(.3,.6),col:i%3?"#ff9b3d":"#6b6b6b"});
   near(b.x,b.y,R+20,f=>{const dx=f.x-b.x,dy=f.y-b.y,d=Math.hypot(dx,dy)||1;if(d<R+f.r){hurt(f,b.dmg,dx/d*60,dy/d*60,b.o);f.slow=1}});
   for(const o of G.kegs)if(!o.done&&o.fuse<=0&&Math.hypot(o.x-b.x,o.y-b.y)<R*2.2){o.fuse=.18;o.arm=0}}
@@ -994,10 +1005,10 @@ const ULT_FN={
     for(let i=1;i<=Math.floor(dist/16);i++)G.fx.push({k:"chev",x:p.x+dx*i*16,y:p.y+dy*i*16,a,t:1.2+i*.02,max:1.2+i*.02});
     p.shield=Math.max(p.shield,p.maxHp*(.3+.05*(l-1)));p.charging=true;
     p.dash={vx:dx*210,vy:dy*210,t:T,onStep:pp=>near(pp.x,pp.y,24,f=>{if(!hit.has(f)&&(f.x-pp.x)**2+(f.y-pp.y)**2<(12+f.r)**2){hit.add(f);hurt(f,(30+G.t*.06)*um(l),-dy*60,dx*60,pp)}}),
-      onEnd:pp=>{pp.charging=false;sfx("bigboom");G.shake=.35;G.fx.push({k:"blast",x:pp.x+dx*8,y:pp.y+dy*8,r:30,t:.5,max:.5});
+      onEnd:pp=>{pp.charging=false;pp.ultEndT=G.t;sfx("bigboom");G.shake=.35;G.fx.push({k:"blast",x:pp.x+dx*8,y:pp.y+dy*8,r:30,t:.5,max:.5});
         near(pp.x,pp.y,50,f=>{const ex=f.x-pp.x,ey=f.y-pp.y,d=Math.hypot(ex,ey)||1;if(d<30+f.r){hurt(f,(90+G.t*.2)*um(l),ex/d*90,ey/d*90,pp);f.stun=Math.max(f.stun,.8)}});if(again)go(false)}}};go(mx)},
   entrance(p,l){const mx=l>=MAXL,R=mx?100:46+5*(l-1);const ally=G.ps.find(o=>o!==p&&!o.down);let x,y;if(ally&&Math.hypot(ally.x-p.x,ally.y-p.y)>25){x=ally.x;y=ally.y}else{const t=densest(p.x,p.y,180,40)||bigTarget(p.x,p.y,180);x=t?t.x:p.x;y=t?t.y:p.y}
-    p.stasis=1.2;p.inv=Math.max(p.inv,1.3);p.flying=true;G.zones.push({k:"entrance",x,y,o:p,r:R,t:1.2,max:1.2,end:z=>{p.x=z.x;p.y=z.y;p.flying=false;sfx("bigboom");G.shake=.45;
+    p.stasis=1.2;p.inv=Math.max(p.inv,1.3);p.flying=true;G.zones.push({k:"entrance",x,y,o:p,r:R,t:1.2,max:1.2,end:z=>{p.x=z.x;p.y=z.y;p.flying=false;p.ultEndT=G.t;sfx("bigboom");G.shake=.45;
       G.fx.push({k:"land",x:z.x,y:z.y,r:R,t:.7,max:.7});for(const q of G.ps)if(!q.down&&Math.hypot(q.x-z.x,q.y-z.y)<R+10)q.shield=Math.max(q.shield,q.maxHp*(mx?.6:.25+.04*(l-1)));
       near(z.x,z.y,R+25,f=>{const ex=f.x-z.x,ey=f.y-z.y,d=Math.hypot(ex,ey)||1;if(d<R+f.r){hurt(f,(80+G.t*.2)*um(l),ex/d*70,ey/d*70,p);f.stun=Math.max(f.stun,mx?2.5:1+.1*(l-1));f.air=G.t+.7}})}})},
   realm(p,l){const mx=l>=MAXL;const t=bigTarget(p.x,p.y,200);if(!t){say("Aucune cible pour le Royaume des morts","#4fe0b0",1.2);return false}
@@ -1290,12 +1301,17 @@ function loadModel(c,file=c.model,key=c.id,H=c.modelH||175){if(!file||MODELS[key
     const box=new THREE.Box3().setFromObject(root),h=box.max.y-box.min.y||1,sc=H/h;root.scale.setScalar(sc);root.position.y=-box.min.y*sc;
     const holder=new THREE.Group();holder.add(root);holder.visible=false;scene.add(holder);
     const mixer=new THREE.AnimationMixer(root),A={};
-    for(const cl of g.animations){const n=cl.name.toLowerCase(),role=/death|mort/.test(n)?"death":/idle/.test(n)?"idle":/mount/.test(n)?"mount":/run|walk/.test(n)?"run":/spell4/.test(n)?"ult":/spell1/.test(n)?"q":/spell/.test(n)?"spell":/attack/.test(n)?"attack":null;if(role&&!A[role])A[role]=mixer.clipAction(cl)}
+    const map=ANIMS[key],D={};
+    if(map){const norm=n=>n.toLowerCase().replace(/\.anm$/,"").replace(new RegExp("^"+key.toLowerCase()+"_"),"");
+      for(const r in map){if(typeof map[r]!=="string")continue;const cl=g.animations.find(c=>norm(c.name)===map[r]);if(cl)A[r==="sig"?"attack":r]=mixer.clipAction(cl)}
+      if(A.attack)A.spell=A.q=A.attack}
+    else for(const cl of g.animations){const n=cl.name.toLowerCase(),role=/death|mort/.test(n)?"death":/idle/.test(n)?"idle":/mount/.test(n)?"mount":/run|walk/.test(n)?"run":/spell4/.test(n)?"ult":/spell1/.test(n)?"q":/spell/.test(n)?"spell":/attack/.test(n)?"attack":null;if(role&&!A[role])A[role]=mixer.clipAction(cl)}
     if(!A.run&&g.animations[0])A.run=mixer.clipAction(g.animations[0]);
     if(!A.attack&&A.q)A.attack=A.q;if(!A.spell&&A.q)A.spell=A.q;
-    for(const k of ["attack","spell","death","q","ult","mount"])if(A[k]){A[k].setLoop(THREE.LoopOnce);A[k].clampWhenFinished=true}
-    if(A.attack)A.attack.timeScale=1.8;if(A.spell)A.spell.timeScale=1.4;
-    MODELS[key]={holder,mixer,A,cur:null}},()=>{MODELS[key]={failed:true}})}).catch(()=>{MODELS[key]={failed:true}})}
+    for(const k of ["attack","spell","death","q","ult","mount","ultEnd","shoot"])if(A[k]){A[k].setLoop(THREE.LoopOnce);A[k].clampWhenFinished=true}
+    if(map){for(const k of ["attack","ult","ultEnd","shoot"])if(A[k])A[k].timeScale=1.25}else{if(A.attack)A.attack.timeScale=1.8;if(A.spell)A.spell.timeScale=1.4}
+    for(const k in A)D[k]=A[k].getClip().duration/Math.abs(A[k].timeScale||1);
+    MODELS[key]={holder,mixer,A,D,endAfter:!!(map&&map.endAfter),cur:null}},()=>{MODELS[key]={failed:true}})}).catch(()=>{MODELS[key]={failed:true}})}
 for(const c of CHAMPS){loadModel(c);if(c.model2)loadModel(c,c.model2,c.id+"_d",c.model2H)}
 function playRole(M,role){const a=M.A[role];if(!a)return;if(M.cur===role&&(a.isRunning()||role==="death"))return;const prev=M.cur&&M.A[M.cur];
   a.reset();a.fadeIn(.12);a.play();if(prev&&prev!==a)prev.fadeOut(.12);M.cur=role}
@@ -1361,9 +1377,12 @@ function draw(){
     F.stand.rotation.z=p.moving&&!p.down?Math.sin(p.walk*12)*.08:0;F.stand.rotation.x=p.down?-1.35:-.32;F.stand.position.y=8+(p.moving&&!p.down?Math.abs(Math.sin(p.walk*12))*4:0);
     F.stand.rotation.y+=(((p.face<0?-.35:.35))-F.stand.rotation.y)*.15;F.ring.material.opacity=.35+Math.sin(t*4)*.1;
     F.rez.visible=p.down;if(p.down){F.rez.scale.setScalar(.25+.75*p.rez/3);F.rez.material.opacity=.4+.5*(p.rez/3)}
-    if(useM){used.add(Object.keys(MODELS).find(k=>MODELS[k]===M));M.holder.visible=blink;M.holder.position.set(X,Y,Z);const want=Math.PI/2-(G.t-(p.atkT??-9)<.5&&p.aimA!=null?p.aimA:(p.dir??0));let d=want-M.holder.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));M.holder.rotation.y+=d*.25;
-      const A=M.A;let role,freeze=false;if((p.down||G.dead)&&A.death)role="death";else if(A.mount&&G.t-(p.mountT??-9)<.6)role="mount";else if(A.ult&&(p.charging||G.t-(p.ultT??-9)<.7))role="ult";else if(A.spell&&G.t-(p.spellT??-9)<.9)role="spell";else if(A.attack&&G.t-(p.atkT??-9)<.55)role="attack";
-      else if(p.moving&&state==="play")role="run";else if(A.idle)role="idle";else{role="run";freeze=true}
+    if(useM){used.add(Object.keys(MODELS).find(k=>MODELS[k]===M));M.holder.visible=blink;M.holder.position.set(X,Y,Z);const want=Math.PI/2-(G.t-Math.max(p.atkT??-9,p.shootT??-9)<.5&&p.aimA!=null?p.aimA:(p.dir??0));let d=want-M.holder.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));M.holder.rotation.y+=d*.25;
+      const A=M.A;let role,freeze=false;if((p.down||G.dead)&&A.death)role="death";else if(A.mount&&G.t-(p.mountT??-9)<.6)role="mount";else{const D=M.D||{},su=G.t-(p.ultT??-99),e0=p.ultEndT!=null&&p.ultEndT>(p.ultT??-99)?p.ultEndT:M.endAfter?(p.ultT??-99)+(D.ult||0):-99,se=G.t-e0;
+        if(A.ultEnd&&se>=0&&se<(D.ultEnd||.8))role="ultEnd";else if(A.chan&&p.flying&&su>(D.ult||.4))role="chan";
+        else if(A.ult&&(p.charging||p.flying||su<Math.min(D.ult||.7,1.6)))role="ult";else if(A.shoot&&G.t-(p.shootT??-9)<Math.min(D.shoot||.6,1.1))role="shoot";
+        else if(A.spell&&A.spell!==A.attack&&G.t-(p.spellT??-9)<.9)role="spell";else if(A.attack&&G.t-(p.atkT??-9)<(M.D?Math.min(D.attack||.55,1.2):.55))role="attack"}
+      if(!role){if(p.moving&&state==="play")role="run";else if(A.idle)role="idle";else{role="run";freeze=true}}
       playRole(M,role);if(state==="play"||G.dead||p.down)M.mixer.update(freeze?0:ddt)}
     champLights[i].intensity=1.2;champLights[i].color.set(p.realmGlow?0x3fffc0:p.champ.col);champLights[i].position.set(X,160+Y,Z+120)});
   for(const [id,M] of Object.entries(MODELS))if(M.holder&&!used.has(id))M.holder.visible=false;
@@ -1406,7 +1425,8 @@ function draw(){
     solMark.forEach((m,i)=>{const so=sol[i];m.visible=!!so;if(!so)return;m.position.set(so.x*K,112+Math.sin(G.t*3+i)*4,so.y*K);m.rotation.y=G.t*2})}
   // barils de poudre
   kegs3.forEach((o,i)=>{const b=G.kegs[i];o.g.visible=!!b;if(!b)return;o.g.position.set(b.x*K,0,b.y*K);o.g.rotation.y=b.seed;const armed=b.t>=b.arm,fr=Math.min(1,b.t/Math.max(.01,b.arm));
-    o.ring.geometry.setDrawRange(0,6*Math.round(32*(armed?1:fr)));o.ring.material.color.set(b.fuse>0?0xff7a2a:armed?0x6fd0ff:0x3a6a9a);o.fuse.visible=b.fuse>0||armed;o.fuse.scale.setScalar(b.fuse>0?1.8+Math.random():1+Math.sin(t*20)*.3)});
+    o.ring.geometry.setDrawRange(0,6*Math.round(32*(armed?1:fr)));o.ring.material.color.set(b.fuse>0?0xff7a2a:armed?0x6fd0ff:0x3a6a9a);o.fuse.visible=b.fuse>0||armed;o.fuse.scale.setScalar(b.fuse>0?1.8+Math.random():1+Math.sin(t*20)*.3);
+    if(PROPS.keg&&PROPS.keg.scene)o.g.children.forEach(c=>{if(c!==o.ring&&c!==o.fuse)c.visible=false})});
   // cordes de Kled et rayon de la corde
   leashes.forEach(m=>m.visible=false);
   G.tethers.forEach(te=>{const o=te.o,f=te.f,k=te.t/te.max,R=f.r*K;if(nloop<12)put(loopM,nloop++,f.x*K,R*1.1,f.y*K,R*.9,Math.PI/2,0,0);
@@ -1577,9 +1597,9 @@ function propKill(f,o){const F=FOES[f.type];
   if(f.type==="turretR"){G.corpses.push({model:"turretB_dead",role:"destroyed",x:f.x,y:f.y,ry:0,t:60,id:++UID});G.waveSlow=30;say("Tourelle du Néant détruite : la horde ralentit pendant 30 s","#ffcc4d",2.4);G.shake=.4}}
 
 // ---------- modèles ----------
-const PROP_FILES={shop:["shop.glb.txt",230],red:["red.glb.txt",120],turretA:["turretA.glb.txt",340],turretA_dead:["turretA_dead.glb.txt",340],turretB:["turretB.glb.txt",340],turretB_dead:["turretB_dead.glb.txt",340],
+const PROP_FILES={keg:["keg.glb.txt",34],shop:["shop.glb.txt",230],red:["red.glb.txt",120],turretA:["turretA.glb.txt",340],turretA_dead:["turretA_dead.glb.txt",340],turretB:["turretB.glb.txt",340],turretB_dead:["turretB_dead.glb.txt",340],
   soldier:["soldier.glb.txt",150],soldierR:["soldierR.glb.txt",150],bloom:["bloom.glb.txt",120],honey:["honey.glb.txt",140],cone:["cone.glb.txt",105]};
-const PCAP={soldier:6,soldierR:24,shop:1,red:3,turretA:4,turretA_dead:6,turretB:2,turretB_dead:4,bloom:8,honey:8,cone:8};
+const PCAP={keg:16,soldier:6,soldierR:24,shop:1,red:3,turretA:4,turretA_dead:6,turretB:2,turretB_dead:4,bloom:8,honey:8,cone:8};
 const PROPS={};
 function loadProp(k){const [file,H]=PROP_FILES[k];PROPS[k]={loading:true};
   fetch((window.IC_MODELS??ASSET)+file).then(r=>{if(!r.ok)throw 0;return r.text()}).then(b64=>{const bin=atob(b64.trim()),buf=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)buf[i]=bin.charCodeAt(i);
@@ -1590,8 +1610,8 @@ const propCount={};
 function propInst(k){const T=PROPS[k];if(!T||!T.scene)return null;if((propCount[k]||0)>=PCAP[k])return null;propCount[k]=(propCount[k]||0)+1;
   const root=THREE.SkeletonUtils?THREE.SkeletonUtils.clone(T.scene):T.scene.clone();root.scale.setScalar(T.sc);root.position.y=T.y0;const g=new THREE.Group();g.add(root);g.visible=false;scene.add(g);
   const mixer=new THREE.AnimationMixer(root),A={};
-  for(const cl of T.anims){const n=cl.name.toLowerCase(),role=/death/.test(n)?"death":/destroy/.test(n)?"destroyed":/respawn/.test(n)?"respawn":/trigger/.test(n)?"trigger":/idle/.test(n)?"idle":/run/.test(n)?"run":/attack/.test(n)?"attack":null;
-    if(role&&!A[role]){A[role]=mixer.clipAction(cl);if(["death","trigger","respawn","attack"].includes(role)){A[role].setLoop(THREE.LoopOnce);A[role].clampWhenFinished=true}}}
+  for(const cl of T.anims){const n=cl.name.toLowerCase(),role=/death/.test(n)?"death":/spawn/.test(n)?"spawn":/destroy/.test(n)?"destroyed":/respawn/.test(n)?"respawn":/trigger/.test(n)?"trigger":/idle/.test(n)?"idle":/run/.test(n)?"run":/attack/.test(n)?"attack":null;
+    if(role&&!A[role]){A[role]=mixer.clipAction(cl);if(["death","trigger","respawn","attack","spawn"].includes(role)){A[role].setLoop(THREE.LoopOnce);A[role].clampWhenFinished=true}}}
   if(!A.idle)A.idle=A.run||A.destroyed||A.trigger;return {k,g,mixer,A,cur:null}}
 const USED=new Map(),FREE={};
 function useProp(k,ek){let m=USED.get(ek);if(m&&m.k===k)return m;if(m){m.g.visible=false;(FREE[m.k]=FREE[m.k]||[]).push(m);USED.delete(ek)}
@@ -1608,7 +1628,8 @@ function drawProps(t,ddt){const seen=new Set(),put1=(k,ek,x,z,ry,role,speed)=>{c
     for(const f of G.foes){const F=FOES[f.type];if(!F.model)continue;f.uid=f.uid||++UID;const tp=f.tgt||G.ps[0];
       if(f.type==="turretR"){put1("turretB","f"+f.uid,f.x,f.y,0,G.t-(f.born||0)<3?"respawn":G.t-(f.atkT||-9)<.8?"attack":"idle",G.t-(f.born||0)<3?5:1);continue}
       const a=Math.atan2(tp.y-f.y,tp.x-f.x);f.ry=Math.PI/2-a;put1(F.model,"f"+f.uid,f.x,f.y,f.ry,G.t-(f.atkT||-9)<.6?"attack":f.stun>0?"idle":"run")}
-    for(const c of G.corpses||[])put1(c.model,"c"+c.id,c.x,c.y,c.ry,c.role);
+    for(const c of G.corpses||[])put1(c.model,"c"+c.id,c.x,c.y,c.ry,c.role,c.sp||1);
+    for(const b of G.kegs){b.id=b.id||++UID;put1("keg","k"+b.id,b.x,b.y,b.seed,"spawn",1.4)}
     // tourelles d'Icathia
     cellsAround(G.cx,G.cy,TC,VIEW()*1.3,(i,j)=>{const w=towerAt(i,j);if(!w)return;const st=(G.towerSt||{})[w.key]||{s:"dead"};
       if(st.s==="dead")put1("turretA_dead",w.key,w.x,w.y,0,"destroyed");else put1("turretA",w.key,w.x,w.y,0,st.s==="wake"?"respawn":G.t-(st.atkT||-9)<.6?"attack":"idle",st.s==="wake"?5.1:1)});
