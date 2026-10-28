@@ -385,6 +385,7 @@ const FOES={
   krugS:{name:"Petit Krug",hp:24,spd:22,r:4,dmg:7,xp:2,shape:"krug",col:"#b39b78",g:2},
   krugM:{name:"Krug",hp:80,spd:16,r:7,dmg:11,xp:4,shape:"krug",col:"#8a7456",split:["krugS",2],g:4},
   krugB:{name:"Ancien Krug",hp:230,spd:12,r:11,dmg:16,xp:10,shape:"krug",col:"#6e5a40",split:["krugM",2],tag:1,g:10},
+  grompV:{name:"Gromp",hp:60,spd:16,r:8,dmg:10,xp:6,shape:"gromp",col:"#4c9a3a",ranged:1,g:4},
   gromp:{name:"Gromp",hp:180,spd:15,r:10,dmg:14,xp:12,shape:"gromp",col:"#4c9a3a",ranged:1,tag:1,g:15},
   crab:{name:"Carapateur",hp:90,spd:42,r:7,dmg:0,xp:10,shape:"crab",col:"#5fd0c0",flee:1,tag:1,g:25},
   grub:{name:"Larve du Néant",hp:320,spd:24,r:7,dmg:12,xp:20,shape:"grub",col:"#9b4dff",boss:1,mini:1,g:30},
@@ -639,13 +640,13 @@ function camp(k){const [x,y]=edgePoint(),ring=(t,n,R)=>{for(let i=0;i<n;i++){con
   else if(k==="krugs"){spawnAt("krugB",x,y);spawnAt("krugS",x+14,y)}else if(k==="gromp")spawnAt("gromp",x,y)}
 function minionWave(){const t=G.t,n=Math.min(12,4+Math.floor(t/90)),[x,y]=edgePoint();
   for(let i=0;i<n;i++){const red=t>540||(t>300&&i%2);spawnAt(red?"minR":"minB",x+(i%3)*9-9,y+Math.floor(i/3)*9)}}
-function spawnBoss(type,lvl){const [x,y]=edgePoint();let o={lvl};
-  if(type==="dragon"){const d=DRAGONS[Math.floor(Math.random()*DRAGONS.length)];o={lvl,name:d.name,col:d.col,drag:d}}
+function spawnBoss(type,lvl,at){const [x,y]=edgePoint();let o={lvl};
+  if(type==="dragon"){const d=G["drag"+at]||DRAGONS[Math.floor(Math.random()*DRAGONS.length)];o={lvl,name:d.name,col:d.col,drag:d}}
   if(type==="grub"){for(let i=0;i<3;i++)spawnAt("grub",x+i*14-14,y,o);say(`Les Larves du Néant éclosent${lvl>1?" (niv. "+lvl+")":""} !`,"#c48bff",2.4)}
   else{const f=spawnAt(type,x,y,o);say(`${f.name}${lvl>1?" niv. "+lvl:""} entre dans la brèche !`,f.col,2.6)}
   sfx("boss")}
 function faillePlan(dt){const t=G.t,swarm=G.mod.essaim?2:1;
-  if(G.waveSlow>0)G.waveSlow-=dt;G.acc+=Math.min(10,.7+t/40)*dt*swarm*(G.D?G.D.spawn:1)*(G.waveSlow>0?.6:1);while(G.acc>=1&&G.foes.length<420*Math.min(1.4,swarm)){G.acc--;const r=Math.random();let ty="larve";if(t>45&&r<.28)ty="rodeur";if(t>100&&r>.92)ty="brute";spawn(ty)}
+  if(G.waveSlow>0)G.waveSlow-=dt;G.acc+=Math.min(10,.7+t/40)*dt*swarm*(G.D?G.D.spawn:1)*(G.waveSlow>0?.6:1);while(G.acc>=1&&G.foes.length<420*Math.min(1.4,swarm)){G.acc--;const r=Math.random();let ty="larve";if(t>45&&r<.28)ty="rodeur";if(t>100&&r>.92)ty="brute";else if(t>120&&r>.895&&G.foes.filter(o=>o.type==="grompV").length<8)ty="grompV";spawn(ty)}
   if(t>=(G.nextMin??15)){G.nextMin=t+25;minionWave()}
   if(t>=(G.nextCamp??60)){const open=CAMPS.filter(c=>t>=c.at);G.nextCamp=t+Math.max(9,20-t/60);if(open.length)camp(open[Math.floor(Math.random()*open.length)].k)}
   if(t>=(G.nextGold??rnd(40,70))){G.nextGold=t+rnd(55,95);const [x,y]=edgePoint();spawnAt("golden",x,y);say("Un Néantin doré passe : attrape-le !","#ffd75e",2)}
@@ -653,10 +654,10 @@ function faillePlan(dt){const t=G.t,swarm=G.mod.essaim?2:1;
   if(!G.mod.noporo&&t>=(G.nextPoro??30)){G.nextPoro=t+40;const a=rnd(0,Math.PI*2),d=VIEW()*.75;G.poros.push({x:G.cx+Math.cos(a)*d,y:G.cy+Math.sin(a)*d,t:40,a:rnd(0,6),seed:Math.random()*6})}
   for(const w of [120,240,420])if(t>=w&&!G["ring"+w]){G["ring"+w]=1;for(let i=0;i<40;i++)spawn(w>200?"rodeur":"larve",i/40*Math.PI*2);say("La horde t'encercle !","#ff7a9a",2)}
   if(t>=(G.eliteNext??90)){G.eliteNext=t+90;spawn("elite")}
-  for(const b of BOSS_PLAN){const key="b"+b[0];if(t>=b[0]&&!G[key]){G[key]=1;spawnBoss(b[1],b[2])}}}
+  for(const b of BOSS_PLAN){const key="b"+b[0];if(t>=b[0]&&!G[key]){G[key]=1;spawnBoss(b[1],b[2],b[0])}}}
 
 // dégâts infligés aux monstres (o = le joueur qui frappe)
-function hurt(f,dmg,kx=0,ky=0,o=G.p){if(!f||f.dead||!o)return 0;if(G.realm&&f!==G.realm.tgt)return 0;
+function hurt(f,dmg,kx=0,ky=0,o=G.p){if(!f||f.dead||!o)return 0;if(f.untarg>G.t)return 0;if(G.realm&&f!==G.realm.tgt)return 0;
   const bl=o.weapons&&o.weapons.bloodlust?WEAPONS.bloodlust.st(o.weapons.bloodlust).bonus:0;
   let d=dmg*(o.dmgMul+bl)*(f.moon>G.t?1.4:1)*(f.hawk>G.t?1.15:1)*(o.rageT>0?1+(o.rageV||.3):1);const cr=o.crit>0&&Math.random()<o.crit;if(cr)d*=2;
   if(o.redT>0){f.burnT=G.t+2.5;f.burnDps=4+G.t*.02;f.burnBy=o;f.slow=Math.max(f.slow,.4)}
@@ -666,7 +667,7 @@ function hurt(f,dmg,kx=0,ky=0,o=G.p){if(!f||f.dead||!o)return 0;if(G.realm&&f!==
   if(G.texts.length<30)G.texts.push({x:f.x+rnd(-3,3),y:f.y-f.r-2,s:String(Math.round(d))+(cr?"!":""),col:cr?"#ff9b3d":f.boss||f.elite?"#ffcc4d":"#ffffff",t:.5,max:.5,small:!cr});
   if(f.hp<=0)killFoe(f,o);return d}
 function addGold(p,g){p.goldF+=g*p.goldMul;const n=Math.floor(p.goldF);if(n>0){p.gold+=n;p.goldF-=n}}
-function killFoe(f,o){if(f.dead)return;f.dead=true;f.hp=0;G.kills++;o.kills=(o.kills||0)+1;if(o.weapons&&o.weapons.bloodlust)o.fury=Math.min(100,(o.fury||0)+3);
+function killFoe(f,o){if(f.dead)return;f.dead=true;if(f.hasM)monDeath(f);f.hp=0;G.kills++;o.kills=(o.kills||0)+1;if(o.weapons&&o.weapons.bloodlust)o.fury=Math.min(100,(o.fury||0)+3);
   if(f.type==="golden"){G.rush=(G.rush||0)+20;say("Ruée vers l'or ! Pendant 20 s, l'expérience se change en or","#ffd75e",2.6);sfx("chest");for(let i=0;i<30;i++)G.fx.push({k:"px",x:f.x,y:f.y,vx:rnd(-90,90),vy:rnd(-90,90),t:rnd(.4,.9),col:"#ffe14d"})}if(o.courage!=null&&!o.mounted)o.courage+=f.boss?3:f.elite?1:.05;const F=FOES[f.type];
   const g=(F.g||0)*(G.mod.pauvre?.5:1);for(const p of G.ps)addGold(p,g);
   if(g>=10){G.texts.push({x:f.x,y:f.y-f.r-10,s:`+${Math.round(g)} or`,col:"#ffd75e",t:1,max:1,small:true});sfx("coin")}
@@ -709,10 +710,10 @@ function hazards(dt){for(const h of G.haz){h.t-=dt;if(h.t<=0){h.done=1;G.fx.push
 function seek(f){let b=null,bd=1e12;for(const p of G.ps){if(p.down)continue;const d=(p.x-f.x)**2+(p.y-f.y)**2;if(p.hidden&&!f.boss&&d>26*26)continue;if(d<bd){bd=d;b=p}}
   if(b){f.lx=b.x;f.ly=b.y}return b}
 // comportement des boss et des monstres spéciaux ; renvoie la vitesse voulue
-function brain(f,dt,dx,dy,d,tp){const F=FOES[f.type];f.cd-=dt;
+function brain(f,dt,dx,dy,d,tp){const F=FOES[f.type];f.cd-=dt;if(BOSS_AI[f.type]&&!F.mini)return BOSS_AI[f.type](f,dt,dx,dy,d,tp);
   if(F.flee){const a=Math.atan2(-dy,-dx)+Math.sin(G.t*1.5+f.seed)*.9;return [Math.cos(a)*f.spd,Math.sin(a)*f.spd]}
   if(!tp)return null;
-  if(F.ranged){if(f.cd<=0&&d<130){f.cd=2.6;const s=70;G.eshots.push({x:f.x,y:f.y,vx:dx/d*s,vy:dy/d*s,t:2.5,dmg:f.dmg*.8,r:3,src:f})}return d<60?[0,0]:null}
+  if(F.ranged){if(f.cd<=0&&d<130){f.cd=2.6;f.atkT=G.t;const s=70;G.eshots.push({x:f.x,y:f.y,vx:dx/d*s,vy:dy/d*s,t:2.5,dmg:f.dmg*.8,r:3,src:f})}return d<60?[0,0]:null}
   if(f.ai==="turret"){if(f.cd<=0&&d<100&&G.t-f.born>3){f.cd=1.1;f.atkT=G.t;const s=120;G.eshots.push({x:f.x,y:f.y,vx:dx/d*s,vy:dy/d*s,t:1.4,dmg:f.dmg*1.2,r:4,src:f,red:1});sfx("shoot")}return [0,0]}
   if(f.ai==="charge"){if(f.dash>0){f.dash-=dt;return [Math.cos(f.ca)*165,Math.sin(f.ca)*165]}
     if(f.tele>0){f.tele-=dt;if(f.tele<=0)f.dash=.7;return [0,0]}
@@ -792,7 +793,7 @@ function update(dt){G.t+=dt;const two=G.ps.length>1;
     if(f.stun>0){f.stun-=dt}else{const v=(f.ai||FOES[f.type].flee||FOES[f.type].ranged)?brain(f,dt,dx,dy,d,tp):null;vx=v?v[0]:dx/d*f.spd*(tp?1:.5);vy=v?v[1]:dy/d*f.spd*(tp?1:.5)}
     f.x+=(vx*sl+f.kx)*dt+sx*.5;f.y+=(vy*sl+f.ky)*dt+sy*.5;f.kx*=Math.pow(.02,dt);f.ky*=Math.pow(.02,dt);
     for(const w of G.walls)wallPush(f,w);if(G.terrain==="montagne")rockPush(f,f.r);if(FOES[f.type].fixed){f.x=f.ax;f.y=f.ay;f.kx=f.ky=0}
-    if(f.stun<=0&&f.dmg>0)for(const p of G.ps)if(!p.down&&p.inv<=0&&(p.x-f.x)**2+(p.y-f.y)**2<(f.r+p.r)**2){f.atkT=G.t;damagePlayer(f.dmg*(f.dash>0?1.6:1),p,f);if(state!=="play")return}
+    if(f.stun<=0&&f.dmg>0&&!(f.alt>0))for(const p of G.ps)if(!p.down&&p.inv<=0&&(p.x-f.x)**2+(p.y-f.y)**2<(f.r+p.r)**2){f.atkT=G.t;damagePlayer(f.dmg*(f.dash>0?1.6:1),p,f);if(state!=="play")return}
     if(FOES[f.type].fixed){if((f.x-G.cx)**2+(f.y-G.cy)**2>(VIEW()*2.6)**2)f.dead=true}
     else if(!f.boss&&f.type!=="crab"&&(f.x-G.cx)**2+(f.y-G.cy)**2>(VIEW()*1.6)**2){const a=Math.atan2(f.y-G.cy,f.x-G.cx)+Math.PI+rnd(-.6,.6),R=VIEW()+14;f.x=G.cx+Math.cos(a)*R;f.y=G.cy+Math.sin(a)*R;f.lx=null}}
   G.foes=G.foes.filter(f=>!f.dead);hazards(dt);friends(dt);terrainTick(dt);propsTick(dt);if(state!=="play")return;
@@ -1400,7 +1401,7 @@ function draw(){
     if(f.r>=7)for(let k=0;k<(f.boss?7:4)&&nsp<900;k++){const a=k/(f.boss?7:4)*Math.PI*2+f.seed;put(spikes,nsp++,x+Math.cos(a)*R*.55,y+R*.75,z+Math.sin(a)*R*.55,R*.55,Math.sin(a)*.6,0,-Math.cos(a)*.6)}}
   for(const k in FM)FM[k].count=cnt[k];done(...Object.values(FM));eyes.count=ne;spikes.count=nsp;done(eyes,spikes);
   for(const f of G.foes)if(f.frozen>t&&nice<120){const R=f.r*K*1.5;put(iceM,nice++,f.x*K,R*.9,f.y*K,[R*1.7,R*1.8,R*1.7],0,f.seed,0)}iceM.count=nice;done(iceM);
-  drawFaille(t);drawProps(t,ddt);
+  drawProps(t,ddt);drawFaille(t);
   // butin
   const ng=[0,0,0,0];let nch=0,nh=0;
   for(const g of G.gems){const x=g.x*K,z=g.y*K;if(g.chest){if(nch<40)put(chestM,nch++,x,10+Math.sin(t*3)*2,z,1,0,t,0);continue}if(g.heal){if(nh<40)put(healM,nh++,x,11+Math.sin(t*4)*2,z,1);continue}
@@ -1528,14 +1529,14 @@ function draw(){
 // monstres de la Faille, poros, zones annoncées, souffle du dragon, échoppe
 function drawFaille(t){
   const cnt={},nb={n:0},realm=G.realm;for(const k in SM)cnt[k]=0;
-  for(const f of G.foes){const F=FOES[f.type];if(!F.shape)continue;const m=SM[F.shape];if(cnt[F.shape]>=m.instanceMatrix.count)continue;const i=cnt[F.shape]++,tp=f.tgt||G.ps[0]||{x:G.cx,y:G.cy};
+  for(const f of G.foes){const F=FOES[f.type];if(!F.shape||f.hasM)continue;const m=SM[F.shape];if(cnt[F.shape]>=m.instanceMatrix.count)continue;const i=cnt[F.shape]++,tp=f.tgt||G.ps[0]||{x:G.cx,y:G.cy};
     const R=f.r*K*1.1,x=f.x*K,z=f.y*K,ea=Math.atan2(tp.y-f.y,tp.x-f.x),bob=F.shape==="dragon"?R*(.9+Math.sin(t*2+f.seed)*.15):0,air=f.air>t?60*Math.sin((f.air-t)/.7*Math.PI):0;
     const sy=F.shape==="minion"?R*.85:F.shape==="crab"?R*.3:F.shape==="baron"?R*1.1:R;
     put(m,i,x,sy+bob+R*.15+air,z,R,0,Math.PI/2-ea+(F.flee?Math.PI:0),F.shape==="crab"?Math.sin(t*10+f.seed)*.15:0);m.setColorAt(i,f.flash>0?WHITE:realm&&f!==realm.tgt?tmpCol.set(f.col).multiplyScalar(.3):tmpCol.set(f.col));
     if(nb.n<900){put(baseM,nb.n,x,1,z,[R*.95,1,R*.95]);baseM.setColorAt(nb.n++,tmpCol.set(f.boss?"#8a6414":F.tag?"#4a2f78":"#22182e"))}}
   for(const k in SM)SM[k].count=cnt[k];done(...Object.values(SM));baseM.count=nb.n;done(baseM);
   let ne=0;for(const s of G.eshots)if(!s.red&&ne<120)put(eshotM,ne++,s.x*K,14,s.y*K,1);eshotM.count=ne;done(eshotM);
-  let np=0;for(const o of G.poros)if(np<20)put(poroM,np++,o.x*K,12+Math.abs(Math.sin(t*6+o.seed))*6,o.y*K,[13,11,13]);poroM.count=np;done(poroM);
+  let np=0;for(const o of G.poros)if(np<20&&!G.poroModel)put(poroM,np++,o.x*K,12+Math.abs(Math.sin(t*6+o.seed))*6,o.y*K,[13,11,13]);poroM.count=np;done(poroM);
   hazards3.forEach(h=>h.g.visible=false);G.haz.slice(0,hazards3.length).forEach((h,i)=>{const o=hazards3[i],k=1-h.t/h.max;o.g.visible=true;o.g.position.set(h.x*K,0,h.y*K);o.edge.scale.setScalar(h.r*K);o.fill.scale.setScalar(h.r*K*k);
     o.edge.material.color.set(h.col||"#ff3b3b");o.fill.material.color.set(h.col||"#ff3b3b");o.fill.material.opacity=.18+.25*k});
   teles.forEach(m=>m.visible=false);fires.forEach(m=>m.visible=false);let nt=0,nf=0;
@@ -1564,7 +1565,7 @@ function plantAt(i,j){if(h2(i,j,31)>.3)return null;const x=i*PLC+PLC*(.2+.6*h2(i
 const PLANT={honey:{name:"Fruit de miel",col:"#ffd75e"},cone:{name:"Bulbe explosif",col:"#ff8a5a"},bloom:{name:"Fleur de clairvoyance",col:"#6fd8ff"}};
 function cellsAround(x,y,C,R,fn){const i0=Math.floor(x/C),j0=Math.floor(y/C),n=Math.ceil(R/C);for(let i=i0-n;i<=i0+n;i++)for(let j=j0-n;j<=j0+n;j++)fn(i,j)}
 let UID=0;
-function propsTick(dt){const T=G.t;
+function propsTick(dt){const T=G.t;monPreload();
   // apparitions : buffs et tourelles du Néant
   if(T>=(G.nextRed??100)){G.nextRed=T+150;const [x,y]=edgePoint();spawnAt("redbuff",x,y);say("Le Ronceux rouge apparaît : son buff fait brûler tes sorts","#ff6a3a",2.4)}
   if(T>=(G.nextBlue??130)){G.nextBlue=T+150;const [x,y]=edgePoint();spawnAt("bluebuff",x,y);say("La Sentinelle bleue apparaît : son buff accélère tes sorts","#5fa8ff",2.4)}
@@ -1616,7 +1617,9 @@ const propCount={};
 function propInst(k){const T=PROPS[k];if(!T||!T.scene)return null;if((propCount[k]||0)>=PCAP[k])return null;propCount[k]=(propCount[k]||0)+1;
   const root=THREE.SkeletonUtils?THREE.SkeletonUtils.clone(T.scene):T.scene.clone();root.scale.setScalar(T.sc);root.position.y=T.y0;const g=new THREE.Group();g.add(root);g.visible=false;scene.add(g);
   const mixer=new THREE.AnimationMixer(root),A={};
-  for(const cl of T.anims){const n=cl.name.toLowerCase(),role=/death/.test(n)?"death":/spawn/.test(n)?"spawn":/destroy/.test(n)?"destroyed":/respawn/.test(n)?"respawn":/trigger/.test(n)?"trigger":/idle/.test(n)?"idle":/run/.test(n)?"run":/attack/.test(n)?"attack":null;
+  const map=typeof MON!=="undefined"&&MON[k]&&MON[k].a;
+  if(map){for(const r in map){const cl=T.anims.find(c=>c.name.toLowerCase().split(".")[0]===map[r]);if(cl){A[r]=mixer.clipAction(cl);if(!MON_LOOP.has(r)){A[r].setLoop(THREE.LoopOnce);A[r].clampWhenFinished=true}}}}
+  else for(const cl of T.anims){const n=cl.name.toLowerCase(),role=/death/.test(n)?"death":/spawn/.test(n)?"spawn":/destroy/.test(n)?"destroyed":/respawn/.test(n)?"respawn":/trigger/.test(n)?"trigger":/idle/.test(n)?"idle":/run/.test(n)?"run":/attack/.test(n)?"attack":null;
     if(role&&!A[role]){A[role]=mixer.clipAction(cl);if(["death","trigger","respawn","attack","spawn"].includes(role)){A[role].setLoop(THREE.LoopOnce);A[role].clampWhenFinished=true}}}
   if(!A.idle)A.idle=A.run||A.destroyed||A.trigger;return {k,g,mixer,A,cur:null}}
 const USED=new Map(),FREE={};
@@ -1630,11 +1633,12 @@ function drawProps(t,ddt){const seen=new Set(),put1=(k,ek,x,z,ry,role,speed)=>{c
   // marchand
   if(PROPS.shop&&PROPS.shop.scene){put1("shop","shop",G.shop.x,G.shop.y,0,"idle");shop3.visible=false}else shop3.visible=true;
   if(G.ps.length){
+    drawMonsters(t,ddt,seen);
     // monstres à modèle (Ronceux rouge, tourelles du Néant)
     for(const f of G.foes){const F=FOES[f.type];if(!F.model)continue;f.uid=f.uid||++UID;const tp=f.tgt||G.ps[0];
       if(f.type==="turretR"){put1("turretB","f"+f.uid,f.x,f.y,0,G.t-(f.born||0)<3?"respawn":G.t-(f.atkT||-9)<.8?"attack":"idle",G.t-(f.born||0)<3?5:1);continue}
       const a=Math.atan2(tp.y-f.y,tp.x-f.x);f.ry=Math.PI/2-a;put1(F.model,"f"+f.uid,f.x,f.y,f.ry,G.t-(f.atkT||-9)<.6?"attack":f.stun>0?"idle":"run")}
-    for(const c of G.corpses||[])put1(c.model,"c"+c.id,c.x,c.y,c.ry,c.role,c.sp||1);
+    for(const c of G.corpses||[]){const m=put1(c.model,"c"+c.id,c.x,c.y,c.ry,c.role,c.sp||1);if(m)m.g.scale.setScalar(c.sc||1)}
     for(const b of G.kegs){b.id=b.id||++UID;put1("keg","k"+b.id,b.x,b.y,b.seed,"spawn",1.4)}
     // tourelles d'Icathia
     cellsAround(G.cx,G.cy,TC,VIEW()*1.3,(i,j)=>{const w=towerAt(i,j);if(!w)return;const st=(G.towerSt||{})[w.key]||{s:"dead"};
@@ -1663,6 +1667,141 @@ function propsOverlay(){if(!G.ps.length)return;ctx.textAlign="center";ctx.font="
   if(G.reveal>0){const tg=G.foes.filter(f=>f.type==="golden"||FOES[f.type].buff||f.type==="turretR");
     for(const f of tg){const [sx,sy,ok]=toScreen(f.x*K,0,f.y*K);if(ok&&sx>30&&sx<W-30&&sy>60&&sy<H-30)continue;const a=Math.atan2(f.y-G.cy,f.x-G.cx),ax=W/2+Math.cos(a)*(Math.min(W,H)/2-70),ay=H/2+Math.sin(a)*(Math.min(W,H)/2-70);
       ctx.save();ctx.translate(ax,ay);ctx.rotate(a);ctx.fillStyle=f.col||"#6fd8ff";ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(-8,-9);ctx.lineTo(-8,9);ctx.fill();ctx.restore();ctx.fillStyle=f.col||"#6fd8ff";ctx.fillText(f.name,ax,ay+24)}}}
+
+// ===================== Monstres de la Faille en 3D (modèles fournis) et phases des grands boss =====================
+// Chaque modèle se charge à la demande : les monstres des vagues au lancement, chaque boss 30 s avant son arrivée.
+// Noms de clips normalisés : minuscules, sans extension (.anm, .SRT…).
+const MON={
+  minB:{f:"m_minion_b",h:46,cap:18,a:{idle:"idle1",run:"run",attack:"attack1",death:"death"}},
+  minR:{f:"m_minion_r",h:50,cap:18,a:{idle:"idle1",run:"run",attack:"attack1",death:"death"}},
+  raptorS:{f:"m_raptor_s",h:30,cap:10,a:{idle:"idle_normal1",run:"run",attack:"attack2_base",death:"death_base"}},
+  raptorB:{f:"m_raptor_b",h:56,cap:4,a:{idle:"sru_razorbeak_idle_normal5",run:"run",attack:"attack2_base",death:"death_base"}},
+  wolfS:{f:"m_wolf_s",h:42,cap:8,a:{idle:"sru_murkwolfmini_idle4",run:"run_base",attack:"attack1_base",death:"death_base"}},
+  wolfB:{f:"m_wolf_b",h:66,cap:4,a:{idle:"sru_murkwolf_idle1",run:"run_base",attack:"attack2_base",spawn:"sru_murkwolf_spawn"}},
+  krug1:{f:"m_krug_1",h:28,cap:10,a:{idle:"krug_idle_ag2n",run:"run",death:"death"}},
+  krug2:{f:"m_krug_2",h:46,cap:8,a:{idle:"krug_idle_aggro",run:"run",attack:"attack1_base",death:"death"}},
+  krug3:{f:"m_krug_3",h:78,cap:4,a:{idle:"krug_idle_ag2n",run:"run",attack:"attack2",death:"death"}},
+  gromp:{f:"m_gromp",h:72,cap:8,a:{idle:"sru_gromp_idle2",run:"run",attack:"attack1_mid",death:"death"}},
+  crab:{f:"m_crab",h:40,cap:3,a:{idle:"idle1",run:"run",spawn:"crab_spawn"}},
+  grub:{f:"m_grub",h:46,cap:8,a:{idle:"run",run:"run",attack:"attack1b",spawn:"spawnin",death:"death1"}},
+  poro:{f:"m_poro",h:30,cap:12,a:{idle:"idle1",run:"run1",death:"death"}},
+  blue:{f:"m_blue",h:120,cap:2,a:{idle:"sru_blue_idle_aggro",run:"run",attack:"attack1",death:"death"}},
+  herald:{f:"m_herald",h:150,cap:2,a:{idle:"idle_base",run:"run",spawn:"spawn",dash:"dash",death:"death"}},
+  atakhan:{f:"m_atakhan",h:210,cap:1,a:{idle:"idle1",run:"run_slow",runF:"run_fast",s1:"spell1",s2:"spell2",death:"death"}},
+  baron:{f:"m_baron",h:250,cap:1,a:{idle:"idle1_base",spawn:"spawn_crawlout",s2:"spell2_base",s3:"spell3_base",s5:"spell5",s6w:"spell6_windup",s6:"spell6",s9:"spell9",death:"death"}}};
+for(const k of ["infernal","ocean","nuage","montagne","hextech","chemtech"])
+  MON["dragon_"+k]={f:"m_dragon_"+k,h:150,cap:2,a:{idle:"sru_dragon_idle_normal",run:"run",fly:"sru_dragon_flying_run",breath:"spell2",attack:"attack1",land:"landing",death:"death"}};
+const MON_LOOP=new Set(["idle","run","runF","fly"]);
+const MON_TYPE={minB:"minB",minR:"minR",raptor:"raptorS",raptorB:"raptorB",wolf:"wolfS",wolfB:"wolfB",krugS:"krug1",krugM:"krug2",krugB:"krug3",
+  gromp:"gromp",grompV:"gromp",crab:"crab",grub:"grub",bluebuff:"blue",herald:"herald",atakhan:"atakhan",baron:"baron"};
+const monKey=f=>f.type==="dragon"?(f.drag?"dragon_"+f.drag.k:"dragon_infernal"):MON_TYPE[f.type];
+function needMon(k){if(!k||!MON[k]||PROPS[k])return;const M=MON[k];PROP_FILES[k]=[M.f+".glb.txt",M.h];PCAP[k]=M.cap;loadProp(k)}
+// préchargement : monstres des vagues au lancement, chaque boss 30 s avant (le dragon est tiré au sort à ce moment-là)
+function monPreload(){if(!G.monPre){G.monPre=1;for(const k of ["minB","minR","raptorS","raptorB","wolfS","wolfB","krug1","krug2","krug3","gromp","crab","grub","poro","blue"])needMon(k)}
+  for(const b of BOSS_PLAN){const key="pre"+b[0];if(G.t>=b[0]-30&&!G[key]){G[key]=1;
+    if(b[1]==="dragon"){const d=DRAGONS[Math.floor(Math.random()*DRAGONS.length)];G["drag"+b[0]]=d;needMon("dragon_"+d.k)}else needMon(MON_TYPE[b[1]])}}}
+// animations d'un monstre : un nouveau stamp relance le clip
+function playM(m,role,speed,stamp){const a=m.A[role]||m.A.idle;if(!a)return;if(m.cur===role&&m.stamp===stamp){a.timeScale=speed;return}
+  const prev=m.cur&&(m.A[m.cur]||m.A.idle);a.reset();a.timeScale=speed;a.setEffectiveWeight(1);a.play();if(prev&&prev!==a)a.crossFadeFrom(prev,.15,false);m.cur=role;m.stamp=stamp;m.st0=G.t}
+const clipD=(m,r)=>m.A[r]?m.A[r].getClip().duration:0;
+function drawMonsters(t,ddt,seen){
+  for(const f of G.foes)f.hasM=false;
+  const V=VIEW()*1.3,list=[];
+  for(const f of G.foes){const k=monKey(f);if(!k)continue;needMon(k);const T=PROPS[k];if(!T||!T.scene)continue;
+    const d2=(f.x-G.cx)**2+(f.y-G.cy)**2;if(!f.boss&&d2>V*V)continue;list.push([f,k,(f.boss?0:f.elite?1e7:2e7)+d2])}
+  list.sort((a,b)=>a[2]-b[2]);
+  for(const [f,k] of list){const ek="m"+(f.uid=f.uid||++UID),m=useProp(k,ek);if(!m)continue;seen.add(ek);f.hasM=true;
+    const F=FOES[f.type],tp=f.tgt||G.ps[0],mv=f.px==null?0:Math.hypot(f.x-f.px,f.y-f.py)/Math.max(ddt,1e-3);
+    let want=f.mry??0;if(F.flee&&mv>2)want=Math.PI/2-Math.atan2(f.y-f.py,f.x-f.px);else if(f.dash>0&&f.ca!=null)want=Math.PI/2-f.ca;else if(tp)want=Math.PI/2-Math.atan2(tp.y-f.y,tp.x-f.x);
+    let dr=want-(f.mry??want);dr=Math.atan2(Math.sin(dr),Math.cos(dr));f.mry=(f.mry??want)+dr*Math.min(1,ddt*(f.boss?4:9));
+    m.g.visible=true;m.g.scale.setScalar(f.r/F.r);m.g.position.set(f.x*K,(f.alt||0)*K,f.y*K);m.g.rotation.y=f.mry;
+    let role,sp=1,stamp=0;
+    if(f.anim&&G.t-f.animT<f.animD){role=f.anim;sp=f.animSp||1;stamp=f.animT}
+    else if(!f.boss&&m.A.spawn&&G.t-f.born<1.4){role="spawn";sp=Math.max(1,clipD(m,"spawn")/1.4);stamp=f.born}
+    else if(m.A.attack&&G.t-(f.atkT??-9)<.6){role="attack";sp=1.3;stamp=m.cur==="attack"&&G.t-m.st0<clipD(m,"attack")/1.3?m.stamp:f.atkT}
+    else if(f.alt>0&&m.A.fly)role="fly";
+    else if(mv>3)role=f.runK&&m.A[f.runK]?f.runK:"run";else role="idle";
+    playM(m,role,sp,stamp);m.mixer.update(ddt)}
+  for(const f of G.foes){f.px=f.x;f.py=f.y}
+  // poros
+  G.poroModel=!!(PROPS.poro&&PROPS.poro.scene);
+  if(G.poroModel)for(const o of G.poros){const ek="po"+(o.uid=o.uid||++UID),m=useProp("poro",ek);if(!m)continue;seen.add(ek);m.g.visible=true;m.g.scale.setScalar(1);
+    m.g.position.set(o.x*K,0,o.y*K);m.g.rotation.y=Math.PI/2-o.a;playM(m,"run",.8,0);m.mixer.update(ddt)}}
+// mort animée : le corps reste le temps de l'animation
+function monDeath(f){const k=monKey(f),M=MON[k];if(!M||!M.a.death||!PROPS[k]||!PROPS[k].scene)return;
+  if(!f.boss&&(G.corpses||[]).filter(c=>c.mon).length>=14)return;
+  const cl=PROPS[k].anims.find(c=>c.name.toLowerCase().split(".")[0]===M.a.death),D=cl?cl.duration:2,keep=f.boss?Math.min(D/1.3,6):1.5;
+  (G.corpses=G.corpses||[]).push({model:k,role:"death",x:f.x,y:f.y,ry:f.mry??0,t:keep,sp:f.boss?1.3:D/1.4,sc:f.r/FOES[f.type].r,mon:1,id:++UID})}
+
+// --------------------- grands boss : phases ---------------------
+const banim=(f,role,dur,sp=1)=>{f.anim=role;f.animT=G.t;f.animD=dur;f.animSp=sp};
+function phaseOf(f,n){const r=f.hp/f.max;return n===2?(r>.5?1:2):r>.75?1:r>.5?2:r>.25?3:4}
+function phaseUp(f,n,names){f.ph=f.ph||1;const ph=phaseOf(f,n);if(ph<=f.ph)return false;f.ph=ph;
+  say(`${f.name} · phase ${ph}/${n} : ${names[ph-1]}`,f.col,2.6);G.shake=Math.max(G.shake,.3);sfx("boss");return true}
+function shove(f,R,force){for(const p of G.ps)if(!p.down){const ex=p.x-f.x,ey=p.y-f.y,d=Math.hypot(ex,ey)||1;if(d<R){p.x+=ex/d*force;p.y+=ey/d*force}}
+  G.fx.push({k:"blast",x:f.x,y:f.y,r:R,t:.6,max:.6})}
+const BOSS_AI={
+  // Dragons · phase 1 : au sol, souffle ; phase 2 (50 %) : s'envole 7 s (intouchable) et bombarde, puis atterrit enragé
+  dragon(f,dt,dx,dy,d,tp){
+    if(!f.init){f.init=1;f.ph=1;f.alt=f.alt0=45;f.lock=2.6;f.untarg=G.t+2.6;banim(f,"land",2.6,5.67/2.6)}
+    f.lock=(f.lock||0)-dt;
+    if(f.anim==="land"&&G.t-f.animT<f.animD)f.alt=f.alt0*Math.max(0,1-(G.t-f.animT)/f.animD);else if(!(f.flyT>0))f.alt=0;
+    if(phaseUp(f,2,["","il s'envole et bombarde la zone"])){f.flyT=7;f.untarg=G.t+7;f.bomb=.6}
+    if(f.flyT>0){f.flyT-=dt;f.alt=Math.min(45,(f.alt||0)+dt*50);f.bomb-=dt;
+      if(f.bomb<=0){f.bomb=.5;for(const p of G.ps)if(!p.down){const x=p.x+rnd(-32,32),y=p.y+rnd(-32,32);hazard(x,y,16,1,f.dmg*.8,f.col,null,f);G.fx.push({k:"fire",x:f.x,y:f.y,tx:x,ty:y,t:1,max:1,col:f.col})}}
+      if(f.flyT<=0){f.alt0=f.alt;banim(f,"land",1.6,5.67/1.6);f.lock=1.6;hazard(f.x,f.y,42,1.6,f.dmg*1.4,f.col,null,f);say(`${f.name} atterrit, enragé !`,f.col,2)}
+      return tp?[dx/d*f.spd*1.3,dy/d*f.spd*1.3]:null}
+    if(f.lock>0)return [0,0];
+    const P2=f.ph>=2;
+    if(f.cd<=0&&tp&&d<170){f.cd=(P2?2:3.2)-.3*(f.lvl-1);banim(f,"breath",1.5,2);f.lock=.8;
+      const n=(P2?3:1)+(f.lvl-1);for(let i=0;i<n;i++){const tx=tp.x+(i?rnd(-30,30):0),ty=tp.y+(i?rnd(-30,30):0);hazard(tx,ty,(18+2*f.lvl)*(P2?1.25:1),1.1,f.dmg,f.col,null,f);G.fx.push({k:"fire",x:f.x,y:f.y,tx,ty,t:1.1,max:1.1,col:f.col})}}
+    if(!tp)return null;const s=P2?1.3:1;return d<60?[-dx/d*f.spd,-dy/d*f.spd]:d>100?[dx/d*f.spd*s,dy/d*f.spd*s]:[0,0]},
+  // Héraut · phase 1 : charges ; phase 2 (50 %) : l'Œil s'ouvre, charges en chaîne qui font trembler le sol
+  herald(f,dt,dx,dy,d,tp){
+    if(!f.init){f.init=1;f.ph=1;banim(f,"spawn",2.2,3.63/2.2);f.lock=2.2;f.untarg=G.t+2.2}
+    f.lock=(f.lock||0)-dt;
+    if(phaseUp(f,2,["","l'Œil s'ouvre, charges en chaîne"])){banim(f,"spawn",1.4,3.63/1.4);f.lock=1.4;f.tele=0;f.dash=0;f.cd=1.5;f.inSeq=0;f.chain=0;f.spd*=1.2;shove(f,70,35)}
+    if(f.dash>0){f.dash-=dt;if(f.dash<=0){if(f.ph>=2){hazard(f.x,f.y,30,.3,f.dmg,f.col,null,f);G.shake=Math.max(G.shake,.2)}
+        if(f.chain>0){f.chain--;f.cd=.35}else{f.inSeq=0;f.cd=f.ph>=2?3.2:4.5-.5*(f.lvl-1)}}
+      return [Math.cos(f.ca)*165,Math.sin(f.ca)*165]}
+    if(f.tele>0){f.tele-=dt;if(f.tele<=0)f.dash=.7;return [0,0]}
+    if(f.lock>0)return [0,0];
+    if(f.cd<=0&&tp&&d<160){if(f.ph>=2&&!f.inSeq){f.chain=2;f.inSeq=1}
+      const tl=f.ph>=2?.55:.9;f.cd=99;f.tele=tl;f.ca=Math.atan2(dy,dx);banim(f,"dash",tl+.7,3.43/(tl+.7));G.fx.push({k:"tele",x:f.x,y:f.y,a:f.ca,len:120,w:f.r*1.6,t:tl,max:tl})}
+    return null},
+  // Atakhan · 4 phases : Ravageur (fracas), Cri de sang (pluie de sang), Course sanglante (plus vite, fracas géant), Frénésie
+  atakhan(f,dt,dx,dy,d,tp){
+    if(!f.init){f.init=1;f.ph=1;banim(f,"s2",2,3.33/2);f.lock=2}
+    f.lock=(f.lock||0)-dt;
+    if(phaseUp(f,4,["","Cri de sang","Course sanglante","Frénésie"])){banim(f,"s2",1.6,3.33/1.6);f.lock=1.6;f.cd=Math.max(f.cd,1.8);shove(f,90,40)}
+    if(f.lock>0)return [0,0];
+    const ph=f.ph;
+    if(f.cd<=0&&tp){const rain=ph>=2&&(ph===4?(f.alt2=!f.alt2):Math.random()<.4);
+      if(rain){f.cd=ph>=4?2.4:4.5;banim(f,"s2",1.6,3.33/1.6);f.lock=1;const n=ph>=3?8:5;
+        for(const p of G.ps)if(!p.down)for(let i=0;i<n;i++)hazard(p.x+rnd(-40,40),p.y+rnd(-40,40),16,1.2+i*.08,f.dmg*.9,"#c4122f",null,f)}
+      else{f.cd=ph>=4?2.4:ph>=3?4.5:6;banim(f,"s1",1.6,3.5/1.6);f.lock=1.4;const R=ph>=3?62:48,nl=ph>=3?10:6;
+        hazard(f.x,f.y,R,1.2,f.dmg,"#c4122f",()=>{if(!f.dead)for(let i=0;i<nl;i++){const a=i/nl*Math.PI*2;spawnAt("larve",f.x+Math.cos(a)*R*.7,f.y+Math.sin(a)*R*.7)}},f)}}
+    f.runK=ph>=3?"runF":"run";const s=[1,1,1.5,1.75][ph-1];return tp?[dx/d*f.spd*s,dy/d*f.spd*s]:null},
+  // Baron Nashor · immobile, ressurgit près de toi si tu t'éloignes · 4 phases : Crachat acide, Tentacules, Vague corrosive, Fracas du Néant
+  baron(f,dt,dx,dy,d,tp){
+    const emerge=first=>{const o=tp||G.ps.find(p=>!p.down)||G.ps[0];if(o){const a=rnd(0,Math.PI*2);f.x=o.x+Math.cos(a)*110;f.y=o.y+Math.sin(a)*110}
+      banim(f,"spawn",2.6,4/2.6);f.lock=2.6;f.untarg=G.t+2.6;if(!first)say("Le Baron Nashor ressurgit près de toi !",f.col,1.8);G.fx.push({k:"blast",x:f.x,y:f.y,r:50,t:.6,max:.6})};
+    if(!f.init){f.init=1;f.ph=1;emerge(true)}
+    f.lock=(f.lock||0)-dt;f.kx=f.ky=0;
+    if(tp&&d>230&&f.lock<=0){emerge(false);return [0,0]}
+    if(phaseUp(f,4,["","Tentacules","Vague corrosive","Fracas du Néant"])){banim(f,"s9",1.6,2.17/1.6);f.lock=1.6;f.cd=Math.max(f.cd,1.8);shove(f,100,45)}
+    if(f.lock>0||!tp)return [0,0];
+    if(f.cd<=0){const ph=f.ph,o=["acid"];if(ph>=2)o.push("tent");if(ph>=3)o.push("wave");if(ph>=4)o.push("slam","slam");
+      const k=o[Math.floor(Math.random()*o.length)],fast=ph>=4?.7:1;
+      if(k==="acid"){f.cd=3.2*fast;banim(f,"s2",1.4,2.17/1.4);f.lock=.8;for(let i=0;i<3+ph;i++)hazard(tp.x+rnd(-35,35),tp.y+rnd(-35,35),17,1.25,f.dmg,"#9b4dff",null,f)}
+      else if(k==="tent"){f.cd=4*fast;banim(f,"s3",1.8,1);f.lock=1.8;const a=Math.atan2(dy,dx);G.fx.push({k:"tele",x:f.x,y:f.y,a,len:180,w:14,t:.9,max:.9});
+        for(let i=1;i<=8;i++)hazard(f.x+Math.cos(a)*i*22,f.y+Math.sin(a)*i*22,14,.6+i*.09,f.dmg*1.1,"#7a2fd6",null,f)}
+      else if(k==="wave"){f.cd=5*fast;banim(f,"s5",1.97,1);f.lock=2.2;const a0=Math.atan2(dy,dx);
+        for(let j=0;j<3;j++)for(let i=-3;i<=3;i++){const a=a0+i*.18,r=50+j*35;hazard(f.x+Math.cos(a)*r,f.y+Math.sin(a)*r,15,.9+j*.25,f.dmg*.9,"#4fbf5a",null,f)}
+        for(let i=0;i<4;i++)spawnAt("rodeur",f.x+rnd(-25,25),f.y+rnd(-25,25))}
+      else{f.cd=6;banim(f,"s6w",2.1,3.33/2.1);f.lock=2.7;say("Le Baron prépare le Fracas du Néant : éloigne-toi !","#c48bff",1.6);
+        hazard(f.x,f.y,95,2.1,f.dmg*1.8,"#c48bff",()=>{if(!f.dead){banim(f,"s6",.7,2.3/.7);G.shake=.5}},f)}}
+    return [0,0]}};
 
 // ===================== Interface =====================
 // portraits : l'illustration officielle recadrée sur le visage, en pixels
@@ -1699,7 +1838,7 @@ function hud(){if(!G)return;bossHud();$("xpb").style.width=(100*G.xp/G.need).toF
   for(const p of G.ps){if(!p.panel)continue;const g=p.panel.querySelector("[data-g]");if(g.textContent!==String(p.gold))g.textContent=p.gold;
     skState(p.panel.querySelector("[data-u]"),p.ultCd,ultCd(p.champ.ult,p.ultLvl)*p.ultMul);skState(p.panel.querySelector("[data-s]"),G.mod.sanschati?99:p.smiteCd,18*p.ultMul)}}
 function rushHud(){const r=$("rushBar");r.hidden=!(G.rush>0);if(G.rush>0)r.textContent=`Ruée vers l'or · ${Math.ceil(G.rush)} s`}
-function bossHud(){rushHud();const bs=G.foes.filter(f=>f.boss&&!FOES[f.type].mini).sort((a,b)=>b.max-a.max)[0];$("bossbar").hidden=!bs;if(bs){$("bossName").textContent=bs.name+(bs.lvl>1?" · niveau "+bs.lvl:"");$("bossHp").style.width=Math.max(0,100*bs.hp/bs.max)+"%"}}
+function bossHud(){rushHud();const bs=G.foes.filter(f=>f.boss&&!FOES[f.type].mini).sort((a,b)=>b.max-a.max)[0];$("bossbar").hidden=!bs;if(bs){const np=bs.type==="atakhan"||bs.type==="baron"?4:bs.type==="dragon"||bs.type==="herald"?2:0;$("bossName").textContent=bs.name+(bs.lvl>1?" · niveau "+bs.lvl:"")+(np?` · phase ${bs.ph||1}/${np}`:"")+(bs.untarg>G.t?" · intouchable":"");$("bossHp").style.width=Math.max(0,100*bs.hp/bs.max)+"%"}}
 let last=0;function loop(ts){const dt=Math.min(.05,(ts-last)/1000||0);last=ts;pollPads();if(state==="play")update(dt);draw();if(state!=="menu")hud();requestAnimationFrame(loop)}
 
 // ---- montées de niveau (à deux : chacun son tour) ----
