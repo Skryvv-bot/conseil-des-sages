@@ -241,9 +241,9 @@ window.IC_ASSET="cartes/";window.IC_MODELS="icathia/";
     const j=await r.json().catch(()=>({}));if(!r.ok||j.error)throw new Error(j.error||"Robot indisponible");return j}
   const IC={online:true,runes:()=>doc.runes||{},essence:()=>doc.ess||0,
     unlocked:id=>FREE.includes(id)||own.has(id),skins:id=>skinOwn[id]||[],
-    start:o=>call({op:"icStart",...o}).then(r=>r.run),
+    start:o=>call({op:"icStart",...o}),
     submit:run=>{if(!run.run)return Promise.reject(new Error("Partie non enregistrée : le robot n'a pas répondu au début de la partie"));
-      return call({op:"icRun",...run}).then(r=>{doc.ess=r.ess;doc.runes=r.runes;return {essence:r.essence,po:r.po,rush:r.rush,boosters:r.boosters,note:r.note}})},
+      return call({op:"icRun",...run}).then(r=>{doc.ess=r.ess;doc.runes=r.runes;return {essence:r.essence,po:r.po,rush:r.rush,king:r.king,boosters:r.boosters,note:r.note}})},
     buyRune:k=>call({op:"icRune",rune:k}).then(r=>{doc.ess=r.ess;doc.runes=r.runes;return true}),
     board:async tab=>{const q=await db.collection("icathia").get(),rows=[],wk=weekKey();
       q.forEach(d=>{const x=d.data(),pick=tab==="week"?(x.week&&x.week.key===wk?x.week:null):tab==="all"?x.top:(x.best||{})[tab];if(pick)rows.push({...pick,pseudo:x.pseudo,me:d.id===uid})});
@@ -387,6 +387,7 @@ const FOES={
   krugB:{name:"Ancien Krug",hp:230,spd:12,r:11,dmg:16,xp:10,shape:"krug",col:"#6e5a40",split:["krugM",2],tag:1,g:10},
   grompV:{name:"Gromp",hp:60,spd:16,r:8,dmg:10,xp:6,shape:"gromp",col:"#4c9a3a",ranged:1,g:4},
   gromp:{name:"Gromp",hp:180,spd:15,r:10,dmg:14,xp:12,shape:"gromp",col:"#4c9a3a",ranged:1,tag:1,g:15},
+  poroKing:{name:"Roi Poro",hp:900,spd:34,r:12,dmg:0,xp:60,shape:"crab",col:"#9fd8ff",flee:1,tag:1,g:150},
   crab:{name:"Carapateur",hp:90,spd:42,r:7,dmg:0,xp:10,shape:"crab",col:"#5fd0c0",flee:1,tag:1,g:25},
   grub:{name:"Larve du Néant",hp:320,spd:24,r:7,dmg:12,xp:20,shape:"grub",col:"#9b4dff",boss:1,mini:1,g:30},
   herald:{name:"Héraut de la Faille",hp:2600,spd:22,r:19,dmg:24,xp:120,shape:"herald",col:"#b06bff",boss:1,ai:"charge",g:120},
@@ -518,7 +519,7 @@ window.IC=window.IC||{online:false,
   runes:()=>store.get("ic-runes",{}),essence:()=>store.get("ic-ess",0),
   buyRune(k){const r=this.runes(),lv=r[k]||0,c=RUNE_COST[lv];if(lv>=RUNE_MAX||this.essence()<c)return Promise.resolve(false);r[k]=lv+1;store.set("ic-runes",r);store.set("ic-ess",this.essence()-c);return Promise.resolve(true)},
   unlocked:()=>true,skins:()=>[],
-  start:()=>Promise.resolve(null),
+  start:()=>Promise.resolve({run:null,king:Math.random()<.5,kingAt:150+Math.floor(Math.random()*390)}),
   submit(run){store.set("ic-ess",this.essence()+run.essence);return Promise.resolve({essence:run.essence})}};
 
 // écran : la logique travaille dans un monde « basse résolution » (unités LW × LH)
@@ -726,6 +727,9 @@ function brain(f,dt,dx,dy,d,tp){const F=FOES[f.type];f.cd-=dt;if(BOSS_AI[f.type]
 // ce qui se passe quand un monstre de la Faille tombe (les bonus profitent à toute l'équipe)
 function onKill(f,o){const F=FOES[f.type],all=G.ps;
   if(F.split)for(let i=0;i<F.split[1];i++)spawnAt(F.split[0],f.x+rnd(-6,6),f.y+rnd(-6,6));
+  if(f.type==="poroKing"){G.kingKilled=1;for(const p of all)if(!p.down)p.hp=p.maxHp;for(const p of all)addGold(p,150);
+    say(IC.online?"Le Roi Poro est vaincu ! Une montagne de PO t'attend à la fin de la partie":"Le Roi Poro est vaincu ! (les PO hors jeu se gagnent sur CDS.TV)","#ffd75e",3.2);sfx("chest");G.shake=.3;
+    for(let i=0;i<50;i++)G.fx.push({k:"px",x:f.x,y:f.y,vx:rnd(-110,110),vy:rnd(-110,110),t:rnd(.5,1.1),col:i%2?"#ffe14d":"#dff4ff"})}
   if(f.type==="crab"){for(const p of all)if(!p.down)p.hp=p.maxHp;say("Carapateur vaincu : tous les PV sont restaurés !","#5fd0c0",2.4);for(let i=0;i<20;i++)G.fx.push({k:"px",x:o.x||f.x,y:o.y||f.y,vx:rnd(-50,50),vy:rnd(-50,50),t:.6,col:"#6cff8a"})}
   if(f.type==="grub"){for(const p of all)p.dmgMul+=.04;G.buffs.grub=(G.buffs.grub||0)+1;say("Faim du Néant : +4 % de dégâts","#c48bff",1.8)}
   if(f.type==="herald"){for(const p of all)p.spd*=1.06;G.buffs.herald=(G.buffs.herald||0)+1;say("Œil du Héraut : +6 % de vitesse","#b06bff",2)}
@@ -795,7 +799,7 @@ function update(dt){G.t+=dt;const two=G.ps.length>1;
     for(const w of G.walls)wallPush(f,w);if(G.terrain==="montagne")rockPush(f,f.r);if(FOES[f.type].fixed){f.x=f.ax;f.y=f.ay;f.kx=f.ky=0}
     if(f.stun<=0&&f.dmg>0&&!(f.alt>0))for(const p of G.ps)if(!p.down&&p.inv<=0&&(p.x-f.x)**2+(p.y-f.y)**2<(f.r+p.r)**2){f.atkT=G.t;damagePlayer(f.dmg*(f.dash>0?1.6:1),p,f);if(state!=="play")return}
     if(FOES[f.type].fixed){if((f.x-G.cx)**2+(f.y-G.cy)**2>(VIEW()*2.6)**2)f.dead=true}
-    else if(!f.boss&&f.type!=="crab"&&(f.x-G.cx)**2+(f.y-G.cy)**2>(VIEW()*1.6)**2){const a=Math.atan2(f.y-G.cy,f.x-G.cx)+Math.PI+rnd(-.6,.6),R=VIEW()+14;f.x=G.cx+Math.cos(a)*R;f.y=G.cy+Math.sin(a)*R;f.lx=null}}
+    else if(!f.boss&&f.type!=="crab"&&f.type!=="poroKing"&&(f.x-G.cx)**2+(f.y-G.cy)**2>(VIEW()*1.6)**2){const a=Math.atan2(f.y-G.cy,f.x-G.cx)+Math.PI+rnd(-.6,.6),R=VIEW()+14;f.x=G.cx+Math.cos(a)*R;f.y=G.cy+Math.sin(a)*R;f.lx=null}}
   G.foes=G.foes.filter(f=>!f.dead);hazards(dt);friends(dt);terrainTick(dt);propsTick(dt);if(state!=="play")return;
   const xpMul=G.ps[0].xpMul;
   for(const g of G.gems){let pl=null,pd=1e9;for(const p of G.ps){if(p.down)continue;const d=Math.hypot(p.x-g.x,p.y-g.y);if(d<pd){pd=d;pl=p}}if(!pl)break;
@@ -1565,7 +1569,7 @@ function plantAt(i,j){if(h2(i,j,31)>.3)return null;const x=i*PLC+PLC*(.2+.6*h2(i
 const PLANT={honey:{name:"Fruit de miel",col:"#ffd75e"},cone:{name:"Bulbe explosif",col:"#ff8a5a"},bloom:{name:"Fleur de clairvoyance",col:"#6fd8ff"}};
 function cellsAround(x,y,C,R,fn){const i0=Math.floor(x/C),j0=Math.floor(y/C),n=Math.ceil(R/C);for(let i=i0-n;i<=i0+n;i++)for(let j=j0-n;j<=j0+n;j++)fn(i,j)}
 let UID=0;
-function propsTick(dt){const T=G.t;monPreload();
+function propsTick(dt){const T=G.t;monPreload();kingTick(T);
   // apparitions : buffs et tourelles du Néant
   if(T>=(G.nextRed??100)){G.nextRed=T+150;const [x,y]=edgePoint();spawnAt("redbuff",x,y);say("Le Ronceux rouge apparaît : son buff fait brûler tes sorts","#ff6a3a",2.4)}
   if(T>=(G.nextBlue??130)){G.nextBlue=T+150;const [x,y]=edgePoint();spawnAt("bluebuff",x,y);say("La Sentinelle bleue apparaît : son buff accélère tes sorts","#5fa8ff",2.4)}
@@ -1621,6 +1625,7 @@ function propInst(k){const T=PROPS[k];if(!T||!T.scene)return null;if((propCount[
   if(map){for(const r in map){const cl=T.anims.find(c=>c.name.toLowerCase().split(".")[0]===map[r]);if(cl){A[r]=mixer.clipAction(cl);if(!MON_LOOP.has(r)){A[r].setLoop(THREE.LoopOnce);A[r].clampWhenFinished=true}}}}
   else for(const cl of T.anims){const n=cl.name.toLowerCase(),role=/death/.test(n)?"death":/spawn/.test(n)?"spawn":/destroy/.test(n)?"destroyed":/respawn/.test(n)?"respawn":/trigger/.test(n)?"trigger":/idle/.test(n)?"idle":/run/.test(n)?"run":/attack/.test(n)?"attack":null;
     if(role&&!A[role]){A[role]=mixer.clipAction(cl);if(["death","trigger","respawn","attack","spawn"].includes(role)){A[role].setLoop(THREE.LoopOnce);A[role].clampWhenFinished=true}}}
+  const tint=typeof MON!=="undefined"&&MON[k]&&MON[k].tint;if(tint){const tc=new THREE.Color(tint);root.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.material.color.multiply(tc);if(o.material.emissive){o.material.emissive.copy(tc).multiplyScalar(.25)}}})}
   if(!A.idle)A.idle=A.run||A.destroyed||A.trigger;return {k,g,mixer,A,cur:null}}
 const USED=new Map(),FREE={};
 function useProp(k,ek){let m=USED.get(ek);if(m&&m.k===k)return m;if(m){m.g.visible=false;(FREE[m.k]=FREE[m.k]||[]).push(m);USED.delete(ek)}
@@ -1691,13 +1696,27 @@ const MON={
   baron:{f:"m_baron",h:450,cap:1,a:{idle:"idle1_base",spawn:"spawn_crawlout",s2:"spell2_base",s3:"spell3_base",s5:"spell5",s6w:"spell6_windup",s6:"spell6",s9:"spell9",death:"death"}}};
 for(const k of ["infernal","ocean","nuage","montagne","hextech","chemtech"])
   MON["dragon_"+k]={f:"m_dragon_"+k,h:500,cap:2,a:{idle:"sru_dragon_idle_normal",run:"run",fly:"sru_dragon_flying_run",breath:"spell2",attack:"attack1",land:"landing",death:"death"}};
+// Roi Poro : 50 % de chance par partie (tirage du robot), s'enfuit après 40 s
+MON.poroKing={f:"m_poro_king",h:150,cap:1,a:{idle:"idle1",run:"run",spawn:"spawn",jump:"jump",death:"death"}};
+function kingTick(T){if(!(G.kingAt>0)||G.kingDone)return;if(T>=G.kingAt-30)needMon("poroKing");
+  if(T>=G.kingAt&&!G.kingF){const [x,y]=edgePoint();G.kingF=spawnAt("poroKing",x,y);G.kingF.until=T+40;say("Le Roi Poro apparaît ! Attrape-le avant qu'il ne s'enfuie (40 s)","#9fd8ff",3);sfx("boss")}
+  const k=G.kingF;if(k&&!k.dead&&T>=k.until){k.dead=true;G.kingDone=1;say("Le Roi Poro s'est enfui…","#9fd8ff",2.2)}if(k&&k.dead)G.kingDone=1}
+// créatures du Néant : Voidlings de Malzahar et Void spawns (Néantins), Voidmites (Rôdeurs), super-sbires (Ravageur, Sentinelle, Gueule-Abîme)
+Object.assign(MON,{
+  voidling:{f:"m_voidling",h:60,cap:28,a:{idle:"idle1",run:"run",attack:"attack3",death:"death"}},
+  voidspawn:{f:"m_voidspawn",h:42,cap:28,a:{idle:"idle1",run:"run",attack:"voidspawn_attack2",death:"death"}},
+  voidmite:{f:"m_voidmite",h:48,cap:24,a:{idle:"idle1",run:"run1",attack:"attack1b",death:"death2"}},
+  superR:{f:"m_super_r",h:165,cap:8,a:{idle:"idle1",run:"run",attack:"attack2",death:"death_base"}},
+  superB:{f:"m_super_b",h:175,cap:6,a:{idle:"idle1",run:"run",attack:"attack1",death:"death_base"}},
+  gueule:{f:"m_super_r",h:380,cap:1,tint:"#b07cff",a:{idle:"idle1",run:"run",attack:"attack2",death:"death_base"}},
+  golden:{f:"m_voidling",h:75,cap:2,tint:"#ffd75e",a:{idle:"idle1",run:"run",attack:"attack3",death:"death"}}});
 const MON_LOOP=new Set(["idle","run","runF","fly"]);
 const MON_TYPE={minB:"minB",minR:"minR",raptor:"raptorS",raptorB:"raptorB",wolf:"wolfS",wolfB:"wolfB",krugS:"krug1",krugM:"krug2",krugB:"krug3",
-  gromp:"gromp",grompV:"gromp",crab:"crab",grub:"grub",bluebuff:"blue",herald:"herald",atakhan:"atakhan",baron:"baron"};
-const monKey=f=>f.type==="dragon"?(f.drag?"dragon_"+f.drag.k:"dragon_infernal"):MON_TYPE[f.type];
+  gromp:"gromp",grompV:"gromp",poroKing:"poroKing",rodeur:"voidmite",brute:"superR",elite:"superB",boss:"gueule",golden:"golden",crab:"crab",grub:"grub",bluebuff:"blue",herald:"herald",atakhan:"atakhan",baron:"baron"};
+const monKey=f=>f.type==="larve"?(f.seed<3.6?"voidling":"voidspawn"):f.type==="dragon"?(f.drag?"dragon_"+f.drag.k:"dragon_infernal"):MON_TYPE[f.type];
 function needMon(k){if(!k||!MON[k]||PROPS[k])return;const M=MON[k];PROP_FILES[k]=[M.f+".glb.txt",M.h];PCAP[k]=M.cap;loadProp(k)}
 // préchargement : monstres des vagues au lancement, chaque boss 30 s avant (le dragon est tiré au sort à ce moment-là)
-function monPreload(){if(!G.monPre){G.monPre=1;for(const k of ["minB","minR","raptorS","raptorB","wolfS","wolfB","krug1","krug2","krug3","gromp","crab","grub","poro","blue"])needMon(k)}
+function monPreload(){if(!G.monPre){G.monPre=1;for(const k of ["voidling","voidspawn","voidmite","superR","superB","golden","gueule","minB","minR","raptorS","raptorB","wolfS","wolfB","krug1","krug2","krug3","gromp","crab","grub","poro","blue"])needMon(k)}
   for(const b of BOSS_PLAN){const key="pre"+b[0];if(G.t>=b[0]-30&&!G[key]){G[key]=1;
     if(b[1]==="dragon"){const d=DRAGONS[Math.floor(Math.random()*DRAGONS.length)];G["drag"+b[0]]=d;needMon("dragon_"+d.k)}else needMon(MON_TYPE[b[1]])}}}
 // animations d'un monstre : un nouveau stamp relance le clip
@@ -1730,8 +1749,8 @@ function drawMonsters(t,ddt,seen){
 // mort animée : le corps reste le temps de l'animation
 function monDeath(f){const k=monKey(f),M=MON[k];if(!M||!M.a.death||!PROPS[k]||!PROPS[k].scene)return;
   if(!f.boss&&(G.corpses||[]).filter(c=>c.mon).length>=14)return;
-  const cl=PROPS[k].anims.find(c=>c.name.toLowerCase().split(".")[0]===M.a.death),D=cl?cl.duration:2,keep=f.boss?Math.min(D/1.3,6):1.5;
-  (G.corpses=G.corpses||[]).push({model:k,role:"death",x:f.x,y:f.y,ry:f.mry??0,t:keep,sp:f.boss?1.3:D/1.4,sc:f.r/FOES[f.type].r,mon:1,id:++UID})}
+  const cl=PROPS[k].anims.find(c=>c.name.toLowerCase().split(".")[0]===M.a.death),D=cl?cl.duration:2,keep=f.boss?Math.min(D/1.3,6):f.elite?1.5:.8;
+  (G.corpses=G.corpses||[]).push({model:k,role:"death",x:f.x,y:f.y,ry:f.mry??0,t:keep,sp:f.boss?1.3:D/keep,sc:f.r/FOES[f.type].r,mon:1,id:++UID})}
 
 // --------------------- grands boss : phases ---------------------
 const banim=(f,role,dur,sp=1)=>{f.anim=role;f.animT=G.t;f.animD=dur;f.animSp=sp};
@@ -1924,7 +1943,7 @@ function menu(){state="menu";chal=null;["hud","tools","pps","lvup","pause","over
 let run=null;
 function startGame(challenge){if(challenge){const ch=weekChallenge();chal=ch;nPlayers=1;$("m1").setAttribute("aria-pressed",true);$("m2").setAttribute("aria-pressed",false);sel[0]=CH(ch.champ);selSkin[0]=null}else chal=null;
   const list=nPlayers===2?[sel[0],sel[1]]:[sel[0]];if(list.some(c=>!IC.unlocked(c.id))&&!challenge)return;
-  newGame(list,nPlayers===2?selSkin:[selSkin[0]]);run={id:null,at:Date.now()};IC.start({chal:chal?chal.key:null,champ:list[0].id,coop:list.length>1}).then(id=>{if(run)run.id=id}).catch(()=>{});
+  newGame(list,nPlayers===2?selSkin:[selSkin[0]]);run={id:null,at:Date.now()};IC.start({chal:chal?chal.key:null,champ:list[0].id,coop:list.length>1}).then(r=>{if(run&&r){run.id=r.run;if(G)G.kingAt=r.king?r.kingAt:-1}}).catch(()=>{});
   state="play";last=performance.now();["menu","over","shop","runes","board"].forEach(i=>$(i).hidden=true);$("hud").hidden=false;$("tools").hidden=false;$("pps").hidden=false;$("chalTag").hidden=false;$("chalTag").textContent=chal?"Défi de la semaine":G.D.name;$("chalTag").style.color=chal?"var(--gold)":G.D.col;
   if(chal)say(`Défi : ${chal.mods.map(k=>MODS.find(m=>m.k===k).name).join(" + ")}`,"#ffcc4d",3);
   buildPanels();try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();AC.resume()}catch(e){}}
@@ -1936,8 +1955,8 @@ function finish(won){const P=G.ps[0],c=P.champ,b=best(),bk=bestKey(c.id,G.diff),
   $("ovR").innerHTML=[["Score",fmt(sc)],["Temps",mmss(t)],["Monstres",G.kills],["Boss",G.bossKills],["Niveau",G.lvl],["Essence",`+${ess}`]].map(([l,v])=>`<div class="px"><b>${v}</b><span>${l}</span></div>`).join("");
   $("ovN").textContent=(rec?`Nouveau record avec ${c.name} ! `:"")+G.ps.map(p=>(G.ps.length>1?`J${p.i+1} : `:"Sorts : ")+Object.entries(p.weapons).map(([k,l])=>WEAPONS[k].name+" "+l).join(", ")).join(" · ")+".";
   $("ovW").hidden=true;
-  IC.submit({run:run&&run.id,t,kills:G.kills,bosses:G.bossKills,win:won,lvl:G.lvl,champ:c.id,coop:G.ps.length>1,chal:G.isChal?weekKey():null,diff:G.diff,rush:Math.floor(G.rushPO||0),score:sc,essence:ess,dmg:Math.round(P.dmgDone)})
-    .then(r=>{if(!r)return;const parts=[];if(r.essence)parts.push(`+${r.essence} essence bleue`);if(r.po)parts.push(`+${r.po} PO${r.rush?` (dont ${r.rush} de la ruée vers l'or)`:""}`);if(r.boosters)parts.push(`+${r.boosters} booster${r.boosters>1?"s":""} LolMaster`);if(r.rank)parts.push(`${r.rank}e au classement`);if(r.note)parts.push(r.note);
+  IC.submit({run:run&&run.id,t,kills:G.kills,bosses:G.bossKills,win:won,lvl:G.lvl,champ:c.id,coop:G.ps.length>1,chal:G.isChal?weekKey():null,diff:G.diff,rush:Math.floor(G.rushPO||0),king:G.kingKilled?1:0,score:sc,essence:ess,dmg:Math.round(P.dmgDone)})
+    .then(r=>{if(!r)return;const parts=[];if(r.essence)parts.push(`+${r.essence} essence bleue`);if(r.po)parts.push(`+${r.po} PO${r.rush?` (dont ${r.rush} de la ruée vers l'or)`:""}${r.king?` (dont ${r.king} du Roi Poro)`:""}`);if(r.boosters)parts.push(`+${r.boosters} booster${r.boosters>1?"s":""} LolMaster`);if(r.rank)parts.push(`${r.rank}e au classement`);if(r.note)parts.push(r.note);
       if(parts.length){$("ovW").textContent=parts.join(" · ");$("ovW").hidden=false}}).catch(e=>{$("ovW").textContent=e.message||"Résultat non enregistré";$("ovW").hidden=false});
   $("over").hidden=false;$("tools").hidden=true;$("pps").hidden=true;$("shopBtn").hidden=true;$("again").focus()}
 function lose(){if(state!=="play"&&state!=="shop")return;G.dead=true;state="over";sfx("die");finish(false)}
