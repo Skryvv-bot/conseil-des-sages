@@ -1708,7 +1708,7 @@ function draw(){
   for(const [id,M] of Object.entries(MODELS))if(M.holder&&!used.has(id))M.holder.visible=false;
   // créatures du Néant (assombries hors du Royaume des morts)
   const realm=G.realm,cnt={larve:0,rodeur:0,brute:0,elite:0,boss:0};let ne=0,nsp=0,nice=0;
-  for(const f of G.foes){const m=FM[f.type];if(!m)continue;const i=cnt[f.type];if(i>=m.instanceMatrix.count)continue;cnt[f.type]++;const R=f.r*K*1.15,x=f.x*K,z=f.y*K,y=R*(1.05+Math.sin(t*6+f.seed*3)*.12)+(f.air>t?60*Math.sin((f.air-t)/.7*Math.PI):0);
+  for(const f of G.foes){const m=FM[f.type];if(!m||f.hasM)continue;const i=cnt[f.type];if(i>=m.instanceMatrix.count)continue;cnt[f.type]++;const R=f.r*K*1.15,x=f.x*K,z=f.y*K,y=R*(1.05+Math.sin(t*6+f.seed*3)*.12)+(f.air>t?60*Math.sin((f.air-t)/.7*Math.PI):0);
     const tp=f.tgt||G.ps[0]||{x:cx,y:cy};put(m,i,x,y,z,R,Math.sin(t*2+f.seed)*.3,f.seed+t*(f.type==="rodeur"?3:.8)*(f.stun>0?0:1),0);m.setColorAt(i,f.flash>0?WHITE:realm&&f!==realm.tgt?tmpCol.copy(FCOL[f.type]).multiplyScalar(.3):FCOL[f.type]);
     const ea=Math.atan2(tp.y-f.y,tp.x-f.x);if(ne<900)put(eyes,ne++,x+Math.cos(ea)*R*.85,y+R*.25,z+Math.sin(ea)*R*.85,Math.max(3,R*.22));
     if(f.r>=7)for(let k=0;k<(f.boss?7:4)&&nsp<900;k++){const a=k/(f.boss?7:4)*Math.PI*2+f.seed;put(spikes,nsp++,x+Math.cos(a)*R*.55,y+R*.75,z+Math.sin(a)*R*.55,R*.55,Math.sin(a)*.6,0,-Math.cos(a)*.6)}}
@@ -1987,8 +1987,8 @@ function propsOverlay(){if(!G.ps.length)return;ctx.textAlign="center";ctx.font="
 // Chaque modèle se charge à la demande : les monstres des vagues au lancement, chaque boss 30 s avant son arrivée.
 // Noms de clips normalisés : minuscules, sans extension (.anm, .SRT…).
 const MON={
-  minB:{f:"m_minion_b",h:95,cap:12,a:{idle:"idle1",run:"run",attack:"attack1",death:"death"}},
-  minR:{f:"m_minion_r",h:100,cap:12,a:{idle:"idle1",run:"run",attack:"attack1",death:"death"}},
+  minB:{f:"m_minion_b",h:95,cap:16,a:{idle:"idle1",run:"run",attack:"attack1",death:"death"}},
+  minR:{f:"m_minion_r",h:100,cap:16,a:{idle:"idle1",run:"run",attack:"attack1",death:"death"}},
   raptorS:{f:"m_raptor_s",h:60,cap:8,a:{idle:"idle_normal1",run:"run",attack:"attack2_base",death:"death_base"}},
   raptorB:{f:"m_raptor_b",h:105,cap:4,a:{idle:"sru_razorbeak_idle_normal5",run:"run",attack:"attack2_base",death:"death_base"}},
   wolfS:{f:"m_wolf_s",h:85,cap:8,a:{idle:"sru_murkwolfmini_idle4",run:"run_base",attack:"attack1_base",death:"death_base"}},
@@ -2013,11 +2013,11 @@ function kingTick(T){if(!(G.kingAt>0)||G.kingDone)return;if(T>=G.kingAt-30)needM
   const k=G.kingF;if(k&&!k.dead&&T>=k.until){k.dead=true;G.kingDone=1;say("Le Roi Poro s'est enfui…","#9fd8ff",2.2)}if(k&&k.dead)G.kingDone=1}
 // créatures du Néant : Voidlings de Malzahar et Void spawns (Néantins), Voidmites (Rôdeurs), super-sbires (Ravageur, Sentinelle, Gueule-Abîme)
 Object.assign(MON,{
-  voidling:{f:"m_voidling",h:60,cap:20,a:{idle:"idle1",run:"run",attack:"attack3",death:"death"}},
-  voidspawn:{f:"m_voidspawn",h:42,cap:20,a:{idle:"idle1",run:"run",attack:"voidspawn_attack2",death:"death"}},
-  voidmite:{f:"m_voidmite",h:48,cap:14,a:{idle:"idle1",run:"run1",attack:"attack1b",death:"death2"}},
-  superR:{f:"m_super_r",h:165,cap:6,a:{idle:"idle1",run:"run",attack:"attack2",death:"death_base"}},
-  superB:{f:"m_super_b",h:175,cap:5,a:{idle:"idle1",run:"run",attack:"attack1",death:"death_base"}},
+  voidling:{f:"m_voidling",h:60,cap:45,a:{idle:"idle1",run:"run",attack:"attack3",death:"death"}},
+  voidspawn:{f:"m_voidspawn",h:42,cap:45,a:{idle:"idle1",run:"run",attack:"voidspawn_attack2",death:"death"}},
+  voidmite:{f:"m_voidmite",h:48,cap:35,a:{idle:"idle1",run:"run1",attack:"attack1b",death:"death2"}},
+  superR:{f:"m_super_r",h:165,cap:10,a:{idle:"idle1",run:"run",attack:"attack2",death:"death_base"}},
+  superB:{f:"m_super_b",h:175,cap:8,a:{idle:"idle1",run:"run",attack:"attack1",death:"death_base"}},
   gueule:{f:"m_super_r",h:380,cap:1,tint:"#b07cff",a:{idle:"idle1",run:"run",attack:"attack2",death:"death_base"}},
   golden:{f:"m_voidling",h:75,cap:2,tint:"#ffd75e",a:{idle:"idle1",run:"run",attack:"attack3",death:"death"}}});
 const MON_BIG=new Set(["herald","atakhan","baron","gueule","blue","poroKing"]);
