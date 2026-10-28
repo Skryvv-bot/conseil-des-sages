@@ -266,21 +266,21 @@ const RUN=900;
 const CHAMPS=[
   {id:"Ashe",name:"Ashe",title:"Archère de givre",region:"Freljord",col:"#8fd8ff",hp:90,spd:62,weapon:"volley",ult:"crystal",model:"ashe.glb.txt",modelH:180,crop:[95,63,90,90],
     lore:"Reine des Avarosans, elle porte l'arc de cristal de la légendaire Avarosa. Le froid du Freljord ralentit tout ce qu'elle touche."},
-  {id:"Diana",name:"Diana",title:"Mépris de la lune",region:"Mont Targon",col:"#9fc4ff",hp:105,spd:60,weapon:"lunar",ult:"moonfall",crop:[80,70,90,90],model:"diana.glb.txt",
+  {id:"Diana",name:"Diana",title:"Mépris de la lune",region:"Mont Targon",col:"#9fc4ff",hp:105,spd:60,weapon:"lunar",ult:"moonfall",crop:[80,70,90,90],model:"diana.glb.txt",modelH:195,
     lore:"Guerrière du Mont Targon, elle a embrassé le culte de la lune que les Solaris avaient fait disparaître. Sa lame en croissant décrit des arcs de lumière pâle qui tranchent tout sur leur passage."},
-  {id:"Azir",name:"Azir",title:"Empereur des sables",region:"Shurima",col:"#e8c27a",hp:100,spd:58,weapon:"sand",ult:"divide",crop:[100,25,90,90],model:"azir.glb.txt",
+  {id:"Azir",name:"Azir",title:"Empereur des sables",region:"Shurima",col:"#e8c27a",hp:100,spd:58,weapon:"sand",ult:"divide",crop:[100,25,90,90],model:"azir.glb.txt",modelH:200,
     lore:"Empereur de Shurima revenu d'entre les morts sous la forme d'un Élevé. Icathia fut jadis une cité vassale de son empire : c'est sa propre terre que le Néant ronge. Ses soldats de sable tiennent la ligne à sa place."},
-  {id:"Gangplank",name:"Gangplank",title:"Fléau des mers",region:"Bilgewater",col:"#ff9b3d",hp:115,spd:58,weapon:"keg",ult:"barrage",model:"gangplank.glb.txt",modelH:190,crop:[80,50,100,100],
+  {id:"Gangplank",name:"Gangplank",title:"Fléau des mers",region:"Bilgewater",col:"#ff9b3d",hp:115,spd:58,weapon:"keg",ult:"barrage",model:"gangplank.glb.txt",modelH:200,crop:[80,50,100,100],
     lore:"Ancien maître de Bilgewater, chassé de son trône et revenu le reprendre. Pour lui, le Néant n'est qu'une flotte ennemie de plus : il sème ses barils de poudre et fait tout sauter d'un coup de pistolet."},
-  {id:"Kled",name:"Kled",title:"Le cavalier colérique",region:"Noxus",col:"#ff7a4d",hp:120,spd:64,weapon:"trap",ult:"charge",crop:[70,40,110,110],model:"kled.glb.txt",modelH:200,model2:"kledd.glb.txt",model2H:120,
+  {id:"Kled",name:"Kled",title:"Le cavalier colérique",region:"Noxus",col:"#ff7a4d",hp:120,spd:64,weapon:"trap",ult:"charge",crop:[70,40,110,110],model:"kled.glb.txt",modelH:190,model2:"kledd.glb.txt",model2H:100,
     lore:"Yordle noxien, chevalier autoproclamé, juché sur Skaarl, un lézard bien plus peureux que lui. Skaarl encaisse les coups à sa place ; quand il s'enfuit, Kled continue à pied jusqu'à ce que son courage revienne."},
-  {id:"Galio",name:"Galio",title:"Le colosse",region:"Demacia",col:"#f3d48a",hp:140,spd:54,weapon:"winds",ult:"entrance",model:"galio.glb.txt",modelH:235,crop:[70,10,110,110],
+  {id:"Galio",name:"Galio",title:"Le colosse",region:"Demacia",col:"#f3d48a",hp:140,spd:54,weapon:"winds",ult:"entrance",model:"galio.glb.txt",modelH:320,crop:[70,10,110,110],
     lore:"Statue de pétricite géante qui protège Demacia de la magie. La magie du Néant suffit à le réveiller : il n'a jamais eu autant de raisons de se battre."},
-  {id:"Mordekaiser",name:"Mordekaiser",title:"Le revenant de fer",region:"Noxus",col:"#4fe0b0",hp:135,spd:52,weapon:"mace",ult:"realm",model:"mordekaiser.glb.txt",modelH:225,crop:[60,20,110,110],
+  {id:"Mordekaiser",name:"Mordekaiser",title:"Le revenant de fer",region:"Noxus",col:"#4fe0b0",hp:135,spd:52,weapon:"mace",ult:"realm",model:"mordekaiser.glb.txt",modelH:280,crop:[60,20,110,110],
     lore:"Seigneur de guerre revenu deux fois d'entre les morts, il règne sur un royaume des âmes. Les créatures du Néant n'ont pas d'âme ; il compte bien leur en arracher une quand même."},
-  {id:"Tryndamere",name:"Tryndamere",title:"Le roi barbare",region:"Freljord",col:"#ff4f4f",hp:125,spd:60,weapon:"slash",ult:"rage",model:"tryndamere.glb.txt",modelH:190,crop:[40,20,110,110],
+  {id:"Tryndamere",name:"Tryndamere",title:"Le roi barbare",region:"Freljord",col:"#ff4f4f",hp:125,spd:60,weapon:"slash",ult:"rage",model:"tryndamere.glb.txt",modelH:195,crop:[40,20,110,110],
     lore:"Dernier survivant de son clan, massacré par une créature venue d'ailleurs. Sa rage l'empêche de mourir, et la brèche d'Icathia est l'occasion qu'il attendait depuis toujours."},
-  {id:"Graves",name:"Graves",title:"Le hors-la-loi",region:"Bilgewater",col:"#d8a35a",hp:115,spd:60,weapon:"eol",ult:"collat",model:"graves.glb.txt",modelH:185,crop:[85,25,90,90],
+  {id:"Graves",name:"Graves",title:"Le hors-la-loi",region:"Bilgewater",col:"#d8a35a",hp:115,spd:60,weapon:"eol",ult:"collat",model:"graves.glb.txt",modelH:190,crop:[85,25,90,90],
     lore:"Mercenaire, contrebandier et joueur de Bilgewater, toujours accompagné de « Destin », son fusil à pompe. Le Néant ne paie pas ses dettes ; Graves vient quand même encaisser."}
 ];
 const CH=id=>CHAMPS.find(c=>c.id===id);
@@ -370,8 +370,8 @@ const FOES={
   rodeur:{name:"Rôdeur du Néant",hp:8,spd:42,r:3.5,dmg:5,xp:1,g:0.15},
   brute:{name:"Ravageur",hp:72,spd:17,r:7,dmg:12,xp:5,g:1},
   elite:{name:"Sentinelle corrompue",hp:520,spd:24,r:9,dmg:18,xp:25,elite:true,g:20},
-  redbuff:{name:"Ronceux rouge",hp:900,spd:22,r:12,dmg:20,xp:30,g:60,model:"red",col:"#ff5a2a",tag:1,buff:"red"},
-  bluebuff:{name:"Sentinelle bleue",hp:1000,spd:18,r:12,dmg:18,xp:30,g:60,shape:"krug",col:"#3d8bff",tag:1,buff:"blue"},
+  redbuff:{name:"Ronceux rouge",hp:900,spd:22,r:15,dmg:20,xp:30,g:60,model:"red",col:"#ff5a2a",tag:1,buff:"red"},
+  bluebuff:{name:"Sentinelle bleue",hp:1000,spd:18,r:15,dmg:18,xp:30,g:60,shape:"krug",col:"#3d8bff",tag:1,buff:"blue"},
   turretR:{name:"Tourelle du Néant",hp:1800,spd:0,r:13,dmg:16,xp:50,g:150,model:"turretB",col:"#ff4a3a",tag:1,fixed:1,ai:"turret"},
   golden:{name:"Néantin doré",hp:70,spd:44,r:5.5,dmg:0,xp:5,g:10,shape:"grub",col:"#ffd75e",flee:1,tag:1},
   boss:{name:"Gueule-Abîme",hp:4200,spd:21,r:15,dmg:26,xp:120,boss:true,g:150},
@@ -389,10 +389,10 @@ const FOES={
   gromp:{name:"Gromp",hp:180,spd:15,r:10,dmg:14,xp:12,shape:"gromp",col:"#4c9a3a",ranged:1,tag:1,g:15},
   crab:{name:"Carapateur",hp:90,spd:42,r:7,dmg:0,xp:10,shape:"crab",col:"#5fd0c0",flee:1,tag:1,g:25},
   grub:{name:"Larve du Néant",hp:320,spd:24,r:7,dmg:12,xp:20,shape:"grub",col:"#9b4dff",boss:1,mini:1,g:30},
-  herald:{name:"Héraut de la Faille",hp:2600,spd:22,r:14,dmg:24,xp:120,shape:"herald",col:"#b06bff",boss:1,ai:"charge",g:120},
-  dragon:{name:"Dragon",hp:3600,spd:26,r:15,dmg:22,xp:150,shape:"dragon",col:"#ff6a2a",boss:1,ai:"breath",g:150},
-  atakhan:{name:"Atakhan",hp:6500,spd:24,r:17,dmg:30,xp:220,shape:"atakhan",col:"#c4122f",boss:1,ai:"slam",g:250},
-  baron:{name:"Baron Nashor",hp:12000,spd:13,r:21,dmg:34,xp:400,shape:"baron",col:"#7a2fd6",boss:1,ai:"acid",g:400}
+  herald:{name:"Héraut de la Faille",hp:2600,spd:22,r:19,dmg:24,xp:120,shape:"herald",col:"#b06bff",boss:1,ai:"charge",g:120},
+  dragon:{name:"Dragon",hp:3600,spd:26,r:24,dmg:22,xp:150,shape:"dragon",col:"#ff6a2a",boss:1,ai:"breath",g:150},
+  atakhan:{name:"Atakhan",hp:6500,spd:24,r:26,dmg:30,xp:220,shape:"atakhan",col:"#c4122f",boss:1,ai:"slam",g:250},
+  baron:{name:"Baron Nashor",hp:12000,spd:13,r:32,dmg:34,xp:400,shape:"baron",col:"#7a2fd6",boss:1,ai:"acid",g:400}
 };
 // dragons élémentaires : chacun donne une âme ; le 2e dragon tué transforme la carte selon son élément
 const DRAGONS=[
@@ -714,7 +714,7 @@ function brain(f,dt,dx,dy,d,tp){const F=FOES[f.type];f.cd-=dt;if(BOSS_AI[f.type]
   if(F.flee){const a=Math.atan2(-dy,-dx)+Math.sin(G.t*1.5+f.seed)*.9;return [Math.cos(a)*f.spd,Math.sin(a)*f.spd]}
   if(!tp)return null;
   if(F.ranged){if(f.cd<=0&&d<130){f.cd=2.6;f.atkT=G.t;const s=70;G.eshots.push({x:f.x,y:f.y,vx:dx/d*s,vy:dy/d*s,t:2.5,dmg:f.dmg*.8,r:3,src:f})}return d<60?[0,0]:null}
-  if(f.ai==="turret"){if(f.cd<=0&&d<100&&G.t-f.born>3){f.cd=1.1;f.atkT=G.t;const s=120;G.eshots.push({x:f.x,y:f.y,vx:dx/d*s,vy:dy/d*s,t:1.4,dmg:f.dmg*1.2,r:4,src:f,red:1});sfx("shoot")}return [0,0]}
+  if(f.ai==="turret"){if(f.cd<=0&&d<100&&G.t-f.born>3){f.cd=1.1;f.atkT=G.t;const s=120;G.eshots.push({x:f.x,y:f.y,x0:f.x,y0:f.y,d0:d,vx:dx/d*s,vy:dy/d*s,t:1.4,dmg:f.dmg*1.2,r:4,src:f,red:1});sfx("shoot")}return [0,0]}
   if(f.ai==="charge"){if(f.dash>0){f.dash-=dt;return [Math.cos(f.ca)*165,Math.sin(f.ca)*165]}
     if(f.tele>0){f.tele-=dt;if(f.tele<=0)f.dash=.7;return [0,0]}
     if(f.cd<=0&&d<160){f.cd=4.5-.5*(f.lvl-1);f.tele=.9;f.ca=Math.atan2(dy,dx);G.fx.push({k:"tele",x:f.x,y:f.y,a:f.ca,len:120,w:f.r*1.6,t:.9,max:.9})}return null}
@@ -1582,7 +1582,7 @@ function propsTick(dt){const T=G.t;monPreload();
       if(st.cap>=3){st.s="wake";st.t=3;st.cap=0;say("Une tourelle d'Icathia se réveille !","#6fb8ff",2);sfx("ult")}}
     else if(st.s==="wake"){st.t-=dt;if(st.t<=0){st.s="on";st.t=45}}
     else if(st.s==="on"){st.t-=dt;st.fire-=dt;if(st.fire<=0){const f=nearest(w.x,w.y,95);if(f){st.fire=.7;st.atkT=T;const o=G.ps.filter(p=>!p.down).sort((a,b)=>Math.hypot(a.x-w.x,a.y-w.y)-Math.hypot(b.x-w.x,b.y-w.y))[0]||G.ps[0];
-        G.shots.push({k:"tshot",o,x:w.x,y:w.y,tgt:f,t:1.6,dmg:40+T*.12,r:3,trail:[]});sfx("shoot")}}
+        G.shots.push({k:"tshot",o,x:w.x,y:w.y,x0:w.x,y0:w.y,d0:Math.hypot(f.x-w.x,f.y-w.y)||1,tgt:f,t:1.6,dmg:40+T*.12,r:3,trail:[]});sfx("shoot")}}
       if(st.t<=0){st.s="dead";st.cd=60;say("La tourelle d'Icathia s'éteint","#6fb8ff",1.4)}}});
   // plantes
   G.plantSt=G.plantSt||{};
@@ -1604,8 +1604,8 @@ function propKill(f,o){const F=FOES[f.type];
   if(f.type==="turretR"){G.corpses.push({model:"turretB_dead",role:"destroyed",x:f.x,y:f.y,ry:0,t:60,id:++UID});G.waveSlow=30;say("Tourelle du Néant détruite : la horde ralentit pendant 30 s","#ffcc4d",2.4);G.shake=.4}}
 
 // ---------- modèles ----------
-const PROP_FILES={keg:["keg.glb.txt",34],shop:["shop.glb.txt",230],red:["red.glb.txt",120],turretA:["turretA.glb.txt",340],turretA_dead:["turretA_dead.glb.txt",340],turretB:["turretB.glb.txt",340],turretB_dead:["turretB_dead.glb.txt",340],
-  soldier:["soldier.glb.txt",150],soldierR:["soldierR.glb.txt",150],bloom:["bloom.glb.txt",120],honey:["honey.glb.txt",140],cone:["cone.glb.txt",105]};
+const PROP_FILES={keg:["keg.glb.txt",55],shop:["shop.glb.txt",300],red:["red.glb.txt",250],turretA:["turretA.glb.txt",520],turretA_dead:["turretA_dead.glb.txt",520],turretB:["turretB.glb.txt",520],turretB_dead:["turretB_dead.glb.txt",520],
+  soldier:["soldier.glb.txt",185],soldierR:["soldierR.glb.txt",185],bloom:["bloom.glb.txt",280],honey:["honey.glb.txt",140],cone:["cone.glb.txt",75]};
 const PCAP={keg:16,soldier:6,soldierR:24,shop:1,red:3,turretA:4,turretA_dead:6,turretB:2,turretB_dead:4,bloom:8,honey:8,cone:8};
 const PROPS={};
 function loadProp(k){const [file,H]=PROP_FILES[k];PROPS[k]={loading:true};
@@ -1655,8 +1655,8 @@ function drawProps(t,ddt){const seen=new Set(),put1=(k,ek,x,z,ry,role,speed)=>{c
   // auras des buffs, tirs des tourelles
   buffRings.forEach(r=>r.visible=false);let nr=0;
   for(const p of G.ps){if(p.down)continue;for(const [v,col] of [[p.redT,0xff4a2a],[p.blueT,0x3d8bff]]){if(!(v>0)||nr>=buffRings.length)continue;const r=buffRings[nr++];r.visible=true;r.material.color.set(col);r.position.set(p.x*K,3+nr,p.y*K);r.scale.setScalar(34*K*(1+.06*Math.sin(t*5+nr)));r.material.opacity=v<5?.35+.35*Math.sin(t*12):.7}}
-  let ns=0;tshotRib.forEach(r=>r.hide());for(const s of G.shots){if(s.k!=="tshot"||ns>=60)continue;put(tshotM,ns,s.x*K,60,s.y*K,1);if(ns<tshotRib.length)tshotRib[ns].set([[s.x*K,60,s.y*K],...s.trail.map(([a,b])=>[a*K,60,b*K])],10,1);ns++}
-  tshotM.count=ns;let ne=0;for(const s of G.eshots)if(s.red&&ne<40)put(eshotRed,ne++,s.x*K,70,s.y*K,1.2);eshotRed.count=ne;done(tshotM,eshotRed)}
+  let ns=0;tshotRib.forEach(r=>r.hide());for(const s of G.shots){if(s.k!=="tshot"||ns>=60)continue;const sh=(x,y)=>40+450*Math.max(0,1-Math.hypot(x-(s.x0??x),y-(s.y0??y))/(s.d0||1));put(tshotM,ns,s.x*K,sh(s.x,s.y),s.y*K,1.4);if(ns<tshotRib.length)tshotRib[ns].set([[s.x*K,sh(s.x,s.y),s.y*K],...s.trail.map(([a,b])=>[a*K,sh(a,b),b*K])],10,1);ns++}
+  tshotM.count=ns;let ne=0;for(const s of G.eshots)if(s.red&&ne<40)put(eshotRed,ne++,s.x*K,40+450*Math.max(0,1-Math.hypot(s.x-(s.x0??s.x),s.y-(s.y0??s.y))/(s.d0||1)),s.y*K,1.4);eshotRed.count=ne;done(tshotM,eshotRed)}
 // étiquettes : réveil des tourelles, plantes proches, flèches de la Fleur de clairvoyance
 function propsOverlay(){if(!G.ps.length)return;ctx.textAlign="center";ctx.font="400 12px Silkscreen,monospace";
   const label=(x,y,z,s,col)=>{const [sx,sy,ok]=toScreen(x,y,z);if(!ok||sx<-50||sx>W+50||sy<0||sy>H)return;ctx.fillStyle="#120818";ctx.fillText(s,sx+1,sy+1);ctx.fillStyle=col;ctx.fillText(s,sx,sy)};
@@ -1672,25 +1672,25 @@ function propsOverlay(){if(!G.ps.length)return;ctx.textAlign="center";ctx.font="
 // Chaque modèle se charge à la demande : les monstres des vagues au lancement, chaque boss 30 s avant son arrivée.
 // Noms de clips normalisés : minuscules, sans extension (.anm, .SRT…).
 const MON={
-  minB:{f:"m_minion_b",h:46,cap:18,a:{idle:"idle1",run:"run",attack:"attack1",death:"death"}},
-  minR:{f:"m_minion_r",h:50,cap:18,a:{idle:"idle1",run:"run",attack:"attack1",death:"death"}},
-  raptorS:{f:"m_raptor_s",h:30,cap:10,a:{idle:"idle_normal1",run:"run",attack:"attack2_base",death:"death_base"}},
-  raptorB:{f:"m_raptor_b",h:56,cap:4,a:{idle:"sru_razorbeak_idle_normal5",run:"run",attack:"attack2_base",death:"death_base"}},
-  wolfS:{f:"m_wolf_s",h:42,cap:8,a:{idle:"sru_murkwolfmini_idle4",run:"run_base",attack:"attack1_base",death:"death_base"}},
-  wolfB:{f:"m_wolf_b",h:66,cap:4,a:{idle:"sru_murkwolf_idle1",run:"run_base",attack:"attack2_base",spawn:"sru_murkwolf_spawn"}},
-  krug1:{f:"m_krug_1",h:28,cap:10,a:{idle:"krug_idle_ag2n",run:"run",death:"death"}},
-  krug2:{f:"m_krug_2",h:46,cap:8,a:{idle:"krug_idle_aggro",run:"run",attack:"attack1_base",death:"death"}},
-  krug3:{f:"m_krug_3",h:78,cap:4,a:{idle:"krug_idle_ag2n",run:"run",attack:"attack2",death:"death"}},
-  gromp:{f:"m_gromp",h:72,cap:8,a:{idle:"sru_gromp_idle2",run:"run",attack:"attack1_mid",death:"death"}},
-  crab:{f:"m_crab",h:40,cap:3,a:{idle:"idle1",run:"run",spawn:"crab_spawn"}},
-  grub:{f:"m_grub",h:46,cap:8,a:{idle:"run",run:"run",attack:"attack1b",spawn:"spawnin",death:"death1"}},
-  poro:{f:"m_poro",h:30,cap:12,a:{idle:"idle1",run:"run1",death:"death"}},
-  blue:{f:"m_blue",h:120,cap:2,a:{idle:"sru_blue_idle_aggro",run:"run",attack:"attack1",death:"death"}},
-  herald:{f:"m_herald",h:150,cap:2,a:{idle:"idle_base",run:"run",spawn:"spawn",dash:"dash",death:"death"}},
-  atakhan:{f:"m_atakhan",h:210,cap:1,a:{idle:"idle1",run:"run_slow",runF:"run_fast",s1:"spell1",s2:"spell2",death:"death"}},
-  baron:{f:"m_baron",h:250,cap:1,a:{idle:"idle1_base",spawn:"spawn_crawlout",s2:"spell2_base",s3:"spell3_base",s5:"spell5",s6w:"spell6_windup",s6:"spell6",s9:"spell9",death:"death"}}};
+  minB:{f:"m_minion_b",h:95,cap:18,a:{idle:"idle1",run:"run",attack:"attack1",death:"death"}},
+  minR:{f:"m_minion_r",h:100,cap:18,a:{idle:"idle1",run:"run",attack:"attack1",death:"death"}},
+  raptorS:{f:"m_raptor_s",h:60,cap:10,a:{idle:"idle_normal1",run:"run",attack:"attack2_base",death:"death_base"}},
+  raptorB:{f:"m_raptor_b",h:105,cap:4,a:{idle:"sru_razorbeak_idle_normal5",run:"run",attack:"attack2_base",death:"death_base"}},
+  wolfS:{f:"m_wolf_s",h:85,cap:8,a:{idle:"sru_murkwolfmini_idle4",run:"run_base",attack:"attack1_base",death:"death_base"}},
+  wolfB:{f:"m_wolf_b",h:170,cap:4,a:{idle:"sru_murkwolf_idle1",run:"run_base",attack:"attack2_base",spawn:"sru_murkwolf_spawn"}},
+  krug1:{f:"m_krug_1",h:50,cap:10,a:{idle:"krug_idle_ag2n",run:"run",death:"death"}},
+  krug2:{f:"m_krug_2",h:95,cap:8,a:{idle:"krug_idle_aggro",run:"run",attack:"attack1_base",death:"death"}},
+  krug3:{f:"m_krug_3",h:160,cap:4,a:{idle:"krug_idle_ag2n",run:"run",attack:"attack2",death:"death"}},
+  gromp:{f:"m_gromp",h:140,cap:8,a:{idle:"sru_gromp_idle2",run:"run",attack:"attack1_mid",death:"death"}},
+  crab:{f:"m_crab",h:105,cap:3,a:{idle:"idle1",run:"run",spawn:"crab_spawn"}},
+  grub:{f:"m_grub",h:80,cap:8,a:{idle:"run",run:"run",attack:"attack1b",spawn:"spawnin",death:"death1"}},
+  poro:{f:"m_poro",h:65,cap:12,a:{idle:"idle1",run:"run1",death:"death"}},
+  blue:{f:"m_blue",h:255,cap:2,a:{idle:"sru_blue_idle_aggro",run:"run",attack:"attack1",death:"death"}},
+  herald:{f:"m_herald",h:270,cap:2,a:{idle:"idle_base",run:"run",spawn:"spawn",dash:"dash",death:"death"}},
+  atakhan:{f:"m_atakhan",h:430,cap:1,a:{idle:"idle1",run:"run_slow",runF:"run_fast",s1:"spell1",s2:"spell2",death:"death"}},
+  baron:{f:"m_baron",h:450,cap:1,a:{idle:"idle1_base",spawn:"spawn_crawlout",s2:"spell2_base",s3:"spell3_base",s5:"spell5",s6w:"spell6_windup",s6:"spell6",s9:"spell9",death:"death"}}};
 for(const k of ["infernal","ocean","nuage","montagne","hextech","chemtech"])
-  MON["dragon_"+k]={f:"m_dragon_"+k,h:150,cap:2,a:{idle:"sru_dragon_idle_normal",run:"run",fly:"sru_dragon_flying_run",breath:"spell2",attack:"attack1",land:"landing",death:"death"}};
+  MON["dragon_"+k]={f:"m_dragon_"+k,h:500,cap:2,a:{idle:"sru_dragon_idle_normal",run:"run",fly:"sru_dragon_flying_run",breath:"spell2",attack:"attack1",land:"landing",death:"death"}};
 const MON_LOOP=new Set(["idle","run","runF","fly"]);
 const MON_TYPE={minB:"minB",minR:"minR",raptor:"raptorS",raptorB:"raptorB",wolf:"wolfS",wolfB:"wolfB",krugS:"krug1",krugM:"krug2",krugB:"krug3",
   gromp:"gromp",grompV:"gromp",crab:"crab",grub:"grub",bluebuff:"blue",herald:"herald",atakhan:"atakhan",baron:"baron"};
