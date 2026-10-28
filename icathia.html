@@ -347,15 +347,15 @@ function weekChallenge(key=weekKey()){let h=2166136261;for(const c of key)h=Math
 // niveaux de difficulté : résistance, dégâts, vitesse et nombre de monstres ; le score et l'essence suivent
 // animations précises par champion (noms de clips normalisés : minuscules, sans préfixe ni .anm)
 const ANIMS={
-  Ashe:{idle:"idle1",run:"run",sig:"spell2",ult:"spell4"},
-  Azir:{idle:"idle1_base",run:"run_in",death:"ga_death",sig:"attack_command",ult:"spell4"},
-  Diana:{idle:"idle1",run:"run_base",death:"death_anim",sig:"spell1",ult:"attack1"},
-  Kled:{idle:"idle0",run:"run_base",death:"death",mount:"mount_on_to_run",sig:"spell1",ult:"spell4_into",ultEnd:"spell4_outattack"},
-  Gangplank:{idle:"idle1",run:"run_base",death:"death",sig:"spell3",ult:"spell4",shoot:"spell1"},
-  Galio:{idle:"idle1_base",run:"run_base",death:"death",sig:"spell1",ult:"spell4_in",chan:"spell4_channel",ultEnd:"spell4_out"},
-  Mordekaiser:{idle:"battle_idle",run:"walk",death:"death",sig:"spell1",ult:"spell4_to_idle"},
-  Tryndamere:{idle:"idle1",run:"run",death:"death",sig:"spell3",ult:"spell4"},
-  Graves:{idle:"idle1",run:"run",death:"death",sig:"spell1",ult:"spell4",ultEnd:"spell4_back",endAfter:1}};
+  Ashe:{idle:"idle1",run:"run",sig:"spell2",ult:"spell4",at:{sig:.75,ult:.92}},
+  Azir:{idle:"idle1_base",run:"run_in",death:"ga_death",sig:"attack_command",ult:"spell4",at:{sig:.28,ult:.28}},
+  Diana:{idle:"idle1",run:"run_base",death:"death_anim",sig:"spell1",ult:"attack1",at:{sig:.27,ult:.3}},
+  Kled:{idle:"idle0",run:"run_base",death:"death",mount:"mount_on_to_run",sig:"spell1",ult:"spell4_into",ultEnd:"spell4_outattack",at:{sig:.22,ultEnd:.18}},
+  Gangplank:{idle:"idle1",run:"run_base",death:"death",sig:"spell3",ult:"spell4",shoot:"spell1",at:{sig:.18,ult:.2,shoot:.4}},
+  Galio:{idle:"idle1_base",run:"run_base",death:"death",sig:"spell1",ult:"spell4_in",chan:"spell4_channel",ultEnd:"spell4_out",at:{sig:.18,ultEnd:.13}},
+  Mordekaiser:{idle:"battle_idle",run:"walk",death:"death",sig:"spell1",ult:"spell4_to_idle",at:{sig:.32,ult:1.22}},
+  Tryndamere:{idle:"idle1",run:"run",death:"death",sig:"spell3",ult:"spell4",at:{sig:.07,ult:.07}},
+  Graves:{idle:"idle1",run:"run",death:"death",sig:"spell1",ult:"spell4",ultEnd:"spell4_back",endAfter:1,at:{sig:.27,ult:.08}}};
 const DIFFS=[
   {k:"normal",name:"Normal",desc:"L'équilibre d'origine. Victoire : 2 boosters LolMaster.",hp:1,dmg:1,spd:1,spawn:1,boss:1,score:1,ess:1,boost:2,col:"#ffcc4d"},
   {k:"hard",name:"Difficile",desc:"Une horde plus dense, plus rapide et plus solide, des boss qui frappent fort. Victoire : 4 boosters LolMaster.",hp:1.45,dmg:1.4,spd:1.12,spawn:1.3,boss:1.5,score:1.6,ess:1.4,boost:4,col:"#ff8a3d"},
@@ -419,9 +419,11 @@ const OUT_LORE={Ashe:"Le Freljord perd sa reine, mais la glace d'Avarosa retient
 // Le sort principal de chaque champion est donné au départ ; les deux autres arrivent en montant de niveau.
 // Au niveau MAX (6), chaque sort devient presque injuste. Le R MAX ne se débloque qu'une fois Q, W et E au MAX.
 const MAXL=6,LV=(...a)=>l=>a[Math.min(a.length,l)-1];
-const KITS={Ashe:{Q:"focus",W:"volley",E:"hawk"},Diana:{Q:"lunar",W:"cascade",E:"rush"},Azir:{Q:"conquer",W:"sand",E:"shifting"},
+const KITS_FULL={Ashe:{Q:"focus",W:"volley",E:"hawk"},Diana:{Q:"lunar",W:"cascade",E:"rush"},Azir:{Q:"conquer",W:"sand",E:"shifting"},
   Gangplank:{Q:"parrrley",W:"scurvy",E:"keg"},Kled:{Q:"trap",W:"violent",E:"joust"},Galio:{Q:"winds",W:"durand",E:"justice"},
   Mordekaiser:{Q:"mace",W:"indestr",E:"grasp"},Tryndamere:{Q:"bloodlust",W:"shout",E:"slash"},Graves:{Q:"eol",W:"smoke",E:"quickdraw"}};
+// sorts disponibles pour l'instant : la signature de chaque champion (+ son R)
+const KITS={Ashe:{W:"volley"},Diana:{Q:"lunar"},Azir:{W:"sand"},Gangplank:{E:"keg"},Kled:{Q:"trap"},Galio:{Q:"winds"},Mordekaiser:{Q:"mace"},Tryndamere:{E:"slash"},Graves:{Q:"eol"}};
 const WEAPONS={
   // ---- Ashe ----
   focus:{name:"Concentration du ranger",by:"Ashe",col:"#8fd8ff",desc:["Ashe se concentre et tire une rafale de flèches sur l'ennemi le plus proche.","Rafale plus longue","Tirs plus rapides, +20 % de dégâts","2 flèches par tir","Recharge plus courte, +20 % de dégâts","MAX : concentration permanente, 3 flèches toutes les 0,07 s."],
@@ -776,7 +778,7 @@ function update(dt){G.t+=dt;const two=G.ps.length>1;
   if(two){const [a,b]=G.ps,mx=LW*.8,my=LH*.72,dx=b.x-a.x,dy=b.y-a.y;if(Math.abs(dx)>mx){const e=(Math.abs(dx)-mx)/2*Math.sign(dx);a.x+=e;b.x-=e}if(Math.abs(dy)>my){const e=(Math.abs(dy)-my)/2*Math.sign(dy);a.y+=e;b.y-=e}}
   const al=alive().length?alive():G.ps;G.cx=al.reduce((s,p)=>s+p.x,0)/al.length;G.cy=al.reduce((s,p)=>s+p.y,0)/al.length;
   faillePlan(dt);build();
-  for(const p of G.ps){if(p.down)continue;G.p=p;const w=p.champ.weapon,c0=p.cds[w]||0;weapons(dt,p);if((p.cds[w]||0)>c0+.01)p.atkT=G.t}
+  for(const p of G.ps){if(p.down)continue;G.p=p;const w=p.champ.weapon,c0=p.cds[w]||0,a0=p.aimA;weapons(dt,p);if((p.cds[w]||0)>c0+.01){p.atkT=G.t;if(p.aimA===a0){const t=nearest(p.x,p.y,260);if(t)p.aimA=Math.atan2(t.y-p.y,t.x-p.x)}}}
   G.p=G.ps[0];shots(dt);spells(dt);if(state!=="play")return;
   const realm=G.realm;
   for(const f of G.foes){if(f.dead)continue;f.flash-=dt;
@@ -898,7 +900,7 @@ function weapons(dt,p){
     else if(k==="bloodlust"&&ready){if(p.hp<p.maxHp*.5&&(p.fury||0)>=10){cd();heal(p,p.fury*s.heal);p.fury=0;for(let q=0;q<12;q++)G.fx.push({k:"px",x:p.x,y:p.y,vx:rnd(-30,30),vy:rnd(-40,-10),t:.6,col:"#ff5d73"});sfx("gem")}}
     else if(k==="shout"&&ready){if(!nearest(p.x,p.y,s.R))continue;cd();sfx("ult");pulse(p.x,p.y,s.R,"#ff6a6a",.55);
       near(p.x,p.y,s.R+15,f=>{const dx=f.x-p.x,dy=f.y-p.y,d=Math.hypot(dx,dy)||1;if(d<s.R+f.r){f.weak=G.t+4;f.weakV=s.weak;f.slow=2;if(s.dmg){hurt(f,s.dmg,dx/d*80,dy/d*80,p)}}})}
-    else if(k==="slash"&&ready&&!p.dash){let a;if(p.moving)a=Math.atan2(p.mvy,p.mvx);else{const t=nearest(p.x,p.y,110);if(!t)continue;a=Math.atan2(t.y-p.y,t.x-p.x)}
+    else if(k==="slash"&&ready&&!p.dash){let a;if(p.moving)a=Math.atan2(p.mvy,p.mvx);else{const t=nearest(p.x,p.y,110);if(!t)continue;a=Math.atan2(t.y-p.y,t.x-p.x)}p.aimA=a;
       cd();const T=.24,dx=Math.cos(a),dy=Math.sin(a),hit=new Set();sfx("shoot");
       p.dash={vx:dx*s.len/T,vy:dy*s.len/T,t:T,onStep:pp=>near(pp.x,pp.y,s.w+12,f=>{if(!hit.has(f)&&(f.x-pp.x)**2+(f.y-pp.y)**2<(s.w+f.r)**2){hit.add(f);hurt(f,s.dmg,dx*30,dy*30,pp)}})};
       G.fx.push({k:"spinslash",o:p,a,t:T+.12,max:T+.12})}
@@ -1003,7 +1005,7 @@ const ULT_FN={
     const t=densest(p.x,p.y,220,40)||bigTarget(p.x,p.y,220);zone(t?t.x:p.x,t?t.y:p.y);if(mx){const b=bigTarget(p.x,p.y,260);zone(b?b.x+rnd(-20,20):p.x+80,b?b.y+rnd(-20,20):p.y)}},
   charge(p,l){const mx=l>=MAXL;const go=(again)=>{const t=bigTarget(p.x,p.y,220+20*(l-1))||densest(p.x,p.y,200,30);const a=t?Math.atan2(t.y-p.y,t.x-p.x):p.dir,dist=t?Math.min(170+20*(l-1),Math.hypot(t.x-p.x,t.y-p.y)+6):130,T=dist/210,dx=Math.cos(a),dy=Math.sin(a),hit=new Set();
     for(let i=1;i<=Math.floor(dist/16);i++)G.fx.push({k:"chev",x:p.x+dx*i*16,y:p.y+dy*i*16,a,t:1.2+i*.02,max:1.2+i*.02});
-    p.shield=Math.max(p.shield,p.maxHp*(.3+.05*(l-1)));p.charging=true;
+    p.shield=Math.max(p.shield,p.maxHp*(.3+.05*(l-1)));p.charging=true;p.aimA=a;
     p.dash={vx:dx*210,vy:dy*210,t:T,onStep:pp=>near(pp.x,pp.y,24,f=>{if(!hit.has(f)&&(f.x-pp.x)**2+(f.y-pp.y)**2<(12+f.r)**2){hit.add(f);hurt(f,(30+G.t*.06)*um(l),-dy*60,dx*60,pp)}}),
       onEnd:pp=>{pp.charging=false;pp.ultEndT=G.t;sfx("bigboom");G.shake=.35;G.fx.push({k:"blast",x:pp.x+dx*8,y:pp.y+dy*8,r:30,t:.5,max:.5});
         near(pp.x,pp.y,50,f=>{const ex=f.x-pp.x,ey=f.y-pp.y,d=Math.hypot(ex,ey)||1;if(d<30+f.r){hurt(f,(90+G.t*.2)*um(l),ex/d*90,ey/d*90,pp);f.stun=Math.max(f.stun,.8)}});if(again)go(false)}}};go(mx)},
@@ -1019,7 +1021,7 @@ const ULT_FN={
     p.x-=Math.cos(a0)*15;p.y-=Math.sin(a0)*15;G.fx.push({k:"star",x:p.x,y:p.y,t:.25,max:.25,col:"#ff5a2a"});G.shake=.3}
 };
 function castUlt(p){if(!G||state!=="play"||!p||p.down||p.ultCd>0||p.stasis>0)return;const u=p.champ.ult,U=ULTS[u],l=p.ultLvl||1;
-  if(ULT_FN[u](p,l)===false)return;p.ultCd=ultCd(u,l)*p.ultMul;p.ultT=G.t;sfx("ult");G.texts.push({x:p.x,y:p.y-28,s:U.name+(l>=MAXL?" MAX":""),col:p.champ.col,t:1.4,max:1.4,small:false})}
+  const a0=p.aimA;if(ULT_FN[u](p,l)===false)return;if(p.aimA===a0&&!p.charging){const t=bigTarget(p.x,p.y,260)||nearest(p.x,p.y,260);if(t)p.aimA=Math.atan2(t.y-p.y,t.x-p.x)}p.ultCd=ultCd(u,l)*p.ultMul;p.ultT=G.t;sfx("ult");G.texts.push({x:p.x,y:p.y-28,s:U.name+(l>=MAXL?" MAX":""),col:p.champ.col,t:1.4,max:1.4,small:false})}
 // Châtiment (F) : achève les monstres de la Faille, avec un bonus si le coup tue
 function smite(p){if(!G||state!=="play"||!p||p.down)return;if(G.mod.sanschati){say("Pas de Châtiment pour ce défi !","#ff5d73",1.2);return}if(p.smiteCd>0)return;
   let b=null,bs=-1;for(const f of G.foes){if(f.dead||(G.realm&&f!==G.realm.tgt))continue;const d=Math.hypot(f.x-p.x,f.y-p.y);if(d>110)continue;const F=FOES[f.type];const s=(f.boss?3e6:(F.shape||F.model)?2e6:f.elite?1e6:0)-d;if(s>bs){bs=s;b=f}}
@@ -1310,11 +1312,15 @@ function loadModel(c,file=c.model,key=c.id,H=c.modelH||175){if(!file||MODELS[key
     if(!A.attack&&A.q)A.attack=A.q;if(!A.spell&&A.q)A.spell=A.q;
     for(const k of ["attack","spell","death","q","ult","mount","ultEnd","shoot"])if(A[k]){A[k].setLoop(THREE.LoopOnce);A[k].clampWhenFinished=true}
     if(map){for(const k of ["attack","ult","ultEnd","shoot"])if(A[k])A[k].timeScale=1.25}else{if(A.attack)A.attack.timeScale=1.8;if(A.spell)A.spell.timeScale=1.4}
-    for(const k in A)D[k]=A[k].getClip().duration/Math.abs(A[k].timeScale||1);
-    MODELS[key]={holder,mixer,A,D,endAfter:!!(map&&map.endAfter),cur:null}},()=>{MODELS[key]={failed:true}})}).catch(()=>{MODELS[key]={failed:true}})}
+    const S={};if(map&&map.at)for(const r in map.at){const k=r==="sig"?"attack":r;if(A[k])S[k]=Math.max(0,map.at[r]-.12)}
+    for(const k in A)D[k]=(A[k].getClip().duration-(S[k]||0))/Math.abs(A[k].timeScale||1);
+    MODELS[key]={holder,mixer,A,D,S,endAfter:!!(map&&map.endAfter),cur:null}},()=>{MODELS[key]={failed:true}})}).catch(()=>{MODELS[key]={failed:true}})}
 for(const c of CHAMPS){loadModel(c);if(c.model2)loadModel(c,c.model2,c.id+"_d",c.model2H)}
-function playRole(M,role){const a=M.A[role];if(!a)return;if(M.cur===role&&(a.isRunning()||role==="death"))return;const prev=M.cur&&M.A[M.cur];
-  a.reset();a.fadeIn(.12);a.play();if(prev&&prev!==a)prev.fadeOut(.12);M.cur=role}
+// joue un rôle d'animation ; un nouveau lancement (stamp différent) relance le clip au bon moment, sans repasser par la pose de base
+function playRole(M,role,stamp=0){const a=M.A[role];if(!a)return;if(M.cur===role&&M.stamp===stamp)return;const prev=M.cur&&M.A[M.cur];
+  a.reset();a.time=(M.S&&M.S[role])||0;a.setEffectiveWeight(1);a.play();
+  if(prev&&prev!==a){a.crossFadeFrom(prev,role==="death"?.25:.1,false)}
+  M.cur=role;M.stamp=stamp}
 // échoppe du marchand (provisoire)
 const shop3=new THREE.Group();{const wood=std(0x6b4a33,0,0,{roughness:.9}),cloth=std(0x7a2fd6,0x3b1466,.3),gold=std(0xffcc4d,0x6a4a00,.4,{metalness:.8});
   const counter=new THREE.Mesh(new THREE.BoxGeometry(120,40,46),wood);counter.position.y=20;const top=new THREE.Mesh(new THREE.BoxGeometry(128,6,52),gold);top.position.y=43;
@@ -1377,13 +1383,13 @@ function draw(){
     F.stand.rotation.z=p.moving&&!p.down?Math.sin(p.walk*12)*.08:0;F.stand.rotation.x=p.down?-1.35:-.32;F.stand.position.y=8+(p.moving&&!p.down?Math.abs(Math.sin(p.walk*12))*4:0);
     F.stand.rotation.y+=(((p.face<0?-.35:.35))-F.stand.rotation.y)*.15;F.ring.material.opacity=.35+Math.sin(t*4)*.1;
     F.rez.visible=p.down;if(p.down){F.rez.scale.setScalar(.25+.75*p.rez/3);F.rez.material.opacity=.4+.5*(p.rez/3)}
-    if(useM){used.add(Object.keys(MODELS).find(k=>MODELS[k]===M));M.holder.visible=blink;M.holder.position.set(X,Y,Z);const want=Math.PI/2-(G.t-Math.max(p.atkT??-9,p.shootT??-9)<.5&&p.aimA!=null?p.aimA:(p.dir??0));let d=want-M.holder.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));M.holder.rotation.y+=d*.25;
+    if(useM){used.add(Object.keys(MODELS).find(k=>MODELS[k]===M));M.holder.visible=blink;M.holder.position.set(X,Y,Z);const want=Math.PI/2-((p.charging||G.t-Math.max(p.atkT??-9,p.shootT??-9,p.ultT??-9)<.6)&&p.aimA!=null?p.aimA:(p.dir??0));let d=want-M.holder.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));M.holder.rotation.y+=d*.25;
       const A=M.A;let role,freeze=false;if((p.down||G.dead)&&A.death)role="death";else if(A.mount&&G.t-(p.mountT??-9)<.6)role="mount";else{const D=M.D||{},su=G.t-(p.ultT??-99),e0=p.ultEndT!=null&&p.ultEndT>(p.ultT??-99)?p.ultEndT:M.endAfter?(p.ultT??-99)+(D.ult||0):-99,se=G.t-e0;
         if(A.ultEnd&&se>=0&&se<(D.ultEnd||.8))role="ultEnd";else if(A.chan&&p.flying&&su>(D.ult||.4))role="chan";
-        else if(A.ult&&(p.charging||p.flying||su<Math.min(D.ult||.7,1.6)))role="ult";else if(A.shoot&&G.t-(p.shootT??-9)<Math.min(D.shoot||.6,1.1))role="shoot";
+        else if(A.ult&&(p.charging||p.flying||(su<Math.min(D.ult||.7,1.6)&&!(A.ultEnd&&p.ultEndT!=null&&p.ultEndT>=(p.ultT??-99)))))role="ult";else if(A.shoot&&G.t-(p.shootT??-9)<Math.min(D.shoot||.6,1.1))role="shoot";
         else if(A.spell&&A.spell!==A.attack&&G.t-(p.spellT??-9)<.9)role="spell";else if(A.attack&&G.t-(p.atkT??-9)<(M.D?Math.min(D.attack||.55,1.2):.55))role="attack"}
       if(!role){if(p.moving&&state==="play")role="run";else if(A.idle)role="idle";else{role="run";freeze=true}}
-      playRole(M,role);if(state==="play"||G.dead||p.down)M.mixer.update(freeze?0:ddt)}
+      playRole(M,role,role==="attack"?p.atkT:role==="ult"||role==="chan"?p.ultT:role==="shoot"?p.shootT:role==="ultEnd"?(p.ultEndT??p.ultT):role==="mount"?p.mountT:role==="spell"?p.spellT:0);if(state==="play"||G.dead||p.down)M.mixer.update(freeze?0:ddt)}
     champLights[i].intensity=1.2;champLights[i].color.set(p.realmGlow?0x3fffc0:p.champ.col);champLights[i].position.set(X,160+Y,Z+120)});
   for(const [id,M] of Object.entries(MODELS))if(M.holder&&!used.has(id))M.holder.visible=false;
   // créatures du Néant (assombries hors du Royaume des morts)
