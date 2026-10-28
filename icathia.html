@@ -1037,74 +1037,135 @@ function smite(p){if(!G||state!=="play"||!p||p.down)return;if(G.mod.sanschati){s
 // élixirs : bonus temporaires (sign = +1 à l'achat, −1 quand l'effet s'arrête)
 function elixir(p,k,sign){const e=SHOPK[k].elix;if(e.hp){p.maxHp+=e.hp*sign;p.hp=Math.min(p.maxHp,p.hp+Math.max(0,e.hp*sign))}if(e.armor)p.armor+=e.armor*sign;if(e.dmg)p.dmgMul+=e.dmg*sign;if(e.ls)p.ls+=e.ls*sign}
 
-// ===================== Sol de Runeterra =====================
-// Quatre terrains peints à la main (en code) puis mélangés selon la position dans le monde :
-// sable du désert de Shurima, dalles de grès des ruines d'Icathia, herbe de la Faille de l'invocateur
-// (là où la brèche s'est ouverte) et sol corrompu du Néant, qui gagne du terrain au fil de la partie.
-const GT=512;
-function tileNoise(seed){const N=64,v=new Float32Array(N*N);let s=seed*9301+49297;for(let i=0;i<N*N;i++){s=(s*9301+49297)%233280;v[i]=s/233280}
-  const at=(i,j)=>v[((j%N+N)%N)*N+((i%N+N)%N)],sm=t=>t*t*(3-2*t);
-  return (x,y,p)=>{const f=N/p,gx=x/GT*p,gy=y/GT*p,i=Math.floor(gx),j=Math.floor(gy),u=sm(gx-i),w=sm(gy-j),k=f;  // période p cellules sur la tuile
-    const A=at(i*k|0,j*k|0),B=at((i+1)%p*k|0,j*k|0),C=at(i*k|0,(j+1)%p*k|0),D=at((i+1)%p*k|0,(j+1)%p*k|0);return A+(B-A)*u+(C-A)*w+(A-B-C+D)*u*w}}
+// ===================== Sol de Runeterra, peint à la manière de la Faille de l'invocateur =====================
+// Cinq matières peintes (en code) et mélangées selon la position dans le monde : sable de Shurima, dalles irrégulières
+// des ruines d'Icathia, chemins de terre battue, herbe de la Faille (là où la brèche s'est ouverte) et sol du Néant,
+// qui gagne du terrain au fil de la partie. Le shader ajoute le relief, les bordures et les variations de teinte.
+const fr32=Math.fround;
+// bruit de valeur périodique (tuile de S pixels, p cellules)
+function tnoise(seed,S){const N=256,v=new Float32Array(N*N);let s=seed*9301+49297;for(let i=0;i<N*N;i++){s=(s*9301+49297)%233280;v[i]=s/233280}
+  const sm=t=>t*t*(3-2*t);
+  return (x,y,p)=>{const gx=x/S*p,gy=y/S*p,i=Math.floor(gx),j=Math.floor(gy),u=sm(gx-i),w=sm(gy-j),i0=((i%p)+p)%p,j0=((j%p)+p)%p,i1=(i0+1)%p,j1=(j0+1)%p;
+    const A=v[j0*N+i0],B=v[j0*N+i1],C=v[j1*N+i0],D=v[j1*N+i1];return A+(B-A)*u+(C-A)*w+(A-B-C+D)*u*w}}
 function fbmT(nz,x,y,o=[4,8,16,32],w=[.5,.25,.15,.1]){let s=0;for(let i=0;i<o.length;i++)s+=nz(x,y,o[i])*w[i];return s}
-function paint(draw){const c=document.createElement("canvas");c.width=c.height=GT;const x=c.getContext("2d"),img=x.createImageData(GT,GT);draw(img.data,x);x.putImageData(img,0,0);return {c,x}}
 const lerpC=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];
-function px(d,i,c){d[i]=c[0];d[i+1]=c[1];d[i+2]=c[2];d[i+3]=255}
-// sable : ondulations des dunes, grains clairs et sombres
-const SAND=(()=>{const nz=tileNoise(3),nz2=tileNoise(11);return paint(d=>{for(let y=0;y<GT;y++)for(let x=0;x<GT;x++){const n=fbmT(nz,x,y),m=fbmT(nz2,x,y,[2,4,8]);
-  const r=Math.sin((x*.55+y+n*90)/GT*Math.PI*2*22)*.5+.5,t=clamp(n*.9+r*r*.25+(m-.5)*.4,0,1),g=Math.random();
-  let c=lerpC([184,140,86],[232,198,140],t);if(g<.04)c=lerpC(c,[250,230,190],.5);else if(g>.97)c=lerpC(c,[120,88,52],.4);px(d,(y*GT+x)*4,c)}}).c})();
-// dalles de grès d'Icathia : appareil en quinconce, joints ensablés, arêtes usées, fissures, glyphes dorés de Shurima
-const STONE=(()=>{const nz=tileNoise(5),B=128,H=128;const {c,x}=paint(d=>{for(let y=0;y<GT;y++)for(let X=0;X<GT;X++){const row=Math.floor(y/H),off=row%2?B/2:0,bx=((X+off)%GT),col=Math.floor(bx/B),lx=bx%B,ly=y%H,id=row*7+col;
-    const tint=(Math.sin(id*12.9898)*43758.5453)%1,n=fbmT(nz,X,y),e=Math.min(lx,ly,B-1-lx,H-1-ly);let c;
-    if(e<4){c=lerpC([104,78,50],[176,142,96],clamp(n*1.2-.2,0,1))}   // joint rempli de sable
-    else{c=lerpC([170,128,82],[214,174,118],clamp(Math.abs(tint)*.6+n*.6-.1,0,1));if(e<9){const k=(9-e)/9;c=lx<9||ly<9?lerpC(c,[236,206,150],k*.35):lerpC(c,[96,70,44],k*.4)}
-      if(Math.random()<.03)c=lerpC(c,[90,66,40],.35)}
-    px(d,(y*GT+X)*4,c)}});
-  // fissures
-  x.strokeStyle="rgba(70,48,28,.75)";x.lineCap="round";for(let k=0;k<14;k++){let px0=Math.random()*GT,py0=Math.random()*GT,a=Math.random()*6;x.lineWidth=1+Math.random()*1.5;x.beginPath();x.moveTo(px0,py0);for(let s=0;s<9;s++){a+=rnd(-.7,.7);px0+=Math.cos(a)*9;py0+=Math.sin(a)*9;x.lineTo(px0,py0)}x.stroke()}
-  // glyphes solaires de Shurima gravés et dorés (sur quelques dalles)
-  for(const [gx,gy] of [[320+64,192]]){x.save();x.translate(gx,gy);x.strokeStyle="rgba(232,190,96,.9)";x.fillStyle="rgba(232,190,96,.85)";x.lineWidth=3;
-    x.beginPath();x.arc(0,0,18,0,7);x.stroke();x.beginPath();x.arc(0,0,7,0,7);x.fill();for(let i=0;i<12;i++){const a=i/12*Math.PI*2;x.beginPath();x.moveTo(Math.cos(a)*24,Math.sin(a)*24);x.lineTo(Math.cos(a)*(i%2?32:40),Math.sin(a)*(i%2?32:40));x.stroke()}
-    x.strokeStyle="rgba(60,40,20,.5)";x.lineWidth=1;x.beginPath();x.arc(1,1,19,0,7);x.stroke();x.restore()}
-  return c})();
-// herbe de la Faille : touffes, brins, terre battue
-const GRASS=(()=>{const nz=tileNoise(7);const {c,x}=paint(d=>{for(let y=0;y<GT;y++)for(let X=0;X<GT;X++){const n=fbmT(nz,X,y);let c=lerpC([46,82,36],[92,132,56],clamp(n*1.3-.15,0,1));
-    if(n<.33)c=lerpC(c,[104,84,52],clamp((.33-n)*6,0,.85));px(d,(y*GT+X)*4,c)}});
-  for(let i=0;i<9000;i++){const X=Math.random()*GT,y=Math.random()*GT,l=4+Math.random()*7,a=-Math.PI/2+rnd(-.5,.5),g=Math.random();x.strokeStyle=g<.5?"rgba(120,170,70,.55)":g<.85?"rgba(40,80,30,.55)":"rgba(170,200,100,.5)";
-    x.lineWidth=1.2;x.beginPath();x.moveTo(X,y);x.lineTo(X+Math.cos(a)*l,y+Math.sin(a)*l);x.stroke();
-    for(const [ox,oy] of [[GT,0],[-GT,0],[0,GT],[0,-GT]])if(X+ox>-10&&X+ox<GT+10&&y+oy>-10&&y+oy<GT+10){x.beginPath();x.moveTo(X+ox,y+oy);x.lineTo(X+ox+Math.cos(a)*l,y+oy+Math.sin(a)*l);x.stroke()}}
-  return c})();
-// sol du Néant : roche sombre et veines violettes lumineuses (la lueur est dans une seconde texture)
-const VOIDT=(()=>{const nz=tileNoise(13);const base=paint(d=>{for(let y=0;y<GT;y++)for(let X=0;X<GT;X++){const n=fbmT(nz,X,y);px(d,(y*GT+X)*4,lerpC([22,10,34],[70,30,96],clamp(n*1.4-.25,0,1)))}});
-  const e=document.createElement("canvas");e.width=e.height=GT;const ex=e.getContext("2d");ex.fillStyle="#000";ex.fillRect(0,0,GT,GT);
-  const vein=(ctx,w,col,blur)=>{ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineCap="round";ctx.shadowColor=col;ctx.shadowBlur=blur;
-    let seed=42;const R=()=>{seed=(seed*9301+49297)%233280;return seed/233280};
-    const br=(X,y,a,l,wd,dep)=>{if(dep>5||l<6)return;let cx=X,cy=y;ctx.lineWidth=wd;ctx.beginPath();ctx.moveTo(cx,cy);for(let s=0;s<6;s++){a+=(R()-.5)*.9;cx+=Math.cos(a)*l/6;cy+=Math.sin(a)*l/6;ctx.lineTo(cx,cy)}
-      for(const [ox,oy] of [[0,0]])ctx.stroke();br(cx,cy,a+(R()-.5)*.8,l*.8,wd*.75,dep+1);if(R()<.6)br(cx,cy,a+(R()<.5?1:-1)*(.6+R()*.6),l*.6,wd*.6,dep+1)};
-    for(let k=0;k<9;k++){const X=R()*GT,y=R()*GT,a=R()*6;for(const [ox,oy] of [[0,0],[GT,0],[-GT,0],[0,GT],[0,-GT]]){seed=1000+k*77;br(X+ox,y+oy,a,90,4,0)}}};
-  vein(ex,4,"#c060ff",10);vein(base.x,3,"rgba(190,90,255,.8)",6);return {c:base.c,e}})();
+const ramp=(cs,t)=>{t=clamp(t,0,1)*(cs.length-1);const i=Math.min(cs.length-2,Math.floor(t));return lerpC(cs[i],cs[i+1],t-i)};
+function canvasPaint(S,pix,brush){const c=document.createElement("canvas");c.width=c.height=S;const x=c.getContext("2d"),img=x.createImageData(S,S),d=img.data;
+  for(let y=0;y<S;y++)for(let X=0;X<S;X++){const o=(y*S+X)*4,col=pix(X,y);d[o]=col[0];d[o+1]=col[1];d[o+2]=col[2];d[o+3]=255}
+  x.putImageData(img,0,0);if(brush)brush(x,S);return c}
+// coup de pinceau répété aux bords pour que la tuile reste sans couture
+function wrapDraw(S,x0,y0,r,fn){for(const ox of [-S,0,S])for(const oy of [-S,0,S])if(x0+ox>-r&&x0+ox<S+r&&y0+oy>-r&&y0+oy<S+r)fn(x0+ox,y0+oy)}
+let PSEED=7;const prand=()=>{PSEED=(PSEED*16807)%2147483647;return PSEED/2147483647};
+
+// sable : grandes taches peintes, rides du vent, grains
+const SAND=(()=>{const S=512,nz=tnoise(3,S),nz2=tnoise(11,S),nz3=tnoise(17,S);PSEED=11;
+  return canvasPaint(S,(x,y)=>{const n=fbmT(nz,x,y,[3,6,12,24]),m=fbmT(nz2,x,y,[2,4,8]),g=nz3(x,y,128);
+    const rip=Math.sin((x*.6+y*.8+n*140)/S*Math.PI*2*18)*.5+.5;let c=ramp([[176,132,82],[206,164,106],[228,192,134],[240,212,160]],n*.95+(m-.5)*.5+rip*.12);
+    c=lerpC(c,[150,108,66],Math.max(0,.5-g)*.25);return c},
+  (x,S)=>{for(let i=0;i<900;i++){const X=prand()*S,Y=prand()*S,r=6+prand()*26,a=prand()*3.14,l=prand();
+      x.fillStyle=l<.5?`rgba(250,226,176,${.05+prand()*.07})`:`rgba(150,104,60,${.04+prand()*.06})`;
+      wrapDraw(S,X,Y,r*2,(X,Y)=>{x.beginPath();x.ellipse(X,Y,r*1.8,r*.6,a,0,7);x.fill()})}
+    for(let i=0;i<500;i++){const X=prand()*S,Y=prand()*S,r=.8+prand()*1.6;x.fillStyle=prand()<.6?"rgba(110,78,46,.55)":"rgba(255,240,205,.6)";x.beginPath();x.arc(X,Y,r,0,7);x.fill()}})})();
+
+// terre battue des chemins : cailloux éclairés en haut à gauche
+const DIRT=(()=>{const S=512,nz=tnoise(23,S),nz2=tnoise(29,S);PSEED=23;
+  return canvasPaint(S,(x,y)=>{const n=fbmT(nz,x,y,[4,8,16,32]),m=fbmT(nz2,x,y,[8,16,64]);return ramp([[92,66,44],[122,90,60],[152,116,78],[170,134,92]],n*.9+(m-.5)*.6)},
+  (x,S)=>{for(let i=0;i<420;i++){const X=prand()*S,Y=prand()*S,r=1.5+prand()*prand()*7,a=prand()*3,t=prand();
+      wrapDraw(S,X,Y,r*2,(X,Y)=>{x.fillStyle=`rgba(40,26,14,.35)`;x.beginPath();x.ellipse(X+r*.35,Y-r*.35,r,r*.75,a,0,7);x.fill();
+        x.fillStyle=t<.5?"rgb(150,128,104)":t<.8?"rgb(124,104,84)":"rgb(176,150,120)";x.beginPath();x.ellipse(X,Y,r,r*.75,a,0,7);x.fill();
+        x.fillStyle="rgba(255,240,215,.35)";x.beginPath();x.ellipse(X-r*.3,Y+r*.3,r*.45,r*.3,a,0,7);x.fill()})}
+    x.strokeStyle="rgba(60,40,24,.45)";x.lineCap="round";for(let k=0;k<10;k++){let X=prand()*S,Y=prand()*S,a=prand()*6;x.lineWidth=1+prand();x.beginPath();x.moveTo(X,Y);for(let s=0;s<7;s++){a+=(prand()-.5)*1.2;X+=Math.cos(a)*7;Y+=Math.sin(a)*7;x.lineTo(X,Y)}x.stroke()}})})();
+
+// herbe de la Faille : touffes claires et sombres, brins, petites fleurs
+const GRASS=(()=>{const S=512,nz=tnoise(7,S),nz2=tnoise(31,S);PSEED=31;
+  return canvasPaint(S,(x,y)=>{const n=fbmT(nz,x,y,[4,8,16,32]),m=fbmT(nz2,x,y,[16,32,64]);return ramp([[34,66,38],[52,94,44],[82,124,52],[122,154,66]],n*.85+(m-.5)*.55)},
+  (x,S)=>{for(let i=0;i<260;i++){const X=prand()*S,Y=prand()*S,r=8+prand()*22;x.fillStyle=prand()<.55?`rgba(150,190,80,${.06+prand()*.07})`:`rgba(20,46,26,${.08+prand()*.08})`;
+      wrapDraw(S,X,Y,r,(X,Y)=>{x.beginPath();x.arc(X,Y,r,0,7);x.fill()})}
+    x.lineCap="round";for(let i=0;i<11000;i++){const X=prand()*S,Y=prand()*S,l=3+prand()*7,a=-Math.PI/2+(prand()-.5)*1.1,g=prand();
+      x.strokeStyle=g<.45?"rgba(126,172,70,.6)":g<.8?"rgba(30,64,32,.55)":"rgba(186,210,110,.55)";x.lineWidth=.8+prand()*.9;
+      wrapDraw(S,X,Y,12,(X,Y)=>{x.beginPath();x.moveTo(X,Y);x.quadraticCurveTo(X+Math.cos(a)*l*.5+1.5,Y+Math.sin(a)*l*.5,X+Math.cos(a)*l,Y+Math.sin(a)*l);x.stroke()})}
+    for(let i=0;i<70;i++){const X=prand()*S,Y=prand()*S,c=prand()<.5?"#fff6d8":prand()<.5?"#ffd75e":"#c8b8ff";for(let k=0;k<4;k++){x.fillStyle=c;x.beginPath();x.arc(X+Math.cos(k*1.57)*1.6,Y+Math.sin(k*1.57)*1.6,1.3,0,7);x.fill()}
+      x.fillStyle="#e8a030";x.beginPath();x.arc(X,Y,.9,0,7);x.fill()}})})();
+
+// dalles d'Icathia : pierres irrégulières (Voronoï), arêtes éclairées, joints ensablés, fissures, dalles manquantes
+const STONE=(()=>{const S=1024,G=8,cs=S/G,nz=tnoise(5,S),nz2=tnoise(41,S);PSEED=5;const P=[];
+  for(let j=0;j<G;j++)for(let i=0;i<G;i++)P.push([(i+.15+prand()*.7)*cs,(j+.15+prand()*.7)*cs,prand(),prand()]);
+  const near=(x,y)=>{const ci=Math.floor(x/cs),cj=Math.floor(y/cs);let d1=1e9,d2=1e9,b=null,bx=0,by=0;
+    for(let dj=-1;dj<=1;dj++)for(let di=-1;di<=1;di++){const ii=ci+di,jj=cj+dj,w=((ii%G)+G)%G,h=((jj%G)+G)%G,p=P[h*G+w],px=p[0]+(ii-w)*cs,py=p[1]+(jj-h)*cs,d=Math.hypot(x-px,y-py);
+      if(d<d1){d2=d1;d1=d;b=p;bx=px;by=py}else if(d<d2)d2=d}return [d1,d2,b,bx,by]};
+  return canvasPaint(S,(x,y)=>{const [d1,d2,p,px,py]=near(x,y),e=(d2-d1)/2,n=fbmT(nz,x,y,[8,16,32,64]),g=nz2(x,y,256);
+    if(p[3]<.05){return ramp([[150,110,68],[196,156,100]],n)}                       // dalle manquante : sable
+    if(e<3.2)return lerpC([86,62,40],[122,92,60],n);                                 // joint
+    let c=ramp([[158,120,80],[188,148,98],[212,174,120],[226,194,140]],p[2]*.65+n*.55-.08);
+    c=lerpC(c,[120,90,60],Math.max(0,.45-g)*.5);
+    if(e<12){const k=1-(e-3.2)/8.8,dx=(x-px)/(d1||1),dy=(y-py)/(d1||1),L=dx*-.7+dy*.7;c=L>0?lerpC(c,[244,218,170],k*L*.55):lerpC(c,[78,56,36],k*-L*.6)}
+    return c},
+  (x,S)=>{x.lineCap="round";for(let k=0;k<70;k++){let X=prand()*S,Y=prand()*S,a=prand()*6;x.strokeStyle="rgba(70,48,28,.7)";x.lineWidth=.8+prand()*1.4;x.beginPath();x.moveTo(X,Y);
+      const n=3+Math.floor(prand()*6);for(let s=0;s<n;s++){a+=(prand()-.5)*1.3;X+=Math.cos(a)*8;Y+=Math.sin(a)*8;x.lineTo(X,Y)}x.stroke();
+      x.strokeStyle="rgba(250,226,180,.25)";x.lineWidth=.8;x.stroke()}
+    for(let i=0;i<300;i++){const X=prand()*S,Y=prand()*S,r=8+prand()*24;x.fillStyle=prand()<.5?`rgba(255,236,190,${.04+prand()*.05})`:`rgba(90,62,36,${.05+prand()*.06})`;x.beginPath();x.arc(X,Y,r,0,7);x.fill()}})})();
+
+// sol du Néant : roche violette, veines lumineuses (la lueur est dans une seconde texture)
+const VOIDT=(()=>{const S=512,nz=tnoise(13,S),nz2=tnoise(47,S);
+  const base=canvasPaint(S,(x,y)=>{const n=fbmT(nz,x,y,[4,8,16,32]),m=nz2(x,y,32);return ramp([[16,8,26],[38,16,58],[72,30,100],[96,48,130]],n*1.1-.12+(m-.5)*.25)});
+  const e=document.createElement("canvas");e.width=e.height=S;const ex=e.getContext("2d");ex.fillStyle="#000";ex.fillRect(0,0,S,S);
+  const vein=(ctx,col,blur,w0)=>{ctx.strokeStyle=col;ctx.lineCap="round";ctx.shadowColor=col;ctx.shadowBlur=blur;let seed=42;const R=()=>{seed=(seed*9301+49297)%233280;return seed/233280};
+    const br=(X,y,a,l,wd,dep)=>{if(dep>5||l<6)return;let cx=X,cy=y;ctx.lineWidth=wd;ctx.beginPath();ctx.moveTo(cx,cy);for(let s=0;s<6;s++){a+=(R()-.5)*.9;cx+=Math.cos(a)*l/6;cy+=Math.sin(a)*l/6;ctx.lineTo(cx,cy)}ctx.stroke();
+      br(cx,cy,a+(R()-.5)*.8,l*.8,wd*.75,dep+1);if(R()<.6)br(cx,cy,a+(R()<.5?1:-1)*(.6+R()*.6),l*.6,wd*.6,dep+1)};
+    for(let k=0;k<9;k++){const X=R()*S,y=R()*S,a=R()*6;for(const [ox,oy] of [[0,0],[S,0],[-S,0],[0,S],[0,-S]]){seed=1000+k*77;br(X+ox,y+oy,a,90,w0,0)}}};
+  vein(ex,"#c060ff",10,4);vein(base.getContext("2d"),"rgba(190,90,255,.8)",6,3);return {c:base,e}})();
+
 function gTex(c){const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=8;t.minFilter=THREE.LinearMipMapLinearFilter;return t}
-const GU={tSand:{value:gTex(SAND)},tStone:{value:gTex(STONE)},tGrass:{value:gTex(GRASS)},tVoid:{value:gTex(VOIDT.c)},tVoidE:{value:gTex(VOIDT.e)},uTime:{value:0},uVoid:{value:.15}};
-const groundMat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.95,metalness:0});
-groundMat.onBeforeCompile=sh=>{Object.assign(sh.uniforms,GU);
-  sh.vertexShader=sh.vertexShader.replace("#include <common>","#include <common>\nvarying vec3 vWP;").replace("#include <fog_vertex>","#include <fog_vertex>\nvWP=(modelMatrix*vec4(transformed,1.0)).xyz;");
-  sh.fragmentShader=sh.fragmentShader.replace("#include <common>",`#include <common>
-varying vec3 vWP;uniform sampler2D tSand,tStone,tGrass,tVoid,tVoidE;uniform float uTime,uVoid;
+const GU={tSand:{value:gTex(SAND)},tStone:{value:gTex(STONE)},tGrass:{value:gTex(GRASS)},tDirt:{value:gTex(DIRT)},tVoid:{value:gTex(VOIDT.c)},tVoidE:{value:gTex(VOIDT.e)},uTime:{value:0},uVoid:{value:.15},uBright:{value:.8}};
+const groundMat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.95,metalness:0});groundMat.extensions={derivatives:true};
+// répartition des matières (la même formule sert au décor, côté JavaScript)
+const GROUND_GLSL=`
 float h21(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
 float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h21(i),h21(i+vec2(1,0)),f.x),mix(h21(i+vec2(0,1)),h21(i+vec2(1,1)),f.x),f.y);}
 float fbm(vec2 p){float s=0.,a=.5;for(int i=0;i<4;i++){s+=vn(p)*a;p*=2.03;a*=.5;}return s;}
+float mStone(vec2 P){float d=fbm(P*.021);return max(smoothstep(.52,.545,fbm(P*.0011)+(d-.5)*.07),1.-smoothstep(520.,700.,length(P)+(d-.5)*60.));}
+float mGrass(vec2 P){float d=fbm(P*.017+vec2(3.,7.));return smoothstep(.6,.625,fbm(P*.0007+vec2(37.,11.))+(d-.5)*.06);}
+float mDirt(vec2 P){float d=fbm(P*.015+vec2(9.,2.));return smoothstep(.042,.026,abs(fbm(P*.0008+vec2(5.,9.))-.5)+(d-.5)*.03);}
+`;
+groundMat.onBeforeCompile=sh=>{Object.assign(sh.uniforms,GU);
+  sh.vertexShader=sh.vertexShader.replace("#include <common>","#include <common>\nvarying vec3 vWP;").replace("#include <fog_vertex>","#include <fog_vertex>\nvWP=(modelMatrix*vec4(transformed,1.0)).xyz;");
+  sh.fragmentShader=sh.fragmentShader.replace("#include <common>",`#include <common>
+varying vec3 vWP;uniform sampler2D tSand,tStone,tGrass,tDirt,tVoid,tVoidE;uniform float uTime,uVoid,uBright;
+${GROUND_GLSL}
 vec3 lin(vec3 c){return pow(c,vec3(2.2));}
-float wStone,wGrass,wVoid;`).replace("#include <map_fragment>",`
-  vec2 P=vWP.xz;float n1=fbm(P*.0011),n2=fbm(P*.0007+vec2(37.,11.)),n3=fbm(P*.0013+vec2(-19.,53.));
-  wStone=max(smoothstep(.5,.58,n1),1.-smoothstep(520.,760.,length(P)));
-  wGrass=smoothstep(.6,.67,n2)*(1.-wStone*.8);
-  wVoid=smoothstep(.74-uVoid*.3,.8-uVoid*.3,n3);
-  vec3 sand=lin(texture2D(tSand,P/520.).rgb),stone=lin(texture2D(tStone,P/600.).rgb),grass=lin(texture2D(tGrass,P/420.).rgb),vo=lin(texture2D(tVoid,P/480.).rgb);
-  vec3 col=mix(sand,stone,wStone);col=mix(col,grass,wGrass);col=mix(col,vo,wVoid);
-  col*=(.82+.36*fbm(P*.004))*.68;
+// deux lectures tournées et décalées pour casser la répétition des tuiles
+vec3 anti(sampler2D t,vec2 uv,float k){vec3 a=texture2D(t,uv).rgb,b=texture2D(t,mat2(.8,-.6,.6,.8)*uv*.71+vec2(.37,.11)).rgb;return lin(mix(a,b,k));}
+float wStone,wGrass,wVoid,wDirt;`).replace("#include <map_fragment>",`
+  vec2 P=vWP.xz;
+  wStone=mStone(P);wGrass=mGrass(P)*(1.-wStone);wDirt=mDirt(P)*(1.-wStone)*(1.-wGrass*.6);
+  float n3=fbm(P*.0013+vec2(-19.,53.));wVoid=smoothstep(.74-uVoid*.3,.78-uVoid*.3,n3+(fbm(P*.02)-.5)*.05);
+  float mv=fbm(P*.0005+vec2(71.,3.));
+  vec3 sand=anti(tSand,P/520.,.45+.3*mv),stone=lin(texture2D(tStone,P/900.).rgb),grass=anti(tGrass,P/380.,.4),dirt=anti(tDirt,P/420.,.4),vo=lin(texture2D(tVoid,P/480.).rgb);
+  vec3 col=mix(sand,grass,wGrass);col=mix(col,dirt,wDirt);
+  // bordures peintes : herbe qui s'assombrit, terre qui s'enfonce, dalles qui débordent d'un liseré d'ombre
+  float eG=wGrass*(1.-wGrass)*4.,eD=wDirt*(1.-wDirt)*4.,eS=wStone*(1.-wStone)*4.;
+  col=mix(col,col*vec3(.55,.62,.5),eG*.55);col*=1.-eD*.18;
+  col=mix(col,stone,wStone);col*=1.-eS*.42;
+  col=mix(col,vo,wVoid);
+  // relief : la luminance et les masques font une hauteur, éclairée depuis le haut à gauche
+  float lu=dot(col,vec3(.3,.5,.2));float h=lu*1.6+wStone*.9-wDirt*.35+wGrass*.25;
+  vec2 gr=vec2(dFdx(h),dFdy(h));float sh=clamp(1.+(gr.x*.9-gr.y*.9)*2.2,.7,1.25);col*=sh;
+  // grandes variations de teinte et de lumière, comme sur la Faille
+  col*=mix(vec3(.9,.95,1.04),vec3(1.07,1.,.9),mv)*(.86+.28*fbm(P*.0021+vec2(13.,29.)));
+  col*=uBright;
   diffuseColor.rgb*=col;`).replace("#include <emissivemap_fragment>",`#include <emissivemap_fragment>
   totalEmissiveRadiance+=lin(texture2D(tVoidE,vWP.xz/480.).rgb)*wVoid*(.55+.45*sin(uTime*2.2+vWP.x*.004));`)};
+// même calcul en JavaScript (précision 32 bits comme le GPU) pour placer le décor sur la bonne matière
+const GJ=(()=>{const f=fr32,fract=v=>f(v-Math.floor(v));
+  const h21=(x,y)=>{x=fract(f(x*123.34));y=fract(f(y*456.21));const d=f(f(x*f(x+45.32))+f(y*f(y+45.32)));x=f(x+d);y=f(y+d);return fract(f(x*y))};
+  const vn=(x,y)=>{const i=Math.floor(x),j=Math.floor(y);let u=f(x-i),w=f(y-j);u=u*u*(3-2*u);w=w*w*(3-2*w);
+    const a=h21(i,j),b=h21(i+1,j),c=h21(i,j+1),d=h21(i+1,j+1);return (a+(b-a)*u)+((c+(d-c)*u)-(a+(b-a)*u))*w};
+  const fbm=(x,y)=>{let s=0,a=.5;for(let i=0;i<4;i++){s+=vn(x,y)*a;x=f(x*2.03);y=f(y*2.03);a*=.5}return s};
+  const ss=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
+  const stone=(x,z)=>{const d=fbm(x*.021,z*.021);return Math.max(ss(.52,.545,fbm(x*.0011,z*.0011)+(d-.5)*.07),1-ss(520,700,Math.hypot(x,z)+(d-.5)*60))};
+  const grass=(x,z)=>{const d=fbm(x*.017+3,z*.017+7);return ss(.6,.625,fbm(x*.0007+37,z*.0007+11)+(d-.5)*.06)};
+  const dirt=(x,z)=>{const d=fbm(x*.015+9,z*.015+2);return ss(.042,.026,Math.abs(fbm(x*.0008+5,z*.0008+9)-.5)+(d-.5)*.03)};
+  return {at(x,z){const s=stone(x,z),g=grass(x,z)*(1-s),d=dirt(x,z)*(1-s)*(1-g*.6);return {s,g,d}}}})();
 
 // ===================== Dessin 3D (three.js) =====================
 // La logique travaille en unités basse résolution ; le monde 3D les agrandit ×K (y du jeu = z du monde).
@@ -1270,8 +1331,6 @@ const goldGem=inst(new THREE.OctahedronGeometry(1,0),new THREE.MeshBasicMaterial
 const blockM=inst(new THREE.BoxGeometry(1,1,1),std(0xb08a5a,0,0,{roughness:.95,flatShading:true}),260);
 const colM=inst(new THREE.CylinderGeometry(.8,1,1,8),std(0xc29a66,0,0,{roughness:.9,flatShading:true}),120);
 const sealM=inst(new THREE.TorusGeometry(1,.08,6,24),std(0x2a0d44,0x9b4dff,.9),60,false);
-const bladeG=new THREE.ConeGeometry(1,1,4);bladeG.translate(0,.5,0);
-const bushM=inst(bladeG,std(0x2f6b4a,0x0a2a18,.3,{roughness:.8,flatShading:true}),700,true,true),bushFade=inst(bladeG,new THREE.MeshStandardMaterial({color:0x3f8b62,transparent:true,opacity:.35,depthWrite:false,flatShading:true}),300,false);
 const patchDisc=inst(new THREE.CircleGeometry(1,40),glow(0xffffff,.6,crackTex),80,false,true);patchDisc.geometry.rotateX(-Math.PI/2);
 const patchSoft=inst(new THREE.CircleGeometry(1,40),glow(0xffffff,.35,softTex),80,false,true);patchSoft.geometry.rotateX(-Math.PI/2);
 const rockM=inst(new THREE.DodecahedronGeometry(1,0),std(0x6b5a4a,0,0,{roughness:1,flatShading:true}),80,true,true);
@@ -1342,6 +1401,86 @@ const V=new THREE.Vector3();const toScreen=(x,y,z)=>{V.set(x,y,z).project(cam);r
 const FOG0=new THREE.Color(0x1c0c2e),HEMI0=new THREE.Color(0xffe3c0),GR0=new THREE.Color(0xffffff);
 const hideAll=(...arrs)=>arrs.forEach(a=>a.forEach(o=>{if(o instanceof Ribbon)o.hide();else (o.g||o).visible=false}));
 
+// ===================== Décor de la carte : rochers, ruines d'Icathia, touffes d'herbe, cailloux, sceaux solaires =====================
+// Placé de façon déterministe par case (même carte à chaque partie) et sur la bonne matière du sol (calcul GJ, identique au shader).
+// Purement décoratif : rien ne bloque les déplacements.
+function decorTex(w,h,draw){const c=document.createElement("canvas");c.width=w;c.height=h;draw(c.getContext("2d"),w,h);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=4;return t}
+// rocher : icosaèdre cabossé, couleurs peintes dans les sommets (dessus clair, base sombre)
+function rockGeo(seed,det=1){const g=new THREE.IcosahedronGeometry(1,det),P=g.attributes.position,v=new THREE.Vector3();let s=seed;const R=()=>{s=(s*16807)%2147483647;return s/2147483647};
+  const bumps=[...Array(6)].map(()=>[new THREE.Vector3(R()-.5,R()-.5,R()-.5).normalize(),.15+R()*.25]);
+  for(let i=0;i<P.count;i++){v.fromBufferAttribute(P,i);let k=1;for(const [d,a] of bumps)k+=Math.max(0,v.dot(d)-.4)*a;v.multiplyScalar(k);v.y=v.y<0?v.y*.35:v.y*.85;P.setXYZ(i,v.x,v.y,v.z)}
+  g.computeVertexNormals();const C=new Float32Array(P.count*3);
+  for(let i=0;i<P.count;i++){const y=P.getY(i),t=clamp((y+.2)/1.1,0,1),n=.92+R()*.16;C[i*3]=(.15+.33*t)*n;C[i*3+1]=(.11+.25*t)*n;C[i*3+2]=(.075+.16*t)*n}
+  g.setAttribute("color",new THREE.BufferAttribute(C,3));return g}
+const rockMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.95,metalness:0,flatShading:true});
+const decRocks=[rockGeo(11),rockGeo(23),rockGeo(37)].map(g=>inst(g,rockMat,220,true,true));
+const pebM=inst(rockGeo(51,0),rockMat,500,false,true);
+// grès sculpté des ruines : assises, cannelures, bandeau doré
+const sandstoneTex=decorTex(256,256,(x,w,h)=>{x.fillStyle="#c9a06a";x.fillRect(0,0,w,h);
+  for(let i=0;i<1400;i++){x.fillStyle=Math.random()<.5?"rgba(240,214,160,.18)":"rgba(110,78,44,.16)";x.beginPath();x.arc(Math.random()*w,Math.random()*h,1+Math.random()*5,0,7);x.fill()}
+  x.fillStyle="rgba(90,62,34,.55)";for(let y=0;y<h;y+=64)x.fillRect(0,y,w,3);for(let i=0;i<w;i+=32){x.fillStyle="rgba(100,70,40,.35)";x.fillRect(i,0,2,h);x.fillStyle="rgba(250,226,180,.25)";x.fillRect(i+2,0,2,h)}
+  x.strokeStyle="rgba(70,46,26,.6)";x.lineWidth=1.5;for(let k=0;k<6;k++){let X=Math.random()*w,Y=Math.random()*h;x.beginPath();x.moveTo(X,Y);for(let s=0;s<5;s++){X+=(Math.random()-.5)*20;Y+=8;x.lineTo(X,Y)}x.stroke()}});
+sandstoneTex.wrapS=sandstoneTex.wrapT=THREE.RepeatWrapping;
+const ruinMat=new THREE.MeshStandardMaterial({map:sandstoneTex,roughness:.9,metalness:0});
+const ruinGold=new THREE.MeshStandardMaterial({color:0xd8a845,roughness:.35,metalness:.8,emissive:0x3a2400,emissiveIntensity:.4});
+const stumpG=new THREE.CylinderGeometry(.9,1,1,10,1);stumpG.translate(0,.5,0);
+{const P=stumpG.attributes.position;for(let i=0;i<P.count;i++)if(P.getY(i)>.99)P.setY(i,1-Math.random()*.35);stumpG.computeVertexNormals()}   // cassure irrégulière
+const stumpM=inst(stumpG,ruinMat,70),ringM=inst(new THREE.CylinderGeometry(1.05,1.05,.07,14,1,true),ruinGold,70,false);
+const drumG=new THREE.CylinderGeometry(1,1,1,10,1);drumG.rotateZ(Math.PI/2);const drumM=inst(drumG,ruinMat,90);
+const blockG=new THREE.BoxGeometry(1,1,1,1,1,1);const blockM2=inst(blockG,ruinMat,140);
+// sceau solaire doré incrusté dans les dalles
+const sunTex=decorTex(256,256,(x,w)=>{x.translate(w/2,w/2);x.strokeStyle="rgba(240,196,96,1)";x.fillStyle="rgba(240,196,96,1)";x.lineWidth=7;
+  x.beginPath();x.arc(0,0,58,0,7);x.stroke();x.beginPath();x.arc(0,0,24,0,7);x.fill();
+  for(let i=0;i<16;i++){const a=i/16*Math.PI*2,r1=72,r2=i%2?96:120;x.lineWidth=i%2?5:8;x.beginPath();x.moveTo(Math.cos(a)*r1,Math.sin(a)*r1);x.lineTo(Math.cos(a)*r2,Math.sin(a)*r2);x.stroke()}
+  x.lineWidth=3;x.beginPath();x.arc(0,0,40,0,7);x.stroke()});
+const sunDiscM=inst(new THREE.PlaneGeometry(1,1),new THREE.MeshStandardMaterial({map:sunTex,transparent:true,depthWrite:false,roughness:.4,metalness:.7,emissive:0x3a2600,emissiveMap:sunTex,emissiveIntensity:.6,polygonOffset:true,polygonOffsetFactor:-2}),40,false);
+sunDiscM.geometry.rotateX(-Math.PI/2);sunDiscM.receiveShadow=true;
+// touffes d'herbe (trois cartes croisées) : vertes sur l'herbe, sèches sur le sable
+const tuftTex=decorTex(128,128,(x,w,h)=>{x.lineCap="round";for(let i=0;i<26;i++){const bx=w/2+(Math.random()-.5)*w*.5,a=(Math.random()-.5)*1.1,l=h*(.5+Math.random()*.45);
+  const g=x.createLinearGradient(0,h,0,h-l);g.addColorStop(0,"rgba(38,58,28,1)");g.addColorStop(1,"rgba(176,198,104,1)");x.strokeStyle=g;x.lineWidth=3+Math.random()*3;
+  x.beginPath();x.moveTo(bx,h);x.quadraticCurveTo(bx+Math.sin(a)*l*.4,h-l*.6,bx+Math.sin(a)*l,h-l*Math.cos(a));x.stroke()}});
+const tuftG=(()=>{const gs=[0,1,2].flatMap(i=>{const g=new THREE.PlaneGeometry(1,1);g.translate(0,.5,0);g.rotateY(i*Math.PI/3);const b=g.clone();const ix=b.index.array;for(let k=0;k<ix.length;k+=3){const t=ix[k];ix[k]=ix[k+1];ix[k+1]=t}return [g,b]});
+  const pos=[],uv=[],idx=[];let o=0;for(const g of gs){pos.push(...g.attributes.position.array);uv.push(...g.attributes.uv.array);idx.push(...[...g.index.array].map(v=>v+o));o+=g.attributes.position.count}
+  const G2=new THREE.BufferGeometry();G2.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));G2.setAttribute("uv",new THREE.Float32BufferAttribute(uv,2));G2.setIndex(idx);G2.computeVertexNormals();
+  const N=G2.attributes.normal;for(let i=0;i<N.count;i++)N.setXYZ(i,0,1,0);return G2})();   // normales vers le ciel : éclairage doux comme une touffe peinte
+const tuftM=inst(tuftG,new THREE.MeshStandardMaterial({map:tuftTex,alphaTest:.45,side:THREE.FrontSide,roughness:1}),1400,false,true);
+// une case de décor est calculée une fois puis gardée
+const DC=170,decorCache=new Map();
+function decorCell(i,j){const key=i+":"+j;let L=decorCache.get(key);if(L)return L;L=[];if(decorCache.size>6000)decorCache.clear();
+  const H=s=>h2(i,j,60+s);
+  for(let k=0;k<7;k++){const x=(i+H(k*3))*DC,z=(j+H(k*3+1))*DC,r=H(k*3+2);const m=GJ.at(x,z);if(Math.hypot(x,z+680)<170)continue;   // garde le marchand dégagé
+    if(m.s>.6){ // ruines sur les dalles
+      if(k===0&&r<.16)L.push({t:"stump",x,z,s:26+r*60,h:50+r*420,ry:r*40});
+      else if(k===1&&r<.14)L.push({t:"drum",x,z,s:24+r*40,l:50+r*160,ry:r*30});
+      else if(k===2&&r<.12)L.push({t:"block",x,z,w:50+r*160,h:22+r*90,d:40+r*120,ry:r*20,tilt:(r-.06)*1.2});
+      else if(k===3&&r<.05)L.push({t:"sun",x,z,s:110+r*900,ry:r*30});
+      else if(r<.3)L.push({t:"peb",x,z,s:3+r*14,ry:r*50,sh:r});}
+    else if(m.g>.55){ // herbe de la Faille : touffes, quelques rochers
+      if(r<.75)L.push({t:"tuft",x,z,s:22+r*32,ry:r*60,c:[.85+r*.2,1,.8]});else if(k<2&&r>.94)L.push({t:"rock",x,z,s:12+(r-.94)*400,ry:r*40,v:k});}
+    else if(m.d>.5){if(r<.6)L.push({t:"peb",x,z,s:3+r*9,ry:r*50,sh:r})}
+    else{ // sable : rochers en grappes, touffes sèches, cailloux
+      if(k<2&&r<.16){const n=1+Math.floor(r*18);for(let q=0;q<n;q++){const a=q*2.4+r*9,d=q?18+q*12:0;L.push({t:"rock",x:x+Math.cos(a)*d,z:z+Math.sin(a)*d,s:(q?9:18)+H(40+q)*(q?12:30),ry:a*3,v:(k+q)%3})}}
+      else if(r<.28)L.push({t:"tuft",x,z,s:16+r*40,ry:r*60,c:[1.35,1.05,.55]});else if(r<.5)L.push({t:"peb",x,z,s:3+r*7,ry:r*50,sh:r})}}
+  decorCache.set(key,L);return L}
+function drawDecor(PX,PZ){const n=[0,0,0],c={peb:0,stump:0,drum:0,block:0,sun:0,tuft:0};const R0=Math.ceil(camD*1.35/DC),gx=Math.floor(PX/DC),gz=Math.floor(PZ/DC);
+  for(let i=gx-R0;i<=gx+R0;i++)for(let j=gz-R0;j<=gz+R0;j++)for(const o of decorCell(i,j)){
+    if(o.t==="rock"){const M=decRocks[o.v];if(n[o.v]<220){put(M,n[o.v],o.x,o.s*.15,o.z,[o.s*1.15,o.s*.9,o.s],0,o.ry,0);M.setColorAt(n[o.v]++,tmpCol.setRGB(1,1,1))}}
+    else if(o.t==="peb"){if(c.peb<500){put(pebM,c.peb,o.x,o.s*.2,o.z,[o.s*1.3,o.s*.8,o.s],0,o.ry,0);pebM.setColorAt(c.peb++,tmpCol.setRGB(.9+o.sh*.3,.9+o.sh*.25,.9+o.sh*.2))}}
+    else if(o.t==="stump"){if(c.stump<70){put(stumpM,c.stump,o.x,0,o.z,[o.s,o.h,o.s],0,o.ry,0);if(o.h>110)put(ringM,c.stump,o.x,o.h*.62,o.z,[o.s,o.s,o.s],0,o.ry,0);else put(ringM,c.stump,o.x,-50,o.z,.01);c.stump++}}
+    else if(o.t==="drum"){if(c.drum<90)put(drumM,c.drum++,o.x,o.s,o.z,[o.l,o.s,o.s],0,o.ry,0)}
+    else if(o.t==="block"){if(c.block<140)put(blockM2,c.block++,o.x,o.h*.4,o.z,[o.w,o.h,o.d],o.tilt*.3,o.ry,o.tilt)}
+    else if(o.t==="sun"){if(c.sun<40)put(sunDiscM,c.sun++,o.x,.8,o.z,o.s,0,o.ry,0)}
+    else if(o.t==="tuft"){if(c.tuft<1400){put(tuftM,c.tuft,o.x,0,o.z,[o.s*1.1,o.s,o.s*1.1],0,o.ry,0);tuftM.setColorAt(c.tuft++,tmpCol.setRGB(...o.c))}}}
+  decRocks.forEach((M,k)=>M.count=n[k]);pebM.count=c.peb;stumpM.count=c.stump;ringM.count=c.stump;drumM.count=c.drum;blockM2.count=c.block;sunDiscM.count=c.sun;tuftM.count=c.tuft;
+  done(...decRocks,pebM,stumpM,ringM,drumM,blockM2,sunDiscM,tuftM)}
+// buissons façon Faille : longues feuilles larges, courbées vers l'extérieur
+const leafTex=decorTex(64,256,(x,w,h)=>{const g=x.createLinearGradient(0,h,0,0);g.addColorStop(0,"#0f3a33");g.addColorStop(.55,"#2f7a5c");g.addColorStop(1,"#8fd09a");
+  x.fillStyle=g;x.beginPath();x.moveTo(w*.5,0);x.bezierCurveTo(w*.95,h*.25,w*.92,h*.75,w*.6,h);x.lineTo(w*.4,h);x.bezierCurveTo(w*.08,h*.75,w*.05,h*.25,w*.5,0);x.fill();
+  x.strokeStyle="rgba(200,240,190,.45)";x.lineWidth=2;x.beginPath();x.moveTo(w*.5,h);x.quadraticCurveTo(w*.52,h*.5,w*.5,h*.04);x.stroke()});
+const leafG=(()=>{const g=new THREE.PlaneGeometry(1,1,1,4);g.translate(0,.5,0);const P=g.attributes.position;for(let i=0;i<P.count;i++){const y=P.getY(i);P.setZ(i,y*y*.45)}g.computeVertexNormals();return g})();
+const bushM=inst(leafG,new THREE.MeshStandardMaterial({map:leafTex,alphaTest:.4,side:THREE.DoubleSide,roughness:.85}),1100,true,true),
+  bushFade=inst(leafG,new THREE.MeshStandardMaterial({map:leafTex,transparent:true,opacity:.32,depthWrite:false,side:THREE.DoubleSide}),500,false);
+
 // ===================== Une image du jeu =====================
 function draw(){
   const cx=G?G.cx:0,cy=G?G.cy:0,sh=G&&G.shake>0?G.shake*18:0,PX=cx*K,PZ=cy*K,el=1.0,t=G?G.t:performance.now()/1000;
@@ -1355,18 +1494,13 @@ function draw(){
   if(G&&G.realm){scene.fog.color.lerp(tmpCol.set(0x0b3a33),.8);hemi.color.lerp(tmpCol.set(0x7dffd8),.5);ground.material.color.lerp(tmpCol.set(0x5a9a90),.6)}
   scene.background.copy(scene.fog.color).multiplyScalar(.6);
   const night=G&&G.mod.nuit;scene.fog.near=night?420:1100;scene.fog.far=night?1300:2700;
-  // décor
-  let nb=0,nc=0,ns=0;const C=200,R0=Math.ceil(camD*1.3/C),gx=Math.floor(PX/C),gz=Math.floor(PZ/C);
-  for(let i=gx-R0;i<=gx+R0;i++)for(let j=gz-R0;j<=gz+R0;j++){const h=Math.sin(i*127.1+j*311.7)*43758.5453,r=h-Math.floor(h),ox=i*C+(r*7919%C),oz=j*C+(r*104729%C);
-    if(r>.92&&nb<260){const s=18+(r*1000)%22;put(blockM,nb++,ox,s*.35,oz,[s*1.4,s*.7,s],0,r*9,0)}
-    else if(r<.02&&nc<120){const hh=30+r*5000;put(colM,nc++,ox,hh/2,oz,[16,hh,16],0,r*40,r<.01?.12:0)}
-    else if(r>.88&&r<.885&&ns<60)put(sealM,ns++,ox,1,oz,30,Math.PI/2,0,0)}
-  blockM.count=nb;colM.count=nc;sealM.count=ns;done(blockM,colM,sealM);
+  // décor : rochers, ruines, touffes, cailloux
+  drawDecor(PX,PZ);
   // buissons (une touffe de brins ; transparents quand un champion est caché dedans)
   {let n1=0,n2=0;const R=Math.ceil(VIEW()*1.2/BC),bi=Math.floor(cx/BC),bj=Math.floor(cy/BC);
     for(let i=bi-R;i<=bi+R;i++)for(let j=bj-R;j<=bj+R;j++){const b=bushAt(i,j);if(!b)continue;const hid=G&&G.ps.some(p=>!p.down&&(p.x-b.x)**2+(p.y-b.y)**2<b.r*b.r);
-      const nBl=Math.round(b.r*1.6);for(let k=0;k<nBl;k++){const a=k*2.399+i,rr=Math.sqrt((k+.5)/nBl)*b.r*K,x=b.x*K+Math.cos(a)*rr,z=b.y*K+Math.sin(a)*rr,hh=38+h2(i+k,j,5)*30,sw=Math.sin(t*1.6+k+i)*.08;
-        if(hid){if(n2<300)put(bushFade,n2++,x,0,z,[9,hh,9],sw,a,sw)}else if(n1<700){put(bushM,n1,x,0,z,[9,hh,9],sw,a,sw);bushM.setColorAt(n1++,tmpCol.setHSL(.40+h2(k,j,6)*.05,.45,.22+h2(i,k,7)*.1))}}}
+      const nBl=Math.round(b.r*2.6);for(let k=0;k<nBl;k++){const a=k*2.399+i,rr=Math.sqrt((k+.5)/nBl)*b.r*K*.85,x=b.x*K+Math.cos(a)*rr,z=b.y*K+Math.sin(a)*rr,hh=70+h2(i+k,j,5)*60*(1-rr/(b.r*K)*.5),sw=Math.sin(t*1.6+k+i)*.06,ry=Math.atan2(Math.cos(a),Math.sin(a))+(h2(k,i,8)-.5)*.6,wd=20+h2(j,k,9)*14;
+        if(hid){if(n2<500)put(bushFade,n2++,x,0,z,[wd,hh,wd],0,ry,sw)}else if(n1<1100){put(bushM,n1,x,0,z,[wd,hh,wd],0,ry,sw);bushM.setColorAt(n1++,tmpCol.setRGB(.85+h2(k,j,6)*.3,.9+h2(i,k,7)*.2,.85+h2(j,i,8)*.25))}}}
     bushM.count=n1;bushFade.count=n2;done(bushM,bushFade)}
   // terrain transformé
   {let nd=0,nsft=0,nr=0,ncr=0;if(RF){const R=Math.ceil(VIEW()*1.2/PC),pi=Math.floor(cx/PC),pj=Math.floor(cy/PC),T=G.terrain;
