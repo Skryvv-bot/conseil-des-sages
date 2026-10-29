@@ -80,7 +80,7 @@ export class ArenaRoom {
       this.conns.set(c.id, c);
       if (!this.host || !this.conns.has(this.host)) this.host = c.id;
       this.send(c, { t: "hi", id: c.id, room: this.room, game: this.game, arena: SIM.ARENA, flash: SIM.FLASH, champs: SIM.CHAMPS,
-        ...(TDG ? { td: { map: TD.MAP, lanes: TD.LANES, pads: TD.PADS, towers: TD.TOWERS, mons: TD.MONS, waves: TD.WAVES.length } } : {}) });
+        ...(TDG ? { td: { map: TD.MAP, lanes: TD.LANES, pads: TD.PADS, towers: TD.TOWERS, hero: TD.HERO, mons: TD.MONS, waves: TD.WAVES.length } } : {}) });
       this.lobby(); this.ensureLoop(); return;
     }
     if (!c.id) return;

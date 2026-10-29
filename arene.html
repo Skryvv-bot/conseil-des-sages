@@ -572,6 +572,7 @@ function onFx(e) {
     case "mace": rectFx(e[2], e[3], e[4], e[5], 180, 0x4fe0b0, .45); sparks(e[2] + Math.cos(e[4]) * 300, e[3] + Math.sin(e[4]) * 300, 0x4fe0b0, 10); break;
     case "grasp": rectFx(e[2], e[3], e[4], e[5], 140, 0x2fd08a, .4); break;
     case "realm": ringFx(PL.get(e[2])?.x ?? 0, PL.get(e[2])?.y ?? 0, 600, 0x4fe0b0, .8); break;
+    case "gshout": ringFx(e[2], e[3], e[4], 0xff5a5a, .6); discFx(e[2], e[3], e[4], 0xff3a3a, .5, .25); break;
     case "shout": { const p = PL.get(e[2]); if (p) ringFx(p.x, p.y, e[3], 0xff5a5a, .6); break; }
     case "rage": auraFx(e[2], 0xff3030, e[3], 95); break;
     case "gline": rectFx(e[2], e[3], e[4], e[5], 90, 0xffd27a, .35); break;

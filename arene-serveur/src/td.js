@@ -40,6 +40,9 @@ export const TOWERS = {
   sable: { name: "Soldats de sable", cost: [125, 110, 200], dmg: [11, 19, 32], range: [430, 460, 500], rate: [.42, .38, .34] },
   givre: { name: "Fleur de givre", cost: [100, 100, 170], dmg: [4, 7, 12], range: [380, 420, 470], rate: [.5, .5, .5], slow: [.65, .55, .45] },
 };
+// champions gardiens : achetés sur un emplacement, un exemplaire de chaque par partie, 3 par joueur au plus.
+// Ils lancent seuls leur sort rapide ; le niveau 3 débloque leur sort puissant.
+export const HERO = { name: "Champion gardien", cost: [300, 220, 350], range: 900, max: 3, mult: [1, 1.5, 2.2] };
 // monstres : pv, vitesse, rayon, or, dégâts au Nexus, dégâts aux champions
 export const MONS = {
   voidspawn: { hp: 40, spd: 170, r: 32, gold: 4, leak: 1, dmg: 6 },
@@ -139,7 +142,7 @@ function endGame(S, win) {
 export function cheat(S, P, m) { if (m.gold) P.gold += +m.gold || 0; if (m.wave && S.phase === "build") { S.wave = Math.max(0, (+m.wave || 1) - 1); S.phaseT = S.T + .3; } }
 export function action(S, P, m) {
   if (m.t === "go" && S.phase === "build") { P.ready = true; const all = [...S.players.values()].every(p => p.ready); if (all) S.phaseT = Math.min(S.phaseT, S.T + .5); S.E.push(["ready", P.id]); return; }
-  if (m.t === "b") return build(S, P, +m.pad, String(m.k));
+  if (m.t === "b") return m.k === "hero" ? buildHero(S, P, +m.pad, String(m.ch)) : build(S, P, +m.pad, String(m.k));
   if (m.t === "u") return upgrade(S, P, +m.pad);
   if (m.t === "sell") return sell(S, P, +m.pad);
 }
@@ -149,8 +152,17 @@ function build(S, P, pad, k) {
   P.gold -= c; P.built++; S.towers.set(pad, { id: S.uid++, pad, k, lvl: 0, owner: P.id, cd: 0, face: 0, spent: c });
   S.E.push(["tb", pad, k, P.id]);
 }
+function buildHero(S, P, pad, ch) {
+  if (!(S.phase === "build" || S.phase === "wave") || !PADS[pad] || S.towers.has(pad) || !CHAMPS[ch]) return;
+  const used = [...S.towers.values()].filter(t => t.k === "hero"); if (used.some(t => t.ch === ch)) return S.E.push(["msg", P.id, CHAMPS[ch] && ch + " défend déjà le Nexus"]);
+  if (used.filter(t => t.owner === P.id).length >= HERO.max) return S.E.push(["msg", P.id, `${HERO.max} champions gardiens au plus par joueur`]);
+  const c = HERO.cost[0]; if (P.gold < c) return S.E.push(["msg", P.id, "Pas assez d'or"]);
+  const [x, y] = PADS[pad]; P.gold -= c; P.built++;
+  S.towers.set(pad, { id: S.uid++, pad, k: "hero", ch, lvl: 0, owner: P.id, cd: 0, cq: S.T + 1, ce: 0, face: 0, spent: c, g: { id: "g" + pad, x, y, face: 0, st: {}, alive: true, r: 55 } });
+  S.E.push(["tb", pad, "hero", P.id, ch]);
+}
 function upgrade(S, P, pad) {
-  const T = S.towers.get(pad); if (!T || T.lvl >= 2) return; const c = TOWERS[T.k].cost[T.lvl + 1]; if (P.gold < c) return S.E.push(["msg", P.id, "Pas assez d'or"]);
+  const T = S.towers.get(pad); if (!T || T.lvl >= 2) return; const c = (T.k === "hero" ? HERO : TOWERS[T.k]).cost[T.lvl + 1]; if (P.gold < c) return S.E.push(["msg", P.id, "Pas assez d'or"]);
   P.gold -= c; T.lvl++; T.spent += c; S.E.push(["tu", pad, T.lvl, P.id]);
 }
 function sell(S, P, pad) {
@@ -268,6 +280,48 @@ const KITS = {
       const cone = o => { fx(S, "shellboom", Math.round(o.x), Math.round(o.y), +a.toFixed(3), 420); for (const m of alive(S)) { const dx = m.x - o.x, dy = m.y - o.y, al = dx * Math.cos(a) + dy * Math.sin(a), lat = Math.abs(-dx * Math.sin(a) + dy * Math.cos(a)); if (al > -40 && al < 420 && lat < 90 + al * .45) hurtMon(S, m, 45 * pw, P); } };
       shoot(S, P, "shell", a, { speed: 1900, range: 1000, w: 110, onHit: (m, p) => { hurtMon(S, m, 90 * pw, P); cone(p); }, onEnd: p => { if (!p.hit.size) cone(p); } }); }); } },
 };
+// sorts des gardiens : ils restent sur leur emplacement ; les ruées deviennent des impacts sur la cible
+const GK = {
+  Ashe: { q: [4, (S, G, a, x, y, M, o) => { for (let i = -3; i <= 3; i++) shoot(S, G, "arrow", a + i * .145, { speed: 1500, range: 1000, w: 50, onHit: m => { hurtMon(S, m, 16 * M, o); slowMon(S, m, .6, 1.5); } }); }],
+    e: [14, (S, G, a, x, y, M, o) => shoot(S, G, "crystal", a, { speed: 1400, range: 2200, w: 170, pierce: true, onHit: m => { hurtMon(S, m, 60 * M, o); stunMon(S, m, 1.5); fx(S, "frost", Math.round(m.x), Math.round(m.y), 200); } })] },
+  Diana: { q: [4, (S, G, a, x, y, M, o) => shoot(S, G, "moon", a, { speed: 1250, range: Math.max(200, hyp(x - G.x, y - G.y)), w: 80, pierce: true, onHit: m => hurtMon(S, m, 22 * M, o), onEnd: p => { fx(S, "moonburst", Math.round(p.x), Math.round(p.y), 190); monsIn(S, p.x, p.y, 190).forEach(m => hurtMon(S, m, 26 * M, o)); } })],
+    e: [10, (S, G, a, x, y, M, o) => { fx(S, "moonblast", Math.round(x), Math.round(y), 260); monsIn(S, x, y, 260).forEach(m => { hurtMon(S, m, 45 * M, o); stunMon(S, m, .6); }); }] },
+  Azir: { q: [4, (S, G, a, x, y, M, o) => { const len = Math.max(250, hyp(x - G.x, y - G.y)); fx(S, "tele", "rect", Math.round(G.x), Math.round(G.y), +a.toFixed(3), Math.round(len), 150, .35);
+      later(S, .35, () => { fx(S, "spears", Math.round(G.x), Math.round(G.y), +a.toFixed(3), Math.round(len)); for (const m of monsRect(S, G.x, G.y, a, len, 160)) { hurtMon(S, m, 34 * M, o); pushMon(S, m, 70); } }); }],
+    e: [15, (S, G, a, x, y, M, o) => { const cx = x, cy = y, px = -Math.sin(a), py = Math.cos(a), L = 280; fx(S, "wall", S.uid++, Math.round(cx + px * L), Math.round(cy + py * L), Math.round(cx - px * L), Math.round(cy - py * L), 3);
+      for (const m of monsIn(S, x, y, 330)) { hurtMon(S, m, 50 * M, o); pushMon(S, m, 300); stunMon(S, m, 1.5); } }] },
+  Gangplank: { q: [3, (S, G, a, x, y, M, o) => shoot(S, G, "bullet", a, { speed: 2000, range: 950, w: 60, onHit: m => hurtMon(S, m, 40 * M, o) })],
+    e: [15, (S, G, a, x, y, M, o) => S.areas.push({ id: S.uid++, kind: "barrage", owner: G.id, src: o, x, y, r: 400, until: S.T + 3, tick: S.T + .3, dmg: 11 * M })] },
+  Kled: { q: [5, (S, G, a, x, y, M, o) => shoot(S, G, "trap", a, { speed: 1400, range: 950, w: 85, onHit: m => { hurtMon(S, m, 26 * M, o); later(S, 1.6, () => { if (m.dead) return; hurtMon(S, m, 30 * M, o); stunMon(S, m, 1); pushMon(S, m, 200); }); } })],
+    e: [14, (S, G, a, x, y, M, o) => { fx(S, "charge", Math.round(x), Math.round(y), 240); monsIn(S, x, y, 240).forEach(m => { hurtMon(S, m, 60 * M, o); pushMon(S, m, 180); stunMon(S, m, .8); }); }] },
+  Galio: { q: [5, (S, G, a, x, y, M, o) => shoot(S, G, "wind", a, { speed: 1200, range: Math.max(200, hyp(x - G.x, y - G.y)), w: 90, pierce: true, onHit: m => hurtMon(S, m, 20 * M, o),
+      onEnd: p => S.areas.push({ id: S.uid++, kind: "tornado", owner: G.id, src: o, x: p.x, y: p.y, r: 230, until: S.T + 2, tick: S.T + .1, dmg: 8 * M }) })],
+    e: [10, (S, G, a, x, y, M, o) => { fx(S, "galioland", Math.round(x), Math.round(y), 240); monsIn(S, x, y, 240).forEach(m => { hurtMon(S, m, 40 * M, o); stunMon(S, m, 1); }); }] },
+  Mordekaiser: { q: [4.5, (S, G, a, x, y, M, o) => { fx(S, "tele", "rect", Math.round(G.x), Math.round(G.y), +a.toFixed(3), 700, 190, .5);
+      later(S, .5, () => { fx(S, "mace", Math.round(G.x), Math.round(G.y), +a.toFixed(3), 700); const hit = monsRect(S, G.x, G.y, a, 700, 200); hit.forEach(m => hurtMon(S, m, (hit.length === 1 ? 70 : 45) * M, o)); }); }],
+    e: [10, (S, G, a, x, y, M, o) => { fx(S, "tele", "rect", Math.round(G.x), Math.round(G.y), +a.toFixed(3), 800, 150, .6);
+      later(S, .6, () => { fx(S, "grasp", Math.round(G.x), Math.round(G.y), +a.toFixed(3), 800); for (const m of monsRect(S, G.x, G.y, a, 800, 160)) { hurtMon(S, m, 30 * M, o); stunMon(S, m, 1.4); pushMon(S, m, 150); } }); }] },
+  Tryndamere: { q: [4.5, (S, G, a, x, y, M, o) => { fx(S, "gline", Math.round(G.x), Math.round(G.y), +a.toFixed(3), 700); for (const m of monsRect(S, G.x, G.y, a, 700, 250)) hurtMon(S, m, 38 * M, o); }],
+    e: [16, (S, G, a, x, y, M, o) => { fx(S, "gshout", Math.round(G.x), Math.round(G.y), 520); G.rageU = S.T + 5; for (const m of monsIn(S, G.x, G.y, 520)) slowMon(S, m, .5, 2.5); }] },
+  Graves: { q: [4, (S, G, a, x, y, M, o) => { fx(S, "gline", Math.round(G.x), Math.round(G.y), +a.toFixed(3), 800); for (const m of monsRect(S, G.x, G.y, a, 800, 120)) hurtMon(S, m, 30 * M, o);
+      later(S, .9, () => { fx(S, "gboom", Math.round(G.x), Math.round(G.y), +a.toFixed(3), 800); for (const m of monsRect(S, G.x, G.y, a, 800, 130)) hurtMon(S, m, 24 * M, o); }); }],
+    e: [12, (S, G, a, x, y, M, o) => { const cone = p => { fx(S, "shellboom", Math.round(p.x), Math.round(p.y), +a.toFixed(3), 420); for (const m of alive(S)) { const dx = m.x - p.x, dy = m.y - p.y, al = dx * Math.cos(a) + dy * Math.sin(a), lat = Math.abs(-dx * Math.sin(a) + dy * Math.cos(a)); if (al > -40 && al < 420 && lat < 90 + al * .45) hurtMon(S, m, 40 * M, o); } };
+      shoot(S, G, "shell", a, { speed: 1900, range: 1100, w: 110, onHit: (m, p) => { hurtMon(S, m, 80 * M, o); cone(p); }, onEnd: p => { if (!p.hit.size) cone(p); } }); }] },
+};
+function stepHero(S, T) {
+  const G = T.g, M = HERO.mult[T.lvl] * (1 + .06 * Math.max(0, S.wave - 1)), owner = S.players.get(T.owner);
+  let best = null, bd = -1, near = 0; for (const m of S.mons) { if (m.dead) continue; if (hyp(m.x - G.x, m.y - G.y) > HERO.range + m.r * .5) continue; near++; const prog = m.d / LEN[m.lane].tot + (m.boss ? 1 : 0); if (prog > bd) { bd = prog; best = m; } }
+  if (!best) return;
+  // visée un peu en avance sur la cible
+  const lead = .35, [fx2, fy2] = lanePos(best.lane, best.d + best.spd * (best.st.stunU > S.T ? 0 : lead), best.off), a = Math.atan2(fy2 - G.y, fx2 - G.x); T.face = G.face = a;
+  const K = GK[T.ch];
+  if (T.lvl >= 2 && S.T >= T.ce && (near >= 3 || best.boss)) { T.ce = S.T + K.e[0]; T.cq = Math.max(T.cq, S.T + .8); S.E.push(["gcast", T.pad, "e", Math.round(fx2), Math.round(fy2)]); later(S, .15, () => { if (S.towers.get(T.pad) === T) K.e[1](S, G, a, fx2, fy2, M, owner); }); return; }
+  if (S.T >= T.cq) { T.cq = S.T + K.q[0] * (T.lvl === 1 ? .85 : T.lvl === 2 ? .75 : 1); S.E.push(["gcast", T.pad, "q", Math.round(fx2), Math.round(fy2)]); later(S, .15, () => { if (S.towers.get(T.pad) === T) K.q[1](S, G, a, fx2, fy2, M, owner); }); return; }
+  // attaque automatique entre deux sorts
+  if (S.T >= T.cd) { T.cd = S.T + (G.rageU > S.T ? .45 : 1); const [rng] = CHAMPS[T.ch].auto, m2 = hyp(best.x - G.x, best.y - G.y) < Math.max(rng, 500) + best.r ? best : null;
+    if (m2) { S.E.push(["aa", G.id, m2.id]); hurtMon(S, m2, CHAMPS[T.ch].auto[1] * M * (G.rageU > S.T ? 1.5 : 1), owner); } }
+}
+
 export function cast(S, P, k, x, y) {
   if (!(S.phase === "build" || S.phase === "wave") || !P.alive || !["q", "e", "f"].includes(k)) return false;
   if (P.st.stunU > S.T) return false; if (P.force && (k !== "f" || P.force.kind !== "dash")) return false; if (P.cd[k] > S.T + .05) return false;
@@ -314,10 +368,11 @@ export function step(S) {
   }
   stepProj(S);
   // zones (barrage, tornade)
-  for (const A of S.areas) if (S.T >= A.tick) { A.tick += A.kind === "barrage" ? .5 : .4; const owner = S.players.get(A.owner); for (const m of monsIn(S, A.x, A.y, A.r)) { hurtMon(S, m, A.dmg, owner); slowMon(S, m, A.kind === "barrage" ? .65 : .7, .6); } }
+  for (const A of S.areas) if (S.T >= A.tick) { A.tick += A.kind === "barrage" ? .5 : .4; const owner = A.src || S.players.get(A.owner); for (const m of monsIn(S, A.x, A.y, A.r)) { hurtMon(S, m, A.dmg, owner); slowMon(S, m, A.kind === "barrage" ? .65 : .7, .6); } }
   S.areas = S.areas.filter(A => A.until > S.T);
   // tourelles : visent le monstre le plus avancé à portée
   for (const T of S.towers.values()) {
+    if (T.k === "hero") { stepHero(S, T); continue; }
     const D = TOWERS[T.k], [px, py] = PADS[T.pad], rng = D.range[T.lvl], owner = S.players.get(T.owner);
     if (T.k === "givre") { if (S.T >= T.cd) { T.cd = S.T + D.rate[T.lvl]; for (const m of monsIn(S, px, py, rng)) { slowMon(S, m, D.slow[T.lvl], .7); hurtMon(S, m, D.dmg[T.lvl], owner); } } continue; }
     if (S.T < T.cd) continue;
@@ -346,7 +401,7 @@ export function snapshot(S) {
     M: S.mons.map(m => [m.id, m.type, r(m.x), r(m.y), r(m.hp), r(m.mhp), +m.face.toFixed(2), (m.st.slowU > S.T ? 1 : 0) | (m.st.stunU > S.T ? 2 : 0), m.sub || 0]),
     X: S.proj.map(p => [p.id, p.kind, r(p.x), r(p.y), r(p.vx), r(p.vy), p.owner]),
     A: S.areas.map(A => [A.id, A.kind, r(A.x), r(A.y), A.r, +(A.until - S.T).toFixed(2), A.owner]),
-    TW: [...S.towers.values()].map(T => [T.pad, T.k, T.lvl, T.owner, +T.face.toFixed(2)]),
+    TW: [...S.towers.values()].map(T => [T.pad, T.k, T.lvl, T.owner, +T.face.toFixed(2), T.ch || 0]),
     E: S.E.splice(0),
   };
 }
