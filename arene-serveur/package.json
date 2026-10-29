@@ -1,0 +1,8 @@
+{
+  "name": "cds-arene",
+  "private": true,
+  "type": "module",
+  "description": "Serveur temps réel de l'Arène de la Faille (Cloudflare Worker + Durable Objects)",
+  "scripts": { "dev": "wrangler dev --var DEV:1", "deploy": "wrangler deploy" },
+  "devDependencies": { "wrangler": "3.114.17" }
+}
