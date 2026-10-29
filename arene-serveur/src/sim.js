@@ -8,16 +8,19 @@ export const FLASH = { range: 400, cd: 15 };
 
 // caractéristiques : pv, vitesse, rayon ; sorts : temps de recharge (s) et portée (pour l'interface et les bots)
 export const CHAMPS = {
-  Ashe:        { hp: 100, spd: 330, rad: 55, q: { cd: 3.5, range: 1000 }, e: { cd: 10, range: 0 },   r: { cd: 28, range: 2600 } },
-  Diana:       { hp: 100, spd: 345, rad: 55, q: { cd: 4,   range: 850 },  e: { cd: 8,  range: 550 }, r: { cd: 24, range: 380 } },
-  Azir:        { hp: 100, spd: 335, rad: 55, q: { cd: 4.5, range: 850 },  e: { cd: 9,  range: 500 }, r: { cd: 26, range: 400 } },
-  Gangplank:   { hp: 110, spd: 340, rad: 58, q: { cd: 2.5, range: 700 },  e: { cd: 4,  range: 700 }, r: { cd: 26, range: 1600 } },
-  Kled:        { hp: 110, spd: 345, rad: 60, q: { cd: 6,   range: 800 },  e: { cd: 7,  range: 550 }, r: { cd: 30, range: 1500 } },
-  Galio:       { hp: 120, spd: 335, rad: 75, q: { cd: 5,   range: 825 },  e: { cd: 9,  range: 500 }, r: { cd: 30, range: 1500 } },
-  Mordekaiser: { hp: 120, spd: 330, rad: 70, q: { cd: 4.5, range: 600 },  e: { cd: 10, range: 700 }, r: { cd: 40, range: 650 } },
-  Tryndamere:  { hp: 100, spd: 350, rad: 55, q: { cd: 5,   range: 600 },  e: { cd: 10, range: 450 }, r: { cd: 40, range: 0 } },
-  Graves:      { hp: 100, spd: 330, rad: 55, q: { cd: 4,   range: 750 },  e: { cd: 6,  range: 400 }, r: { cd: 24, range: 1000 } },
+  Ashe:        { hp: 130, spd: 330, rad: 55, q: { cd: 3,   range: 1000 }, e: { cd: 14, range: 2600 } },
+  Diana:       { hp: 130, spd: 345, rad: 55, q: { cd: 3.5, range: 850 },  e: { cd: 7,  range: 550 } },
+  Azir:        { hp: 130, spd: 335, rad: 55, q: { cd: 3.5, range: 850 },  e: { cd: 14, range: 400 } },
+  Gangplank:   { hp: 140, spd: 340, rad: 58, q: { cd: 2.5, range: 700 },  e: { cd: 14, range: 1600 } },
+  Kled:        { hp: 140, spd: 345, rad: 60, q: { cd: 4,   range: 800 },  e: { cd: 14, range: 1500 } },
+  Galio:       { hp: 155, spd: 335, rad: 75, q: { cd: 4,   range: 825 },  e: { cd: 8,  range: 500 } },
+  Mordekaiser: { hp: 155, spd: 330, rad: 70, q: { cd: 4,   range: 600 },  e: { cd: 9,  range: 700 } },
+  Tryndamere:  { hp: 130, spd: 350, rad: 55, q: { cd: 4,   range: 600 },  e: { cd: 20, range: 0 } },
+  Graves:      { hp: 130, spd: 330, rad: 55, q: { cd: 3.5, range: 750 },  e: { cd: 12, range: 1000 } },
 };
+// quel sort du kit complet occupe chaque touche (Q = sort rapide, E = sort puissant)
+const SLOTS = { Ashe: { q: "q", e: "r" }, Diana: { q: "q", e: "e" }, Azir: { q: "q", e: "r" }, Gangplank: { q: "q", e: "r" }, Kled: { q: "q", e: "r" },
+  Galio: { q: "q", e: "e" }, Mordekaiser: { q: "q", e: "e" }, Tryndamere: { q: "q", e: "r" }, Graves: { q: "q", e: "r" } };
 export const CHAMP_IDS = Object.keys(CHAMPS);
 const WIND = 0.12;   // délai entre l'appui et l'effet : l'animation est calée pour frapper à ce moment
 
@@ -40,7 +43,7 @@ export function addPlayer(S, id, name, champ, bot = false) {
 export function setChamp(P, c) { if (CHAMPS[c]) P.champ = c; }
 function resetPlayer(S, P, x, y) {
   const C = CHAMPS[P.champ]; Object.assign(P, { x, y, hp: C.hp, mhp: C.hp, r: C.rad, spd: C.spd, alive: true, mv: null, to: null, st: {}, force: null, act: null, face: Math.atan2(-y, -x) });
-  P.cd = { q: S.T + 1, e: S.T + 1, r: S.T + 12, f: S.T + 3 };   // l'ultime se recharge en début de manche
+  P.cd = { q: S.T + 1, e: S.T + 6, f: S.T + 3 };   // le sort puissant se recharge en début de manche
 }
 
 // ---------- déroulé d'un match ----------
@@ -96,8 +99,8 @@ const fx = (S, ...a) => S.E.push(["fx", ...a]);
 
 // ---------- projectiles ----------
 function shoot(S, P, kind, ang, o) {
-  const p = { id: S.uid++, kind, owner: P.id, realm: P.st.realm || null, x: P.x + Math.cos(ang) * 40, y: P.y + Math.sin(ang) * 40, vx: Math.cos(ang) * o.speed, vy: Math.sin(ang) * o.speed,
-    w: o.w || 50, left: o.range, hit: new Set(), pierce: !!o.pierce, onHit: o.onHit, onEnd: o.onEnd, keg: o.keg !== false };
+  const p = { id: S.uid++, kind, owner: P.id, realm: P.st.realm || null, x: P.x + Math.cos(ang) * 40, y: P.y + Math.sin(ang) * 40, vx: Math.cos(ang) * o.speed * .82, vy: Math.sin(ang) * o.speed * .82,
+    w: (o.w || 50) * 1.25, left: o.range, hit: new Set(), pierce: !!o.pierce, onHit: o.onHit, onEnd: o.onEnd, keg: o.keg !== false };
   S.proj.push(p); return p;
 }
 function stepProj(S) {
@@ -215,7 +218,7 @@ function dashTo(S, P, tx, ty, speed, o = {}) {
 
 // lancement d'un sort par un joueur (Q, E, R ou F = Saut éclair)
 export function cast(S, P, k, x, y) {
-  if (S.phase !== "round" || !P.alive || !["q", "e", "r", "f"].includes(k)) return false;
+  if (S.phase !== "round" || !P.alive || !["q", "e", "f"].includes(k)) return false;
   if (P.st.stunU > S.T || P.st.chanU > S.T) return false;
   if (P.force && (k !== "f" || P.force.kind !== "dash")) return false;
   if (P.cd[k] > S.T + .05) return false;
@@ -225,7 +228,7 @@ export function cast(S, P, k, x, y) {
   const a = Math.atan2(ny, nx), r = range ? Math.min(d, range) : 0;
   let [tx, ty] = clampArena(P.x + nx * r, P.y + ny * r, P.r);
   if (k === "f") { P.force = null; [P.x, P.y] = clampArena(P.x + nx * Math.max(r, 120), P.y + ny * Math.max(r, 120), P.r); P.face = a; P.cd.f = S.T + FLASH.cd; S.E.push(["cast", P.id, "f", Math.round(P.x), Math.round(P.y)]); return true; }
-  const ok = KITS[P.champ][k](S, P, a, tx, ty);
+  const ok = KITS[P.champ][SLOTS[P.champ][k]](S, P, a, tx, ty);
   if (ok === false) return false;
   P.face = a; P.to = null; P.cd[k] = S.T + C[k].cd; P.act = { k, s: S.uid++ };
   S.E.push(["cast", P.id, k, Math.round(tx), Math.round(ty)]);
@@ -308,8 +311,7 @@ function botThink(S, P) {
     if (al > 0 && al < 550 && Math.abs(lat) < P.r + p.w / 2 + 30 && !(ai.miss && ai.miss.has(p.id))) { if (S.rand() < .45) { (ai.miss = ai.miss || new Set()).add(p.id); if (ai.miss.size > 60) ai.miss.clear(); continue; } const side = lat >= 0 ? 1 : -1; if (S.rand() < .2 && P.cd.f <= S.T) cast(S, P, "f", P.x + ny * side * 400, P.y - nx * side * 400); P.to = [P.x + ny * side * 260, P.y - nx * side * 260]; return; } }
   const pref = C.q.range * .75, [nx, ny] = norm(tgt.x - P.x, tgt.y - P.y);
   if (S.rand() < .35 && P.cd.q <= S.T && bd < C.q.range * 1.05) { cast(S, P, "q", P.aim[0], P.aim[1]); return; }
-  if (S.rand() < .1 && P.cd.r <= S.T && (C.r.range === 0 ? bd < 450 : bd < C.r.range)) { cast(S, P, "r", P.aim[0], P.aim[1]); return; }
-  if (S.rand() < .12 && P.cd.e <= S.T && bd < Math.max(C.e.range, 450) * 1.1) { cast(S, P, "e", P.aim[0], P.aim[1]); return; }
+  if (S.rand() < .12 && P.cd.e <= S.T && (C.e.range === 0 ? bd < 450 : bd < C.e.range)) { cast(S, P, "e", P.aim[0], P.aim[1]); return; }
   // garder la distance préférée, en tournant autour de la cible et en restant dans la zone
   const strafe = (P.id.charCodeAt(P.id.length - 1) % 2 ? 1 : -1) * 220, back = bd < pref * .7 ? -1 : bd > pref ? 1 : 0;
   let gx = P.x + nx * back * 250 - ny * strafe, gy = P.y + ny * back * 250 + nx * strafe;
@@ -323,7 +325,7 @@ export function snapshot(S) {
   return {
     t: "s", T: +S.T.toFixed(3), ph: S.phase, rd: S.round, rt: +S.rt.toFixed(2), zr: r(S.zr),
     P: [...S.players.values()].map(P => [P.id, r(P.x), r(P.y), +P.hp.toFixed(1), P.mhp, +P.face.toFixed(2), flags(S, P), r(P.st.shieldU > S.T ? P.st.shield : 0),
-      [P.cd.q, P.cd.e, P.cd.r, P.cd.f].map(c => +Math.max(0, c - S.T).toFixed(2)), P.st.realm || 0, P.force ? P.force.kind[0] : 0]),
+      [P.cd.q, P.cd.e, P.cd.f].map(c => +Math.max(0, c - S.T).toFixed(2)), P.st.realm || 0, P.force ? P.force.kind[0] : 0]),
     X: S.proj.map(p => [p.id, p.kind, r(p.x), r(p.y), r(p.vx), r(p.vy), p.owner]),
     A: S.areas.map(A => [A.id, A.kind, r(A.x), r(A.y), A.r, +(A.until - S.T).toFixed(2), A.owner]),
     E: S.E.splice(0),

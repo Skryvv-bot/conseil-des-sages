@@ -133,7 +133,7 @@ kbd{font:600 12px Inter;border:1px solid var(--gold);padding:1px 6px;border-radi
 .sl .fl{background:radial-gradient(circle at 50% 40%,#fff6a8,#e0a020 45%,#5a3a00);display:flex;align-items:center;justify-content:center;font:900 26px Inter;color:#fff;text-shadow:0 0 6px #000}
 .sl .cd{position:absolute;inset:0;background:conic-gradient(rgba(0,0,0,.72) var(--p,0%),transparent 0);display:flex;align-items:center;justify-content:center;font:800 18px Inter;color:#fff;text-shadow:0 1px 3px #000}
 .sl kbd{position:absolute;right:-6px;bottom:-8px;background:#010a13;font-size:11px}
-.sl.r{border-color:#f0e6d2}
+.sl.e{border-color:#f0e6d2}
 #tools{position:absolute;right:10px;bottom:12px;display:flex;flex-direction:column;gap:6px;pointer-events:auto}
 #tools button{width:34px;height:34px;background:rgba(1,10,19,.85);border:1px solid var(--gold);color:var(--gold2);font:700 16px Inter;cursor:pointer}
 #gchat{position:absolute;left:12px;bottom:12px;width:min(340px,40vw);pointer-events:auto}
@@ -169,7 +169,7 @@ body.host .btn.hostonly{display:inline-block}
     <a class="back" href="jeux.html">‹ Jeux du Conseil</a>
     <span class="eyebrow">Arène en ligne · 2 à 8 joueurs</span>
     <h1>Arène de la <em>Faille</em></h1>
-    <p class="lead">Chacun son champion, trois sorts et un Saut éclair. Esquive, touche, survis : le dernier debout gagne la manche, le premier à trois manches gagne le match.</p>
+    <p class="lead">Chacun son champion, deux sorts visés et un Saut éclair. Esquive, touche, survis : le dernier debout gagne la manche, le premier à trois manches gagne le match.</p>
     <p class="touchonly">Se joue sur ordinateur, au clavier et à la souris.</p>
     <label class="field"><span>Ton pseudo</span><input id="pseudo" maxlength="18" autocomplete="nickname" placeholder="Pseudo"></label>
     <h2>Salons publics</h2>
@@ -183,7 +183,8 @@ body.host .btn.hostonly{display:inline-block}
     <details class="help"><summary>Commandes</summary>
       <ul>
         <li><b>Clic droit</b> (maintenu) : se déplacer · <b>Flèches</b> : se déplacer aussi</li>
-        <li><b><kbd data-k="KeyQ">Q</kbd></b> <b><kbd data-k="KeyE">E</kbd></b> <b><kbd data-k="KeyR">R</kbd></b> : sorts lancés vers la souris · <b><kbd data-k="KeyF">F</kbd></b> ou <b><kbd data-k="KeyD">D</kbd></b> : Saut éclair</li>
+        <li><b><kbd data-k="KeyQ">Q</kbd></b> sort rapide · <b><kbd data-k="KeyE">E</kbd></b> sort puissant : maintiens la touche pour voir la visée au sol, relâche pour tirer (clic droit pour annuler)</li>
+        <li><b><kbd data-k="KeyF">F</kbd></b> ou <b><kbd data-k="KeyD">D</kbd></b> : Saut éclair vers la souris</li>
         <li><b>Molette</b> : zoom · <b>Espace</b> : recentrer · <b>Entrée</b> : discuter</li>
         <li>Après 40 s, le Néant referme l'arène : rester dehors fait perdre des PV.</li>
       </ul></details>
@@ -251,29 +252,38 @@ const CFG = {
 // champions : modèle, animations (noms des clips sans le préfixe du champion), instant d'impact, sorts de l'arène
 // sorts : [nom, icône (fichier ui/spells), description]
 const CH = {
-  Ashe: { name: "Ashe", title: "Archère de givre", col: "#8fd8ff", model: "ashe.glb.txt", H: 180, anim: { idle: "idle1", run: "run", q: "spell2", r: "spell4" }, at: { q: .75, r: .92 },
-    Q: ["Salve", "Ashe_W", "7 flèches en éventail. Chaque cible touchée subit 14 dégâts et est ralentie."], E: ["Concentration du ranger", "Ashe_Q", "Sprint : +45 % de vitesse pendant 2,5 s."], R: ["Flèche de cristal enchantée", "Ashe_R", "Une flèche géante qui traverse l'arène. Étourdit jusqu'à 2,5 s selon la distance."] },
-  Diana: { name: "Diana", title: "Mépris de la lune", col: "#9fc4ff", model: "diana.glb.txt", H: 195, anim: { idle: "idle1", run: "run_base", death: "death_anim", q: "spell1", r: "attack1" }, at: { q: .27, r: .3 },
-    Q: ["Frappe du croissant", "Diana_Q", "Un arc de lune qui explose au point visé et marque les ennemis touchés."], E: ["Ruée lunaire", "Diana_E", "Ruée vers le point visé. Traverser un ennemi marqué recharge la ruée."], R: ["Lune ascendante", "Diana_R", "Attire les ennemis proches, puis explose 0,6 s plus tard."] },
-  Azir: { name: "Azir", title: "Empereur des sables", col: "#e8c27a", model: "azir.glb.txt", H: 200, anim: { idle: "idle1_base", run: "run_in", death: "ga_death", q: "attack_command", r: "spell4" }, at: { q: .28, r: .28 },
-    Q: ["Sables conquérants", "Azir_Q", "Les soldats frappent en ligne jusqu'au point visé après un court délai et repoussent."], E: ["Sables mouvants", "Azir_E", "Ruée vers le point visé, puis un petit bouclier."], R: ["Partage de l'Empereur", "Azir_R", "Un mur de soldats repousse les ennemis et bloque le passage 3 s."] },
-  Gangplank: { name: "Gangplank", title: "Fléau des mers", col: "#ff9b3d", model: "gangplank.glb.txt", H: 200, anim: { idle: "idle1", run: "run_base", death: "death", q: "spell1", e: "spell3", r: "spell4" }, at: { q: .4, e: .18, r: .2 },
-    Q: ["Pourparlers", "Gangplank_Q", "Un tir de pistolet. Il fait aussi exploser les barils."], E: ["Baril de poudre", "Gangplank_E", "Pose un baril (3 au maximum). N'importe quel projectile le fait exploser, en chaîne."], R: ["Barrage de boulets", "Gangplank_R", "Une pluie de boulets sur une grande zone pendant 3 s : dégâts et ralentissement."] },
-  Kled: { name: "Kled", title: "Le cavalier colérique", col: "#ff7a4d", model: "kled.glb.txt", H: 190, anim: { idle: "idle0", run: "run_base", death: "death", q: "spell1", r: "spell4_into", rEnd: "spell4_outattack" }, at: { q: .22, rEnd: .18 },
-    Q: ["Piège à ours au bout d'une corde", "Kled_Q", "Accroche un ennemi. S'il reste à portée, il est ramené vers Kled 1,6 s plus tard."], E: ["Joute", "Kled_E", "Ruée qui blesse les ennemis traversés."], R: ["Chaaaaaaaarge !!!", "Kled_R", "Longue charge inarrêtable. Le premier ennemi percuté est projeté avec ses voisins."] },
-  Galio: { name: "Galio", title: "Le colosse", col: "#f3d48a", model: "galio.glb.txt", H: 300, anim: { idle: "idle1_base", run: "run_base", death: "death", q: "spell1", r: "spell4_in", rChan: "spell4_channel", rEnd: "spell4_out" }, at: { q: .18, rEnd: .13 },
-    Q: ["Vents de la guerre", "Galio_Q", "Une rafale qui laisse une tornade au point visé."], E: ["Coup de justice", "Galio_E", "Ruée qui s'arrête sur le premier ennemi et le projette en l'air."], R: ["Entrée héroïque", "Galio_R", "Après 1 s, Galio s'envole et retombe sur la zone visée en projetant tout le monde."] },
-  Mordekaiser: { name: "Mordekaiser", title: "Le revenant de fer", col: "#4fe0b0", model: "mordekaiser.glb.txt", H: 260, anim: { idle: "battle_idle", run: "walk", death: "death", q: "spell1", e: "spell1", r: "spell4_to_idle" }, at: { q: .32, e: .32, r: 1.0 },
-    Q: ["Anéantissement", "Mordekaiser_Q", "Coup de masse en ligne après 0,5 s. Plus fort sur une cible isolée."], E: ["Étreinte de la mort", "Mordekaiser_E", "Après 0,6 s, attire les ennemis de la ligne devant lui."], R: ["Royaume des morts", "Mordekaiser_R", "Emporte l'ennemi visé dans un autre monde 6 s : personne d'autre ne peut intervenir."] },
-  Tryndamere: { name: "Tryndamere", title: "Le roi barbare", col: "#ff5a5a", model: "tryndamere.glb.txt", H: 195, anim: { idle: "idle1", run: "run", death: "death", q: "spell3", r: "spell4" }, at: { q: .07, r: .07 },
-    Q: ["Tourbillon tranchant", "Tryndamere_E", "Ruée tournoyante qui tranche tout sur son passage."], E: ["Cri railleur", "Tryndamere_W", "Ralentit fortement les ennemis proches pendant 2 s."], R: ["Rage indomptable", "Tryndamere_R", "Pendant 4 s, Tryndamere ne peut pas descendre sous 1 PV."] },
-  Graves: { name: "Graves", title: "Le hors-la-loi", col: "#d9a066", model: "graves.glb.txt", H: 190, anim: { idle: "idle1", run: "run", death: "death", q: "spell1", r: "spell4", rEnd: "spell4_back" }, at: { q: .27, r: .08 },
-    Q: ["Fin de partie", "Graves_Q", "Une ligne de poudre qui blesse, puis explose une seconde fois 0,9 s plus tard."], E: ["Ruée", "Graves_E", "Courte ruée, puis un petit bouclier."], R: ["Dégâts collatéraux", "Graves_R", "Un obus qui explose sur le premier ennemi et en cône derrière lui. Graves recule."] },
+  Ashe: { name: "Ashe", title: "Archère de givre", col: "#8fd8ff", model: "ashe.glb.txt", H: 180, anim: { idle: "idle1", run: "run", q: "spell2", e: "spell4" }, at: { q: .75, e: .92 },
+    Q: ["Salve", "Ashe_W", "7 flèches en éventail : dégâts et ralentissement.", { t: "cone", r: 1000, a: .87 }],
+    E: ["Flèche de cristal enchantée", "Ashe_R", "Une flèche géante qui traverse l'arène et étourdit (plus longtemps de loin).", { t: "line", r: 1700, w: 160 }] },
+  Diana: { name: "Diana", title: "Mépris de la lune", col: "#9fc4ff", model: "diana.glb.txt", H: 195, anim: { idle: "idle1", run: "run_base", death: "death_anim", q: "spell1" }, at: { q: .27 },
+    Q: ["Frappe du croissant", "Diana_Q", "Un arc de lune qui explose au point visé et marque les ennemis.", { t: "point", r: 170, range: 850 }],
+    E: ["Ruée lunaire", "Diana_E", "Ruée vers le point visé. Traverser un ennemi marqué la recharge aussitôt.", { t: "line", r: 550, w: 110, to: 1 }] },
+  Azir: { name: "Azir", title: "Empereur des sables", col: "#e8c27a", model: "azir.glb.txt", H: 200, anim: { idle: "idle1_base", run: "run_in", death: "ga_death", q: "attack_command", e: "spell4" }, at: { q: .28, e: .28 },
+    Q: ["Sables conquérants", "Azir_Q", "Les soldats frappent en ligne jusqu'au point visé, après un court délai.", { t: "line", r: 850, w: 140, to: 1 }],
+    E: ["Partage de l'Empereur", "Azir_R", "Un mur de soldats repousse tout le monde devant Azir et bloque le passage 3 s.", { t: "wall" }] },
+  Gangplank: { name: "Gangplank", title: "Fléau des mers", col: "#ff9b3d", model: "gangplank.glb.txt", H: 200, anim: { idle: "idle1", run: "run_base", death: "death", q: "spell1", e: "spell4" }, at: { q: .4, e: .2 },
+    Q: ["Pourparlers", "Gangplank_Q", "Un tir de pistolet rapide.", { t: "line", r: 700, w: 62 }],
+    E: ["Barrage de boulets", "Gangplank_R", "Une pluie de boulets sur une grande zone pendant 3 s : dégâts et ralentissement.", { t: "point", r: 450, range: 1600 }] },
+  Kled: { name: "Kled", title: "Le cavalier colérique", col: "#ff7a4d", model: "kled.glb.txt", H: 190, anim: { idle: "idle0", run: "run_base", death: "death", q: "spell1", e: "spell4_into", rEnd: "spell4_outattack" }, at: { q: .22, rEnd: .18 },
+    Q: ["Piège à ours au bout d'une corde", "Kled_Q", "Accroche un ennemi : s'il reste à portée, il est ramené vers Kled 1,6 s plus tard.", { t: "line", r: 800, w: 88 }],
+    E: ["Chaaaaaaaarge !!!", "Kled_R", "Longue charge inarrêtable : le premier ennemi percuté est projeté avec ses voisins.", { t: "line", r: 1500, w: 140 }] },
+  Galio: { name: "Galio", title: "Le colosse", col: "#f3d48a", model: "galio.glb.txt", H: 300, anim: { idle: "idle1_base", run: "run_base", death: "death", q: "spell1" }, at: { q: .18 },
+    Q: ["Vents de la guerre", "Galio_Q", "Une rafale qui laisse une tornade au point visé.", { t: "point", r: 220, range: 825 }],
+    E: ["Coup de justice", "Galio_E", "Ruée qui s'arrête sur le premier ennemi et le projette en l'air.", { t: "line", r: 500, w: 180, to: 1 }] },
+  Mordekaiser: { name: "Mordekaiser", title: "Le revenant de fer", col: "#4fe0b0", model: "mordekaiser.glb.txt", H: 260, anim: { idle: "battle_idle", run: "walk", death: "death", q: "spell1", e: "spell1" }, at: { q: .32, e: .32 },
+    Q: ["Anéantissement", "Mordekaiser_Q", "Coup de masse en ligne après 0,5 s. Plus fort sur une cible seule.", { t: "line", r: 600, w: 180 }],
+    E: ["Étreinte de la mort", "Mordekaiser_E", "Après 0,6 s, attire tous les ennemis de la ligne devant lui.", { t: "line", r: 700, w: 140 }] },
+  Tryndamere: { name: "Tryndamere", title: "Le roi barbare", col: "#ff5a5a", model: "tryndamere.glb.txt", H: 195, anim: { idle: "idle1", run: "run", death: "death", q: "spell3", e: "spell4" }, at: { q: .07, e: .07 },
+    Q: ["Tourbillon tranchant", "Tryndamere_E", "Ruée tournoyante qui tranche tout sur son passage.", { t: "line", r: 600, w: 250, to: 1 }],
+    E: ["Rage indomptable", "Tryndamere_R", "Pendant 4 s, Tryndamere ne peut pas descendre sous 1 PV.", { t: "self", r: 130 }] },
+  Graves: { name: "Graves", title: "Le hors-la-loi", col: "#d9a066", model: "graves.glb.txt", H: 190, anim: { idle: "idle1", run: "run", death: "death", q: "spell1", e: "spell4", rEnd: "spell4_back" }, at: { q: .27, e: .08 },
+    Q: ["Fin de partie", "Graves_Q", "Une ligne de poudre qui blesse, puis explose une seconde fois 0,9 s plus tard.", { t: "line", r: 750, w: 110 }],
+    E: ["Dégâts collatéraux", "Graves_R", "Un obus qui explose sur le premier ennemi et en cône derrière lui. Graves recule.", { t: "line", r: 1000, w: 125 }] },
 };
 const CH_IDS = Object.keys(CH);
 // valeurs par défaut (remplacées par celles du serveur à la connexion)
 let ARENA = { R: 1300, zoneStart: 40, zoneEnd: 100, zoneMin: 320, wins: 3 }, FLASH = { range: 400, cd: 15 }, STATS = {};
-const SLOTS = ["q", "e", "r", "f"];
+const SLOTS = ["q", "e", "f"];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v, lerp = (a, b, t) => a + (b - a) * t, hyp = Math.hypot;
 const angLerp = (a, b, t) => { let d = b - a; d = Math.atan2(Math.sin(d), Math.cos(d)); return a + d * t; };
@@ -412,11 +422,10 @@ function playRole(av, role, stamp = 0, speed = 1) {
   av.cur = role; av.stamp = stamp; return true;
 }
 // action déclenchée par un sort : rôle d'animation pour chaque touche
-const CAST_ROLE = { q: "q", e: "e", r: "r" };
+const CAST_ROLE = { q: "q", e: "e" };
 function avatarCast(av, k, now) {
-  let role = CAST_ROLE[k]; if (role === "e" && !av.A.e) role = null; if (!role || !av.A[role]) return;
+  const role = CAST_ROLE[k]; if (!role || !av.A[role]) return;
   playRole(av, role, now); av.lockU = now + Math.min(1.4, av.D[role] / (av.A[role].timeScale || 1));
-  if (av.champ === "Galio" && k === "r") av.chanU = now + 1.0;
 }
 function avatarAct(av, what, now) { if (what === "ultEnd" && av.A.rEnd) { playRole(av, "rEnd", now + .001); av.lockU = now + Math.min(1.2, av.D.rEnd); av.chanU = 0; } }
 // rôle de base selon l'état du joueur
@@ -428,7 +437,7 @@ function avatarTick(av, P, dt, now) {
     if (P.dashing) playRole(av, "run", 0, 1.7);
     else if (P.spd2 > 40 && !(P.fl & 2)) playRole(av, "run", 0, clamp(P.spd2 / 340, .7, 1.5));
     else playRole(av, "idle", 0, 1);
-  } else if (P.champ === "Kled" && P.dashing && av.cur === "r" && now > av.lockU - .2) playRole(av, "run", 0, 2);
+  } else if (P.champ === "Kled" && P.dashing && av.cur === "e" && now > av.lockU - .2) playRole(av, "run", 0, 2);
   av.mixer.update(dt);
 }
 
@@ -674,7 +683,7 @@ function buildChampGrid() {
   g.querySelectorAll(".cg").forEach(b => b.classList.toggle("sel", b.dataset.c === myChamp));
   const c = CH[myChamp], st = STATS[myChamp] || {};
   $("cinfo").innerHTML = `<div class="ct">${esc(c.name)}<small>${esc(c.title)} · ${st.hp || 100} PV</small></div>` +
-    [["q", "KeyQ", c.Q], ["e", "KeyE", c.E], ["r", "KeyR", c.R]].map(([k, code, s]) => `<div class="sp"><img src="${spellArt(s[1])}" alt=""><div><b><i>${KEYLBL[code]}</i>${esc(s[0])}</b><div>${esc(s[2])}${st[k] ? ` <span class="muted">(${st[k].cd} s)</span>` : ""}</div></div></div>`).join("") +
+    [["q", "KeyQ", c.Q], ["e", "KeyE", c.E]].map(([k, code, s]) => `<div class="sp"><img src="${spellArt(s[1])}" alt=""><div><b><i>${KEYLBL[code]}</i>${esc(s[0])}</b><div>${esc(s[2])}${st[k] ? ` <span class="muted">(${st[k].cd} s)</span>` : ""}</div></div></div>`).join("") +
     `<div class="sp"><div class="sl" style="width:42px;height:42px;border-width:1px"><div class="fl" style="font-size:18px">⚡</div></div><div><b><i>${KEYLBL.KeyF}</i>Saut éclair</b><div>Téléportation courte vers la souris (${FLASH.cd} s).</div></div></div>`;
 }
 $("ready").onclick = () => { const me = LOBBY.players.find(p => p.id === ME); send({ t: "ready", v: !(me && me.ready) }); };
@@ -724,7 +733,7 @@ function onEvent(e) {
     case "cast": if (!P) break;
       if (e[2] === "f") { ringFx(P.x, P.y, 90, 0xffe27a, .35); discFx(e[3], e[4], 120, 0xfff2a8, .35); if (P.id === ME) { MY.px = e[3]; MY.py = e[4]; } P.x = e[3]; P.y = e[4]; P.hist = []; sfx("flash"); break; }
       if (P.av) avatarCast(P.av, e[2], now); if (P.id === ME) { MY.dest = null; MY.rootU = now + .12; }
-      if (e[2] === "r") voice(P.champ, "ult", { interrupt: P.id === ME, vol: P.id === ME ? 1 : .55 }); else if (e[2] === "q" && P.id === ME) voice(P.champ, "sig", { chance: .2 });
+      if (e[2] === "e") voice(P.champ, "ult", { interrupt: P.id === ME, vol: P.id === ME ? 1 : .55 }); else if (e[2] === "q" && P.id === ME) voice(P.champ, "sig", { chance: .2 });
       sfx("cast"); break;
     case "act": if (P && P.av) avatarAct(P.av, e[2], now); break;
     case "dmg": if (!P) break; dmgNum(P, e[2]); if (e[3] && e[2] >= 1) { sfx("hit"); P.hitT = now; } break;
@@ -747,11 +756,11 @@ const DMGS = []; function dmgNum(P, a) { if (a < 1) { P.zacc = (P.zacc || 0) + a
 // ---------- interface en partie ----------
 function buildScore() { const list = [...PL.values()]; $("score").innerHTML = list.map(p => `<div class="sc ${p.id === ME ? "me" : ""}" data-id="${p.id}"><img src="${loadArt(p.champ)}" alt=""><span>${esc(p.name)}</span><span class="w">${Array.from({ length: ARENA.wins }, (_, i) => `<i class="${i < (p.wins || 0) ? "on" : ""}"></i>`).join("")}</span></div>`).join(""); }
 function buildSpells() { if (!myChamp) return; const c = CH[myChamp];
-  $("spells").innerHTML = [["q", "KeyQ", c.Q], ["e", "KeyE", c.E], ["r", "KeyR", c.R]].map(([k, code, s]) => `<div class="sl ${k}" title="${esc(s[0])}"><img src="${spellArt(s[1])}" alt=""><div class="cd" data-k="${k}"></div><kbd>${KEYLBL[code]}</kbd></div>`).join("") +
+  $("spells").innerHTML = [["q", "KeyQ", c.Q], ["e", "KeyE", c.E]].map(([k, code, s]) => `<div class="sl ${k}" title="${esc(s[0])}"><img src="${spellArt(s[1])}" alt=""><div class="cd" data-k="${k}"></div><kbd>${KEYLBL[code]}</kbd></div>`).join("") +
     `<div class="sl f" title="Saut éclair"><div class="fl">⚡</div><div class="cd" data-k="f"></div><kbd>${KEYLBL.KeyF}</kbd></div>`; }
 function hudTick(now) {
   const me = meV(); if (!me) return;
-  const el = now - MY.cdAt; document.querySelectorAll("#spells .cd").forEach((d, i) => { const left = Math.max(0, (MY.cds[i] || 0) - el), tot = i === 3 ? FLASH.cd : (STATS[myChamp]?.[SLOTS[i]]?.cd || 1);
+  const el = now - MY.cdAt; document.querySelectorAll("#spells .cd").forEach((d, i) => { const left = Math.max(0, (MY.cds[i] || 0) - el), tot = i === 2 ? FLASH.cd : (STATS[myChamp]?.[SLOTS[i]]?.cd || 1);
     d.style.setProperty("--p", left > 0 ? (left / tot * 100).toFixed(1) + "%" : "0%"); d.textContent = left > 0 ? (left < 1 ? left.toFixed(1) : Math.ceil(left)) : ""; });
   const hp = Math.max(0, me.hp); $("hpf").style.width = (hp / me.mhp * 100) + "%"; $("hps").style.left = (hp / me.mhp * 100) + "%"; $("hps").style.width = Math.min(100 - hp / me.mhp * 100, (me.shield || 0) / me.mhp * 100) + "%";
   $("hpt").textContent = `${Math.ceil(hp)} / ${me.mhp}`;
@@ -774,12 +783,13 @@ function showPO(m) { if (m.po > 0) { const s = document.querySelector(`[data-po=
 
 // ---------- commandes ----------
 let mouse = [W / 2, H / 2], rightHeld = false, lastTo = 0, chatOpen = false;
-const KEY_SLOT = { KeyQ: "q", KeyW: "e", KeyE: "e", KeyR: "r", KeyF: "f", KeyD: "f" };
+const KEY_SLOT = { KeyQ: "q", KeyW: "e", KeyE: "e", KeyF: "f", KeyD: "f" };
+let aiming = null, aimCode = null;
 const ARROWS = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0] }, held = new Set();
 const cv = $("cv");
 cv.addEventListener("contextmenu", e => e.preventDefault());
 addEventListener("mousemove", e => { mouse = [e.clientX, e.clientY]; });
-cv.addEventListener("mousedown", e => { if (VIEW !== "game") return; if (e.button === 2 || e.button === 0) { rightHeld = true; moveToCursor(true); } });
+cv.addEventListener("mousedown", e => { if (VIEW !== "game") return; if (aiming && e.button === 2) { aiming = null; return; } if (aiming && e.button === 0) { fireAim(); return; } if (e.button === 2 || e.button === 0) { rightHeld = true; moveToCursor(true); } });
 addEventListener("mouseup", e => { if (e.button === 2 || e.button === 0) rightHeld = false; });
 cv.addEventListener("wheel", e => { setZoom(ZOOM * (e.deltaY > 0 ? 1.08 : 1 / 1.08)); e.preventDefault(); }, { passive: false });
 $("zin").onclick = () => setZoom(ZOOM / 1.12); $("zout").onclick = () => setZoom(ZOOM * 1.12);
@@ -795,10 +805,40 @@ addEventListener("keydown", e => {
   if (ARROWS[e.code]) { held.add(e.code); sendMv(); e.preventDefault(); return; }
   if (e.code === "KeyS") { MY.dest = null; MY.mv = null; send({ t: "in", stop: 1 }); return; }
   const k = KEY_SLOT[e.code]; if (!k || e.repeat) return;
-  const g = groundAt(mouse[0], mouse[1]), me = meV(); if (!g || !me || !me.alive || PH !== "round") return;
-  send({ t: "c", k, x: Math.round(g[0]), y: Math.round(g[1]) });
+  const me = meV(); if (!me || !me.alive || PH !== "round") return;
+  // Q et E : visée affichée tant que la touche est maintenue ; F (Saut éclair) part tout de suite
+  if (k === "f") { const g = groundAt(mouse[0], mouse[1]); if (g) send({ t: "c", k, x: Math.round(g[0]), y: Math.round(g[1]) }); return; }
+  aiming = k; aimCode = e.code;
 });
-addEventListener("keyup", e => { if (ARROWS[e.code]) { held.delete(e.code); sendMv(); } });
+addEventListener("keyup", e => { if (ARROWS[e.code]) { held.delete(e.code); sendMv(); } if (aiming && e.code === aimCode) fireAim(); });
+addEventListener("blur", () => { aiming = null; });
+function fireAim() { const k = aiming; aiming = null; const g = groundAt(mouse[0], mouse[1]), me = meV(); if (!k || !g || !me || !me.alive || PH !== "round") return; send({ t: "c", k, x: Math.round(g[0]), y: Math.round(g[1]) }); }
+// ---------- visée au sol ----------
+const AIM = new THREE.Group(); AIM.visible = false; scene.add(AIM);
+const aimFill = new THREE.Mesh(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2).translate(.5, 0, 0), flatMat(0x7fe0ff, .22)); aimFill.position.y = 7;
+const aimEdge = new THREE.Mesh(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2).translate(.5, 0, 0), flatMat(0xbff4ff, .5)); aimEdge.position.y = 8;
+const aimRing = new THREE.Mesh(new THREE.RingGeometry(.9, 1, 64).rotateX(-Math.PI / 2), flatMat(0xbff4ff, .75)); aimRing.position.y = 8;
+const aimDisc = new THREE.Mesh(new THREE.CircleGeometry(1, 48).rotateX(-Math.PI / 2), flatMat(0x7fe0ff, .2)); aimDisc.position.y = 7;
+const aimRange = new THREE.Mesh(new THREE.RingGeometry(.985, 1, 96).rotateX(-Math.PI / 2), flatMat(0xffffff, .35)); aimRange.position.y = 6;
+let aimCone = null, aimConeA = 0;
+AIM.add(aimFill, aimEdge, aimRing, aimDisc, aimRange);
+function aimTick(now) {
+  const me = meV(); if (!aiming || !me || !me.alive || PH !== "round") { AIM.visible = false; return; }
+  const g = groundAt(mouse[0], mouse[1]); if (!g) { AIM.visible = false; return; }
+  const spec = CH[me.champ][aiming === "q" ? "Q" : "E"][3], x = me.x, y = me.y, a = Math.atan2(g[1] - y, g[0] - x), d = hyp(g[0] - x, g[1] - y);
+  const cdLeft = (MY.cds[SLOTS.indexOf(aiming)] || 0) - (now - MY.cdAt), col = cdLeft > 0 ? 0xff6a6a : 0x7fe0ff;
+  AIM.visible = true; AIM.position.set(x, 0, y); for (const m of AIM.children) m.visible = false;
+  aimFill.material.color.copy(lin(col)); aimDisc.material.color.copy(lin(col));
+  // couloir du sort + trait plus clair au bout
+  const line = (len, w) => { aimFill.visible = aimEdge.visible = true; aimFill.rotation.y = aimEdge.rotation.y = -a; aimFill.position.set(0, 7, 0); aimFill.scale.set(len, 1, w); aimEdge.scale.set(12, 1, w); aimEdge.position.set(Math.cos(a) * (len - 12), 8, Math.sin(a) * (len - 12)); };
+  if (spec.t === "line") { const len = spec.to ? clamp(d, 120, spec.r) : spec.r; line(len, spec.w); }
+  else if (spec.t === "wall") { line(420, 620); aimRing.visible = false; }
+  else if (spec.t === "point") { const r = Math.min(d, spec.range); aimRing.visible = aimDisc.visible = aimRange.visible = true; aimRing.position.set(Math.cos(a) * r, 8, Math.sin(a) * r); aimDisc.position.set(Math.cos(a) * r, 7, Math.sin(a) * r);
+    aimRing.scale.set(spec.r, 1, spec.r); aimDisc.scale.set(spec.r, 1, spec.r); aimRange.scale.set(spec.range, 1, spec.range); }
+  else if (spec.t === "self") { aimRing.visible = aimDisc.visible = true; aimRing.position.set(0, 8, 0); aimDisc.position.set(0, 7, 0); aimRing.scale.set(spec.r, 1, spec.r); aimDisc.scale.set(spec.r, 1, spec.r); }
+  else if (spec.t === "cone") { if (!aimCone || aimConeA !== spec.a) { if (aimCone) AIM.remove(aimCone); aimCone = new THREE.Mesh(new THREE.CircleGeometry(1, 32, -spec.a / 2, spec.a).rotateX(-Math.PI / 2), flatMat(0x7fe0ff, .22)); aimCone.position.y = 7; aimConeA = spec.a; AIM.add(aimCone); }
+    aimCone.visible = true; aimCone.material.color.copy(lin(col)); aimCone.scale.set(spec.r, 1, spec.r); aimCone.rotation.y = -a; }
+}
 function sendMv() { let x = 0, y = 0; for (const c of held) { x += ARROWS[c][0]; y += ARROWS[c][1]; }
   // les flèches suivent l'écran : « haut » éloigne de la caméra
   MY.mv = x || y ? [x, y] : null; if (MY.mv) MY.dest = null; send({ t: "in", mv: [x, y] }); }
@@ -842,7 +882,7 @@ function gameTick(dt, now) {
       const s = p.tag.querySelector(".hb s"); s.style.left = (Math.max(0, p.hp) / p.mhp * 100) + "%"; s.style.width = Math.min(100, (p.shield || 0) / p.mhp * 100) + "%";
       p.tag.querySelector(".st").textContent = p.fl & 2 ? "Étourdi" : p.fl & 16 ? "Increvable" : p.fl & 64 ? "" : p.fl & 4 ? "Ralenti" : p.realm ? "Royaume des morts" : ""; }
   }
-  drawProj(rt); drawAreas(now);
+  drawProj(rt); drawAreas(now); aimTick(now);
   zoneMat.uniforms.zr.value = lerp(zoneMat.uniforms.zr.value, ZR, Math.min(1, dt * 4));
   const f = focusP(); if (f) placeCam(f.x, f.y, dt);
   // chiffres de dégâts
