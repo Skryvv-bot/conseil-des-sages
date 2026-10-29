@@ -1,6 +1,6 @@
 # Serveur de l'Arène de la Faille
 
-Worker Cloudflare `cds-arene` : un Durable Object par salon, simulation du combat 30 fois par seconde, connexion des joueurs en WebSocket.
+Worker Cloudflare `cds-arene` : un Durable Object par salon, simulation 30 fois par seconde, connexion des joueurs en WebSocket. Il fait tourner deux jeux : l'Arène de la Faille (`sim.js`) et la Défense du Nexus (`td.js`, salons `?game=td`).
 
 - `src/sim.js` : règles, sorts des 9 champions, bots.
 - `src/index.js` : salons, comptes (jeton Firebase), envoi de l'état, PO de fin de match via le robot `conseil-riot` (route `/arena`).

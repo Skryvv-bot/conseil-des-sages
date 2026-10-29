@@ -16,6 +16,7 @@
 window.IC_MODELS="icathia/";window.IC_UI="icathia/ui/";window.IC_SND="icathia/snd/";window.IC_MUSIC="icathia/music/";
 window.ARENA_READY=conseilConnect().then(async c=>{if(!c.db)return;try{const w=await c.db.collection("wallets").doc(c.uid).get(),ps=w.exists&&w.data().pseudo;
   let mine=null;try{mine=localStorage.getItem("ar-pseudo")}catch(e){}if(ps&&!mine){const i=document.getElementById("pseudo");if(i&&!i.value){i.value=ps;i.dispatchEvent(new Event("change"))}}}catch(e){}});
+window.ARENA_BOARD=async()=>{const c=await conseilConnect();if(!c.db)return [];const q=await c.db.collection("arena").get();return q.docs.map(d=>({id:d.id,...d.data()}))};
 window.ARENA_AUTH=async()=>{await window.ARENA_READY;const u=firebase.auth().currentUser;if(!u)throw new Error("Connexion au site en cours, réessaie dans un instant.");return u.getIdToken()};
 </script>
 <style>
@@ -290,7 +291,7 @@ const angLerp = (a, b, t) => { let d = b - a; d = Math.atan2(Math.sin(d), Math.c
 const $ = id => document.getElementById(id);
 const loadArt = id => `${CFG.UI}load/${id}.webp`, spellArt = f => `${CFG.UI}spells/${f}.png`;
 
-// ===================== Scène 3D : arène d'Icathia, zone du Néant, caméra =====================
+// ===================== Scène 3D commune : rendu, lumières, textures, caméra =====================
 const R3 = new THREE.WebGLRenderer({ canvas: $("cv"), antialias: true, powerPreference: "high-performance" });
 R3.outputEncoding = THREE.sRGBEncoding; R3.toneMapping = THREE.ACESFilmicToneMapping; R3.toneMappingExposure = .95;
 R3.shadowMap.enabled = true; R3.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -306,6 +307,29 @@ const W2 = (x, y, h = 0) => new THREE.Vector3(x, h, y);   // monde 2D (x, y) -> 
 // ---- textures peintes à la main dans un canevas ----
 function canvasTex(size, draw, rep = 1) { const c = document.createElement("canvas"); c.width = c.height = size; draw(c.getContext("2d"), size); const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = 8; if (rep !== 1) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rep, rep); } return t; }
 let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const softTex = canvasTex(128, (g, S) => { const r = g.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2); r.addColorStop(0, "rgba(255,255,255,1)"); r.addColorStop(.4, "rgba(255,255,255,.5)"); r.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = r; g.fillRect(0, 0, S, S); });
+const lin = c => new THREE.Color(c).convertSRGBToLinear();
+const glowMat = (col, op = .8, map = softTex) => new THREE.MeshBasicMaterial({ color: lin(col), transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false, map });
+// ---- caméra : vue plongeante qui suit le joueur ----
+let W = 1, H = 1, ZOOM = (() => { try { return clamp(+localStorage.getItem("ar-zoom") || 1, .6, 1.6); } catch (e) { return 1; } })();
+const camFocus = new THREE.Vector3(), CAM_EL = 56 * Math.PI / 180; let CAM_D = 1750;
+function resize() { W = innerWidth; H = innerHeight; R3.setSize(W, H); cam.aspect = W / H; cam.updateProjectionMatrix(); }
+addEventListener("resize", resize); resize();
+let shake = 0;
+function placeCam(x, y, dt) {
+  camFocus.x = lerp(camFocus.x, x, Math.min(1, dt * 8)); camFocus.z = lerp(camFocus.z, y, Math.min(1, dt * 8));
+  const D = CAM_D * ZOOM * (W / H < 1.2 ? 1.25 : 1), s = shake > 0 ? (Math.random() - .5) * shake : 0; shake = Math.max(0, shake - dt * 60);
+  cam.position.set(camFocus.x + s, Math.sin(CAM_EL) * D, camFocus.z + Math.cos(CAM_EL) * D + s); cam.lookAt(camFocus.x, 0, camFocus.z - 40);
+  sun.position.set(camFocus.x - 900, 2200, camFocus.z + 700); sun.target.position.set(camFocus.x, 0, camFocus.z);
+}
+function setZoom(z) { ZOOM = clamp(z, .6, 1.6); try { localStorage.setItem("ar-zoom", ZOOM); } catch (e) {} }
+// point du sol sous la souris
+const ray = new THREE.Raycaster(), groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), ndc = new THREE.Vector2(), hitV = new THREE.Vector3();
+function groundAt(px, py) { ndc.set(px / W * 2 - 1, -(py / H) * 2 + 1); ray.setFromCamera(ndc, cam); return ray.ray.intersectPlane(groundPlane, hitV) ? [hitV.x, hitV.z] : null; }
+const PV = new THREE.Vector3();
+function toScreen(x, h, y) { PV.set(x, h, y).project(cam); return [(PV.x + 1) / 2 * W, (1 - PV.y) / 2 * H, PV.z < 1]; }
+
+// ===================== Carte de l'arène : sol d'Icathia, piliers, zone du Néant =====================
 const floorTex = canvasTex(2048, (g, S) => {
   const C = S / 2, k = S / 2 / 1560;
   // sable et dalles d'Icathia
@@ -338,9 +362,6 @@ const rim = new THREE.Mesh(new THREE.TorusGeometry(1318, 14, 8, 160), new THREE.
 // le gouffre autour : falaise et brume violette
 const cliff = new THREE.Mesh(new THREE.CylinderGeometry(1560, 1380, 420, 120, 1, true), new THREE.MeshStandardMaterial({ color: 0x3a2a22, roughness: 1, side: THREE.DoubleSide })); cliff.position.y = -211; scene.add(cliff);
 const abyss = new THREE.Mesh(new THREE.CircleGeometry(9000, 64).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x12061f })); abyss.position.y = -420; scene.add(abyss);
-const softTex = canvasTex(128, (g, S) => { const r = g.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2); r.addColorStop(0, "rgba(255,255,255,1)"); r.addColorStop(.4, "rgba(255,255,255,.5)"); r.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = r; g.fillRect(0, 0, S, S); });
-const lin = c => new THREE.Color(c).convertSRGBToLinear();
-const glowMat = (col, op = .8, map = softTex) => new THREE.MeshBasicMaterial({ color: lin(col), transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false, map });
 for (let i = 0; i < 26; i++) { const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), glowMat(i % 3 ? 0x5a22b8 : 0x9b55ee, .14)); const a = rnd() * 7, d = 1900 + rnd() * 1800, s = 600 + rnd() * 1400; m.position.set(Math.cos(a) * d, -380 + rnd() * 60, Math.sin(a) * d); m.scale.set(s, 1, s); scene.add(m); }
 // piliers brisés et cristaux du Néant sur le pourtour
 const stone = new THREE.MeshStandardMaterial({ color: 0x7a6248, roughness: .95, flatShading: true }), gold = new THREE.MeshStandardMaterial({ color: 0xd8b060, metalness: .7, roughness: .35, emissive: 0x3a2400 });
@@ -367,25 +388,6 @@ const zoneMat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false,
       vec3 c=mix(vec3(.25,.05,.45),vec3(.55,.2,1.),sw)*inside*.55+vec3(.75,.45,1.)*edge;
       gl_FragColor=vec4(c,clamp(inside*.62+edge,0.,.9));}` });
 const zone = new THREE.Mesh(new THREE.RingGeometry(1, 1560, 128, 1).rotateX(-Math.PI / 2), zoneMat); zone.position.y = 3; zone.renderOrder = 2; scene.add(zone);
-
-// ---- caméra : vue plongeante qui suit le joueur ----
-let W = 1, H = 1, ZOOM = (() => { try { return clamp(+localStorage.getItem("ar-zoom") || 1, .6, 1.6); } catch (e) { return 1; } })();
-const camFocus = new THREE.Vector3(), CAM_EL = 56 * Math.PI / 180;
-function resize() { W = innerWidth; H = innerHeight; R3.setSize(W, H); cam.aspect = W / H; cam.updateProjectionMatrix(); }
-addEventListener("resize", resize); resize();
-let shake = 0;
-function placeCam(x, y, dt) {
-  camFocus.x = lerp(camFocus.x, x, Math.min(1, dt * 8)); camFocus.z = lerp(camFocus.z, y, Math.min(1, dt * 8));
-  const D = 1750 * ZOOM * (W / H < 1.2 ? 1.25 : 1), s = shake > 0 ? (Math.random() - .5) * shake : 0; shake = Math.max(0, shake - dt * 60);
-  cam.position.set(camFocus.x + s, Math.sin(CAM_EL) * D, camFocus.z + Math.cos(CAM_EL) * D + s); cam.lookAt(camFocus.x, 0, camFocus.z - 40);
-  sun.position.set(camFocus.x - 900, 2200, camFocus.z + 700); sun.target.position.set(camFocus.x, 0, camFocus.z);
-}
-function setZoom(z) { ZOOM = clamp(z, .6, 1.6); try { localStorage.setItem("ar-zoom", ZOOM); } catch (e) {} }
-// point du sol sous la souris
-const ray = new THREE.Raycaster(), groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), ndc = new THREE.Vector2(), hitV = new THREE.Vector3();
-function groundAt(px, py) { ndc.set(px / W * 2 - 1, -(py / H) * 2 + 1); ray.setFromCamera(ndc, cam); return ray.ray.intersectPlane(groundPlane, hitV) ? [hitV.x, hitV.z] : null; }
-const PV = new THREE.Vector3();
-function toScreen(x, h, y) { PV.set(x, h, y).project(cam); return [(PV.x + 1) / 2 * W, (1 - PV.y) / 2 * H, PV.z < 1]; }
 
 // ===================== Champions : modèles 3D, copies par joueur et animations =====================
 const TPL = {};   // modèle chargé une fois par champion
