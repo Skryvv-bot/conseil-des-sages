@@ -1,14 +1,40 @@
-games 39 
-avec mvp 0
-exemple Kiin {"mapValue": {"fields": {"cs": {"integerValue": "210"}, "d": {"integerValue": "3"}, "kp": {"doubleValue": 0.545}, "gold": {"integerValue": "9591"}, "wp": {"integerValue": "14"}, "win": {"booleanValue": true}, "role": {"stringValue": "Top"}, "a": {"integerValue": "11"}, "champ": {"stringValue": "Ornn"}, "k": {"integerValue": "1"}, "dmg": {"doubleValue": 0.127}, "team": {"stringValue": "GEN"}, "wk": {"integerValue": "2"}}}}
-game 115660540726095006
-window frames 10 2026-10-23T17:21:19.869Z 2026-10-23T17:21:20.632Z
-{"participantId": 1, "totalGold": 0, "level": 1, "kills": 0, "deaths": 0, "assists": 0, "creepScore": 0, "currentHealth": 0, "maxHealth": 0}
-window2 24 ['17:33:10', '17:33:10', '17:33:11', '17:33:11', '17:33:11', '17:33:12', '17:33:12', '17:33:12', '17:33:13', '17:33:13', '17:33:14', '17:33:14', '17:33:15', '17:33:15', '17:33:16', '17:33:16', '17:33:16', '17:33:16', '17:33:16', '17:33:17', '17:33:18', '17:33:18', '17:33:19', '17:33:19']
-details 24 ['17:33:10', '17:33:10', '17:33:11', '17:33:11', '17:33:11', '17:33:12', '17:33:12', '17:33:12', '17:33:13', '17:33:13', '17:33:14', '17:33:14', '17:33:15', '17:33:15', '17:33:16', '17:33:16', '17:33:16', '17:33:16', '17:33:16', '17:33:17', '17:33:18', '17:33:18', '17:33:19', '17:33:19']
-{"participantId": 1, "level": 6, "kills": 0, "deaths": 0, "assists": 0, "totalGoldEarned": 2208, "creepScore": 54, "killParticipation": 0.0, "championDamageShare": 0.3788919132716859, "wardsPlaced": 2, "wardsDestroyed": 0, "attackDamage": 76, "abilityPower": 38, "criticalChance": 0.0, "attackSpeed": 107, "lifeSteal": 0, "armor": 54, "magicResistance": 34, "tenacity": 0.0, "items": [1056, 3158, 2031, 1052], "perkMetadata": {"styleId": 8200, "subStyleId": 8300, "perks": [8992, 8224, 8234, 8237, 8347, 8313, 5007, 5010, 5011]}, "abilities": ["E", "Q", "W", "Q", "Q", "R"]}
-LP lignes 0 avec MVP 0
-[]
-{'code': 'ratelimited', 'info': "You've exceeded your rate limit. Please wait some time and try again.", '*': 'See https://lol.fandom.com/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/postorius/lists/mediawiki-api-announce.lists.wikimedia.org/&gt; for notice of API deprecations and breaking changes.'}
-{"error":{"code":"ratelimited","info":"You've exceeded your rate limit. Please wait some time and try again.","*":"See https://lol.fandom.com/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/postorius/lists/mediawiki-api-announce.lists.wikimedia.org/&gt; for notice of API deprecations and breaking changes."}}
-{"error":{"code":"ratelimited","info":"You've exceeded your rate limit. Please wait some time and try again.","*":"See https://lol.fandom.com/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/postorius/lists/mediawiki-api-announce.lists.wikimedia.org/&gt; for notice of API deprecations and breaking changes."}}
+games 39 à analyser 39
+lol_115660540726095006 IG-GEN kills relevés 32 / officiel 32 {"Chovy": {"solo": 1}} FB Rookie
+lol_115660540726095008 TL-CFO kills relevés 23 / officiel 23 {"Rest": {"triple": 1}} FB Shad0w
+lol_115660540726095010 KC-AL kills relevés 16 / officiel 16 {"Canna": {"quadra": 1}} FB Breathe
+lol_115660540726095012 DK-G2 kills relevés 16 / officiel 16 {} FB SkewMond
+lol_115660540726095014 TES-HLE kills relevés 31 / officiel 31 {"Kanavi": {"solo": 1}, "Zeka": {"solo": 1, "triple": 1}} FB Kanavi
+lol_115660540726095016 LOS-T1 kills relevés 22 / officiel 22 {"Doran": {"solo": 1}} FB Doran
+lol_115660540726095018 LYON-TSW kills relevés 28 / officiel 28 {"Dire": {"solo": 1}} FB Eddie
+lol_115660540726095020 MKOI-BLG kills relevés 32 / officiel 32 {"Knight": {"solo": 2}, "Supa": {"triple": 1}} FB Supa
+lol_115660540726095022 MKOI-CFO kills relevés 26 / officiel 26 {} FB Rest
+lol_115660540726095024 KC-LYON kills relevés 30 / officiel 30 {"Caliste": {"triple": 1}, "Berserker": {"triple": 1}} FB Yike
+lol_115660540726095026 HLE-GEN kills relevés 29 / officiel 29 {"Kiin": {"solo": 2}, "Zeka": {"solo": 1}} FB Ruler
+lol_115660540726095028 DK-T1 kills relevés 18 / officiel 18 {"ShowMaker": {"solo": 2}} FB Faker
+lol_115660540726095030 TES-AL kills relevés 27 / officiel 27 {"Creme": {"solo": 1, "quadra": 1}, "Tian": {"solo": 2}, "JackeyLove": {"triple": 1}} FB Hope
+lol_115660540726095032 LOS-G2 kills relevés 31 / officiel 31 {"Feisty": {"solo": 1}, "Zest": {"solo": 1}, "SkewMond": {"solo": 1}, "BrokenBlade": {"solo": 1}} FB Duduhh
+lol_115660540726095034 TSW-IG kills relevés 33 / officiel 33 {"Dire": {"solo": 2}, "TheShy": {"solo": 1}} FB Hizto
+lol_115660540726095036 TL-BLG kills relevés 19 / officiel 19 {"Bin": {"solo": 2}} FB Knight
+lol_115660540726095038 MKOI-DK kills relevés 24 / officiel 24 {"Siwoo": {"solo": 1}, "Smash": {"penta": 1}} FB Siwoo
+lol_115660540726095039 MKOI-DK kills relevés 22 / officiel 22 {} FB Smash
+lol_115660540726095042 LYON-GEN kills relevés 14 / officiel 14 {} FB Kiin
+lol_115660540726095043 LYON-GEN kills relevés 25 / officiel 25 {"Kiin": {"solo": 1}, "Ruler": {"triple": 1}} FB Dhokla
+lol_115660540726095044 LYON-GEN kills relevés 22 / officiel 22 {"Isles": {"solo": 1}} FB Ruler
+lol_115660540726095046 IG-HLE kills relevés 38 / officiel 38 {"JiaQi": {"quadra": 1}, "Rookie": {"quadra": 1}} FB Meiko
+lol_115660540726095048 TES-G2 kills relevés 24 / officiel 24 {"JackeyLove": {"solo": 1, "triple": 1}} FB Zhuo
+lol_115660540726095050 T1-CFO kills relevés 20 / officiel 20 {"Peyz": {"triple": 1}, "Oner": {"triple": 1}} FB Keria
+lol_115660540726095052 BLG-KC kills relevés 25 / officiel 25 {} FB Knight
+lol_115660540726095054 TSW-LOS kills relevés 23 / officiel 23 {"Dire": {"solo": 1}} FB Dire
+lol_115660540726095055 TSW-LOS kills relevés 35 / officiel 35 {"Feisty": {"solo": 1}, "Eddie": {"solo": 1}} FB Dire
+lol_115660540726095058 AL-TL kills relevés 21 / officiel 21 {"Yeon": {"triple": 1}} FB Josedeodo
+lol_115660540726095059 AL-TL kills relevés 35 / officiel 35 {"Morgan": {"solo": 1}, "Yeon": {"triple": 1}} FB Morgan
+lol_115660540726095062 T1-MKOI kills relevés 30 / officiel 30 {"Faker": {"solo": 1}} FB Jojopyun
+lol_115660540726095063 T1-MKOI kills relevés 31 / officiel 31 {"Jojopyun": {"solo": 1}, "Faker": {"solo": 1}, "Alvaro": {"solo": 1}} FB Keria
+lol_115660540726095066 LYON-IG kills relevés 23 / officiel 23 {"Dhokla": {"solo": 1}, "Rookie": {"quadra": 1}} FB TheShy
+lol_115660540726095067 LYON-IG kills relevés 26 / officiel 26 {"Dhokla": {"solo": 1}, "Saint": {"solo": 1}, "Berserker": {"solo": 1}} FB Wei
+lol_115660540726095068 LYON-IG kills relevés 12 / officiel 12 {"JiaQi": {"triple": 1}} FB JiaQi
+lol_115660540726095070 BLG-TES kills relevés 27 / officiel 27 {"369": {"solo": 1}, "Viper": {"solo": 1}, "Knight": {"solo": 1, "triple": 1}} FB Xun
+lol_115660540726095071 BLG-TES kills relevés 23 / officiel 23 {"Tian": {"solo": 1}} FB Xun
+lol_115660540726095072 BLG-TES kills relevés 20 / officiel 20 {"Tian": {"solo": 1}} FB Xun
+lol_115660540726095074 KC-CFO kills relevés 22 / officiel 22 {} FB Yike
+lol_115660540726095075 KC-CFO kills relevés 32 / officiel 32 {"Caliste": {"triple": 1}} FB Doggo
