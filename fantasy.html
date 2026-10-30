@@ -172,7 +172,7 @@ tr.click{cursor:pointer}tr.click:hover td{background:var(--panel2)}
   <header>
     <span class="eyebrow">Fantasy league</span>
     <h1>Fantasy <b>du</b> Conseil</h1>
-    <p class="lead">À chaque phase des Worlds, un tirage au sort donne à chaque sage un joueur par poste. Tes joueurs marquent des points à chaque partie, ton capitaine compte double et le MVP officiel de chaque game gagne un bonus.</p>
+    <p class="lead">À chaque phase des Worlds, un tirage au sort donne à chaque sage un joueur par poste. Tes joueurs marquent des points à chaque partie et ton capitaine compte double.</p>
   </header>
   <nav class="tabs" aria-label="Sections" id="tabs"></nav>
   <main id="view"></main>
@@ -187,7 +187,7 @@ const PHASES=[
   {id:"demis",label:"Demi-finales",start:"2026-11-07T22:00:00Z"},
   {id:"finale",label:"Finale",start:"2026-11-14T19:00:00Z"}];
 // barème validé par le Conseil : règles communes + bonus propres à chaque poste
-const PTS={win:3,d:-1,clean:2,solo:2,fb:2,triple:2,quadra:5,penta:10,mvp:5,captain:2};
+const PTS={win:3,d:-1,clean:2,solo:2,fb:2,triple:2,quadra:5,penta:10,captain:2};
 const ROLE_PTS={
   Top:{k:3,a:2,cs:50,dmg:[.25,3]},
   Jungle:{k:3,a:1,cs:50,drag:.5,baron:1,kp:[.70,2]},
@@ -233,11 +233,18 @@ function detail(st,role,g){const R=ROLE_PTS[role]||ROLE_PTS.Mid,o=[],add=(l,v)=>
   return o}
 function base(st,role,g){return detail(st,role,g).reduce((t,x)=>t+x[1],0)}
 function voteDeadline(g){const day=parisDay(g.at);const next=games.filter(x=>parisDay(x.at)>day).sort((a,b)=>a.at-b.at)[0];return next?next.at:g.at+36*3600e3}
-// MVP : le choix officiel (Player of the Game relevé sur Leaguepedia), posé dans la partie par le robot (g.mvp). Plus de vote.
+// Multikills, solokills et premier sang : absents des stats officielles, recalculés depuis le direct de LoL Esports
+// (seconde par seconde) par la tâche GitHub « Fantasy : multikills » et publiés dans multi.json.
+const FX_MULTI_URL="https://raw.githubusercontent.com/Skryvv-bot/conseil-des-sages/fantasy-data/out/fx/multi.json";
+let FX_MULTI={};
+function fxApplyMulti(gs){for(const g of gs||[]){const m=FX_MULTI[g.id];if(!m||!g.players)continue;
+  for(const n in g.players){const st=g.players[n],x=m.players?.[n]||{};st.triple=x.triple||0;st.quadra=x.quadra||0;st.penta=x.penta||0;st.solo=x.solo||0;st.fb=m.fb===n?1:0}}return gs}
+function fxLoadMulti(cb){fetch(FX_MULTI_URL+"?t="+Math.floor(Date.now()/300000)).then(r=>r.ok?r.json():{}).then(j=>{FX_MULTI=j||{};cb&&cb()}).catch(()=>{})}
+// (le MVP a été retiré : aucune source fiable du MVP officiel)
 function voteResult(g){return {mvp:g.mvp?[g.mvp]:[]}}
 const VR={};function vr(g){return VR[g.id]||(VR[g.id]=voteResult(g))}
-function gamePts(g,name){const st=g.players?.[name];if(!st)return null;const r=vr(g);let s=base(st,P[name]?.role,g);if(r.mvp.includes(name))s+=PTS.mvp;return Math.round(s*10)/10}
-function gameDetail(g,name){const st=g.players[name],r=vr(g),o=detail(st,P[name]?.role,g);if(r.mvp.includes(name))o.push(["MVP officiel de la game",PTS.mvp]);return o}
+function gamePts(g,name){const st=g.players?.[name];if(!st)return null;const s=base(st,P[name]?.role,g);return Math.round(s*10)/10}
+function gameDetail(g,name){return detail(g.players[name],P[name]?.role,g)}
 function playerPts(name,phase){let t=0,n=0;for(const g of games){if(phase&&g.phase!==phase)continue;const s=gamePts(g,name);if(s!=null){t+=s;n++}}return {t,n}}
 function teamOf(id,phase){const d=phases[phase];if(!d?.picks)return null;const o={};for(const x of d.picks)if(x.uid===id)o[x.role]=x.name;return o}
 function sagePts(id,phase){let t=0;for(const ph of phase?[phase]:PHASES.map(p=>p.id)){const tm=teamOf(id,ph);if(!tm)continue;const cap=captains[id]?.[ph];
@@ -462,14 +469,13 @@ function vJoueurs(v){const ph=currentPhase();
 }
 function vJoueur(v){const p=P[param];if(!p){v.innerHTML=`<div class="empty">Joueur introuvable.</div>`;return}
   const tot=playerPts(p.name),gs=games.filter(g=>g.players?.[p.name]).sort((a,b)=>b.at-a.at),r=rarity(p);
-  let mv=0;for(const g of gs){if(vr(g).mvp.includes(p.name))mv++}
   v.innerHTML=`<a class="chip" href="#joueurs" style="align-self:flex-start">← Tous les joueurs</a>
   <section class="panel"><div class="hero">${card(p,{glow:true})}<div style="display:flex;flex-direction:column;gap:12px;min-width:0">
     <div><span class="rar" style="--rc:${r.c}">${r.n}</span><h2 style="font-size:2.4rem">${esc(p.name)}</h2><span class="note">${esc(team(p).n)} · ${p.role} · ${p.rank===0?"hors catégorie au Conseil 🐐":`#${p.rank} de la tier list du Conseil`}${p.avg!=null?` (${p.avg.toFixed(2).replace(".",",")}/5, ${p.n} votes)`:""}</span></div>
-    <div class="kv"><div><b>${fr(tot.t)}</b><span>points</span></div><div><b>${tot.n}</b><span>parties</span></div><div><b>${tot.n?(tot.t/tot.n).toFixed(1).replace(".",","):"–"}</b><span>points / partie</span></div><div><b class="pos">${mv}</b><span>fois MVP</span></div></div>
+    <div class="kv"><div><b>${fr(tot.t)}</b><span>points</span></div><div><b>${tot.n}</b><span>parties</span></div><div><b>${tot.n?(tot.t/tot.n).toFixed(1).replace(".",","):"–"}</b><span>points / partie</span></div></div>
     <div><span class="eyebrow">Chez</span><div class="row" style="margin-top:6px">${PHASES.map(ph=>{const o=ownersOf(p.name,ph.id);return o.length?`<span class="chip">${ph.label} : ${o.map(id=>`<a href="#sage-${encodeURIComponent(id)}">${esc(sageName(id))}</a>`).join(", ")}</span>`:""}).join("")||'<span class="note">Pas encore tiré.</span>'}</div></div></div></div></section>
-  <section class="panel"><h2>Ses parties</h2>${gs.length?`<div class="tw"><table class="sb"><thead><tr><th>Date</th><th>Match</th><th>Champion</th><th class="num">K / D / A</th><th class="num">CS</th><th class="num">Dégâts</th><th class="num">Particip.</th><th class="num">Balises</th><th>Résultat</th><th>MVP</th><th class="num">Points (détail)</th></tr></thead><tbody>${gs.map(g=>{const st=g.players[p.name],x=vr(g);
-    return `<tr><td>${fmtDate(g.at)}</td><td>${esc(g.teams?.join(" – ")||"")}<div class="note">${esc(g.label||"")}</div></td><td>${champCell(st.champ)}</td><td class="num">${st.k} / ${st.d} / ${st.a}</td><td class="num">${st.cs??"–"}</td><td class="num">${pct(st.dmg)}</td><td class="num">${pct(st.kp)}</td><td class="num">${st.wp??"–"} / ${st.wk??"–"}</td><td class="${st.win?"pos":"neg"}">${st.win?"Victoire":"Défaite"}</td><td>${x.mvp.includes(p.name)?'<b class="pos">MVP</b>':g.mvp?"–":'<span class="note">en attente</span>'}</td><td class="num"><details class="det"><summary><b>${fr(gamePts(g,p.name))}</b></summary><ul>${gameDetail(g,p.name).map(([l,v])=>`<li><span>${esc(l)}</span><b class="${v<0?"neg":"pos"}">${v>0?"+":""}${fr(v)}</b></li>`).join("")}</ul></details></td></tr>`}).join("")}</tbody></table></div>`:`<div class="empty">Pas encore de partie jouée.</div>`}</section>`}
+  <section class="panel"><h2>Ses parties</h2>${gs.length?`<div class="tw"><table class="sb"><thead><tr><th>Date</th><th>Match</th><th>Champion</th><th class="num">K / D / A</th><th class="num">CS</th><th class="num">Dégâts</th><th class="num">Particip.</th><th class="num">Balises</th><th>Résultat</th><th class="num">Points (détail)</th></tr></thead><tbody>${gs.map(g=>{const st=g.players[p.name],x=vr(g);
+    return `<tr><td>${fmtDate(g.at)}</td><td>${esc(g.teams?.join(" – ")||"")}<div class="note">${esc(g.label||"")}</div></td><td>${champCell(st.champ)}</td><td class="num">${st.k} / ${st.d} / ${st.a}</td><td class="num">${st.cs??"–"}</td><td class="num">${pct(st.dmg)}</td><td class="num">${pct(st.kp)}</td><td class="num">${st.wp??"–"} / ${st.wk??"–"}</td><td class="${st.win?"pos":"neg"}">${st.win?"Victoire":"Défaite"}</td><td class="num"><details class="det"><summary><b>${fr(gamePts(g,p.name))}</b></summary><ul>${gameDetail(g,p.name).map(([l,v])=>`<li><span>${esc(l)}</span><b class="${v<0?"neg":"pos"}">${v>0?"+":""}${fr(v)}</b></li>`).join("")}</ul></details></td></tr>`}).join("")}</tbody></table></div>`:`<div class="empty">Pas encore de partie jouée.</div>`}</section>`}
 
 // Stats complètes des games : champion, KDA, CS, dégâts, participation, balises, points et sages qui ont le joueur
 const pct=x=>x==null?"–":Math.round(x*100)+" %";
@@ -481,9 +487,9 @@ function vParties(v){const gs=[...games].filter(g=>!gPhase||g.phase===gPhase).so
     <div class="sub-tabs"><button class="chip" data-gp="" aria-pressed="${!gPhase}">Toutes</button>${PHASES.map(p=>`<button class="chip" data-gp="${p.id}" aria-pressed="${gPhase===p.id}">${p.label}</button>`).join("")}</div></section>`;
   if(!gs.length)h+=`<div class="empty">Pas encore de partie jouée.</div>`;
   for(const g of gs){const x=vr(g),own=n=>ownersOf(n,g.phase).map(sageName).map(esc).join(", ");
-    h+=`<section class="panel"><div class="between"><h2>${(g.teams||[]).map(t=>`<span class="mini" style="display:inline-flex">${logo(t)} ${esc(t)}${g.winner===t?' <span class="pos" style="font-size:.9rem">✓</span>':""}</span>`).join(" – ")}</h2><span class="note">${esc(g.label==='Swiss'?'Phase suisse':g.label||"")} · ${fmtDate(g.at)}${g.mvp?` · MVP officiel : <b class="pos">${esc(g.mvp)}</b>`:" · MVP en attente"}</span></div>`;
+    h+=`<section class="panel"><div class="between"><h2>${(g.teams||[]).map(t=>`<span class="mini" style="display:inline-flex">${logo(t)} ${esc(t)}${g.winner===t?' <span class="pos" style="font-size:.9rem">✓</span>':""}</span>`).join(" – ")}</h2><span class="note">${esc(g.label==='Swiss'?'Phase suisse':g.label||"")} · ${fmtDate(g.at)}</span></div>`;
     for(const t of g.teams||[]){const ob=g.obj?.[t]||{},rows=Object.entries(g.players||{}).filter(([,s])=>s.team===t).sort((a,b)=>ROLES.indexOf(P[a[0]]?.role||a[1].role)-ROLES.indexOf(P[b[0]]?.role||b[1].role));
-      h+=`<div class="row" style="gap:6px 14px"><b style="font:400 1.2rem var(--display);text-transform:uppercase">${esc(DATA.teams[t]?.n||t)}</b>${g.winner===t?'<span class="pos">victoire</span>':'<span class="neg">défaite</span>'}<span class="note">${ob.kills??"–"} kills · ${ob.towers??"–"} tours · ${ob.drag??0} dragon${(ob.drag||0)>1?"s":""} · ${ob.baron??0} Baron${(ob.baron||0)>1?"s":""}</span></div><div class="tw"><table class="sb"><thead><tr><th>Joueur</th><th>Champion</th><th class="num">K / D / A</th><th class="num">CS</th><th class="num">Dégâts</th><th class="num">Particip.</th><th class="num">Balises</th><th class="num">Points</th><th>Chez</th></tr></thead><tbody>${rows.map(([n,s])=>`<tr class="click" data-href="#joueur-${encodeURIComponent(n)}"><td><span class="mini">${P[n]?.img?`<img src="${P[n].img}" alt="">`:""}<b>${esc(n)}</b>${x.mvp.includes(n)?' <span class="pos">MVP</span>':""}</span><div class="note">${esc(P[n]?.role||s.role||"")}</div></td><td>${champCell(s.champ)}</td><td class="num">${s.k} / ${s.d} / ${s.a}</td><td class="num">${s.cs??"–"}</td><td class="num">${pct(s.dmg)}</td><td class="num">${pct(s.kp)}</td><td class="num">${s.wp??"–"} / ${s.wk??"–"}</td><td class="num"><b>${fr(gamePts(g,n))}</b></td><td class="note">${own(n)||"–"}</td></tr>`).join("")}</tbody></table></div>`}
+      h+=`<div class="row" style="gap:6px 14px"><b style="font:400 1.2rem var(--display);text-transform:uppercase">${esc(DATA.teams[t]?.n||t)}</b>${g.winner===t?'<span class="pos">victoire</span>':'<span class="neg">défaite</span>'}<span class="note">${ob.kills??"–"} kills · ${ob.towers??"–"} tours · ${ob.drag??0} dragon${(ob.drag||0)>1?"s":""} · ${ob.baron??0} Baron${(ob.baron||0)>1?"s":""}</span></div><div class="tw"><table class="sb"><thead><tr><th>Joueur</th><th>Champion</th><th class="num">K / D / A</th><th class="num">CS</th><th class="num">Dégâts</th><th class="num">Particip.</th><th class="num">Balises</th><th class="num">Points</th><th>Chez</th></tr></thead><tbody>${rows.map(([n,s])=>`<tr class="click" data-href="#joueur-${encodeURIComponent(n)}"><td><span class="mini">${P[n]?.img?`<img src="${P[n].img}" alt="">`:""}<b>${esc(n)}</b></span><div class="note">${esc(P[n]?.role||s.role||"")}</div></td><td>${champCell(s.champ)}</td><td class="num">${s.k} / ${s.d} / ${s.a}</td><td class="num">${s.cs??"–"}</td><td class="num">${pct(s.dmg)}</td><td class="num">${pct(s.kp)}</td><td class="num">${s.wp??"–"} / ${s.wk??"–"}</td><td class="num"><b>${fr(gamePts(g,n))}</b></td><td class="note">${own(n)||"–"}</td></tr>`).join("")}</tbody></table></div>`}
     h+=`</section>`}
   v.innerHTML=h;v.querySelectorAll("[data-gp]").forEach(b=>b.onclick=()=>{gPhase=b.dataset.gp;render()})}
 
@@ -503,7 +509,7 @@ function bindKick(id){const b=$("kick");if(!b)return;b.onclick=()=>{if(!b.datase
 function vRegles(v){v.innerHTML=`<section class="panel"><h2>Règles</h2><div class="rules">
   <div><span class="eyebrow">Inscription et tirage</span><ul><li>Inscris-toi depuis l'accueil avant le tirage.</li><li>Un tirage à <b>chaque phase</b> : suisse, quarts, demies, finale.</li><li>Lane par lane : chaque sage reçoit un Top, puis un Jungle, un Mid, un Bot, un Support.</li><li>En phase suisse, un joueur ne va qu'à <b>un seul</b> sage.</li></ul></div>
 
-  <div><span class="eyebrow">Capitaine et MVP</span><ul><li>Un <b>capitaine</b> par phase : ses points comptent <b>double</b>. Modifiable jusqu'au premier match de la phase.</li><li>Le <b>MVP</b> est le choix officiel de chaque game, relevé automatiquement.</li></ul></div>
+  <div><span class="eyebrow">Capitaine</span><ul><li>Un <b>capitaine</b> par phase : ses points comptent <b>double</b>. Modifiable jusqu'au premier match de la phase.</li></ul></div>
   <div><span class="eyebrow">Raretés des cartes</span><ul><li><b style="color:var(--r-leg)">Légendaire</b> : top 3 du Conseil à son poste</li><li><b style="color:var(--r-epic)">Épique</b> : 4e à 7e</li><li><b style="color:var(--r-rare)">Rare</b> : 8e à 11e</li><li><b style="color:var(--r-com)">Commun</b> : 12e à 16e</li><li><b style="color:var(--r-goat)">Hors catégorie</b> : Faker 🐐</li></ul></div></div></section>
   <section class="panel"><h2>Points communs à tous les postes</h2><div class="tw"><table class="pts"><tbody>
     <tr><td>Victoire</td><td class="num pos">+${PTS.win}</td></tr>
@@ -512,7 +518,6 @@ function vRegles(v){v.innerHTML=`<section class="panel"><h2>Règles</h2><div cla
     <tr><td>Solokill (en plus des points du kill)</td><td class="num pos">+${PTS.solo} chacun</td></tr>
     <tr><td>Premier sang</td><td class="num pos">+${PTS.fb}</td></tr>
     <tr><td>Triple / Quadra / Penta kill</td><td class="num pos">+${PTS.triple} / +${PTS.quadra} / +${PTS.penta}</td></tr>
-    <tr><td>MVP officiel de la game</td><td class="num pos">+${PTS.mvp}</td></tr>
     <tr><td>Capitaine</td><td class="num">tous ses points ×${PTS.captain}</td></tr></tbody></table></div></section>
   <section class="panel"><h2>Barème par poste</h2><div class="tw"><table class="pts"><thead><tr><th></th>${ROLES.map(r=>`<th>${r}</th>`).join("")}</tr></thead><tbody>
     <tr><td>Kill</td>${ROLES.map(r=>`<td>+${fr(ROLE_PTS[r].k)}</td>`).join("")}</tr>
@@ -557,7 +562,7 @@ render=function(){
   h+=`<section class="panel"><h2>Le principe</h2><div class="rules">
     <div><span class="eyebrow">Tirage</span><ul><li>Pas de draft : chaque sage reçoit au hasard un Top, un Jungle, un Mid, un Bot et un Support.</li><li>Un nouveau tirage à chaque phase : suisse, quarts, demies, finale.</li></ul></div>
     <div><span class="eyebrow">Points</span><ul><li>Kills, assists, farm, dégâts, objectifs : un barème propre à chaque poste.</li><li>Ton capitaine compte double.</li></ul></div>
-    <div><span class="eyebrow">MVP</span><ul><li>Le MVP officiel de chaque game gagne +5.</li></ul></div></div></section>`;
+    </div></section>`;
   v.innerHTML=h;
   const f=$("join");if(f)f.onsubmit=async e=>{e.preventDefault();const p=$("pseudo").value.trim().slice(0,20);if(!p)return;
     try{await db.doc("sages/"+uid).set({pseudo:p,at:Date.now()})}catch(err){$("joinMsg").textContent="Inscription impossible : recharge la page et réessaie."}};
@@ -584,7 +589,8 @@ let fdb=null;
   sub("phases",s=>{phases={};s.docs.forEach(d=>phases[d.id]=d.data())});
   sub("captains",s=>{captains={};s.docs.forEach(d=>captains[d.id]=d.data())});
   sub("votes",s=>{votes={};s.docs.forEach(d=>votes[d.id]=d.data())});
-  sub("games",s=>{games=s.docs.map(d=>{const x={id:d.id,...d.data()};if(x.teams&&!Array.isArray(x.teams))x.teams=Object.keys(x.teams).sort((a,b)=>a-b).map(k=>x.teams[k]);return x}).sort((a,b)=>a.at-b.at)});
+  sub("games",s=>{games=fxApplyMulti(s.docs.map(d=>{const x={id:d.id,...d.data()};if(x.teams&&!Array.isArray(x.teams))x.teams=Object.keys(x.teams).sort((a,b)=>a-b).map(k=>x.teams[k]);return x}).sort((a,b)=>a.at-b.at))});
+  const reMulti=()=>fxLoadMulti(()=>{fxApplyMulti(games);if(!busy)render()});reMulti();setInterval(reMulti,10*60e3);
 })();
 </script>
 

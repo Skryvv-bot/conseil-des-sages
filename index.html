@@ -472,7 +472,7 @@ const LIVE_API="https://conseil-riot.perrotinyvanpro.workers.dev";   // adresse 
 const REGIONS={euw1:"EUW",eun1:"EUNE",na1:"NA",kr:"KR",br1:"BR",tr1:"TR",ru:"RU",jp1:"JP",la1:"LAN",la2:"LAS",oc1:"OCE"};
 const OPGG={euw1:"euw",eun1:"eune",na1:"na",kr:"kr",br1:"br",tr1:"tr",ru:"ru",jp1:"jp",la1:"lan",la2:"las",oc1:"oce"};
 const TEAMC={GEN:"#b8932f",HLE:"#f37321",T1:"#e2012d",DK:"#1ebeb4",AL:"#d6336c",BLG:"#00a1d6",TES:"#ff6a13",IG:"#8d99ae",G2:"#e6e6e6",MKOI:"#7b4ce0",KC:"#2b6bff",TL:"#4a8fe7",LYON:"#3cb371",TSW:"#c0c7d1",CFO:"#00a0e9",LOS:"#f2c94c"};
-const PTS={1:1,3:2,5:3};
+const PTS={1:1,3:1,5:1};
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -717,7 +717,8 @@ conseilLoadLogos(()=>renderAll());conseilDD().then(()=>renderAll());
   sub("picks",o=>picks=o);
   sub("tiers",o=>{tiersN=Object.values(o).filter(t=>t.complete).length;myTiers=o[uid]||null});
   sub("fantasySages",o=>fanD.sages=o);sub("fantasyPhases",o=>fanD.phases=o);sub("fantasyCaptains",o=>fanD.captains=o);
-  db.collection("fantasyGames").onSnapshot(q=>{fanD.games=q.docs.map(d=>({id:d.id,...d.data()}));renderFanRank()},e=>console.warn("fantasyGames",e));
+  db.collection("fantasyGames").onSnapshot(q=>{fanD.games=q.docs.map(d=>({id:d.id,...d.data()}));window.FantasyScore?.applyMulti(fanD.games);renderFanRank()},e=>console.warn("fantasyGames",e));
+  window.FantasyScore?.loadMulti(()=>{window.FantasyScore.applyMulti(fanD.games);renderFanRank()});
   sub("bets",o=>{bets=o;conseilResolvePronos(db,o)});let ladderAsked=false;sub("riot",o=>{if(!ladderAsked){ladderAsked=true;conseilLadder(db,o).then(l=>{ladder=l;renderRecap()})}});sub("trials",o=>trials=o);sub("sageVotes",o=>sage=o);sub("clash",o=>clash=o);
   db.doc("results/state").onSnapshot(s=>{results=s.exists?s.data():null;renderAll()},()=>{});
   renderAll();

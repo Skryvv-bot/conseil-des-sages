@@ -1,6 +1,6 @@
 // Généré depuis la page Fantasy : ne pas modifier à la main.
 window.FantasyScore=(function(){
-const PTS={win:3,d:-1,clean:2,solo:2,fb:2,triple:2,quadra:5,penta:10,mvp:5,captain:2};
+const PTS={win:3,d:-1,clean:2,solo:2,fb:2,triple:2,quadra:5,penta:10,captain:2};
 const ROLE_PTS={
   Top:{k:3,a:2,cs:50,dmg:[.25,3]},
   Jungle:{k:3,a:1,cs:50,drag:.5,baron:1,kp:[.70,2]},
@@ -32,9 +32,16 @@ function base(st,role,g){return detail(st,role,g).reduce((t,x)=>t+x[1],0)}
 const ROLE_OF={"Zeus": "Top", "Bin": "Top", "Kiin": "Top", "Breathe": "Top", "BrokenBlade": "Top", "Siwoo": "Top", "369": "Top", "Canna": "Top", "Doran": "Top", "TheShy": "Top", "Myrwn": "Top", "Dhokla": "Top", "Morgan": "Top", "Pun": "Top", "Rest": "Top", "Zest": "Top", "Canyon": "Jungle", "Oner": "Jungle", "Kanavi": "Jungle", "SkewMond": "Jungle", "Xun": "Jungle", "Tarzan": "Jungle", "Wei": "Jungle", "Inspired": "Jungle", "Yike": "Jungle", "Elyoya": "Jungle", "Lucid": "Jungle", "Tian": "Jungle", "Josedeodo": "Jungle", "Hizto": "Jungle", "Shad0w": "Jungle", "Curse": "Jungle", "Faker": "Mid", "Caps": "Mid", "Chovy": "Mid", "Knight": "Mid", "Zeka": "Mid", "Kyeahoo": "Mid", "ShowMaker": "Mid", "Creme": "Mid", "Rookie": "Mid", "Shanks": "Mid", "Jojopyun": "Mid", "Quid": "Mid", "Dire": "Mid", "Pout": "Mid", "Saint": "Mid", "Feisty": "Mid", "Peyz": "Bot", "Gumayusi": "Bot", "Viper": "Bot", "Ruler": "Bot", "Hans Sama": "Bot", "Smash": "Bot", "Hope": "Bot", "JiaQi": "Bot", "Doggo": "Bot", "Caliste": "Bot", "JackeyLove": "Bot", "Berserker": "Bot", "Eddie": "Bot", "Supa": "Bot", "Yeon": "Bot", "Duduhh": "Bot", "Keria": "Support", "Duro": "Support", "ON": "Support", "Delight": "Support", "Labrov": "Support", "Kael": "Support", "Career": "Support", "Meiko": "Support", "Zhuo": "Support", "Busio": "Support", "CoreJJ": "Support", "Alvaro": "Support", "Bie": "Support", "Isles": "Support", "Kino": "Support", "Ackerman": "Support"};
 const PHASE_IDS=["swiss","quarts","demis","finale"];
 function teamOf(phases,id,ph){const d=phases[ph];if(!d?.picks)return null;const o={};for(const x of d.picks)if(x.uid===id)o[x.role]=x.name;return o}
-function gamePts(g,name){const st=g.players?.[name];if(!st)return null;let s=base(st,ROLE_OF[name],g);if(g.mvp===name)s+=PTS.mvp;return Math.round(s*10)/10}
+function gamePts(g,name){const st=g.players?.[name];if(!st)return null;const s=base(st,ROLE_OF[name],g);return Math.round(s*10)/10}
 function playerPts(games,name,ph){let t=0;for(const g of games){if(ph&&g.phase!==ph)continue;const s=gamePts(g,name);if(s!=null)t+=s}return t}
 function sagePts(phases,captains,games,id){let t=0;for(const ph of PHASE_IDS){const tm=teamOf(phases,id,ph);if(!tm)continue;const cap=captains[id]?.[ph];
   for(const r in tm){const n=tm[r],p=playerPts(games,n,ph);t+=n===cap?p*PTS.captain:p}}return Math.round(t*10)/10}
-return {PTS,ROLE_OF,teamOf,gamePts,sagePts,fr};
+// Multikills, solokills et premier sang : absents des stats officielles, recalculés depuis le direct de LoL Esports 
+// (seconde par seconde) par la tâche GitHub « Fantasy : multikills » et publiés dans multi.json. 
+const FX_MULTI_URL="https://raw.githubusercontent.com/Skryvv-bot/conseil-des-sages/fantasy-data/out/fx/multi.json"; 
+let FX_MULTI={}; 
+function fxApplyMulti(gs){for(const g of gs||[]){const m=FX_MULTI[g.id];if(!m||!g.players)continue; 
+  for(const n in g.players){const st=g.players[n],x=m.players?.[n]||{};st.triple=x.triple||0;st.quadra=x.quadra||0;st.penta=x.penta||0;st.solo=x.solo||0;st.fb=m.fb===n?1:0}}return gs} 
+function fxLoadMulti(cb){fetch(FX_MULTI_URL+"?t="+Math.floor(Date.now()/300000)).then(r=>r.ok?r.json():{}).then(j=>{FX_MULTI=j||{};cb&&cb()}).catch(()=>{})} 
+return {PTS,ROLE_OF,teamOf,gamePts,sagePts,fr,applyMulti:fxApplyMulti,loadMulti:fxLoadMulti};
 })();

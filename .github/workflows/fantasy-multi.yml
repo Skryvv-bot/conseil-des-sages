@@ -1,0 +1,23 @@
+name: "Fantasy : multikills"
+# Toutes les 30 minutes pendant les Worlds : multikills, solokills et premier sang des nouvelles games,
+# recalculés depuis le direct de LoL Esports et publiés sur la branche fantasy-data (out/fx/multi.json).
+on:
+  schedule:
+    - cron: "7,37 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  multi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fantasy-data
+      - run: python3 tools/multikills.py
+      - run: |
+          git config user.name "cds-bot"
+          git config user.email "cds-bot@users.noreply.github.com"
+          git add out/fx/multi.json
+          git commit -m "Fantasy : multikills à jour" || echo "rien de nouveau"
+          git push
