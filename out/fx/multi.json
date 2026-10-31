@@ -485,5 +485,21 @@
 "fb": "Caps",
 "kills": 33,
 "check": 33
+},
+"lol_115660540726095083": {
+"players": {
+"BrokenBlade": {
+"solo": 1
+},
+"Kanavi": {
+"solo": 1
+},
+"Gumayusi": {
+"triple": 1
+}
+},
+"fb": "Gumayusi",
+"kills": 26,
+"check": 26
 }
 }
