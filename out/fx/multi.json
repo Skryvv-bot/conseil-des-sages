@@ -553,5 +553,18 @@
 "fb": "Berserker",
 "kills": 24,
 "check": 24
+},
+"lol_115660540726095094": {
+"players": {
+"Viper": {
+"solo": 1
+},
+"Knight": {
+"quadra": 1
+}
+},
+"fb": "Xun",
+"kills": 37,
+"check": 37
 }
 }
