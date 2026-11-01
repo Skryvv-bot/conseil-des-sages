@@ -566,5 +566,18 @@
 "fb": "Xun",
 "kills": 37,
 "check": 37
+},
+"lol_115660540726095095": {
+"players": {
+"Bin": {
+"solo": 1
+},
+"Knight": {
+"triple": 1
+}
+},
+"fb": "Knight",
+"kills": 17,
+"check": 17
 }
 }
