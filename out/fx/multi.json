@@ -579,5 +579,27 @@
 "fb": "Knight",
 "kills": 17,
 "check": 17
+},
+"lol_115660540726095110": {
+"players": {
+"TheShy": {
+"solo": 1
+},
+"JackeyLove": {
+"solo": 1
+},
+"369": {
+"solo": 1
+},
+"Rookie": {
+"triple": 1
+},
+"JiaQi": {
+"triple": 2
+}
+},
+"fb": "TheShy",
+"kills": 39,
+"check": 39
 }
 }
