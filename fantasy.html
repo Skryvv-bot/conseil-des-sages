@@ -340,8 +340,14 @@ function nextStep(d){const n=d.picks.length,base=d.order.length*ROLES.length;if(
 function poolFor(ph,role){const d=phases[ph],teams=d.teams||Object.keys(DATA.teams);
   let pool=DATA.players[role].filter(p=>teams.includes(p.team)).map(p=>p.name);
   if(PHASES.find(p=>p.id===ph).unique){const used=new Set(d.picks.filter(y=>y.role===role).map(y=>y.name));const left=pool.filter(n=>!used.has(n));if(left.length)pool=left}
-  else{const used=new Set(d.picks.filter(y=>y.role===role).map(y=>y.name));const left=pool.filter(n=>!used.has(n));if(left.length)pool=left}
+  else{
+    // à partir des quarts, il reste trop peu de joueurs : chaque joueur existe en COPIES exemplaires.
+    // La caisse contient les exemplaires restants (un joueur déjà tiré une fois a deux fois moins de chances de ressortir).
+    const used={};for(const y of d.picks)if(y.role===role)used[y.name]=(used[y.name]||0)+1;
+    const deck=[];for(const n of pool)for(let i=used[n]||0;i<COPIES;i++)deck.push(n);
+    if(deck.length)pool=deck}
   return pool}
+const COPIES=2;
 
 function vTirage(v){
   tPhase=tPhase||PHASES.find(p=>phases[p.id]&&phases[p.id].picks.length<totalSteps(phases[p.id]))?.id||currentPhase();
@@ -359,7 +365,7 @@ function vTirage(v){
     <div class="progress" style="max-width:420px"><i style="width:${Math.round(100*n/N)}%"></i></div>
     ${isOwner&&next?`<div class="row" style="justify-content:center">
       <button class="btn" id="open">Ouvrir : ${esc(next.role)} pour ${esc(sageName(next.uid))} (${n+1}/${N})</button></div>`:""}
-    <span class="note">${n}/${N} caisses ouvertes · ${ph.unique?"un joueur ne va qu'à un seul sage pendant cette phase":"chaque joueur n'est tiré qu'une fois tant qu'il en reste"}${room?" · l'animation s'affiche en direct chez tout le monde":""}</span></section>`;
+    <span class="note">${n}/${N} caisses ouvertes · ${ph.unique?"un joueur ne va qu'à un seul sage pendant cette phase":`chaque joueur existe en ${COPIES} exemplaires`}${room?" · l'animation s'affiche en direct chez tout le monde":""}</span></section>`;
   h+=`<section class="panel"><h2>Résultat en direct</h2><div class="tw"><table class="drawtbl"><thead><tr><th>Sage</th>${ROLES.map(r=>`<th>${r}</th>`).join("")}</tr></thead><tbody>${drawOrder(d).map(id=>`<tr class="${id===uid?"me":""}"><td><a href="#sage-${encodeURIComponent(id)}">${esc(sageName(id))}</a></td>${ROLES.map(r=>{const x=d.picks.find(y=>y.uid===id&&y.role===r),isLast=x&&x===last;
     return `<td class="${isLast?"new":""}">${x?`<a class="mini" href="#joueur-${encodeURIComponent(x.name)}">${P[x.name]?.img?`<img src="${P[x.name].img}" alt="">`:""}${esc(x.name)}${tlg(x.name)}</a>`:'<span class="note">?</span>'}</td>`}).join("")}</tr>`).join("")}</tbody></table></div></section>`;
   if(isOwner)h+=`<section class="panel"><h3>Administration</h3><p class="note">Recommencer efface toutes les caisses ouvertes de cette phase et l'ordre des sages. Le prochain « Préparer le tirage » reprendra la liste des inscrits à ce moment-là.</p><div class="row"><button class="btn ghost small" id="redo">Recommencer le tirage</button><span class="note" id="redoMsg"></span></div>${Date.now()>=phaseStart(tPhase)?`<p class="note">Rouvrir le choix du capitaine pendant 30 minutes (sage arrivé en retard) :</p><div class="row">${drawOrder(d).filter(id=>sages[id]).map(id=>`<button class="btn ghost small" data-capopen="${esc(id)}">${esc(sageName(id))}${!capLocked(id,tPhase)?" · ouvert":""}</button>`).join("")}</div>`:""}${(()=>{const out=Object.entries(sages).filter(([id])=>!drawOrder(d).includes(id));return out.length?`<p class="note">Inscrits après le tirage : ajoute-les pour leur ouvrir une caisse par poste avec les joueurs qui restent. Les équipes déjà tirées ne bougent pas.</p><div class="row">${out.map(([id,x])=>`<button class="btn small" data-late="${esc(id)}">Ajouter ${esc(x.pseudo)} au tirage</button>`).join("")}</div>`:""})()}</section>`;
@@ -374,9 +380,13 @@ function demoPanel(){return `<section class="panel"><div class="between"><h2>Ess
 function ownerStart(ph){const def=new Date(phaseStart(ph.id)),loc=new Date(def.getTime()-def.getTimezoneOffset()*6e4).toISOString().slice(0,16);
   return `<div class="state red">Tu es l'organisateur. Quand tout le monde est inscrit, prépare le tirage : l'ordre des sages est tiré au sort, puis tu ouvres les caisses une par une en direct.</div>
     <label class="note">Début de la phase (bloque les capitaines) <input type="datetime-local" id="dStart" value="${loc}"></label>
-    ${ph.unique?"":`<div><span class="eyebrow">Équipes encore en lice</span><div class="row" style="margin-top:6px">${Object.keys(DATA.teams).map(k=>`<label class="chip"><input type="checkbox" class="dTeam" value="${k}" checked> ${k}</label>`).join("")}</div></div>`}
+    ${ph.unique?"":`<div><span class="eyebrow">Équipes encore en lice</span><div class="row" style="margin-top:6px">${Object.keys(DATA.teams).map(k=>`<label class="chip"><input type="checkbox" class="dTeam" value="${k}" ${!stillIn(ph.id)||stillIn(ph.id).includes(k)?"checked":""}> ${k}</label>`).join("")}</div>${stillIn(ph.id)?`<p class="note">Cochées d'office : les équipes de cette phase d'après le programme officiel. Vérifie avant de préparer le tirage.</p>`:""}</div>`}
     <div><span class="eyebrow">Inscrits (clique sur un nom pour le retirer)</span><div class="row" style="margin-top:6px">${Object.entries(sages).sort((a,b)=>a[1].at-b.at).map(([id,x])=>`<a class="chip" href="#sage-${encodeURIComponent(id)}">${esc(x.pseudo)}</a>`).join("")||'<span class="note">Personne.</span>'}</div></div>
     <div class="row"><button class="btn" id="prep" ${Object.keys(sages).length?"":"disabled"}>Préparer le tirage (${n2(Object.keys(sages).length,"sage","sages")})</button><span class="note" id="drawMsg"></span></div>`}
+// équipes encore en lice pour une phase, d'après le programme officiel (results/state, rempli depuis lolesports)
+let worldsState=null;
+const STAGE_OF={quarts:"Quarts de finale",demis:"Demi-finales",finale:"Finale"};
+function stillIn(ph){const m=(worldsState?.matches||[]).filter(x=>x.stage===STAGE_OF[ph]);const t=[...new Set(m.flatMap(x=>[x.a,x.b]))].filter(k=>k&&k!=="TBD"&&DATA.teams[k]);return t.length>=2?t:null}
 function rnd(n){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n}
 function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
 function bindTirage(v){
@@ -507,7 +517,7 @@ function bindKick(id){const b=$("kick");if(!b)return;b.onclick=()=>{if(!b.datase
 
 // ---------- VOTES ----------
 function vRegles(v){v.innerHTML=`<section class="panel"><h2>Règles</h2><div class="rules">
-  <div><span class="eyebrow">Inscription et tirage</span><ul><li>Inscris-toi depuis l'accueil avant le tirage.</li><li>Un tirage à <b>chaque phase</b> : suisse, quarts, demies, finale.</li><li>Lane par lane : chaque sage reçoit un Top, puis un Jungle, un Mid, un Bot, un Support.</li><li>En phase suisse, un joueur ne va qu'à <b>un seul</b> sage.</li></ul></div>
+  <div><span class="eyebrow">Inscription et tirage</span><ul><li>Inscris-toi depuis l'accueil avant le tirage.</li><li>Un tirage à <b>chaque phase</b> : suisse, quarts, demies, finale.</li><li>Lane par lane : chaque sage reçoit un Top, puis un Jungle, un Mid, un Bot, un Support.</li><li>En phase suisse, un joueur ne va qu'à <b>un seul</b> sage. À partir des quarts, il reste moins de joueurs : chacun existe en <b>deux exemplaires</b>.</li><li>Les points gagnés pendant une phase restent acquis : le nouveau tirage ne change que les joueurs des phases suivantes.</li></ul></div>
 
   <div><span class="eyebrow">Capitaine</span><ul><li>Un <b>capitaine</b> par phase : ses points comptent <b>double</b>. Modifiable jusqu'au premier match de la phase.</li></ul></div>
   <div><span class="eyebrow">Raretés des cartes</span><ul><li><b style="color:var(--r-leg)">Légendaire</b> : top 3 du Conseil à son poste</li><li><b style="color:var(--r-epic)">Épique</b> : 4e à 7e</li><li><b style="color:var(--r-rare)">Rare</b> : 8e à 11e</li><li><b style="color:var(--r-com)">Commun</b> : 12e à 16e</li><li><b style="color:var(--r-goat)">Hors catégorie</b> : Faker 🐐</li></ul></div></div></section>
@@ -586,6 +596,7 @@ let fdb=null;
   fdb.collection("riot").doc(uid).get().then(s=>{myProfile=s.data()||null;if(!busy)render()}).catch(()=>{});
   const sub=(col,fn)=>db.collection(col).onSnapshot(s=>{fn(s);if(!busy)render()},e=>console.error(e));
   sub("sages",s=>{sages={};s.docs.forEach(d=>sages[d.id]=d.data())});
+  fdb.doc("results/state").onSnapshot(s=>{worldsState=s.exists?s.data():null;if(!busy&&view==="tirage")render()},()=>{});
   sub("phases",s=>{phases={};s.docs.forEach(d=>phases[d.id]=d.data())});
   sub("captains",s=>{captains={};s.docs.forEach(d=>captains[d.id]=d.data())});
   sub("votes",s=>{votes={};s.docs.forEach(d=>votes[d.id]=d.data())});
