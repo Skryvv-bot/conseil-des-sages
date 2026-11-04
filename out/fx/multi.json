@@ -601,5 +601,35 @@
 "fb": "TheShy",
 "kills": 39,
 "check": 39
+},
+"lol_115660540726095111": {
+"players": {
+"JiaQi": {
+"solo": 1,
+"triple": 1
+},
+"Rookie": {
+"solo": 2
+},
+"Creme": {
+"solo": 1
+},
+"369": {
+"solo": 1
+}
+},
+"fb": "JiaQi",
+"kills": 37,
+"check": 37
+},
+"lol_115660540726095112": {
+"players": {
+"Wei": {
+"solo": 1
+}
+},
+"fb": "Rookie",
+"kills": 25,
+"check": 25
 }
 }
