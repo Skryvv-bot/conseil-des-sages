@@ -209,6 +209,17 @@ input[type=text],select{font:500 1rem var(--body);color:var(--ink);background:va
 .camp-lol .dchip{background:rgba(228,0,43,.12);border-color:#7a0018;color:#ffd6dd}
 .camp-wow .dchip{background:rgba(255,180,0,.1);border-color:#7a5600;color:#ffe7b0}
 .camp .btn{font-size:.85rem!important;padding:10px 8px!important}
+.dchip .flag,.relapse .flag{color:#ff4d6a}.dchip .pure{color:#7bd34a}.dchip .ok{color:#ffd6dd;opacity:.85}
+.dchip b{font-weight:700;font-size:.78em;margin-left:4px;text-transform:uppercase;letter-spacing:.04em}
+.wow.after .clock b{color:#ff4d6a}
+.relapse{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.relapse .alarm{background:rgba(228,0,43,.18);border:1px solid #e4002b;color:#ffd6dd;padding:8px 10px;animation:alarm 1.2s ease-in-out infinite alternate}
+@keyframes alarm{from{box-shadow:0 0 0 rgba(228,0,43,0)}to{box-shadow:0 0 18px rgba(228,0,43,.55)}}
+.rstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.rstats div{border:1px solid var(--fel2);padding:8px;display:flex;flex-direction:column;gap:2px;background:rgba(0,0,0,.25)}
+.rstats b{font:400 1.6rem var(--display);color:#fff}
+.rstats span{font-size:.75rem;color:#c7d6bd}
+@media (max-width:520px){.rstats{grid-template-columns:1fr}}
 .camp .btn[aria-pressed="true"]{outline:2px solid #fff;outline-offset:2px}
 .event{display:flex;flex-direction:column;gap:6px;padding:14px;background:#1d2027;border-left:6px solid var(--tv-red,#e4002b)}
 .ev-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
@@ -317,7 +328,7 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
   <!-- Compte à rebours WoW Forever -->
   <section class="wow" aria-labelledby="wowT">
     <div style="position:relative;z-index:1;display:flex;flex-direction:column;gap:10px">
-      <span class="eyebrow">World of Warcraft: Forever · jeudi 5 novembre, 00 h 00</span>
+      <span class="eyebrow" id="wowEy">World of Warcraft: Forever · jeudi 5 novembre, 00 h 00</span>
       <h2 id="wowT">Fin de l'amitié dans…</h2>
       <div class="clock" id="clock" aria-live="off">
         <div><b id="cd-d">--</b><span>jours</span></div>
@@ -325,6 +336,8 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
         <div><b id="cd-m">--</b><span>minutes</span></div>
         <div><b id="cd-s">--</b><span>secondes</span></div>
       </div>
+      <span class="note" id="clockCap"></span>
+      <div id="relapse" class="relapse" hidden></div>
       <p id="wowMsg">Le 5 novembre, le Conseil se divise : les Fidèles restent sur la Faille, les Déserteurs partent pour Azeroth. Choisis ton camp.</p>
     </div>
     <div class="camps" aria-label="Les deux camps">
@@ -480,11 +493,18 @@ function ink(hex){const n=parseInt(hex.slice(1),16);return ((n>>16)*299+((n>>8)&
 const badge0=t=>TEAMC[t]?`<span class="badge" style="background:${TEAMC[t]};color:${ink(TEAMC[t])}">${t}</span>`:`<span class="badge" style="background:var(--line2);color:var(--muted)">?</span>`;
 const badge=t=>conseilTeamLogo(t,badge0(t));
 let db=null,uid=null,connErr=false,riot={},wow={},picks={},results=null,tiersN=0,myTiers=null,live={},champNames={};
+let RELAPSE={},relapseAt=0;   // rechutes des Déserteurs : parties classées depuis la sortie de WoW
 
 // ===== Compte à rebours =====
+// après la sortie : le compteur remonte (« Jour N de la Grande Trahison »)
+let wowAfter=null;
 function tick(){
-  const ms=WOW_LAUNCH-Date.now();
-  if(ms<=0){["d","h","m","s"].forEach(k=>$("cd-"+k).textContent="0");$("wowT").textContent="L'amitié est terminée.";$("wowMsg").textContent="WoW Forever est sorti. Les Fidèles gardent la Faille, les Déserteurs sont en Azeroth.";return}
+  const ms=WOW_LAUNCH-Date.now(),after=ms<=0;
+  if(after!==wowAfter){wowAfter=after;document.querySelector(".wow")?.classList.toggle("after",after);
+    if(after){$("wowEy").textContent="World of Warcraft: Forever est sorti · jeudi 5 novembre, 00 h 00";$("wowMsg").innerHTML="Le Conseil est coupé en deux. Les Fidèles gardent la Faille, les Déserteurs sont en Azeroth… enfin, en théorie. Le robot surveille les parties classées de chacun depuis la sortie.";renderWow()}}
+  if(after){const s=Math.floor(-ms/1000),day=Math.floor(s/86400)+1;$("wowT").textContent=`Grande Trahison · jour ${day}`;
+    $("cd-d").textContent=Math.floor(s/86400);$("cd-h").textContent=String(Math.floor(s%86400/3600)).padStart(2,"0");$("cd-m").textContent=String(Math.floor(s%3600/60)).padStart(2,"0");$("cd-s").textContent=String(s%60).padStart(2,"0");
+    $("clockCap").textContent="depuis la fin de l'amitié";return}
   const s=Math.floor(ms/1000);
   $("cd-d").textContent=Math.floor(s/86400);$("cd-h").textContent=String(Math.floor(s%86400/3600)).padStart(2,"0");
   $("cd-m").textContent=String(Math.floor(s%3600/60)).padStart(2,"0");$("cd-s").textContent=String(s%60).padStart(2,"0");
@@ -568,24 +588,46 @@ async function loadLive(){
   const ps=conseilAllAccounts(riot);if(!ps.length)return;
   try{const r=await fetch(LIVE_API.replace(/\/$/,"")+"/live?players="+encodeURIComponent(ps.join(",")));
     if(!r.ok)throw new Error("HTTP "+r.status);const j=await r.json();live={};
-    for(const [id,g] of Object.entries(j.games||{}))if(g)live[id.toLowerCase()]=g;renderPlayers()}catch(e){console.warn("live",e)}
+    for(const [id,g] of Object.entries(j.games||{}))if(g)live[id.toLowerCase()]=g;renderPlayers();renderWow()}catch(e){console.warn("live",e)}
 }
 if(LIVE_API){loadChampNames();setInterval(loadLive,90000)}
 
 // ===== Déserteurs WoW =====
 function campOf(w){return w.side||(w.going?"wow":null)}
+// Parties classées de chaque membre des deux camps depuis la sortie de WoW (relais Riot, route /week), gardées 10 min
+async function loadRelapses(){
+  if(!LIVE_API||Date.now()<WOW_LAUNCH||Date.now()-relapseAt<10*60e3)return;relapseAt=Date.now();
+  const ids=Object.keys(wow).filter(id=>campOf(wow[id])&&riot[id]);if(!ids.length)return;
+  const sub=Object.fromEntries(ids.map(id=>[id,riot[id]]));
+  try{const r=await fetch(LIVE_API.replace(/\/$/,"")+"/week?since="+WOW_LAUNCH+"&players="+encodeURIComponent(conseilAllAccounts(sub).join(",")));if(!r.ok)return;const j=await r.json(),wk=j.week||{};
+    const out={};for(const id of ids){let n=0;for(const a of conseilAccounts(riot[id])){const v=wk[a.riotId.toLowerCase()];if(v)for(const q of ["solo","flex"])n+=(v[q]?.w||0)+(v[q]?.l||0)+(v[q]?.pending||0)}out[id]=n}
+    RELAPSE=out;renderWow()}catch(e){console.warn("rechutes",e)}}
+setInterval(loadRelapses,5*60e3);
+const inGame=id=>!!(riot[id]&&conseilLiveOf(riot[id],live));
 function renderWow(){
   const all=Object.entries(wow).filter(([,w])=>w.pseudo&&campOf(w));
   const L=all.filter(([,w])=>campOf(w)==="lol"),Wo=all.filter(([,w])=>campOf(w)==="wow"),n=L.length+Wo.length;
-  const chips=(arr,empty)=>arr.length?arr.map(([id,w])=>`<span class="dchip"${id===uid?' style="outline:1px solid #fff"':""}>${esc(w.pseudo)}</span>`).join(""):`<span class="note">${empty}</span>`;
-  $("lolList").innerHTML=chips(L,"Personne pour l'instant.");$("dlist").innerHTML=chips(Wo,"Personne n'a encore avoué.");
+  const after=Date.now()>=WOW_LAUNCH;
+  const tag=(id,camp)=>{if(!after)return "";const n=RELAPSE[id],now=riot[id]&&inGame(id);
+    if(camp==="wow")return now?' <b class="flag">en partie de LoL !</b>':n?` <b class="flag">rechute ×${n}</b>`:n===0?' <b class="pure">incorruptible</b>':"";
+    return now?' <b class="ok">en partie</b>':n?` <b class="ok">×${n}</b>`:""};
+  const chips=(arr,empty,camp)=>arr.length?arr.map(([id,w])=>`<span class="dchip"${id===uid?' style="outline:1px solid #fff"':""}>${esc(w.pseudo)}${tag(id,camp)}</span>`).join(""):`<span class="note">${empty}</span>`;
+  $("lolList").innerHTML=chips(L,"Personne pour l'instant.","lol");$("dlist").innerHTML=chips(Wo,"Personne n'a encore avoué.","wow");
+  // le tableau de la Grande Trahison
+  if(after){loadRelapses();const sum=a=>a.reduce((t,[id])=>t+(RELAPSE[id]||0),0),known=Object.keys(RELAPSE).length,caught=Wo.filter(([id])=>riot[id]&&inGame(id)),shame=Wo.filter(([id])=>RELAPSE[id]>0).sort((a,b)=>RELAPSE[b[0]]-RELAPSE[a[0]]),pure=Wo.filter(([id])=>RELAPSE[id]===0);
+    const days=Math.max(1,Math.ceil((Date.now()-WOW_LAUNCH)/864e5)),box=$("relapse");box.hidden=!Wo.length&&!L.length;
+    box.innerHTML=(caught.length?`<div class="alarm">🚨 Flagrant délit : ${caught.map(([,w])=>`<b>${esc(w.pseudo)}</b>`).join(", ")} ${caught.length>1?"sont":"est"} en partie de LoL en ce moment. Azeroth n'a pas tenu longtemps.</div>`:"")+
+      `<div class="rstats"><div><b>${known?sum(L):"…"}</b><span>parties classées des Fidèles depuis la sortie</span></div><div><b class="${sum(Wo)?"flag":""}">${known?sum(Wo):"…"}</b><span>rechutes des Déserteurs</span></div><div><b>${pure.length}</b><span>déserteur${pure.length>1?"s":""} sans aucune partie depuis ${days} jour${days>1?"s":""}</span></div></div>`+
+      (shame.length?`<p class="note">Mur de la honte : ${shame.map(([id,w])=>`<b>${esc(w.pseudo)}</b> (${RELAPSE[id]})`).join(" · ")}.</p>`:known&&Wo.length?`<p class="note">Aucune rechute pour l'instant : les Déserteurs tiennent bon.</p>`:"")+
+      (Wo.some(([id])=>!riot[id])?`<p class="note">Les déserteurs sans Riot ID sur le site échappent à la surveillance… pour l'instant.</p>`:"")}
   $("nLol").textContent=L.length;$("nWow").textContent=Wo.length;
   const pl=n?Math.round(100*L.length/n):50;
   $("campBar").innerHTML=`<i class="cl" style="width:${pl}%"></i><i class="cw" style="width:${100-pl}%"></i>`;$("campBar").setAttribute("aria-label",`${L.length} fidèles de la Faille, ${Wo.length} déserteurs`);
   const tr=(window.CAMP_TRAITORS||[])[0];
   $("campMsg").textContent=(tr?`Traître de la semaine : ${tr.pseudo} (${campOf(tr)==="wow"?"parti pour Azeroth":"revenu sur la Faille"}). `:"")+(!n?"":L.length===Wo.length?"Égalité parfaite entre les deux camps.":L.length>Wo.length?`La Faille tient bon : ${L.length} contre ${Wo.length}.`:`Azeroth gagne du terrain : ${Wo.length} contre ${L.length}.`);
   const mine=wow[uid]?campOf(wow[uid]):null;
-  for(const [id,side,label] of [["pickLol","lol","Je reste sur LoL"],["desert","wow","Je pars sur WoW"]]){const b=$(id);b.disabled=!db;b.setAttribute("aria-pressed",mine===side);b.textContent=mine===side?label+" ✓":label}
+  const labels=after?[["pickLol","lol",mine==="wow"?"Je reviens sur la Faille":"Je reste sur LoL"],["desert","wow",mine==="lol"?"Je craque, je pars sur WoW":"Je pars sur WoW"]]:[["pickLol","lol","Je reste sur LoL"],["desert","wow","Je pars sur WoW"]];
+  for(const [id,side,label] of labels){const b=$(id);b.disabled=!db;b.setAttribute("aria-pressed",mine===side);b.textContent=mine===side?label+" ✓":label}
 }
 async function pickCamp(side){if(!db)return;
   let pseudo=wow[uid]?.pseudo||riot[uid]?.pseudo||picks[uid]?.pseudo;
@@ -712,8 +754,8 @@ conseilLoadLogos(()=>renderAll());conseilDD().then(()=>renderAll());
   if(!c.db){connErr=true;renderAll();return}
   db=c.db;uid=c.uid;
   const sub=(col,fn)=>db.collection(col).onSnapshot(q=>{const o={};q.docs.filter(d=>!conseilIsClaimed(d.id)).forEach(d=>o[d.id]=d.data());fn(o);renderAll()},e=>console.warn(col,e));
-  sub("riot",o=>{riot=o;loadLive()});
-  sub("wow",o=>wow=o);
+  sub("riot",o=>{riot=o;loadLive();relapseAt=0;loadRelapses()});
+  sub("wow",o=>{wow=o;if(!Object.keys(RELAPSE).length)relapseAt=0;loadRelapses()});
   sub("picks",o=>picks=o);
   sub("tiers",o=>{tiersN=Object.values(o).filter(t=>t.complete).length;myTiers=o[uid]||null});
   sub("fantasySages",o=>fanD.sages=o);sub("fantasyPhases",o=>fanD.phases=o);sub("fantasyCaptains",o=>fanD.captains=o);
