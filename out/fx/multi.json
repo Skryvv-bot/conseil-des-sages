@@ -664,5 +664,18 @@
 "fb": "Ruler",
 "kills": 28,
 "check": 28
+},
+"lol_115660540726095118": {
+"players": {
+"Chovy": {
+"triple": 1
+},
+"Ruler": {
+"triple": 1
+}
+},
+"fb": "Kiin",
+"kills": 26,
+"check": 26
 }
 }
