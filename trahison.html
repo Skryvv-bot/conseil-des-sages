@@ -246,7 +246,10 @@ glue.onclick=()=>{hero.classList.add("fixed");glue.disabled=true;verdict.textCon
   if(k++===0){setTimeout(()=>{hero.classList.remove("fixed");verdict.textContent=fails[Math.floor(Math.random()*fails.length)];glue.disabled=false;
     const r=hero.getBoundingClientRect();crack(r.left+r.width/2,Math.max(40,r.top+r.height/2))},1400);return}
   setTimeout(()=>{verdict.textContent="Ça tient ! Retour au Conseil…";cx.clearRect(0,0,cv.width,cv.height)},1200);
-  setTimeout(()=>{location.href="./"},2600)};
+  setTimeout(()=>{location.href=backTo()},2600)};
+// la page s'affiche une seule fois ; on retourne ensuite à la page demandée (lien interne seulement)
+try{localStorage.setItem("cdsTrahisonVue","1")}catch(e){}
+function backTo(){const f=new URLSearchParams(location.search).get("from")||"";return /^\/(?!\/)/.test(f)&&!/trahison/.test(f)?f:"./"}
 </script>
 </body>
 </html>

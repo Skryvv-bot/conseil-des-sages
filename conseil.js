@@ -1,4 +1,12 @@
 // Outils partagés par toutes les pages du Conseil des Sages
+// Première visite sur le site, quelle que soit la page : détour unique par la page « CDS.TV en ruines ».
+// Le bouton « Tenter de recoller les morceaux » renvoie ensuite vers la page demandée au départ.
+(function(){try{
+  if(window.top!==window.self||/\/trahison(\.html)?$/.test(location.pathname)||localStorage.getItem("cdsTrahisonVue"))return;
+  localStorage.setItem("cdsTrahisonVue","1");
+  location.replace("/trahison.html?from="+encodeURIComponent(location.pathname+location.search+location.hash));
+}catch(e){}})();
+
 const FIREBASE_CONFIG={
   apiKey:"AIzaSyBnmVwD79y26gs4dVjMEzYyOa7sxdhtR_I",
   authDomain:"conseil-des-sages.firebaseapp.com",
