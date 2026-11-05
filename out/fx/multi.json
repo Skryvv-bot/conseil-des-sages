@@ -654,5 +654,15 @@
 "fb": "Berserker",
 "kills": 27,
 "check": 27
+},
+"lol_115660540726095117": {
+"players": {
+"Ruler": {
+"solo": 1
+}
+},
+"fb": "Ruler",
+"kills": 28,
+"check": 28
 }
 }
