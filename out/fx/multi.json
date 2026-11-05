@@ -677,5 +677,22 @@
 "fb": "Kiin",
 "kills": 26,
 "check": 26
+},
+"lol_115660540726095098": {
+"players": {
+"Knight": {
+"solo": 1
+},
+"Siwoo": {
+"solo": 1
+},
+"Xun": {
+"solo": 1,
+"triple": 2
+}
+},
+"fb": "Lucid",
+"kills": 33,
+"check": 33
 }
 }
