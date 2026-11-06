@@ -704,5 +704,19 @@
 "fb": "Viper",
 "kills": 23,
 "check": 23
+},
+"lol_115660540726095100": {
+"players": {
+"Bin": {
+"solo": 5,
+"triple": 1
+},
+"ShowMaker": {
+"solo": 1
+}
+},
+"fb": "Xun",
+"kills": 34,
+"check": 34
 }
 }
