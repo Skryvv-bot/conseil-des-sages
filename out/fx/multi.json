@@ -718,5 +718,21 @@
 "fb": "Xun",
 "kills": 34,
 "check": 34
+},
+"lol_115660540726095104": {
+"players": {
+"Canna": {
+"solo": 1
+},
+"Faker": {
+"triple": 1
+},
+"Peyz": {
+"triple": 1
+}
+},
+"fb": "Canna",
+"kills": 30,
+"check": 30
 }
 }
