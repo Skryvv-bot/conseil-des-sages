@@ -694,5 +694,15 @@
 "fb": "Lucid",
 "kills": 33,
 "check": 33
+},
+"lol_115660540726095099": {
+"players": {
+"Viper": {
+"solo": 1
+}
+},
+"fb": "Viper",
+"kills": 23,
+"check": 23
 }
 }
