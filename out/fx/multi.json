@@ -760,5 +760,21 @@
 "fb": "Canna",
 "kills": 25,
 "check": 25
+},
+"lol_115660540726095128": {
+"players": {
+"Canyon": {
+"solo": 1
+},
+"Rookie": {
+"solo": 1
+},
+"Wei": {
+"solo": 1
+}
+},
+"fb": "Canyon",
+"kills": 38,
+"check": 38
 }
 }
