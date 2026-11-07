@@ -734,5 +734,15 @@
 "fb": "Canna",
 "kills": 30,
 "check": 30
+},
+"lol_115660540726095105": {
+"players": {
+"Faker": {
+"solo": 1
+}
+},
+"fb": "Faker",
+"kills": 29,
+"check": 29
 }
 }
