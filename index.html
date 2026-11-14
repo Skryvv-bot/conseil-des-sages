@@ -455,8 +455,9 @@ section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,
         <h2 id="lolT">Qui joue en ce moment</h2>
         <span class="note" id="liveInfo"></span>
       </div>
-      <div id="riotReg"></div>
-      <p class="note riot-optin" style="font-size:.8rem">Ajouter ton Riot ID est facultatif et se fait uniquement par toi. En l'ajoutant, tu acceptes que ton Riot ID et ta partie en cours (champion, mode, durée) soient visibles par tous les visiteurs du site. Tu peux le retirer à tout moment dans ton profil (clique sur ton pseudo) (vide le champ Riot ID).</p>
+      <div id="riotReg" class="gone"></div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="note">Pour apparaître ici, indique tes comptes dans ton profil : Riot ID pour LoL, personnage pour WoW, pseudo Epic pour Fortnite. Le jeu en cours vient de Riot pour LoL et de ton statut Discord pour le reste.</span><a class="btn ghost small" href="communaute.html#profil">Mon profil</a></div>
+      <p class="note riot-optin gone" style="font-size:.8rem">Ajouter ton Riot ID est facultatif et se fait uniquement par toi. En l'ajoutant, tu acceptes que ton Riot ID et ta partie en cours (champion, mode, durée) soient visibles par tous les visiteurs du site. Tu peux le retirer à tout moment dans ton profil (clique sur ton pseudo) (vide le champ Riot ID).</p>
       <div class="players" id="players"><div class="note">Chargement des invocateurs…</div></div>
     </section>
   </div>
@@ -644,22 +645,24 @@ function loadWowChars(){const sl=[...new Set(Object.values(riot).filter(p=>p.wow
 function renderPlayers(){
   // un même Riot ID sur plusieurs appareils : une seule ligne (le profil le plus récent) ; puis les sages sans Riot ID qui ont un personnage WoW
   const uniq=new Map();for(const [id,p] of Object.entries(riot).filter(([,p])=>p.riotId&&p.pseudo).sort((a,b)=>String(a[1].updated||"").localeCompare(String(b[1].updated||""))))uniq.set(p.riotId.toLowerCase(),[id,p]);
-  for(const [id,p] of Object.entries(riot))if(!p.riotId&&p.pseudo&&p.wow&&p.wow.name)uniq.set("wow:"+id,[id,p]);
+  for(const [id,p] of Object.entries(riot))if(!p.riotId&&p.pseudo&&((p.wow&&p.wow.name)||(p.fn&&p.fn.name)))uniq.set("autre:"+id,[id,p]);
   loadWowChars();
   const list=[...uniq.values()].map(([id,p])=>{const L=p.riotId?conseilLiveOf(p,live):null,dg=DCGAME[String(p.discord||"").trim().toLowerCase()]||DCGAME[String(p.pseudo).toLowerCase()]||"";
     return {id,...p,lv:L?.g||null,lvAcc:L&&!L.acc.main?L.acc.riotId:null,lvAccObj:L&&!L.acc.main?{riotId:L.acc.riotId,region:L.acc.region||p.region}:null,dg:/league of legends/i.test(dg)?"":dg}});
   if(!db&&!list.length){$("players").innerHTML=`<div class="note">${connErr?"Liste indisponible.":"Chargement des sages…"}</div>`;return}
-  if(!list.length){$("players").innerHTML=`<div class="note">Aucun sage inscrit. Ajoute ton Riot ID ci-dessus, ou ton personnage WoW dans ton profil, pour apparaître ici.</div>`;return}
+  if(!list.length){$("players").innerHTML=`<div class="note">Aucun sage inscrit pour l'instant. Ajoute tes comptes de jeu dans ton profil pour apparaître ici.</div>`;return}
   list.sort((a,b)=>(b.lv?2:b.dg?1:0)-(a.lv?2:a.dg?1:0)||a.pseudo.localeCompare(b.pseudo));
   const short=g=>/warcraft/i.test(g)?"WoW":/fortnite/i.test(g)?"Fortnite":g.length>14?g.slice(0,13)+"…":g;
   $("players").innerHTML=list.map(p=>{
     const g=p.lv, mins=g?Math.max(0,Math.floor((Date.now()-g.start)/60000)):0;
-    const status=g?`<span class="st on">En partie · LoL</span>`:p.dg?`<span class="st on st-g${/warcraft/i.test(p.dg)?" st-wow":/fortnite/i.test(p.dg)?" st-fn":""}">Sur ${esc(short(p.dg))}</span>`:LIVE_API||!p.riotId?`<span class="st">Hors partie</span>`:`<span class="st">${REGIONS[p.region]||""}</span>`;
+    const status=g?`<span class="st on">En partie · LoL</span>`:p.dg?`<span class="st on st-g${/warcraft/i.test(p.dg)?" st-wow":/fortnite/i.test(p.dg)?" st-fn":""}">Sur ${esc(short(p.dg))}</span>`:`<span class="st">Hors jeu</span>`;
     const wc=p.wow&&p.wow.name?WOWCH[wowSlug(p.wow)]:null,wl=p.wow&&p.wow.name?(wc&&wc.level?wc.level:p.wow.lvl||0):0;
     const wowTxt=p.wow&&p.wow.name?` · <span style="color:#ffe27a">WoW : ${esc(p.wow.name)}${wl?" niv. "+wl:""}${wc&&wc.cls?" · "+esc(wc.cls):""}</span>`:"";
-    const detail=g?`${esc(champNames[g.championId]||"Champion")} · ${esc(QUEUES[g.queueId]||"Partie")} · ${mins} min${p.lvAcc?` · sur ${esc(p.lvAcc)}`:""}`:(p.riotId?esc(p.riotId)+(p.alts?.length?` <span style="opacity:.7">+${p.alts.length} compte${p.alts.length>1?"s":""}</span>`:""):"Pas de Riot ID")+wowTxt;
-    return `<div class="pl ${g||p.dg?"ingame":""}">${status}<div class="pinfo"><b>${esc(p.pseudo)}${conseilCampTag(p.id)}</b><small>${detail}</small></div>
-      <div class="plinks">${p.riotId?`<a class="btn ghost small" href="${poro(p.lvAccObj||p)}" target="_blank" rel="noopener">Live</a><a class="btn ghost small" href="${opgg(p)}" target="_blank" rel="noopener">op.gg</a>`:`<a class="btn ghost small" href="wow.html">WoW</a>`}</div></div>`}).join("");
+    const comptes=[p.riotId?"LoL : "+esc(p.riotId)+(p.alts?.length?` <span style="opacity:.7">+${p.alts.length}</span>`:""):"",wowTxt.replace(/^ · /,""),p.fn&&p.fn.name?`<span style="color:#7ad7ff">Fortnite : ${esc(p.fn.name)}</span>`:""].filter(Boolean).join(" · ");
+    const detail=g?`${esc(champNames[g.championId]||"Champion")} · ${esc(QUEUES[g.queueId]||"Partie")} · ${mins} min${p.lvAcc?` · sur ${esc(p.lvAcc)}`:""}`:comptes||"Aucun compte de jeu indiqué";
+    // Live, op.gg et prono : seulement pendant une partie de LoL
+    const links=g?`<div class="plinks"><a class="btn small" href="communaute.html#paris">Prono</a><a class="btn ghost small" href="${poro(p.lvAccObj||p)}" target="_blank" rel="noopener">Live</a><a class="btn ghost small" href="${opgg(p)}" target="_blank" rel="noopener">op.gg</a></div>`:"";
+    return `<div class="pl ${g||p.dg?"ingame":""}">${status}<div class="pinfo"><b>${esc(p.pseudo)}${conseilCampTag(p.id)}</b><small>${detail}</small></div>${links}</div>`}).join("");
   const n=list.filter(p=>p.lv).length,o=list.filter(p=>!p.lv&&p.dg).length;
   $("liveInfo").textContent=(n||o)?[n?`${n} sur LoL`:"",o?`${o} sur un autre jeu`:""].filter(Boolean).join(" · "):"Personne en jeu";
 }
