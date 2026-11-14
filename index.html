@@ -389,6 +389,7 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
         <h3 style="margin-bottom:6px">En ligne maintenant</h3>
         <div class="online" id="dcOnline"></div>
         <p class="vc" id="dcVoice" style="margin-top:8px"></p>
+        <div id="dcGames" hidden style="margin-top:12px;display:flex;flex-direction:column;gap:6px"><h3>En jeu maintenant</h3><div id="dcGamesList" style="display:flex;flex-direction:column;gap:6px"></div></div>
       </div>
       <p class="note" style="font-size:.78rem">Lien d'invitation : discord.gg/ekEVAX8JN</p>
     </section>
@@ -550,6 +551,11 @@ async function loadDiscord(){
       const names=Object.fromEntries((w.channels||[]).map(c=>[c.id,c.name]));
       $("dcVoice").innerHTML=Object.keys(vc).length?Object.entries(vc).map(([id,us])=>`🔊 <b>${esc(names[id]||"Vocal")}</b> : ${us.map(esc).join(", ")}`).join("<br>"):"Personne en vocal pour l'instant.";
     }
+    // Qui joue à quoi : le widget Discord donne le jeu affiché dans le statut de chaque membre en ligne (Fortnite en premier)
+    const by={};for(const m of mem){const g=m.game&&m.game.name;if(g)(by[g]=by[g]||[]).push(m.username)}
+    const gl=Object.entries(by).sort((x,y)=>(/fortnite/i.test(y[0])-/fortnite/i.test(x[0]))||y[1].length-x[1].length);
+    $("dcGames").hidden=!gl.length;
+    $("dcGamesList").innerHTML=gl.map(([g,us])=>`<div class="item" style="padding:8px 10px;border:1px solid ${/fortnite/i.test(g)?"#ffe27a":"#3a3752"}"><b style="color:${/fortnite/i.test(g)?"#ffe27a":"#fff"}">${esc(g)}</b> <span class="tag live">${us.length} en jeu</span><br><span class="note">${us.map(esc).join(", ")}</span></div>`).join("");
     if(w.presence_count!=null){$("dcOn").textContent=w.presence_count;$("dcStats").hidden=false}
   }catch(e){}
 }
