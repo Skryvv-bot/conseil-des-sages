@@ -32,8 +32,8 @@ window.conseilShowAdmin=function(){const ok=window.CONSEIL_UID===CONSEIL_ADMIN;d
 // ---------- Navigation commune ----------
 const CONSEIL_NAV=[
   {id:"accueil",href:"index.html",label:"Accueil"},
-  {id:"lol",href:"lol.html",label:"LoL",sub:[{id:"lol",href:"lol.html",label:"Accueil LoL"},{id:"ladder",href:"ladder.html",label:"Ladder"},{id:"worlds",href:"worlds.html",label:"Worlds 2026"},{id:"tierlist",href:"tierlist.html",label:"Tier list"},
-    {id:"fantasy",href:"fantasy.html",label:"Fantasy"},{id:"cartes",href:"cartes.html",label:"LolMaster"},{id:"customs",href:"customs.html",label:"Customs & Clash"},{id:"pronos",href:"communaute.html#paris",label:"Pronos entre potes"},{id:"mercato",href:"mercato.html",label:"Mercato"},{id:"patch",href:"patch.html",label:"Patch"}]},
+  {id:"lol",href:"lol.html",label:"LoL",sub:[{id:"lol",href:"lol.html",label:"Accueil LoL"},{id:"mercato",href:"mercato.html",label:"Mercato"},{id:"worlds",href:"worlds.html",label:"Worlds 2026"},{id:"fantasy",href:"fantasy.html",label:"Fantasy"},{id:"cartes",href:"cartes.html",label:"LolMaster"},
+    {id:"ladder",href:"ladder.html",label:"Ladder"},{id:"customs",href:"customs.html",label:"Customs & Clash"},{id:"pronos",href:"communaute.html#paris",label:"Pronos entre potes"},{id:"patch",href:"patch.html",label:"Patch"}]},
   {id:"wow",href:"wow.html",label:"WoW",sub:[{id:"wow",href:"wow.html",label:"WoW Forever"}]},
   {id:"fortnite",href:"fortnite.html",label:"Fortnite",sub:[{id:"fortnite",href:"fortnite.html",label:"Chasse aux trésors"},{href:"fortnite.html#taux",label:"Taux de drop"}]},
   {id:"jeux",href:"devinettes.html",label:"Jeux",noBar:1,sub:[{id:"devinettes",href:"devinettes.html",label:"Devinettes"}]}
@@ -256,7 +256,7 @@ window.conseilHunt=async function(){const boxes=[...document.querySelectorAll("[
 
 // ---------- Thème « Collection holographique » et bandeau d'infos ----------
 (function(){const add=()=>{if(document.getElementById("tv-theme"))return;
-  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=8";document.head.appendChild(l)};
+  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=9";document.head.appendChild(l)};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();
 function defaultTicker(){const d=Math.ceil((Date.parse("2026-11-04T23:00:00Z")-Date.now())/864e5);
   return ["Worlds 2026 : la finale le 14 novembre, puis le bilan du Pick'em","Pick'em : un skin pour le 1er (offert par Skryvv) et un skin pour le 2e (offert par Tabaskoh)",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Pronos entre potes, tribunal et sage de la semaine dans Le Conseil","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes"]}

@@ -206,3 +206,8 @@ footer{color:#8c88aa!important}
 .hunt-l:empty{display:none}
 .hunt-p{display:inline-flex;align-items:center;gap:8px;background:#0c0b14;border:1px solid var(--line);border-radius:999px;padding:3px 12px 3px 3px;font-weight:800;font-size:.88rem;color:#fff}
 .hunt-p.me{border-color:var(--holo-pink)}
+
+/* Liens présentés comme des onglets (Worlds 2026 et sa tier list) */
+.tabs a.tablink{display:inline-flex;align-items:center;min-height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--line);font:800 .95rem var(--body);color:#f2f0ff;text-decoration:none}
+.tabs a.tablink:hover{border-color:#f2f0ff}
+.tabs a.tablink[aria-current="page"]{background:#f2f0ff;color:#0c0b14;border-color:#f2f0ff}
