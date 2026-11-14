@@ -112,7 +112,7 @@ window.conseilNav=function(active){
   (function(){const el=document.getElementById("cnavDCn");if(!el)return;const show=n=>{if(n!=null)el.textContent=n+" en ligne"};const c=LS.get("dc-count",null);
     if(c&&Date.now()-c.t<300e3)return show(c.n);
     fetch("https://discord.com/api/v10/invites/ekEVAX8JN?with_counts=true").then(r=>r.json()).then(d=>{if(d.approximate_presence_count!=null){LS.set("dc-count",{n:d.approximate_presence_count,t:Date.now()});show(d.approximate_presence_count)}}).catch(()=>{})})();
-  conseilComments(active);conseilHunt();
+  conseilComments(active);conseilHunt();setTimeout(conseilPromos,1500);
   if(!/communaute\.html$|index\.html$|\/$/.test(location.pathname))setTimeout(conseilPronoSweep,4000);
 };
 
@@ -242,6 +242,29 @@ window.conseilAv=(id,pseudo,size=26)=>`<span class="cav cav-in" data-av="${conse
     let t=null;new MutationObserver(()=>{clearTimeout(t);t=setTimeout(fill,120)}).observe(document.body,{childList:true,subtree:true})})})}
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>setTimeout(start,300));else setTimeout(start,300)})();
 
+// ---------- Félicitations : un sage a passé une division (affiché 4 jours, une fois par visiteur et par montée) ----------
+window.conseilPromos=async function(){try{if(document.querySelector(".cpromo"))return;
+  const {db}=await conseilConnect();if(!db)return;const d=await db.doc("ladder/current").get();if(!d.exists)return;
+  const seen=LS.get("promos-vues",{}),now=Date.now(),Q={solo:"Solo/Duo",flex:"Flex"};
+  const key=p=>p.id+"|"+p.q+"|"+p.to.tier+p.to.rank;
+  const list=(d.data().promos||[]).filter(p=>now-p.at<4*864e5&&!seen[key(p)]).sort((a,b)=>b.at-a.at);
+  for(const k of Object.keys(seen))if(now-seen[k]>6*864e5)delete seen[k];
+  if(!list.length)return;
+  const [sages,dc]=await Promise.all([conseilSages(db),conseilDiscordAvatars()]);if(document.querySelector(".cpromo"))return;
+  const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+  const box=el("div","cpromo");box.setAttribute("role","dialog");box.setAttribute("aria-modal","true");box.setAttribute("aria-labelledby","cpromoT");
+  const card=el("div","cpromo-c");card.append(el("span","eyebrow","Montée de division"),Object.assign(el("h2","",list.length>1?"Félicitations aux sages !":"Félicitations !"),{id:"cpromoT"}));
+  for(const p of list.slice(0,6)){const m=sages[p.id]||{pseudo:p.pseudo},r=el("div","cpromo-r"),t=el("div","cpromo-t");
+    t.append(el("b","",m.pseudo||p.pseudo),el("span","","passe "+conseilRankLabel(p.to,false)+" en "+(Q[p.q]||p.q)),el("small","","depuis "+conseilRankLabel(p.from,false)));
+    const em=el("span");em.innerHTML=conseilRankEmblem(p.to.tier,56);r.append(conseilAvatarEl(m,dc,52),t,em);card.append(r)}
+  const row=el("div","cpromo-b"),ok=el("button","btn","Bravo !"),go=el("a","btn ghost","Voir le ladder");ok.type="button";go.href="ladder.html";row.append(ok,go);card.append(row);
+  const conf=el("div","cpromo-f");conf.setAttribute("aria-hidden","true");for(let i=0;i<40;i++){const s=el("i");s.style.cssText=`left:${Math.random()*100}%;animation-delay:${(Math.random()*1.4).toFixed(2)}s;background:${["#ff8ad8","#ffe27a","#8affc1","#7ad7ff","#b48aff"][i%5]};transform:rotate(${Math.random()*180}deg)`;conf.append(s)}
+  box.append(conf,card);document.body.appendChild(box);ok.focus();
+  const close=()=>{for(const p of list)seen[key(p)]=Date.now();LS.set("promos-vues",seen);box.remove();document.removeEventListener("keydown",esc)};
+  const esc=e=>{if(e.key==="Escape")close()};
+  ok.onclick=close;go.onclick=()=>{for(const p of list)seen[key(p)]=Date.now();LS.set("promos-vues",seen)};box.addEventListener("click",e=>{if(e.target===box)close()});document.addEventListener("keydown",esc);
+}catch(e){console.warn("promos",e)}};
+
 // ---------- Commentaires ----------
 // Un fil par page (collection « comments »). Il faut un profil avec un pseudo pour écrire ; chacun peut supprimer ses messages.
 const COMMENT_PAGES={pronos:"les pronos entre potes",accueil:"l'accueil",lol:"LoL",wow:"WoW Forever",fortnite:"Fortnite",mercato:"le mercato",patch:"le patch",worlds:"les Worlds",fantasy:"la Fantasy",ladder:"le ladder",tierlist:"la tier list",devinettes:"les Devinettes",customs:"les customs"};
@@ -296,7 +319,7 @@ window.conseilHunt=async function(){const boxes=[...document.querySelectorAll("[
 
 // ---------- Thème « Collection holographique » et bandeau d'infos ----------
 (function(){const add=()=>{if(document.getElementById("tv-theme"))return;
-  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=13";document.head.appendChild(l)};
+  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=14";document.head.appendChild(l)};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();
 function defaultTicker(){const d=Math.ceil((Date.parse("2026-11-04T23:00:00Z")-Date.now())/864e5);
   return ["Worlds 2026 : la finale le 14 novembre, puis le bilan du Pick'em","Pick'em : un skin pour le 1er (offert par Skryvv) et un skin pour le 2e (offert par Tabaskoh)",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Pronos entre potes, tribunal et sage de la semaine dans Le Conseil","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes"]}
@@ -386,6 +409,7 @@ window.TIER_COLOR={IRON:"#6b6f76",BRONZE:"#a0674b",SILVER:"#9aa4ae",GOLD:"#d4a64
 const APEX=new Set(["MASTER","GRANDMASTER","CHALLENGER"]);
 // Valeur servant uniquement à trier les rangs officiels et à mesurer les LP gagnés ou perdus
 window.conseilRankValue=v=>{if(!v||!v.tier)return -1;const t=RIOT_TIERS.indexOf(v.tier);if(APEX.has(v.tier))return 2800+(v.lp||0);return t*400+Math.max(0,["IV","III","II","I"].indexOf(v.rank))*100+(v.lp||0)};
+window.conseilRankValue=v=>!v||!v.tier?-1:RIOT_TIERS.indexOf(v.tier)*4+(APEX.has(v.tier)?3:({IV:0,III:1,II:2,I:3}[v.rank]??0));
 window.conseilRankLabel=(v,withLp=true)=>!v||!v.tier?"Non classé":`${TIER_FR[v.tier]||v.tier}${APEX.has(v.tier)?"":" "+v.rank}${withLp?" · "+(v.lp||0)+" LP":""}`;
 // Emblèmes de rang Riot actuels (depuis 2023, Émeraude compris) : Community Dragon, puis le wiki LoL en secours.
 const RANK_EMBLEM_FB={IRON:"f/f8/Season_2023_-_Iron.png",BRONZE:"c/cb/Season_2023_-_Bronze.png",SILVER:"c/c4/Season_2023_-_Silver.png",GOLD:"7/78/Season_2023_-_Gold.png",PLATINUM:"b/bd/Season_2023_-_Platinum.png",EMERALD:"4/4b/Season_2023_-_Emerald.png",DIAMOND:"3/37/Season_2023_-_Diamond.png",MASTER:"d/d5/Season_2023_-_Master.png",GRANDMASTER:"6/64/Season_2023_-_Grandmaster.png",CHALLENGER:"1/14/Season_2023_-_Challenger.png"};
@@ -414,7 +438,13 @@ window.conseilLadder=async function(db,riotProfiles,{force=false}={}){
         const keep=(id,riotId,x)=>{if(x)return {solo:x.solo||null,flex:x.flex||null};const pv=prevOf(id,riotId),e=j.errors?.[riotId.toLowerCase()]||"";return pv&&!/introuvable/i.test(e)?{solo:pv.solo||null,flex:pv.flex||null}:{solo:null,flex:null}};
         for(const [id,p] of players){const rk=j.ranks?.[p.riotId.toLowerCase()],k=keep(id,p.riotId,rk);out[id]={pseudo:p.pseudo,riotId:p.riotId,solo:k.solo,flex:k.flex,err:rk?null:(j.errors?.[p.riotId.toLowerCase()]||null),
           alts:conseilAccounts(p).filter(a=>!a.main).map(a=>{const x=j.ranks?.[a.riotId.toLowerCase()],ka=keep(id,a.riotId,x);return {riotId:a.riotId,solo:ka.solo,flex:ka.flex}})}}
-        cur={updatedAt:new Date().toISOString(),players:out};
+        // montées de division (Solo/Duo et Flex, compte principal) : gardées 4 jours pour le message de félicitations
+        const PROMO_KEEP=4*864e5,nowT=Date.now(),promos=(cur?.promos||[]).filter(x=>nowT-x.at<PROMO_KEEP);
+        for(const [id,v] of Object.entries(out)){const pv=cur?.players?.[id];if(!pv||pv.riotId?.toLowerCase()!==v.riotId.toLowerCase()||v.err)continue;
+          for(const q of ["solo","flex"]){const a=pv[q],b=v[q];if(!a||!b||!a.tier||!b.tier)continue;
+            if(conseilRankValue(b)>conseilRankValue(a)&&!promos.some(x=>x.id===id&&x.q===q&&x.to.tier===b.tier&&x.to.rank===b.rank))
+              promos.push({id,pseudo:v.pseudo,q,from:{tier:a.tier,rank:a.rank||""},to:{tier:b.tier,rank:b.rank||""},at:nowT})}}
+        cur={updatedAt:new Date().toISOString(),players:out,promos:promos.slice(-30)};
         await db.doc("ladder/current").set(cur);
         const today=isoDay(Date.now()),snap=await db.doc("ladderSnap/"+today).get();
         if(!snap.exists){const sp={};for(const [id,v] of Object.entries(out)){sp[id]={solo:v.solo,flex:v.flex};for(const a of v.alts||[])sp[conseilAltKey(id,a.riotId)]={solo:a.solo,flex:a.flex}}await db.doc("ladderSnap/"+today).set({day:today,players:sp})}

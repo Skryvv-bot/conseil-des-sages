@@ -236,3 +236,20 @@ footer{color:#8c88aa!important}
 /* Avatars glissés dans les listes de sages */
 .cav-in{vertical-align:middle;margin-right:7px;font-size:.62rem}
 h2 .cav-in{margin-right:12px}
+
+/* Félicitations : montée de division */
+.cpromo{position:fixed;inset:0;z-index:80;background:rgba(6,5,12,.72);display:flex;align-items:center;justify-content:center;padding:16px;overflow:hidden}
+.cpromo-c{position:relative;z-index:1;width:min(460px,100%);max-height:calc(100vh - 32px);overflow:auto;border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:14px;
+  border:2px solid transparent;background:linear-gradient(#17152a,#17152a) padding-box,var(--foil) border-box;box-shadow:0 30px 80px rgba(0,0,0,.6);animation:cpIn .45s cubic-bezier(.2,1.4,.4,1)}
+.cpromo-c h2{margin:0;font-size:clamp(1.6rem,5vw,2.2rem)!important}
+.cpromo-r{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;background:#0c0b14;border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.cpromo-t{display:flex;flex-direction:column;min-width:0}
+.cpromo-t b{font:800 1.05rem var(--display);color:#fff}
+.cpromo-t span{color:var(--holo-gold);font-weight:800}
+.cpromo-t small{color:var(--muted);font-size:.8rem}
+.cpromo-b{display:flex;gap:10px;flex-wrap:wrap}
+.cpromo-f{position:absolute;inset:0;pointer-events:none}
+.cpromo-f i{position:absolute;top:-20px;width:8px;height:14px;border-radius:2px;animation:cpFall 3.2s linear forwards}
+@keyframes cpIn{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
+@keyframes cpFall{to{top:105%;transform:rotate(720deg)}}
+@media (prefers-reduced-motion:reduce){.cpromo-c,.cpromo-f i{animation:none}.cpromo-f{display:none}}
