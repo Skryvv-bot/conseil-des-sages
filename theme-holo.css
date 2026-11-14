@@ -211,3 +211,7 @@ footer{color:#8c88aa!important}
 .tabs a.tablink{display:inline-flex;align-items:center;min-height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--line);font:800 .95rem var(--body);color:#f2f0ff;text-decoration:none}
 .tabs a.tablink:hover{border-color:#f2f0ff}
 .tabs a.tablink[aria-current="page"]{background:#f2f0ff;color:#0c0b14;border-color:#f2f0ff}
+
+/* Pseudo du menu avec sa photo de profil */
+.cnav-acc.has-av{display:inline-flex;align-items:center;gap:8px;padding:3px 12px 3px 3px!important}
+.cnav-acc.has-av::before{display:none}

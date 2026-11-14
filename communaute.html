@@ -293,7 +293,7 @@ window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
     $("avInfo").textContent=m.avatar?"Champion choisi : "+m.avatar+".":conseilAvatarUrl(m,dc)?"Tu utilises ta photo de profil Discord.":"Photo Discord introuvable pour l'instant : indique ton pseudo Discord ci-dessus et connecte-toi au serveur. En attendant, tes initiales s'affichent.";
     $("avDiscord").hidden=!m.avatar;g.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.c===m.avatar))}
   async function save(v){const msg=$("avMsg");if(!db||!members[uid]||!members[uid].pseudo){msg.textContent="Enregistre d'abord ton profil (pseudo), puis choisis ton avatar.";return}
-    try{await db.doc("riot/"+uid).set({avatar:v},{merge:true});members[uid].avatar=v;msg.textContent=v?"Avatar enregistré : "+v+".":"Tu utilises de nouveau ta photo Discord.";prev()}catch(e){msg.textContent="Enregistrement impossible, réessaie."}}
+    try{await db.doc("riot/"+uid).set({avatar:v},{merge:true});members[uid].avatar=v;if(window.conseilAccAvatar)conseilAccAvatar();msg.textContent=v?"Avatar enregistré : "+v+".":"Tu utilises de nouveau ta photo Discord.";prev()}catch(e){msg.textContent="Enregistrement impossible, réessaie."}}
   function grid(){const q=norm($("avSearch").value.trim());g.replaceChildren(...names.filter(n=>!q||norm(n).includes(q)).map(n=>{const b=document.createElement("button");b.type="button";b.dataset.c=n;b.title=n;b.setAttribute("aria-label",n);
     const im=new Image();im.loading="lazy";im.alt="";im.src=conseilChampImg(n);b.appendChild(im);b.onclick=()=>save(n);return b}));prev()}
   $("avSearch").oninput=grid;$("avDiscord").onclick=()=>save(null);

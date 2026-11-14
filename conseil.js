@@ -256,7 +256,7 @@ window.conseilHunt=async function(){const boxes=[...document.querySelectorAll("[
 
 // ---------- Thème « Collection holographique » et bandeau d'infos ----------
 (function(){const add=()=>{if(document.getElementById("tv-theme"))return;
-  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=9";document.head.appendChild(l)};
+  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=10";document.head.appendChild(l)};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();
 function defaultTicker(){const d=Math.ceil((Date.parse("2026-11-04T23:00:00Z")-Date.now())/864e5);
   return ["Worlds 2026 : la finale le 14 novembre, puis le bilan du Pick'em","Pick'em : un skin pour le 1er (offert par Skryvv) et un skin pour le 2e (offert par Tabaskoh)",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Pronos entre potes, tribunal et sage de la semaine dans Le Conseil","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes"]}
@@ -645,8 +645,14 @@ const ACC_DOMAIN="conseil-des-sages.app";
 const accSlug=id=>String(id||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
 const accName=u=>u&&!u.isAnonymous?(u.displayName||(u.email||"").split("@")[0]):null;
 function renderAccount(u){const b=document.getElementById("cnavAcc");if(!b)return;b.hidden=false;const n=accName(u);
-  b.textContent=n?n:"Connexion";b.classList.toggle("on",!!n);b.title=n?"Mon profil":"Crée ton identifiant ou connecte-toi pour retrouver tes données sur tous tes appareils";b.onclick=()=>{if(!n)return openAccount();if(/communaute\.html$/.test(location.pathname)){location.hash="profil"}else location.href="communaute.html#profil"}}
+  b.textContent=n?n:"Connexion";b.classList.toggle("on",!!n);b.classList.remove("has-av");if(n)setTimeout(accAvatar,0);b.title=n?"Mon profil":"Crée ton identifiant ou connecte-toi pour retrouver tes données sur tous tes appareils";b.onclick=()=>{if(!n)return openAccount();if(/communaute\.html$/.test(location.pathname)){location.hash="profil"}else location.href="communaute.html#profil"}}
 window.conseilOpenAccount=()=>openAccount();
+// Photo de profil à côté du pseudo, dans la barre du haut (champion choisi, sinon photo Discord, sinon initiales)
+let __accAv=0;
+async function accAvatar(){const b=document.getElementById("cnavAcc");if(!b||!b.classList.contains("on"))return;const my=++__accAv;
+  try{const {db,uid}=await conseilConnect();if(!db)return;const [d,dc]=await Promise.all([db.doc("riot/"+uid).get(),conseilDiscordAvatars()]);if(my!==__accAv)return;
+    const m=d.exists?d.data():{pseudo:b.textContent};b.querySelectorAll(".cav").forEach(e=>e.remove());b.prepend(conseilAvatarEl(m,dc,26));b.classList.add("has-av")}catch(e){}}
+window.conseilAccAvatar=accAvatar;
 function accErr(e){const c=e&&e.code||"";
   if(/email-already-in-use|credential-already-in-use/.test(c))return "Cet identifiant est déjà pris. Choisis-en un autre, ou connecte-toi s'il est à toi.";
   if(/invalid-credential|wrong-password|user-not-found|invalid-login-credentials|invalid-email/.test(c))return "Identifiant ou mot de passe incorrect.";
