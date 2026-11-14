@@ -215,3 +215,10 @@ footer{color:#8c88aa!important}
 /* Pseudo du menu avec sa photo de profil */
 .cnav-acc.has-av{display:inline-flex;align-items:center;gap:8px;padding:3px 12px 3px 3px!important}
 .cnav-acc.has-av::before{display:none}
+
+/* Discord dans la barre du haut */
+.cnav-dc{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;text-decoration:none;background:#5865f2;color:#fff!important;border-radius:999px;padding:7px 14px;font:800 .86rem var(--body)}
+.cnav-dc:hover{filter:brightness(1.12)}
+.cnav-dc b{font:700 .72rem var(--mono);opacity:.9}
+.cnav-dc b:empty{display:none}
+@media (max-width:900px){.cnav-dc span,.cnav-dc b{display:none}.cnav-dc{padding:9px 11px}}

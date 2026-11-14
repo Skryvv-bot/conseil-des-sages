@@ -326,44 +326,6 @@ section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,
     </div>
   </header>
 
-  <div class="grid2">
-    <!-- Discord -->
-    <section class="frame panel dc" aria-labelledby="dcT">
-      <h2 id="dcT">Notre Discord</h2>
-      <div class="dchead">
-        <div class="dcicon" id="dcIcon"><svg width="34" height="26" viewBox="0 0 71 55" aria-hidden="true"><path fill="#fff" d="M60.1 4.9A58.5 58.5 0 0 0 45.6.4a40.6 40.6 0 0 0-1.8 3.7 54 54 0 0 0-16.2 0A40.6 40.6 0 0 0 25.8.4 58.4 58.4 0 0 0 11.3 4.9C2.1 18.6-.4 32 .8 45.2a58.9 58.9 0 0 0 17.9 9 43.6 43.6 0 0 0 3.8-6.2 38.2 38.2 0 0 1-6-2.9l1.5-1.1a42 42 0 0 0 36 0l1.5 1.1a38.3 38.3 0 0 1-6 2.9 43.4 43.4 0 0 0 3.8 6.2 58.7 58.7 0 0 0 17.9-9c1.5-15.3-2.5-28.6-10.9-40.3ZM23.7 37.1c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2 6.5 3.3 6.4 7.2c0 4-2.8 7.2-6.4 7.2Zm23.6 0c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2 6.5 3.3 6.4 7.2c0 4-2.8 7.2-6.4 7.2Z"/></svg></div>
-        <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
-          <span class="dcname" id="dcName">Le Conseil Des Sages</span>
-          <span class="dcstats" id="dcStats" hidden><span><i class="dot" style="background:#3ba55d"></i><b id="dcOn">–</b> en ligne</span><span><i class="dot" style="background:#747f8d"></i><b id="dcAll">–</b> membres</span></span>
-        </div>
-      </div>
-      <a class="btn discord" href="https://discord.gg/ekEVAX8JN" target="_blank" rel="noopener">Rejoindre le Discord</a>
-      <div class="event" id="cdsEvent">
-        <div class="ev-top"><span class="tag live">Événement</span><span class="ev-when" id="evWhen">Jeudi 22 octobre · 20 h 30</span></div>
-        <b class="ev-title" id="evTitle">CDS Game : rendez-vous demain soir !</b>
-        <p class="ev-txt" id="evTxt">Le Conseil lance sa soirée CDS Game. Sniper sur les toits, îles flottantes et explosions garanties : ramène tes réflexes, ta mauvaise foi et ton meilleur micro.</p>
-        <div class="ev-cd" id="evCd"></div>
-      </div>
-      <div id="dcWidget" hidden>
-        <h3 style="margin-bottom:6px">En ligne maintenant</h3>
-        <div class="online" id="dcOnline"></div>
-        <p class="vc" id="dcVoice" style="margin-top:8px"></p>
-        <div id="dcGames" hidden style="margin-top:12px;display:flex;flex-direction:column;gap:6px"><h3>En jeu maintenant</h3><div id="dcGamesList" style="display:flex;flex-direction:column;gap:6px"></div></div>
-      </div>
-      <p class="note" style="font-size:.78rem">Lien d'invitation : discord.gg/ekEVAX8JN</p>
-    </section>
-
-    <!-- Parties LoL -->
-    <section class="frame panel" aria-labelledby="lolT">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-        <h2 id="lolT">Qui joue en ce moment</h2>
-        <span class="note" id="liveInfo"></span>
-      </div>
-      <div id="riotReg"></div>
-      <p class="note riot-optin" style="font-size:.8rem">Ajouter ton Riot ID est facultatif et se fait uniquement par toi. En l'ajoutant, tu acceptes que ton Riot ID et ta partie en cours (champion, mode, durée) soient visibles par tous les visiteurs du site. Tu peux le retirer à tout moment dans ton profil (clique sur ton pseudo) (vide le champ Riot ID).</p>
-      <div class="players" id="players"><div class="note">Chargement des invocateurs…</div></div>
-    </section>
-  </div>
 
   <div id="pins" hidden></div>
   <!-- Sortie de LolMaster : 10 boosters offerts à chaque sage inscrit -->
@@ -459,6 +421,45 @@ section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,
       <p class="note" id="campMsg"></p>
     </div>
   </section>
+
+  <div class="grid2" style="grid-template-columns:1fr">
+    <!-- Discord -->
+    <section class="frame panel dc gone" aria-labelledby="dcT">
+      <h2 id="dcT">Notre Discord</h2>
+      <div class="dchead">
+        <div class="dcicon" id="dcIcon"><svg width="34" height="26" viewBox="0 0 71 55" aria-hidden="true"><path fill="#fff" d="M60.1 4.9A58.5 58.5 0 0 0 45.6.4a40.6 40.6 0 0 0-1.8 3.7 54 54 0 0 0-16.2 0A40.6 40.6 0 0 0 25.8.4 58.4 58.4 0 0 0 11.3 4.9C2.1 18.6-.4 32 .8 45.2a58.9 58.9 0 0 0 17.9 9 43.6 43.6 0 0 0 3.8-6.2 38.2 38.2 0 0 1-6-2.9l1.5-1.1a42 42 0 0 0 36 0l1.5 1.1a38.3 38.3 0 0 1-6 2.9 43.4 43.4 0 0 0 3.8 6.2 58.7 58.7 0 0 0 17.9-9c1.5-15.3-2.5-28.6-10.9-40.3ZM23.7 37.1c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2 6.5 3.3 6.4 7.2c0 4-2.8 7.2-6.4 7.2Zm23.6 0c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2 6.5 3.3 6.4 7.2c0 4-2.8 7.2-6.4 7.2Z"/></svg></div>
+        <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+          <span class="dcname" id="dcName">Le Conseil Des Sages</span>
+          <span class="dcstats" id="dcStats" hidden><span><i class="dot" style="background:#3ba55d"></i><b id="dcOn">–</b> en ligne</span><span><i class="dot" style="background:#747f8d"></i><b id="dcAll">–</b> membres</span></span>
+        </div>
+      </div>
+      <a class="btn discord" href="https://discord.gg/ekEVAX8JN" target="_blank" rel="noopener">Rejoindre le Discord</a>
+      <div class="event" id="cdsEvent">
+        <div class="ev-top"><span class="tag live">Événement</span><span class="ev-when" id="evWhen">Jeudi 22 octobre · 20 h 30</span></div>
+        <b class="ev-title" id="evTitle">CDS Game : rendez-vous demain soir !</b>
+        <p class="ev-txt" id="evTxt">Le Conseil lance sa soirée CDS Game. Sniper sur les toits, îles flottantes et explosions garanties : ramène tes réflexes, ta mauvaise foi et ton meilleur micro.</p>
+        <div class="ev-cd" id="evCd"></div>
+      </div>
+      <div id="dcWidget" hidden>
+        <h3 style="margin-bottom:6px">En ligne maintenant</h3>
+        <div class="online" id="dcOnline"></div>
+        <p class="vc" id="dcVoice" style="margin-top:8px"></p>
+        <div id="dcGames" hidden style="margin-top:12px;display:flex;flex-direction:column;gap:6px"><h3>En jeu maintenant</h3><div id="dcGamesList" style="display:flex;flex-direction:column;gap:6px"></div></div>
+      </div>
+      <p class="note" style="font-size:.78rem">Lien d'invitation : discord.gg/ekEVAX8JN</p>
+    </section>
+
+    <!-- Parties LoL -->
+    <section class="frame panel" aria-labelledby="lolT">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <h2 id="lolT">Qui joue en ce moment</h2>
+        <span class="note" id="liveInfo"></span>
+      </div>
+      <div id="riotReg"></div>
+      <p class="note riot-optin" style="font-size:.8rem">Ajouter ton Riot ID est facultatif et se fait uniquement par toi. En l'ajoutant, tu acceptes que ton Riot ID et ta partie en cours (champion, mode, durée) soient visibles par tous les visiteurs du site. Tu peux le retirer à tout moment dans ton profil (clique sur ton pseudo) (vide le champ Riot ID).</p>
+      <div class="players" id="players"><div class="note">Chargement des invocateurs…</div></div>
+    </section>
+  </div>
 
   <!-- Tuiles -->
   <!-- Cette semaine au Conseil -->

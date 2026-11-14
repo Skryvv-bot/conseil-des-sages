@@ -72,6 +72,13 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
     <a class="btn ghost" href="https://discord.gg/ekEVAX8JN" target="_blank" rel="noopener">Se retrouver en vocal sur Discord</a>
   </section>
 
+  <section class="frame panel" aria-labelledby="f-rank">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h2 id="f-rank">Classement des chasseurs</h2><span class="note" id="fnN"></span></div>
+    <p class="lead">Les stats Fortnite de la saison pour les sages qui ont indiqué leur pseudo Epic, classés par victoires.</p>
+    <div class="tbox"><table class="tbl" style="min-width:560px"><thead><tr><th>Sage</th><th>Passe</th><th>Victoires</th><th>Kills</th><th>K/D</th><th>Parties</th></tr></thead><tbody id="fnRows"><tr><td colspan="6">Chargement…</td></tr></tbody></table></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><a class="btn ghost" href="communaute.html#profil">Ajouter mon pseudo Epic</a><span class="note">Dans ton profil, partie Fortnite.</span></div>
+  </section>
+
   <section class="frame panel" aria-labelledby="f-new">
     <h2 id="f-new">Ce qui change par rapport au Battle Royale</h2>
     <div class="vs">
@@ -123,6 +130,22 @@ const fmt=n=>Math.round(n).toLocaleString("fr-FR"),need=(n,q)=>fmt(Math.ceil(Mat
 const row=(cells,hot)=>{const tr=document.createElement("tr");if(hot)tr.className="hot";for(const c of cells){const td=document.createElement("td");td.textContent=c;tr.appendChild(td)}return tr};
 document.getElementById("rates").replaceChildren(...R.map(r=>row([r[0],"1 sur "+fmt(r[1]),(100/r[1]).toPrecision(2).replace(".",",")+" %",need(r[1],.5),need(r[1],.9)],r[1]===137500)));
 document.getElementById("hours").replaceChildren(...R.map(r=>row([r[0],r[2]===r[3]?mul(r[2]):mul(r[2])+" à "+mul(r[3]),"1 sur "+fmt(r[1]/r[3])],r[1]===137500)));
+
+// ---------- Classement des chasseurs : stats de la saison lues par le robot ----------
+(async function(){const tb=document.getElementById("fnRows"),info=document.getElementById("fnN"),el=(t,x,c)=>{const e=document.createElement(t);if(x!=null)e.textContent=x;if(c)e.className=c;return e};
+  const one=t=>{const tr=el("tr"),td=el("td",t);td.colSpan=6;tr.append(td);tb.replaceChildren(tr)};
+  const {db}=await conseilConnect();if(!db)return one("Connexion au Conseil impossible pour le moment.");
+  const [sages,dc]=await Promise.all([conseilSages(db),conseilDiscordAvatars()]);
+  const list=Object.values(sages).filter(m=>m.pseudo&&m.fn&&m.fn.name);if(!list.length)return one("Aucun sage n'a encore indiqué son pseudo Epic.");
+  let api={},down=false;try{const j=await (await fetch(RIOT_RELAY+"/fortnite?players="+encodeURIComponent(list.map(m=>m.fn.name.trim()+"|"+(m.fn.type||"epic")).join(",")))).json();if(j.error)down=true;api=j.players||{}}catch(e){down=true}
+  if(down){info.textContent="stats indisponibles pour le moment"}
+  const rows=list.map(m=>({m,s:api[m.fn.name.trim().toLowerCase()]||null})).sort((a,b)=>((b.s&&b.s.wins)||0)-((a.s&&a.s.wins)||0)||((b.s&&b.s.kills)||0)-((a.s&&a.s.kills)||0)||a.m.pseudo.localeCompare(b.m.pseudo));
+  if(!down)info.textContent=rows.length+(rows.length>1?" chasseurs":" chasseur");
+  const nf=n=>Number(n||0).toLocaleString("fr-FR");
+  tb.replaceChildren(...rows.map(({m,s})=>{const tr=el("tr"),td=el("td"),w=el("span");w.style.cssText="display:inline-flex;align-items:center;gap:8px";w.append(conseilAvatarEl(m,dc,28),el("b",m.pseudo),el("span",m.fn.name,"note"));td.append(w);tr.append(td);
+    if(!s||s.error){const x=el("td",!s?"Stats indisponibles":s.error==="private"?"Stats privées : à rendre publiques dans Fortnite":"Pseudo Epic introuvable","note");x.colSpan=5;tr.append(x)}
+    else tr.append(el("td","niv. "+nf(s.level)),el("td",nf(s.wins)),el("td",nf(s.kills)),el("td",Number(s.kd||0).toFixed(2).replace(".",",")),el("td",nf(s.matches)));
+    return tr}))})();
 </script>
 </body>
 </html>
