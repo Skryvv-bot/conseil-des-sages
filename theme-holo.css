@@ -152,3 +152,26 @@ html[data-camp="wow"] .camp-lol .btn{background:#ff4d6a!important;color:#0c0b14!
 
 /* Étoiles de champion du monde */
 .wstars{display:inline-block;margin-left:6px;color:#ffe27a;font-size:.8em;letter-spacing:1px;line-height:1;white-space:nowrap;vertical-align:.08em;cursor:help;text-shadow:0 0 6px rgba(255,226,122,.35)}
+
+/* Images des pages de jeux et encarts de l'accueil */
+.shot{display:block;width:100%;height:auto;border-radius:16px;border:1px solid var(--line)}
+.shot.wide{aspect-ratio:21/9;object-fit:cover}
+.shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.shots figure{margin:0;display:flex;flex-direction:column;gap:6px}
+.shots figcaption{font-size:.85rem;color:var(--muted)}
+.promo{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,4fr);gap:0;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#17152a}
+.promo>div{padding:22px;display:flex;flex-direction:column;gap:10px;min-width:0;justify-content:center}
+.promo>img{width:100%;height:100%;min-height:220px;object-fit:cover;display:block}
+.promo h2{font-size:clamp(1.4rem,3.4vw,2.1rem)!important;margin:0}
+.promo p{margin:0;color:#c9c5e6}
+.promo .num{font:900 clamp(1.8rem,5vw,2.8rem)/1 var(--display);color:var(--holo-pink)}
+.promo .row{display:flex;gap:10px;flex-wrap:wrap}
+@media (max-width:720px){.promo{grid-template-columns:1fr}.promo>img{max-height:220px;order:-1}}
+.leagues{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.leagues div{background:#0c0b14;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center;min-width:0}
+.leagues b{display:block;font:900 clamp(1.3rem,4vw,2rem)/1 var(--display)}
+.leagues span{font-size:.82rem;color:var(--muted)}
+.glass{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.glass img{display:block;width:100%;height:auto;border-radius:10px;transition:transform .2s}
+.glass img:hover{transform:translateY(-4px) rotate(-1deg)}
+@media (prefers-reduced-motion:reduce){.glass img:hover{transform:none}}
