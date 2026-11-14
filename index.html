@@ -274,6 +274,16 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
 
 /* Visuels de l'accueil */
 .merc-lg{display:flex;gap:10px}.merc-lg img{width:44px;height:44px;object-fit:contain}
+.hype{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.hy{background:#0c0b14;border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;text-decoration:none;color:#f2f0ff;min-width:0}
+.hy:hover{border-color:#f2f0ff}
+.hy-h{display:flex;align-items:center;gap:10px}.hy-h img{width:34px;height:34px;object-fit:contain}.hy-h b{font:800 1rem var(--display)}
+.hy-p{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.hy-p span{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;font:700 .68rem var(--body);text-align:center}
+.hy-p i{width:100%;aspect-ratio:1;border-radius:10px;background:#201d38 center 8%/cover no-repeat;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font:700 .8rem var(--mono);font-style:normal;color:var(--muted)}
+.hy-p em{font-style:normal;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hy-p .new i{border-color:#ffe27a}.hy-p .new em{color:#ffe27a}
+.hy-p small{font:700 .58rem var(--mono);color:var(--muted);letter-spacing:.06em}
 .merc-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
 .merc-g a{display:flex;gap:10px;align-items:center;text-decoration:none;color:#c9c5e6;font-size:.9rem;background:#0c0b14;border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
 .merc-g a:hover{border-color:#f2f0ff}.merc-g img{width:36px;height:36px;object-fit:contain;flex:none}.merc-g b{display:block;color:#fff;font-weight:800}
@@ -321,15 +331,11 @@ section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,
   </section>
   <section class="frame panel merc" aria-labelledby="mcT" style="padding:20px;gap:12px">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-      <div><span class="eyebrow">LoL · intersaison 2026-2027</span><h2 id="mcT" style="font-size:clamp(1.4rem,3.4vw,2.1rem)!important;margin:4px 0 0">Mercato : ça bouge déjà</h2></div>
+      <div><span class="eyebrow">LoL · intersaison 2026-2027</span><h2 id="mcT" style="font-size:clamp(1.4rem,3.4vw,2.1rem)!important;margin:4px 0 0">Mercato : les équipes de 2027 se dessinent</h2></div>
       <div class="merc-lg"><img src="img/ligue-lec.png" alt="LEC" width="44" height="44" loading="lazy"><img src="img/ligue-lck.png" alt="LCK" width="44" height="44" loading="lazy"><img src="img/ligue-lpl.png" alt="LPL" width="44" height="44" loading="lazy"></div>
     </div>
-    <div class="merc-g">
-      <a href="mercato.html"><img src="img/equipes/karmine-corp.png" alt="" width="36" height="36" loading="lazy"><span><b>Karmine Corp</b>kyeahoo prolongé ; SkewMond arriverait dans la jungle.</span></a>
-      <a href="mercato.html"><img src="img/equipes/g2-esports.png" alt="" width="36" height="36" loading="lazy"><span><b>G2 Esports</b>Perkz parti ; Lyncas, Mikyx et Naak Nako pressentis.</span></a>
-      <a href="mercato.html"><img src="img/equipes/fnatic.png" alt="" width="36" height="36" loading="lazy"><span><b>Fnatic</b>Yike et Labrov attendus ; Razork partirait.</span></a>
-      <a href="mercato.html"><img src="img/equipes/kt-rolster.png" alt="" width="36" height="36" loading="lazy"><span><b>KT Rolster</b>Bdd et PerfecT prolongés jusqu'en 2028.</span></a>
-    </div>
+    <p style="margin:0;color:#c9c5e6">Les cinq de départ 2027 tels que la presse les annonce. En jaune, les recrues pressenties.</p>
+    <div class="hype" id="hype"></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><a class="btn" href="mercato.html">Voir tous les transferts</a><span class="note">Ouverture du marché le 17 novembre. Les rumeurs ne sont pas des annonces.</span></div>
   </section>
   <!-- Avant le début des Worlds : pronos et tier list à faire -->
@@ -831,6 +837,21 @@ window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
 // Date du jour dans l'en-tête
 (function(){const fr=new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
   document.getElementById("hhDate").textContent=fr.charAt(0).toUpperCase()+fr.slice(1)+" · les jeux du moment"})();
+</script>
+<script>
+// Mercato « hype » : cinq de départ 2027 pressentis (presse au 12 nov.). 1 = recrue pressentie, "?" = poste à pourvoir.
+(function(){const T=[
+  ["G2 Esports","g2-esports",[["Naak Nako",1],["Lyncas",1],["Caps",0],["Hans Sama",0],["Mikyx",1]]],
+  ["Karmine Corp","karmine-corp",[["Canna",0],["SkewMond",1],["kyeahoo",0],["Caliste",0],["Busio",0]]],
+  ["Fnatic","fnatic",[["?",0],["Yike",1],["Vladi",0],["Upset",0],["Labrov",1]]],
+  ["Movistar KOI","mad-lions",[["BrokenBlade",1],["Elyoya",0],["Jojopyun",0],["Carzzy",1],["Alvaro",0]]],
+  ["GIANTX","giantx-lec",[["Myrwn",1],["Thayger",1],["Feisty",1],["HARPOON",1],["Piero",1]]],
+  ["KT Rolster","kt-rolster",[["PerfecT",0],["Raptor",1],["Bdd",0],["Taeyoon",1],["Kellin",1]]]],R=["TOP","JGL","MID","BOT","SUP"];
+  const box=document.getElementById("hype");if(!box)return;const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+  function draw(P){box.replaceChildren(...T.map(([n,slug,pl])=>{const a=el("a","hy");a.href="mercato.html";const h=el("div","hy-h"),im=new Image();im.src="img/equipes/"+slug+".png";im.alt="";im.loading="lazy";h.append(im,el("b","",n));
+    const g=el("div","hy-p");pl.forEach(([p,nw],k)=>{const s=el("span",nw?"new":""),i=el("i"),u=P[p.toLowerCase()];if(u)i.style.backgroundImage='url("'+u+'")';else i.textContent=p==="?"?"?":p.slice(0,2).toUpperCase();
+      s.append(i,el("em","",p==="?"?"À pourvoir":p),el("small","",R[k]));g.append(s)});a.append(h,g);return a}))}
+  draw({});fetch("img/equipes/equipes.json").then(r=>r.json()).then(d=>{const P={};for(const t of d)for(const p of t.players)if(p.image&&!/default|silhouette/i.test(p.image))P[p.n.trim().toLowerCase()]=p.image.replace(/^http:/,"https:");draw(P)}).catch(()=>{})})();
 </script>
 </body>
 </html>

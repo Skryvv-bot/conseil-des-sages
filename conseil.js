@@ -90,6 +90,7 @@ window.conseilNav=function(active){
   if(item&&item.sub&&!item.noBar){const wrap=document.querySelector(".wrap");if(wrap){const sub=document.createElement("div");sub.className="csub";
     sub.innerHTML=item.sub.map(s=>`<a href="${s.href}" ${s.id===active?'aria-current="page"':""}${s.admin?' data-admin hidden':""}>${s.label}</a>`).join("");wrap.prepend(sub)}}
   setupInstall();
+  conseilComments(active);
 };
 
 // Menus déroulants : survol à la souris, premier toucher sur mobile ; CDS.TV ouvre le plan complet du site
@@ -188,9 +189,60 @@ window.conseilTeamLogo=function(tag,fallbackHTML,size=30){
   return `<span class="tlogo${DARK_LOGOS.includes(tag)?" light":""}" style="width:${size}px;height:${size}px" title="${tag}"><img src="${list[0]}" alt="${tag}" data-tag="${tag}" data-i="0" data-fb="${encodeURIComponent(fallbackHTML)}" referrerpolicy="no-referrer" onload="conseilLogoOk(this)" onerror="conseilLogoErr(this)"></span>`;
 };
 
+// ---------- Avatars des sages ----------
+// Par défaut : la photo de profil Discord (retrouvée dans le widget du serveur grâce au pseudo Discord du profil, ou au pseudo).
+// En option : un champion choisi dans « Mon profil » (champ avatar du profil). Sinon, les initiales.
+const CDS_GUILD="781876426571251743";
+let __sages=null,__dc=null;
+window.conseilSages=function(db){return __sages||(__sages=db.collection("riot").get().then(s=>{const o={};s.forEach(d=>o[d.id]=d.data());return o}).catch(()=>({})))};
+window.conseilDiscordAvatars=function(){
+  return __dc||(__dc=fetch(`https://discord.com/api/guilds/${CDS_GUILD}/widget.json`).then(r=>r.ok?r.json():{members:[]}).then(w=>{
+    const seen=LS.get("dc-avatars",{});for(const m of w.members||[])if(m.avatar_url)seen[String(m.username).toLowerCase()]=m.avatar_url;
+    LS.set("dc-avatars",seen);return seen}).catch(()=>LS.get("dc-avatars",{})))};
+window.conseilAvatarUrl=function(m,dc){if(!m)return "";if(m.avatar)return conseilChampImg(m.avatar);
+  for(const k of [m.discord,m.pseudo]){const u=k&&dc&&dc[String(k).trim().toLowerCase()];if(u)return u}return ""};
+window.conseilAvatarEl=function(m,dc,size=36){const e=document.createElement("span");e.className="cav";e.style.width=e.style.height=size+"px";
+  const u=conseilAvatarUrl(m,dc),ini=String(m&&m.pseudo||"?").slice(0,2).toUpperCase();e.textContent=ini;
+  if(u){const im=new Image();im.alt="";im.loading="lazy";im.onload=()=>{e.textContent="";e.appendChild(im)};im.src=u}return e};
+
+// ---------- Commentaires ----------
+// Un fil par page (collection « comments »). Il faut un profil avec un pseudo pour écrire ; chacun peut supprimer ses messages.
+const COMMENT_PAGES={accueil:"l'accueil",lol:"LoL",wow:"WoW Forever",fortnite:"Fortnite",mercato:"le mercato",patch:"le patch",worlds:"les Worlds",fantasy:"la Fantasy",ladder:"le ladder",tierlist:"la tier list",devinettes:"les Devinettes",customs:"les customs"};
+window.conseilComments=async function(page){
+  const wrap=document.querySelector(".wrap");if(!wrap||!COMMENT_PAGES[page]||document.getElementById("ccom"))return;
+  const sec=document.createElement("section");sec.id="ccom";sec.className="frame panel ccom";sec.setAttribute("aria-labelledby","ccomT");
+  sec.innerHTML=`<div class="ccom-h"><h2 id="ccomT">Commentaires</h2><span class="note" id="ccomN"></span></div>
+    <form class="ccom-f" id="ccomF"><label class="ccom-l" for="ccomI">Ton commentaire sur ${conseilEsc(COMMENT_PAGES[page])}</label>
+      <textarea id="ccomI" maxlength="500" rows="2" placeholder="Écris ton message…" required></textarea>
+      <div class="ccom-r"><span class="note" id="ccomMsg" role="status"></span><button class="btn small" type="submit">Publier</button></div></form>
+    <div class="ccom-list" id="ccomL"><div class="empty">Chargement des commentaires…</div></div>`;
+  const foot=wrap.querySelector("footer");foot?wrap.insertBefore(sec,foot):wrap.appendChild(sec);
+  const $=id=>document.getElementById(id),{db,uid}=await conseilConnect();
+  if(!db){$("ccomL").innerHTML='<div class="empty">Commentaires indisponibles pour le moment.</div>';return}
+  const [sages,dc]=await Promise.all([conseilSages(db),conseilDiscordAvatars()]);
+  const fmt=t=>{const d=new Date(t);return isNaN(d)?"":d.toLocaleString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})};
+  db.collection("comments").where("page","==",page).limit(200).onSnapshot(s=>{
+    const rows=[];s.forEach(d=>rows.push([d.id,d.data()]));rows.sort((a,b)=>String(b[1].at).localeCompare(String(a[1].at)));
+    $("ccomN").textContent=rows.length?rows.length+(rows.length>1?" messages":" message"):"";
+    const L=$("ccomL");L.replaceChildren();
+    if(!rows.length){const e=document.createElement("div");e.className="empty";e.textContent="Aucun commentaire pour l'instant. Lance la discussion !";L.appendChild(e);return}
+    for(const [id,c] of rows.slice(0,60)){const it=document.createElement("article");it.className="ccom-i";
+      const m=sages[c.uid]||{pseudo:c.pseudo},body=document.createElement("div"),head=document.createElement("div"),b=document.createElement("b"),t=document.createElement("time"),p=document.createElement("p");
+      head.className="ccom-m";b.textContent=m.pseudo||c.pseudo;t.textContent=fmt(c.at);p.textContent=c.text;head.append(b,t);
+      if(c.uid===uid||uid===window.CONSEIL_ADMIN){const x=document.createElement("button");x.type="button";x.className="ccom-x";x.textContent="Supprimer";
+        x.onclick=()=>{if(x.dataset.sure){db.doc("comments/"+id).delete()}else{x.dataset.sure="1";x.textContent="Confirmer la suppression";setTimeout(()=>{delete x.dataset.sure;x.textContent="Supprimer"},4000)}};head.appendChild(x)}
+      body.append(head,p);it.append(conseilAvatarEl(m,dc,36),body);L.appendChild(it)}
+  },e=>{console.warn("commentaires",e);$("ccomL").innerHTML='<div class="empty">Les commentaires arrivent bientôt.</div>';$("ccomF").hidden=true});
+  $("ccomF").onsubmit=async e=>{e.preventDefault();const msg=$("ccomMsg"),text=$("ccomI").value.trim().slice(0,500);if(!text)return;
+    let me=sages[uid];if(!me||!me.pseudo){try{const d=await db.doc("riot/"+uid).get();if(d.exists){me=d.data();sages[uid]=me}}catch(x){}}
+    if(!me||!me.pseudo){msg.innerHTML='Crée d\'abord ton profil : <a href="communaute.html#profil">Mon profil</a>.';return}
+    try{await db.collection("comments").add({page,uid,pseudo:me.pseudo,text,at:new Date().toISOString()});$("ccomI").value="";msg.textContent="Publié."}
+    catch(x){msg.textContent="Envoi impossible pour le moment."}};
+};
+
 // ---------- Thème « Collection holographique » et bandeau d'infos ----------
 (function(){const add=()=>{if(document.getElementById("tv-theme"))return;
-  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=6";document.head.appendChild(l)};
+  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=7";document.head.appendChild(l)};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();
 function defaultTicker(){const d=Math.ceil((Date.parse("2026-11-04T23:00:00Z")-Date.now())/864e5);
   return ["Worlds 2026 : la finale le 14 novembre, puis le bilan du Pick'em","Pick'em : un skin pour le 1er (offert par Skryvv) et un skin pour le 2e (offert par Tabaskoh)",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Pronos entre potes, tribunal et sage de la semaine dans Le Conseil","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes"]}

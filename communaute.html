@@ -13,6 +13,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="conseil.js"></script>
+<script src="champions.js"></script>
 <style>
 .bet{display:flex;flex-direction:column;gap:10px;padding:14px;background:var(--void);border:1px solid var(--line2)}
 .bet.open{border-color:var(--hex2)}
@@ -106,6 +107,13 @@
       <div style="grid-column:1/-1"><p class="note riot-optin" style="font-size:.8rem">Ajouter ton Riot ID est facultatif et se fait uniquement par toi. En l'ajoutant, tu acceptes que ton Riot ID et ta partie en cours (champion, mode, durée) soient visibles par tous les visiteurs du site. Tu peux le retirer à tout moment dans Le Conseil › Mon profil (vide le champ Riot ID).</p></div>
       <label class="f">Pseudo Discord (pour détecter tes parties)<input type="text" id="pDiscord" maxlength="40" placeholder="Ton nom affiché sur le serveur"></label>
       <div class="f">Postes préférés (dans l'ordre de clic)<div class="chips" id="pRoles"></div></div>
+      <div class="avpick" aria-labelledby="avT">
+        <div class="avpick-top"><span id="avPrev"></span><div><b id="avT">Ton avatar</b><p class="note" id="avInfo" style="margin:2px 0 0">Par défaut : ta photo de profil Discord.</p></div>
+          <button class="btn small ghost" type="button" id="avDiscord" style="margin-left:auto">Revenir à ma photo Discord</button></div>
+        <label class="f" style="margin:0">Ou choisis un champion<input type="text" id="avSearch" placeholder="Chercher un champion…" autocomplete="off"></label>
+        <div class="avgrid" id="avGrid"></div>
+        <span class="note" id="avMsg" role="status"></span>
+      </div>
       <div class="row"><button class="btn" type="submit">Enregistrer mon profil</button><span class="okmsg" id="profMsg"></span></div>
     </form>
   </section>
@@ -271,6 +279,21 @@ renderAll();
   renderAll()})();
 
 window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
+
+// ---------- Avatar : photo Discord par défaut, champion en option ----------
+(function(){const g=$("avGrid");if(!g)return;let dc={};
+  const names=(window.CHAMPIONS||[]).map(x=>x[0]),norm=s=>s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+  function prev(){const m=members[uid]||{};$("avPrev").replaceChildren(conseilAvatarEl(m,dc,56));
+    $("avInfo").textContent=m.avatar?"Champion choisi : "+m.avatar+".":conseilAvatarUrl(m,dc)?"Tu utilises ta photo de profil Discord.":"Photo Discord introuvable pour l'instant : indique ton pseudo Discord ci-dessus et connecte-toi au serveur. En attendant, tes initiales s'affichent.";
+    $("avDiscord").hidden=!m.avatar;g.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.c===m.avatar))}
+  async function save(v){const msg=$("avMsg");if(!db||!members[uid]||!members[uid].pseudo){msg.textContent="Enregistre d'abord ton profil (pseudo), puis choisis ton avatar.";return}
+    try{await db.doc("riot/"+uid).set({avatar:v},{merge:true});members[uid].avatar=v;msg.textContent=v?"Avatar enregistré : "+v+".":"Tu utilises de nouveau ta photo Discord.";prev()}catch(e){msg.textContent="Enregistrement impossible, réessaie."}}
+  function grid(){const q=norm($("avSearch").value.trim());g.replaceChildren(...names.filter(n=>!q||norm(n).includes(q)).map(n=>{const b=document.createElement("button");b.type="button";b.dataset.c=n;b.title=n;b.setAttribute("aria-label",n);
+    const im=new Image();im.loading="lazy";im.alt="";im.src=conseilChampImg(n);b.appendChild(im);b.onclick=()=>save(n);return b}));prev()}
+  $("avSearch").oninput=grid;$("avDiscord").onclick=()=>save(null);
+  Promise.all([conseilDD(),conseilDiscordAvatars()]).then(([v,d])=>{dc=d;grid()});
+  const iv=setInterval(()=>{if(window.__membersLoaded){clearInterval(iv);prev()}},400);
+})();
 </script>
 </body>
 </html>
