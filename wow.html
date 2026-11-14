@@ -52,6 +52,15 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
 .rc.max{border-color:var(--holo-gold,#ffe27a)}
 .fac{font:700 .62rem var(--mono);letter-spacing:.06em;border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:middle}
 .fac.a{background:#7ad7ff;color:#0c0b14}.fac.h{background:#ff6b6b;color:#0c0b14}
+.chars{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.ch{background:#0c0b14;border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.ch.a{border-top:4px solid #7ad7ff}.ch.h{border-top:4px solid #ff6b6b}
+.ch-top{display:flex;gap:12px;align-items:center;min-width:0}
+.ch-top b{display:block;font:800 1.05rem var(--display);color:#fff;overflow-wrap:anywhere}
+.ch-top span{font-size:.85rem;color:var(--muted)}
+.ch dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;font-size:.9rem}
+.ch dt{color:var(--muted)}.ch dd{margin:0;color:#fff;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ch .note{font-size:.8rem}
 </style>
 </head>
 <body>
@@ -70,6 +79,12 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
     <p class="lead">Les sages partis en Azeroth, classés par niveau. Les niveaux viennent de Blizzard et se mettent à jour quand le joueur se déconnecte du jeu.</p>
     <div class="race" id="race"><div class="empty">Chargement des personnages…</div></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><a class="btn" href="communaute.html#profil">Ajouter mon personnage</a><span class="note">Dans ton profil : prénom et nom de famille du personnage. Il apparaît à partir du niveau 10.</span></div>
+  </section>
+
+  <section class="frame panel" aria-labelledby="w-chars">
+    <h2 id="w-chars">Les personnages du Conseil</h2>
+    <p class="lead">La fiche de chaque personnage indiqué par les sages dans leur profil.</p>
+    <div class="chars" id="chars"><div class="empty">Chargement des personnages…</div></div>
   </section>
 
   <section class="frame panel" aria-labelledby="w-what">
@@ -118,7 +133,7 @@ tick();setInterval(tick,15000);
 
 // ---------- Course au niveau 60 : personnages indiqués dans les profils, niveaux lus chez Blizzard par le robot ----------
 (async function(){const box=$("race"),el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
-  const msg=t=>{box.replaceChildren(el("div","empty",t))};
+  const msg=t=>{box.replaceChildren(el("div","empty",t));$("chars").replaceChildren(el("div","empty",t))};
   const {db}=await conseilConnect();if(!db){msg("Connexion au Conseil impossible pour le moment.");return}
   const [sages,dc]=await Promise.all([conseilSages(db),conseilDiscordAvatars()]);
   const slug=w=>(w.name+(w.surname?"-"+w.surname:"")).trim().toLowerCase().replace(/\s+/g,"-");
@@ -134,7 +149,15 @@ tick();setInterval(tick,15000);
     const perso=(a.name||x.m.wow.name)+" "+(a.surname||x.m.wow.surname||""),det=[perso.trim(),a.race,a.cls,a.guild?"<"+a.guild+">":"",a.ruleset].filter(Boolean).join(" · ");
     const bar=el("div","bar"),fill=el("i");fill.style.width=Math.min(100,Math.round(x.lvl/60*100))+"%";bar.append(fill);who.append(b,el("span","",det),bar);
     const lv=el("div","lv",x.lvl?String(x.lvl):"–");lv.append(el("small","",x.lvl>=60?"niveau max":x.auto?"niveau":x.lvl?"saisi à la main":"pas encore visible"));
-    r.append(el("span","pos",String(i+1)),av,who,lv);return r}))})();
+    r.append(el("span","pos",String(i+1)),av,who,lv);return r}));
+  // fiches des personnages, par ordre alphabétique des sages
+  const ago=t=>{if(!t)return "";const d=Math.floor((Date.now()-t)/86400e3);return d<=0?"aujourd'hui":d===1?"hier":"il y a "+d+" jours"};
+  $("chars").replaceChildren(...rows.slice().sort((p,q)=>p.m.pseudo.localeCompare(q.m.pseudo)).map(x=>{const a=x.a||{},f=a.faction?(/horde/i.test(a.faction)?"h":"a"):"",c=el("article","ch "+f),top=el("div","ch-top"),t=el("div");
+    const av=a.avatar?(()=>{const s=el("span","cav");s.style.width=s.style.height="56px";const im=new Image();im.alt="";im.src=a.avatar;im.onerror=()=>s.replaceWith(conseilAvatarEl(x.m,dc,56));s.append(im);return s})():conseilAvatarEl(x.m,dc,56);
+    t.append(el("b","",((a.name||x.m.wow.name)+" "+(a.surname||x.m.wow.surname||"")).trim()),el("span","","joué par "+x.m.pseudo));top.append(av,t);
+    const dl=el("dl"),row=(k,v)=>{if(!v)return;dl.append(el("dt","",k),el("dd","",String(v)))};
+    row("Niveau",x.lvl?x.lvl+(x.auto?"":" (saisi à la main)"):"");row("Race",a.race);row("Classe",a.cls);row("Faction",f==="h"?"Horde":f==="a"?"Alliance":"");row("Guilde",a.guild);row("Règles",a.ruleset);row("Niveau d'objet",a.ilvl);row("Vu en jeu",ago(a.seen));
+    c.append(top,dl);if(!x.a)c.append(el("span","note",down?"Fiche Blizzard indisponible pour le moment.":"Pas encore visible chez Blizzard : il faut être niveau 10 et s'être déconnecté du jeu. Vérifie aussi le prénom et le nom dans le profil."));return c}))})();
 </script>
 </body>
 </html>
