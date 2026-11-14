@@ -37,6 +37,9 @@
 .voters{display:flex;flex-direction:column;gap:4px;font-size:.92rem}.voters div{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 .voters b{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;min-width:72px}.voters .vw{color:var(--ok,#2fbf71)}.voters .vl{color:#ff4d6a}
 .vn{padding:2px 8px;background:var(--void,#0c0b14);border:1px solid var(--line2,#3a3752)}.vn.me{border-color:var(--gold,#ffe27a);color:var(--gold,#ffe27a)}
+.pf-h{grid-column:1/-1;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px;margin-top:6px}
+.pf-h:first-child{border-top:0;padding-top:0;margin-top:0}
+.pf-h h3{margin:0;font:800 1.05rem var(--display)!important;letter-spacing:0!important;text-transform:none!important;color:#fff!important}
 </style>
 </head>
 <body>
@@ -96,7 +99,17 @@
     <h2>Mon profil</h2>
     <p class="note">Ton profil sert partout sur le site : générateur d’équipes, Clash, pronos, votes, ladder et parties en direct.</p>
     <form class="form" id="profForm">
+      <div class="pf-h"><h3>Général</h3><span class="note">Ton identité sur tout le site.</span></div>
       <label class="f">Pseudo<input type="text" id="pPseudo" maxlength="20" required></label>
+      <label class="f">Pseudo Discord (pour ta photo et tes jeux en cours)<input type="text" id="pDiscord" maxlength="40" placeholder="Ton nom affiché sur le serveur"></label>
+      <div class="avpick" aria-labelledby="avT">
+        <div class="avpick-top"><span id="avPrev"></span><div><b id="avT">Ton avatar</b><p class="note" id="avInfo" style="margin:2px 0 0">Par défaut : ta photo de profil Discord.</p></div>
+          <button class="btn small ghost" type="button" id="avDiscord" style="margin-left:auto">Revenir à ma photo Discord</button></div>
+        <label class="f" style="margin:0">Ou choisis un champion<input type="text" id="avSearch" placeholder="Chercher un champion…" autocomplete="off"></label>
+        <div class="avgrid" id="avGrid"></div>
+        <span class="note" id="avMsg" role="status"></span>
+      </div>
+      <div class="pf-h"><h3>League of Legends</h3><span class="note">Pour le ladder, les pronos et les parties en direct.</span></div>
       <label class="f">Riot ID (optionnel)<input type="text" id="pRiot" maxlength="40" placeholder="Pseudo#TAG"></label>
       <label class="f">Région<select id="pRegion"></select></label>
       <label class="f">2e compte Riot (optionnel)<input type="text" id="pAlt1" maxlength="40" placeholder="Smurf#TAG"></label>
@@ -105,20 +118,13 @@
       <label class="f">Région<select id="pAlt2Reg" class="regsel"></select></label>
       <label class="f">Rang actuel <span id="autoRank" class="note"></span><select id="pRank"></select></label>
       <div style="grid-column:1/-1"><p class="note riot-optin" style="font-size:.8rem">Ajouter ton Riot ID est facultatif et se fait uniquement par toi. En l'ajoutant, tu acceptes que ton Riot ID et ta partie en cours (champion, mode, durée) soient visibles par tous les visiteurs du site. Tu peux le retirer à tout moment dans Le Conseil › Mon profil (vide le champ Riot ID).</p></div>
-      <label class="f">Pseudo Discord (pour détecter tes parties)<input type="text" id="pDiscord" maxlength="40" placeholder="Ton nom affiché sur le serveur"></label>
       <div class="f">Postes préférés (dans l'ordre de clic)<div class="chips" id="pRoles"></div></div>
+      <div class="pf-h"><h3>World of Warcraft: Forever</h3><span class="note">Pour la course au niveau 60 de la page WoW.</span></div>
       <label class="f">Personnage WoW Forever : prénom<input type="text" id="pWowN" maxlength="24" placeholder="Ex. Anduin"></label>
       <label class="f">Nom de famille du personnage<input type="text" id="pWowS" maxlength="24" placeholder="Ex. Wrynn"></label>
       <label class="f">Niveau (seulement si la page WoW ne le trouve pas)<input type="number" id="pWowL" min="1" max="60" inputmode="numeric" placeholder="1 à 60"></label>
-      <div class="avpick" aria-labelledby="avT">
-        <div class="avpick-top"><span id="avPrev"></span><div><b id="avT">Ton avatar</b><p class="note" id="avInfo" style="margin:2px 0 0">Par défaut : ta photo de profil Discord.</p></div>
-          <button class="btn small ghost" type="button" id="avDiscord" style="margin-left:auto">Revenir à ma photo Discord</button></div>
-        <label class="f" style="margin:0">Ou choisis un champion<input type="text" id="avSearch" placeholder="Chercher un champion…" autocomplete="off"></label>
-        <div class="avgrid" id="avGrid"></div>
-        <span class="note" id="avMsg" role="status"></span>
-      </div>
-      <div class="row" style="grid-column:1/-1"><button class="btn small ghost" type="button" onclick="conseilOpenAccount()">Compte et connexion</button><span class="note">Identifiant, mot de passe, connexion sur un autre appareil.</span></div>
       <div class="row"><button class="btn" type="submit">Enregistrer mon profil</button><span class="okmsg" id="profMsg"></span></div>
+      <div class="row" style="grid-column:1/-1"><button class="btn small ghost" type="button" onclick="conseilOpenAccount()">Compte et connexion</button><span class="note">Identifiant, mot de passe, connexion sur un autre appareil.</span></div>
     </form>
   </section>
   <footer>Site de fan du Conseil des Sages, sans lien avec Riot Games ni Discord.</footer>
