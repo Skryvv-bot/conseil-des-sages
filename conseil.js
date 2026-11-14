@@ -35,13 +35,13 @@ const CONSEIL_NAV=[
   {id:"lol",href:"lol.html",label:"LoL",sub:[{id:"lol",href:"lol.html",label:"Accueil LoL"},{id:"ladder",href:"ladder.html",label:"Ladder"},{id:"worlds",href:"worlds.html",label:"Worlds 2026"},{id:"tierlist",href:"tierlist.html",label:"Tier list"},
     {id:"fantasy",href:"fantasy.html",label:"Fantasy",sub:[["accueil","Accueil"],["tirage","Tirage"],["classement","Classement"],["joueurs","Joueurs"],["parties","Parties"],["regles","Règles"]].map(([h,l])=>({href:"fantasy.html#"+h,label:l}))},
     {id:"cartes",href:"cartes.html",label:"LolMaster",sub:[["boosters","Boosters"],["collection","Ma collection"],["marche","Marché"],["echanges","Échanges"],["vitrines","Vitrines"],["sages","Les sages"],["wiki","Wiki des champions"],["regions","Régions"]].map(([h,l])=>({href:"cartes.html#"+h,label:l}))},
-    {id:"customs",href:"customs.html",label:"Customs & Clash",sub:[{href:"customs.html#roue",label:"Roue des champions"}]},{id:"patch",href:"patch.html",label:"Patch"}]},
+    {id:"customs",href:"customs.html",label:"Customs & Clash",sub:[{href:"customs.html#roue",label:"Roue des champions"}]},{id:"mercato",href:"mercato.html",label:"Mercato"},{id:"patch",href:"patch.html",label:"Patch"}]},
   {id:"wow",href:"wow.html",label:"WoW",sub:[{id:"wow",href:"wow.html",label:"WoW Forever"}]},
   {id:"fortnite",href:"fortnite.html",label:"Fortnite",sub:[{id:"fortnite",href:"fortnite.html",label:"Chasse aux trésors"},{href:"fortnite.html#taux",label:"Taux de drop"}]},
   {id:"jeux",href:"devinettes.html",label:"Jeux",noBar:1,sub:[{id:"devinettes",href:"devinettes.html",label:"Devinettes"}]},
   {id:"conseil",href:"communaute.html",label:"Le Conseil",sub:[{id:"conseil",href:"communaute.html",label:"Le Conseil",sub:[{href:"communaute.html#paris",label:"Pronos entre potes"}]},{id:"banque",href:"banque.html",label:"Banque · Pièces d'or"}]}
 ];
-const NAV_GROUP={ladder:"lol",worlds:"lol",tierlist:"lol",fantasy:"lol",cartes:"lol",customs:"lol",patch:"lol",devinettes:"jeux",jeux:"jeux",banque:"conseil"};
+const NAV_GROUP={ladder:"lol",worlds:"lol",tierlist:"lol",fantasy:"lol",cartes:"lol",customs:"lol",patch:"lol",mercato:"lol",devinettes:"jeux",jeux:"jeux",banque:"conseil"};
 (function navStyles(){
   const css=`
 .cnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;margin:-20px calc(-1*max(16px,env(safe-area-inset-left,0px))) 0;padding:10px max(16px,env(safe-area-inset-left,0px));
@@ -190,7 +190,7 @@ window.conseilTeamLogo=function(tag,fallbackHTML,size=30){
 
 // ---------- Thème « Collection holographique » et bandeau d'infos ----------
 (function(){const add=()=>{if(document.getElementById("tv-theme"))return;
-  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=4";document.head.appendChild(l)};
+  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=5";document.head.appendChild(l)};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();
 function defaultTicker(){const d=Math.ceil((Date.parse("2026-11-04T23:00:00Z")-Date.now())/864e5);
   return ["Worlds 2026 : la finale le 14 novembre, puis le bilan du Pick'em","Pick'em : un skin pour le 1er (offert par Skryvv) et un skin pour le 2e (offert par Tabaskoh)",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Pronos entre potes, tribunal et sage de la semaine dans Le Conseil","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes"]}

@@ -166,7 +166,8 @@ footer{color:#8c88aa!important}
 @media (max-width:720px){.promo{grid-template-columns:1fr}.promo>img{max-height:220px;order:-1}}
 .leagues{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .leagues div{background:#0c0b14;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center;min-width:0}
-.leagues b{display:block;font:900 clamp(1.3rem,4vw,2rem)/1 var(--display)}
+.leagues img{display:block;width:72px;height:72px;object-fit:contain;margin:0 auto 6px}
+.leagues b{display:block;font:900 1.1rem/1 var(--display)}
 .leagues span{font-size:.82rem;color:var(--muted)}
 .glass{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
 .glass img{display:block;width:100%;height:auto;border-radius:10px;transition:transform .2s}
