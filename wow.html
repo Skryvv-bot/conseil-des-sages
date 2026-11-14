@@ -41,6 +41,17 @@
 .warn{border-left:4px solid var(--holo-gold,#ffe27a);background:#201d38;border-radius:12px;padding:14px 16px;margin:0;color:#d9d5ef}
 .src{font-size:.85rem;color:var(--muted)}
 ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;color:#d9d5ef}
+.race{display:flex;flex-direction:column;gap:8px}
+.rc{display:grid;grid-template-columns:28px 44px minmax(0,1fr) auto;gap:12px;align-items:center;background:#0c0b14;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.rc .pos{font:800 1rem var(--display);color:var(--holo-gold,#ffe27a);text-align:center}
+.rc .who b{color:#fff}.rc .who span{display:block;font-size:.84rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rc .bar{height:8px;border-radius:99px;background:#201d38;overflow:hidden;margin-top:6px}
+.rc .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#7ad7ff,#8affc1,#ffe27a)}
+.rc .lv{font:900 1.5rem/1 var(--display);font-variant-numeric:tabular-nums;text-align:right}
+.rc .lv small{display:block;font:700 .62rem var(--mono);letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-top:3px}
+.rc.max{border-color:var(--holo-gold,#ffe27a)}
+.fac{font:700 .62rem var(--mono);letter-spacing:.06em;border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:middle}
+.fac.a{background:#7ad7ff;color:#0c0b14}.fac.h{background:#ff6b6b;color:#0c0b14}
 </style>
 </head>
 <body>
@@ -53,6 +64,13 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
     </div>
   </header>
   <img class="shot wide" src="img/wow-hero.jpg" alt="Illustration de World of Warcraft: Forever : quatre aventuriers face à une cité et à des montagnes au coucher du soleil" width="1600" height="900">
+
+  <section class="frame panel" aria-labelledby="w-race">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h2 id="w-race">La course au niveau 60</h2><span class="note" id="raceN"></span></div>
+    <p class="lead">Les sages partis en Azeroth, classés par niveau. Les niveaux viennent de Blizzard et se mettent à jour quand le joueur se déconnecte du jeu.</p>
+    <div class="race" id="race"><div class="empty">Chargement des personnages…</div></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><a class="btn" href="communaute.html#profil">Ajouter mon personnage</a><span class="note">Dans ton profil : prénom et nom de famille du personnage. Il apparaît à partir du niveau 10.</span></div>
+  </section>
 
   <section class="frame panel" aria-labelledby="w-what">
     <h2 id="w-what">C'est quoi, WoW Forever ?</h2>
@@ -82,6 +100,24 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
     <figure style="margin:0;display:flex;flex-direction:column;gap:6px"><img class="shot" src="img/wow-packs.jpg" alt="Le contenu des packs de World of Warcraft: Forever : montures, mascottes, tenues et Warcraft III Reforged" loading="lazy" width="1600" height="900"><figcaption class="src">Le contenu des packs payants : montures, mascottes, tenues et Warcraft III Reforged.</figcaption></figure>
   </section>
 
+  <section class="frame panel" aria-labelledby="w-lex">
+    <h2 id="w-lex">Le lexique pour ceux qui ne jouent pas</h2>
+    <p class="lead">De quoi suivre le vocal quand tout le monde parle de WoW, traduit en langage LoL.</p>
+    <div class="vs">
+      <div>Ils disent</div><div>Ça veut dire</div>
+      <div>« On a wipe »</div><div>Tout le groupe est mort. L'équivalent d'un ace subi, sauf qu'il faut tout recommencer.</div>
+      <div>« Je pull »</div><div>J'attire les monstres pour lancer le combat. Comme engager, mais contre des monstres.</div>
+      <div>« Le tank »</div><div>Celui qui encaisse les coups à la place des autres. Le rôle de ton toplaner quand il fait bien son travail.</div>
+      <div>« Le heal »</div><div>Le soigneur. Un support enchanteur à qui on reproche chaque mort.</div>
+      <div>« Les DPS »</div><div>Ceux qui font les dégâts. Les carrys, en plus nombreux.</div>
+      <div>« L'aggro »</div><div>L'attention du monstre. Si le mage la prend à la place du tank, le mage meurt.</div>
+      <div>« Un donjon »</div><div>Une sortie à 5 contre des monstres et des boss, d'une demi-heure à une heure.</div>
+      <div>« Un raid »</div><div>La même chose à 10, 20 ou 40 joueurs, sur une soirée entière. Les premiers ouvrent le 9 décembre.</div>
+      <div>« Je farm »</div><div>Je répète la même chose pendant des heures pour de l'or ou des objets. Comme farmer les sbires, sans la partie qui se termine.</div>
+      <div>« Je suis 60 »</div><div>J'ai atteint le niveau maximum. C'est là que le « vrai jeu » commence, paraît-il.</div>
+    </div>
+  </section>
+
   <section class="frame panel" aria-labelledby="w-t">
     <span class="eyebrow">La Grande Trahison</span>
     <h2 id="w-t">Depuis la fin de l'amitié</h2>
@@ -97,6 +133,26 @@ conseilNav("wow");conseilConnect().catch(()=>{});
 const WOW_LAUNCH=Date.parse("2026-11-04T23:00:00Z"),$=id=>document.getElementById(id);
 function tick(){const m=Math.max(0,Math.floor((Date.now()-WOW_LAUNCH)/60000));$("wj").textContent=Math.floor(m/1440);$("wh").textContent=String(Math.floor(m/60)%24).padStart(2,"0");$("wm").textContent=String(m%60).padStart(2,"0")}
 tick();setInterval(tick,15000);
+
+// ---------- Course au niveau 60 : personnages indiqués dans les profils, niveaux lus chez Blizzard par le robot ----------
+(async function(){const box=$("race"),el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+  const msg=t=>{box.replaceChildren(el("div","empty",t))};
+  const {db}=await conseilConnect();if(!db){msg("Connexion au Conseil impossible pour le moment.");return}
+  const [sages,dc]=await Promise.all([conseilSages(db),conseilDiscordAvatars()]);
+  const slug=w=>(w.name+(w.surname?"-"+w.surname:"")).trim().toLowerCase().replace(/\s+/g,"-");
+  const list=Object.entries(sages).filter(([,m])=>m.pseudo&&m.wow&&m.wow.name).map(([id,m])=>({id,m,slug:slug(m.wow)}));
+  if(!list.length){msg("Aucun sage n'a encore indiqué son personnage. Sois le premier !");return}
+  let api={},down=false;
+  try{const r=await fetch(RIOT_RELAY+"/wow?chars="+encodeURIComponent(list.map(x=>x.slug).join(",")));const j=await r.json();if(j.error)down=true;api=j.chars||{}}catch(e){down=true}
+  const rows=list.map(x=>{const a=api[x.slug];return Object.assign(x,{a,lvl:a&&a.level?a.level:(x.m.wow.lvl||0),auto:!!(a&&a.level)})}).sort((p,q)=>q.lvl-p.lvl||p.m.pseudo.localeCompare(q.m.pseudo));
+  $("raceN").textContent=rows.length+(rows.length>1?" sages en Azeroth":" sage en Azeroth")+(down?" · niveaux Blizzard indisponibles":"");
+  box.replaceChildren(...rows.map((x,i)=>{const r=el("div","rc"+(x.lvl>=60?" max":"")),a=x.a||{},who=el("div","who"),b=el("b","",x.m.pseudo);
+    const av=a.avatar?(()=>{const s=el("span","cav");s.style.width=s.style.height="44px";const im=new Image();im.alt="";im.src=a.avatar;im.onerror=()=>s.replaceWith(conseilAvatarEl(x.m,dc,44));s.append(im);return s})():conseilAvatarEl(x.m,dc,44);
+    if(a.faction){const f=/horde/i.test(a.faction)?"h":"a";b.append(el("span","fac "+f,f==="h"?"Horde":"Alliance"))}
+    const perso=(a.name||x.m.wow.name)+" "+(a.surname||x.m.wow.surname||""),det=[perso.trim(),a.race,a.cls,a.guild?"<"+a.guild+">":"",a.ruleset].filter(Boolean).join(" · ");
+    const bar=el("div","bar"),fill=el("i");fill.style.width=Math.min(100,Math.round(x.lvl/60*100))+"%";bar.append(fill);who.append(b,el("span","",det),bar);
+    const lv=el("div","lv",x.lvl?String(x.lvl):"–");lv.append(el("small","",x.lvl>=60?"niveau max":x.auto?"niveau":x.lvl?"saisi à la main":"pas encore visible"));
+    r.append(el("span","pos",String(i+1)),av,who,lv);return r}))})();
 </script>
 </body>
 </html>

@@ -107,6 +107,9 @@
       <div style="grid-column:1/-1"><p class="note riot-optin" style="font-size:.8rem">Ajouter ton Riot ID est facultatif et se fait uniquement par toi. En l'ajoutant, tu acceptes que ton Riot ID et ta partie en cours (champion, mode, durée) soient visibles par tous les visiteurs du site. Tu peux le retirer à tout moment dans Le Conseil › Mon profil (vide le champ Riot ID).</p></div>
       <label class="f">Pseudo Discord (pour détecter tes parties)<input type="text" id="pDiscord" maxlength="40" placeholder="Ton nom affiché sur le serveur"></label>
       <div class="f">Postes préférés (dans l'ordre de clic)<div class="chips" id="pRoles"></div></div>
+      <label class="f">Personnage WoW Forever : prénom<input type="text" id="pWowN" maxlength="24" placeholder="Ex. Anduin"></label>
+      <label class="f">Nom de famille du personnage<input type="text" id="pWowS" maxlength="24" placeholder="Ex. Wrynn"></label>
+      <label class="f">Niveau (seulement si la page WoW ne le trouve pas)<input type="number" id="pWowL" min="1" max="60" inputmode="numeric" placeholder="1 à 60"></label>
       <div class="avpick" aria-labelledby="avT">
         <div class="avpick-top"><span id="avPrev"></span><div><b id="avT">Ton avatar</b><p class="note" id="avInfo" style="margin:2px 0 0">Par défaut : ta photo de profil Discord.</p></div>
           <button class="btn small ghost" type="button" id="avDiscord" style="margin-left:auto">Revenir à ma photo Discord</button></div>
@@ -155,7 +158,7 @@ function renderRoleChips(){$("pRoles").innerHTML=ROLES.map(r=>{const i=profRoles
   $("pRoles").querySelectorAll(".chip").forEach(c=>c.onclick=()=>{const r=c.dataset.r,i=profRoles.indexOf(r);i>=0?profRoles.splice(i,1):profRoles.push(r);renderRoleChips()})}
 let profFilled=false;
 function fillProfile(){if(profFilled||!db||!window.__membersLoaded)return;const m=me()||{};profFilled=true;
-  $("pPseudo").value=m.pseudo||"";$("pRiot").value=m.riotId||"";$("pRegion").value=m.region||"euw1";$("pRank").value=m.rank||"Non classé";$("pDiscord").value=m.discord||"";profRoles=(m.roles||[]).slice();renderRoleChips();
+  $("pPseudo").value=m.pseudo||"";$("pRiot").value=m.riotId||"";$("pRegion").value=m.region||"euw1";$("pRank").value=m.rank||"Non classé";$("pDiscord").value=m.discord||"";$("pWowN").value=m.wow?.name||"";$("pWowS").value=m.wow?.surname||"";$("pWowL").value=m.wow?.lvl||"";profRoles=(m.roles||[]).slice();renderRoleChips();
   const al=Array.isArray(m.alts)?m.alts:[];[1,2].forEach(i=>{$("pAlt"+i).value=al[i-1]?.riotId||"";$("pAlt"+i+"Reg").value=al[i-1]?.region||m.region||"euw1"})}
 renderRoleChips();
 $("profForm").onsubmit=async e=>{e.preventDefault();if(!db)return;const msg=$("profMsg");
@@ -166,7 +169,7 @@ $("profForm").onsubmit=async e=>{e.preventDefault();if(!db)return;const msg=$("p
     if(!riotId){msg.className="err";msg.textContent="Indique d'abord ton compte principal.";return}
     if(a.toLowerCase()!==riotId.toLowerCase()&&!alts.some(x=>x.riotId.toLowerCase()===a.toLowerCase()))alts.push({riotId:a,region:$("pAlt"+i+"Reg").value})}
   {const t=Object.entries(members).find(([id,m])=>id!==uid&&m.pseudo?.toLowerCase()===pseudo.toLowerCase());if(t){msg.className="err";conseilTakeover(msg,db,uid,t[0],t[1].pseudo);return}}
-  try{await db.doc("riot/"+uid).set({pseudo,riotId,region:$("pRegion").value,rank:$("pRank").value,discord:$("pDiscord").value.trim().slice(0,40),roles:profRoles.slice(),alts,updated:new Date().toISOString()},{merge:true});
+  try{await db.doc("riot/"+uid).set({pseudo,riotId,region:$("pRegion").value,rank:$("pRank").value,discord:$("pDiscord").value.trim().slice(0,40),wow:$("pWowN").value.trim()?{name:$("pWowN").value.trim().slice(0,24),surname:$("pWowS").value.trim().slice(0,24),lvl:Math.max(0,Math.min(60,+$("pWowL").value||0))}:null,roles:profRoles.slice(),alts,updated:new Date().toISOString()},{merge:true});
     msg.className="okmsg";msg.textContent="Profil enregistré."}catch(x){msg.className="err";msg.textContent="Enregistrement impossible, réessaie."}};
 
 // ---------- Pronos entre potes ----------
