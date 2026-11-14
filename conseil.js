@@ -98,10 +98,10 @@ window.conseilNav=function(active){
       const m=await load();if(pop.hidden)return;
       if(!m){pop.replaceChildren(el("p","note","Liste indisponible pour le moment."))}
       else if(!m.length){pop.replaceChildren(el("p","note","Personne en ligne pour l'instant."))}
-      else{const list=m.slice().sort((a,b)=>(b.game?1:0)-(a.game?1:0)||String(a.username).localeCompare(String(b.username)));
+      else{const pl=x=>x.game&&conseilIsGame(x.game.name)?1:0,list=m.slice().sort((a,b)=>pl(b)-pl(a)||String(a.username).localeCompare(String(b.username)));
         pop.replaceChildren(el("b","cdc-h",m.length+" en ligne sur le Discord"),...list.slice(0,40).map(x=>{const row=el("div","cdc-m"),av=el("span","cav");av.style.width=av.style.height="28px";av.textContent=String(x.username).slice(0,2).toUpperCase();
           if(x.avatar_url){const im=new Image();im.alt="";im.onload=()=>{av.textContent="";av.appendChild(im)};im.src=x.avatar_url}
-          const t=el("span","cdc-n");t.append(el("b","",x.username));if(x.game&&x.game.name)t.append(el("small","",x.game.name));row.append(av,t);return row}));
+          const t=el("span","cdc-n");t.append(el("b","",x.username));if(x.game&&conseilIsGame(x.game.name))t.append(el("small","",x.game.name));row.append(av,t);return row}));
         if(m.length>40)pop.append(el("p","note","et "+(m.length-40)+" autres"))}
       place()}
     function close(){timer=setTimeout(()=>{if(pop)pop.hidden=true},180)}
@@ -216,14 +216,18 @@ window.conseilTeamLogo=function(tag,fallbackHTML,size=30){
 // Par défaut : la photo de profil Discord (retrouvée dans le widget du serveur grâce au pseudo Discord du profil, ou au pseudo).
 // En option : un champion choisi dans « Mon profil » (champ avatar du profil). Sinon, les initiales.
 const CDS_GUILD="781876426571251743";
+// Les noms Discord portent souvent des émojis ou des symboles (« Audric🦦 ») : on compare sans eux, sans accents ni majuscules.
+window.conseilDcNorm=s=>String(s||"").normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]/g,"");
+// Discord affiche aussi des logiciels et des statuts de robots : on ne garde que les jeux.
+window.conseilIsGame=n=>!!n&&!/^[\/!.]|\bhelp\b|curseforge|spotify|medal|visual studio|youtube|twitch|crunchyroll|netflix|custom status/i.test(n);
 let __sages=null,__dc=null;
 window.conseilSages=function(db){return __sages||(__sages=db.collection("riot").get().then(s=>{const o={};s.forEach(d=>o[d.id]=d.data());return o}).catch(()=>({})))};
 window.conseilDiscordAvatars=function(){
   return __dc||(__dc=fetch(`https://discord.com/api/guilds/${CDS_GUILD}/widget.json`).then(r=>r.ok?r.json():{members:[]}).then(w=>{
-    const seen=LS.get("dc-avatars",{});for(const m of w.members||[])if(m.avatar_url)seen[String(m.username).toLowerCase()]=m.avatar_url;
+    const seen=LS.get("dc-avatars",{});for(const m of w.members||[])if(m.avatar_url&&conseilDcNorm(m.username))seen[conseilDcNorm(m.username)]=m.avatar_url;
     LS.set("dc-avatars",seen);return seen}).catch(()=>LS.get("dc-avatars",{})))};
 window.conseilAvatarUrl=function(m,dc){if(!m)return "";if(m.avatar)return conseilChampImg(m.avatar);
-  for(const k of [m.discord,m.pseudo]){const u=k&&dc&&dc[String(k).trim().toLowerCase()];if(u)return u}return ""};
+  for(const k of [m.discord,m.pseudo]){const u=k&&dc&&(dc[conseilDcNorm(k)]||dc[String(k).trim().toLowerCase()]);if(u)return u}return ""};
 window.conseilAvatarEl=function(m,dc,size=36){const e=document.createElement("span");e.className="cav";e.style.width=e.style.height=size+"px";
   const u=conseilAvatarUrl(m,dc),ini=String(m&&m.pseudo||"?").slice(0,2).toUpperCase();e.textContent=ini;
   if(u){const im=new Image();im.alt="";im.loading="lazy";im.onload=()=>{e.textContent="";e.appendChild(im)};im.src=u}return e};

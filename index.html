@@ -603,7 +603,7 @@ async function loadDiscord(){
     }
     // Qui joue à quoi : le widget Discord donne le jeu affiché dans le statut de chaque membre en ligne (Fortnite en premier)
     const by={};for(const m of mem){const g=m.game&&m.game.name;if(g)(by[g]=by[g]||[]).push(m.username)}
-    DCGAME={};for(const m of mem)if(m.game&&m.game.name)DCGAME[String(m.username).toLowerCase()]=m.game.name;renderPlayers();
+    DCGAME={};for(const m of mem)if(m.game&&conseilIsGame(m.game.name))DCGAME[conseilDcNorm(m.username)]=m.game.name;renderPlayers();
     const gl=Object.entries(by).sort((x,y)=>(/fortnite/i.test(y[0])-/fortnite/i.test(x[0]))||y[1].length-x[1].length);
     $("dcGames").hidden=!gl.length;
     $("dcGamesList").innerHTML=gl.map(([g,us])=>`<div class="item" style="padding:8px 10px;border:1px solid ${/fortnite/i.test(g)?"#ffe27a":"#3a3752"}"><b style="color:${/fortnite/i.test(g)?"#ffe27a":"#fff"}">${esc(g)}</b> <span class="tag live">${us.length} en jeu</span><br><span class="note">${us.map(esc).join(", ")}</span></div>`).join("");
@@ -647,7 +647,7 @@ function renderPlayers(){
   const uniq=new Map();for(const [id,p] of Object.entries(riot).filter(([,p])=>p.riotId&&p.pseudo).sort((a,b)=>String(a[1].updated||"").localeCompare(String(b[1].updated||""))))uniq.set(p.riotId.toLowerCase(),[id,p]);
   for(const [id,p] of Object.entries(riot))if(!p.riotId&&p.pseudo&&((p.wow&&p.wow.name)||(p.fn&&p.fn.name)))uniq.set("autre:"+id,[id,p]);
   loadWowChars();
-  const list=[...uniq.values()].map(([id,p])=>{const L=p.riotId?conseilLiveOf(p,live):null,dg=DCGAME[String(p.discord||"").trim().toLowerCase()]||DCGAME[String(p.pseudo).toLowerCase()]||"";
+  const list=[...uniq.values()].map(([id,p])=>{const L=p.riotId?conseilLiveOf(p,live):null,dg=DCGAME[conseilDcNorm(p.discord)]||DCGAME[conseilDcNorm(p.pseudo)]||"";
     return {id,...p,lv:L?.g||null,lvAcc:L&&!L.acc.main?L.acc.riotId:null,lvAccObj:L&&!L.acc.main?{riotId:L.acc.riotId,region:L.acc.region||p.region}:null,dg:/league of legends/i.test(dg)?"":dg}});
   if(!db&&!list.length){$("players").innerHTML=`<div class="note">${connErr?"Liste indisponible.":"Chargement des sages…"}</div>`;return}
   if(!list.length){$("players").innerHTML=`<div class="note">Aucun sage inscrit pour l'instant. Ajoute tes comptes de jeu dans ton profil pour apparaître ici.</div>`;return}
