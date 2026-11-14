@@ -1,0 +1,31 @@
+name: "Logos officiels des ligues"
+# Récupère les logos officiels LEC, LCK et LPL depuis LoL Esports et les range dans img/.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [".github/workflows/logos-ligues.yml"]
+permissions:
+  contents: write
+jobs:
+  logos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          curl -sS --fail -H "x-api-key: 0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z" "https://esports-api.lolesports.com/persisted/gw/getLeagues?hl=fr-FR" -o leagues.json
+          mkdir -p img
+          for s in lec lck lpl; do
+            url=$(jq -r --arg s "$s" '.data.leagues[] | select(.slug==$s) | .image' leagues.json | head -1 | sed 's#^http://#https://#')
+            echo "$s -> $url"
+            curl -sS --fail -L "$url" -o "img/ligue-$s.png"
+            file "img/ligue-$s.png"
+          done
+          jq '[.data.leagues[] | select(.slug=="lec" or .slug=="lck" or .slug=="lpl") | {slug,name,image}]' leagues.json > img/ligues.json
+          rm leagues.json
+      - run: |
+          git config user.name "cds-bot"
+          git config user.email "cds-bot@users.noreply.github.com"
+          git add img/ligue-*.png img/ligues.json
+          git commit -m "Logos officiels LEC, LCK, LPL" || echo "rien de nouveau"
+          git push
