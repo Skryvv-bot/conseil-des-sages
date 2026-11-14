@@ -20,7 +20,7 @@ const clone=o=>JSON.parse(JSON.stringify(o));
 const pseudoOf=u=>room?.players?.[u]?.pseudo||room?.gone?.[u]||"?";
 const isHost=()=>room&&room.host===uid;
 const now=()=>new Date().toISOString();
-function toast(msg){const n=$("conn");n.textContent=msg;n.style.color="var(--tv-amber,#ffb400)";clearTimeout(toast.t);toast.t=setTimeout(()=>{n.textContent=db?"Connecté":"";n.style.color=""},4000)}
+function toast(msg){const n=$("conn");n.textContent=msg;n.style.color="var(--tv-amber,#ffe27a)";clearTimeout(toast.t);toast.t=setTimeout(()=>{n.textContent=db?"Connecté":"";n.style.color=""},4000)}
 
 // Modifie le salon dans une transaction : fn reçoit une copie du salon et renvoie les champs à changer (ou null).
 async function mutate(fn){
@@ -156,7 +156,7 @@ function p4Play(col){mutate(r=>{const s=r.s;if(s.winner!==null||r.order[s.turn]!
   const i=row*7+col;s.board[i]=s.turn+1;const line=p4Win(s.board,i);
   if(line){s.winner=s.turn;s.line=line}else if(s.board.every(x=>x))s.winner="draw";else s.turn=1-s.turn;return {s}})}
 function p4Render(){
-  const s=room.s,mine=room.order.indexOf(uid),myTurn=s.winner===null&&mine===s.turn,col=i=>i===0?"#e4002b":"#ffb400";
+  const s=room.s,mine=room.order.indexOf(uid),myTurn=s.winner===null&&mine===s.turn,col=i=>i===0?"#d92a74":"#ffe27a";
   const who=i=>`<span class="disc" style="background:${col(i)}"></span> ${esc(pseudoOf(room.order[i]))}`;
   let msg=s.winner===null?(myTurn?"À toi de jouer !":`Au tour de ${who(s.turn)}`):s.winner==="draw"?"Match nul, grille pleine.":(s.winner===mine?"Victoire ! Bien joué.":`${who(s.winner)} gagne la partie.`);
   $("gbody").innerHTML=`<div class="banner${myTurn?"":" red"}">${msg}</div>
@@ -485,7 +485,7 @@ function renderLB(){
   $("lbtabs").innerHTML=Object.entries(LB).map(([k,v])=>`<button class="chip" data-lb="${k}" aria-pressed="${k===lbGame}">${v.n}</button>`).join("");
   $("lbtabs").querySelectorAll("[data-lb]").forEach(b=>b.onclick=()=>{lbGame=b.dataset.lb;renderLB()});
   const L=LB[lbGame],rows=Object.entries(statsAll).filter(([id,v])=>v[lbGame]&&!conseilIsClaimed(id)).sort((a,b)=>(b[1][lbGame][L.sort]||0)-(a[1][lbGame][L.sort]||0)).slice(0,20);
-  $("lboard").innerHTML=rows.length?`<table class="lb"><thead><tr><th>#</th><th>Sage</th>${L.cols.map(c=>`<th class="num">${c[0]}</th>`).join("")}</tr></thead><tbody>${rows.map(([id,v],i)=>`<tr${id===uid?' style="color:var(--tv-amber,#ffb400)"':""}><td>${i+1}</td><td>${esc(v.pseudo)}${conseilCampTag(id)}</td>${L.cols.map(c=>`<td class="num">${(v[lbGame][c[1]]||0).toLocaleString("fr-FR")}</td>`).join("")}</tr>`).join("")}</tbody></table>`:`<div class="empty">Personne n'a encore joué. Lance un salon !</div>`;
+  $("lboard").innerHTML=rows.length?`<table class="lb"><thead><tr><th>#</th><th>Sage</th>${L.cols.map(c=>`<th class="num">${c[0]}</th>`).join("")}</tr></thead><tbody>${rows.map(([id,v],i)=>`<tr${id===uid?' style="color:var(--tv-amber,#ffe27a)"':""}><td>${i+1}</td><td>${esc(v.pseudo)}${conseilCampTag(id)}</td>${L.cols.map(c=>`<td class="num">${(v[lbGame][c[1]]||0).toLocaleString("fr-FR")}</td>`).join("")}</tr>`).join("")}</tbody></table>`:`<div class="empty">Personne n'a encore joué. Lance un salon !</div>`;
 }
 
 // ---------- démarrage ----------

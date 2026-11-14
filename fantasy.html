@@ -3,26 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#08090b">
+<meta name="theme-color" content="#0c0b14">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png?v=2">
 <link rel="apple-touch-icon" href="icon-192.png?v=2">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Barlow:wght@400;500;600;700&display=swap">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="conseil.js"></script>
 <title>Fantasy du Conseil · CDS.TV</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@400;500;600;700;800&display=swap">
 <style>
 /* Plateau TV du Conseil : bandeau rouge, onglets, cartes à collectionner ; le tirage s'ouvre comme une caisse de CS:GO.
    Thème sombre unique, assumé : c'est l'identité de CDS.TV. Raretés des cartes = rang dans la tier list du Conseil. */
 :root{
-  --void:#08090b; --panel:#15171c; --panel2:#1d2027; --line:#2a2d35; --ink:#ffffff; --muted:#a7abb6; --dim:#6f7480;
-  --red:#e4002b; --amber:#ffb400; --ok:#2fbf71; --bad:#ff4d6a;
-  --r-goat:#ff7a1a; --r-leg:#ffb400; --r-epic:#b14cff; --r-rare:#4b8bff; --r-com:#8a93a6;
+  --void:#0c0b14; --panel:#17152a; --panel2:#201d38; --line:#3a3752; --ink:#ffffff; --muted:#b4b0d0; --dim:#6f7480;
+  --red:#d92a74; --amber:#ffe27a; --ok:#2fbf71; --bad:#ff4d6a;
+  --r-goat:#ff7a1a; --r-leg:#ffe27a; --r-epic:#b14cff; --r-rare:#4b8bff; --r-com:#8a93a6;
   --display:"Anton","Impact","Arial Narrow",sans-serif; --body:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
   color-scheme:dark;
 }
@@ -45,7 +42,7 @@ h3{font:400 1.2rem var(--display);text-transform:uppercase;margin:0;color:var(--
 .between{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline}
 .note{color:var(--muted);font-size:.92rem}
 .btn{border:0;background:var(--red);color:#fff;font:700 .9rem var(--body);letter-spacing:.08em;text-transform:uppercase;padding:10px 16px;cursor:pointer}
-.btn:hover{background:#ff1744}.btn.ghost{background:transparent;border:2px solid var(--amber);color:var(--amber)}.btn.ghost:hover{background:var(--amber);color:var(--void)}
+.btn:hover{background:#ff4d8d}.btn.ghost{background:transparent;border:2px solid var(--amber);color:var(--amber)}.btn.ghost:hover{background:var(--amber);color:var(--void)}
 .btn.gold{background:var(--amber);color:var(--void)}.btn.small{padding:6px 10px;font-size:.78rem}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 input[type=text],select,input[type=datetime-local]{padding:9px 10px;background:var(--void);border:1px solid var(--line);color:#fff;font:600 1.02rem var(--body)}
@@ -65,9 +62,9 @@ input[type=text],select,input[type=datetime-local]{padding:9px 10px;background:v
 
 /* cartes */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
-.card{--rc:var(--r-com);position:relative;display:flex;flex-direction:column;background:linear-gradient(180deg,color-mix(in srgb,var(--tc) 55%,#0b0c0f) 0%,#121318 55%,#0d0e11 100%);border:1px solid color-mix(in srgb,var(--tc) 40%,#2a2d35);border-bottom:4px solid var(--rc);overflow:hidden;min-width:0;text-decoration:none;color:#fff}
+.card{--rc:var(--r-com);position:relative;display:flex;flex-direction:column;background:linear-gradient(180deg,color-mix(in srgb,var(--tc) 55%,#0b0c0f) 0%,#121318 55%,#0d0e11 100%);border:1px solid color-mix(in srgb,var(--tc) 40%,#3a3752);border-bottom:4px solid var(--rc);overflow:hidden;min-width:0;text-decoration:none;color:#fff}
 a.card{transition:transform .15s ease}a.card:hover{transform:translateY(-3px)}
-.card.goat{background:linear-gradient(180deg,#5c4300 0%,#2a2000 45%,#120e00 100%);border-color:#ffb400}
+.card.goat{background:linear-gradient(180deg,#5c4300 0%,#2a2000 45%,#120e00 100%);border-color:#ffe27a}
 .card.taken{filter:grayscale(1) brightness(.45)}
 .card .top{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 10px 0;position:relative;z-index:2}
 .rank{display:flex;flex-direction:column;align-items:flex-start;line-height:1}
@@ -95,7 +92,7 @@ a.card{transition:transform .15s ease}a.card:hover{transform:translateY(-3px)}
 .slot .capbtn{align-self:stretch}
 
 /* tirage */
-.caisse{background:radial-gradient(ellipse at center,#1d2027 0%,#0b0c0f 75%);border:1px solid var(--line);padding:18px;display:flex;flex-direction:column;gap:14px;align-items:center;overflow:hidden}
+.caisse{background:radial-gradient(ellipse at center,#201d38 0%,#0b0c0f 75%);border:1px solid var(--line);padding:18px;display:flex;flex-direction:column;gap:14px;align-items:center;overflow:hidden}
 .caisse .who{font:400 clamp(1.4rem,4vw,2.2rem) var(--display);text-transform:uppercase;text-align:center}
 .caisse .who b{color:var(--amber);font-weight:400}
 .reel{position:relative;width:100%;height:178px;overflow:hidden;background:#06070a;border-block:2px solid var(--line)}

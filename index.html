@@ -3,14 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#08090b">
+<meta name="theme-color" content="#0c0b14">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png?v=2">
 <link rel="apple-touch-icon" href="icon-192.png?v=2">
 <title>Conseil des Sages</title>
 <meta name="description" content="Le QG du Conseil des Sages : Discord, Worlds 2026, tier list, jeu de devinettes et parties LoL en direct.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Barlow:wght@400;500;600;700&display=swap">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -134,26 +132,26 @@ input[type=text],select{font:500 1rem var(--body);color:var(--ink);background:va
 .wkc b{font:700 .88rem var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
 .wkt{font-size:.88rem;color:var(--muted)}
 .wkt strong{color:var(--goldhi)}
-.kick{background:#15171c;border-top:4px solid var(--tv-red,#e4002b);padding:20px;display:flex;flex-direction:column;gap:16px}
+.kick{background:#17152a;border-top:4px solid var(--tv-red,#d92a74);padding:20px;display:flex;flex-direction:column;gap:16px}
 .kick-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
 .kick-head h2{margin:4px 0 0;font-size:clamp(1.6rem,4vw,2.4rem)}
-.kick-clock{display:flex;gap:6px}.kick-clock div{background:#08090b;padding:6px 10px;text-align:center;min-width:58px}
-.kick-clock b{display:block;font:400 1.8rem var(--display);color:#fff;line-height:1}.kick-clock span{font:700 .7rem var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--tv-amber,#ffb400)}
+.kick-clock{display:flex;gap:6px}.kick-clock div{background:#0c0b14;padding:6px 10px;text-align:center;min-width:58px}
+.kick-clock b{display:block;font:400 1.8rem var(--display);color:#fff;line-height:1}.kick-clock span{font:700 .7rem var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--tv-amber,#ffe27a)}
 .kick-grid{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:12px}
-.kick-card{background:#1d2027;padding:16px;display:flex;flex-direction:column;gap:10px}
+.kick-card{background:#201d38;padding:16px;display:flex;flex-direction:column;gap:10px}
 .kick-card .btn{align-self:flex-start}
 .kick-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.kick-top b{font:400 1.25rem var(--display);text-transform:uppercase;color:#fff}
-.kick-top span{font:700 .85rem var(--body);color:var(--tv-amber,#ffb400);letter-spacing:.06em}
+.kick-top span{font:700 .85rem var(--body);color:var(--tv-amber,#ffe27a);letter-spacing:.06em}
 .kick-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:4px}
-.kick-list li{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:6px;background:#08090b;padding:6px 8px;font:700 .9rem var(--body)}
-.kick-list .t{display:flex;align-items:center;gap:5px;min-width:0;color:#a7abb6}.kick-list .t.b{justify-content:flex-end}
-.kick-list .t.on{color:#fff}.kick-list .t.on::after{content:"✓";color:var(--tv-amber,#ffb400)}.kick-list .t.b.on::after{content:none}.kick-list .t.b.on::before{content:"✓";color:var(--tv-amber,#ffb400)}
+.kick-list li{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:6px;background:#0c0b14;padding:6px 8px;font:700 .9rem var(--body)}
+.kick-list .t{display:flex;align-items:center;gap:5px;min-width:0;color:#b4b0d0}.kick-list .t.b{justify-content:flex-end}
+.kick-list .t.on{color:#fff}.kick-list .t.on::after{content:"✓";color:var(--tv-amber,#ffe27a)}.kick-list .t.b.on::after{content:none}.kick-list .t.b.on::before{content:"✓";color:var(--tv-amber,#ffe27a)}
 .kick-list .h{font:600 .72rem var(--body);color:#6f7480;text-align:center}
-.kick-prog{height:8px;background:#08090b}.kick-prog i{display:block;height:100%;width:0;background:var(--tv-amber,#ffb400);transition:width .4s}
+.kick-prog{height:8px;background:#0c0b14}.kick-prog i{display:block;height:100%;width:0;background:var(--tv-amber,#ffe27a);transition:width .4s}
 .kick-big{margin:0;font:400 2rem var(--display);color:#fff}
 @media (max-width:760px){.kick-grid{grid-template-columns:1fr}.kick-list{grid-template-columns:1fr}.kick{padding:16px}.kick-clock div{min-width:48px}}
-.feat{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,2fr) minmax(0,5fr);background:#15171c;min-height:200px}
-.feat .fa,.feat .fb{padding:24px 28px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;color:#08090b}
+.feat{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,2fr) minmax(0,5fr);background:#17152a;min-height:200px}
+.feat .fa,.feat .fb{padding:24px 28px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;color:#0c0b14}
 .feat .fa{clip-path:polygon(0 0,100% 0,90% 100%,0 100%)}
 .feat .fb{clip-path:polygon(10% 0,100% 0,100% 100%,0 100%);align-items:flex-end;text-align:right}
 .feat .tn{font:400 clamp(2.4rem,7vw,5.4rem)/.9 var(--display);text-transform:uppercase;word-break:break-word}
@@ -163,14 +161,14 @@ input[type=text],select{font:500 1rem var(--body);color:var(--ink);background:va
 .feat .when{font:700 .95rem var(--body);color:var(--gold);text-transform:uppercase;letter-spacing:.06em}
 .feat .lg{display:flex;align-items:center;gap:10px}
 @media (max-width:640px){.feat{grid-template-columns:1fr}.feat .fa,.feat .fb{clip-path:none;align-items:flex-start;text-align:left}}
-.fan{background:#15171c;border-top:4px solid var(--tv-red,#e4002b);padding:20px;display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:20px;align-items:center}
+.fan{background:#17152a;border-top:4px solid var(--tv-red,#d92a74);padding:20px;display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:20px;align-items:center}
 /* Annonce de sortie de LolMaster */
-.lm{position:relative;overflow:hidden;background:linear-gradient(120deg,#5c0012,#15171c 55%,#2a1f00);border-top:4px solid #e4002b;padding:22px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:center}
+.lm{position:relative;overflow:hidden;background:linear-gradient(120deg,#5c0012,#17152a 55%,#2a1f00);border-top:4px solid #d92a74;padding:22px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:center}
 @media (max-width:720px){.lm{grid-template-columns:1fr}.lm-fan{display:none}}
 .lm h2{margin:4px 0 8px;font-size:clamp(1.8rem,5vw,2.8rem)!important;line-height:1!important}
 .lm p{margin:0 0 14px;color:#d5d7dd;max-width:56ch}
-.lm .gift{display:inline-flex;align-items:baseline;gap:8px;font:700 1rem var(--body);color:#ffb400;letter-spacing:.04em;margin-bottom:12px}
-.lm .gift b{font:400 2.4rem/1 var(--display,"Anton"),sans-serif;color:#ffb400}
+.lm .gift{display:inline-flex;align-items:baseline;gap:8px;font:700 1rem var(--body);color:#ffe27a;letter-spacing:.04em;margin-bottom:12px}
+.lm .gift b{font:400 2.4rem/1 var(--display,"Anton"),sans-serif;color:#ffe27a}
 .lm .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .lm .msg{font-weight:600}
 .lm-fan{position:relative;width:300px;height:190px}
@@ -178,59 +176,59 @@ input[type=text],select{font:500 1rem var(--body);color:var(--ink);background:va
 .lm-fan span:nth-child(1){--c:#2f8cff;transform:translateX(calc(-50% - 78px)) rotate(-18deg)}
 .lm-fan span:nth-child(2){--c:#b45cff;transform:translateX(calc(-50% - 26px)) translateY(-10px) rotate(-6deg)}
 .lm-fan span:nth-child(3){--c:#3fbf7f;transform:translateX(calc(-50% + 26px)) translateY(-10px) rotate(6deg)}
-.lm-fan span:nth-child(4){--c:#ffb400;transform:translateX(calc(-50% + 78px)) rotate(18deg)}
-.fan-rank{background:#08090b;border:1px solid #2a2d35;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.lm-fan span:nth-child(4){--c:#ffe27a;transform:translateX(calc(-50% + 78px)) rotate(18deg)}
+.fan-rank{background:#0c0b14;border:1px solid #3a3752;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
 .fr-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}.fr-head h3{margin:0;font-size:1.4rem}
 .fr-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
-.fr-list li{display:grid;grid-template-columns:2.2rem minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 10px;background:#15171c}
-.fr-list li.me{outline:2px solid #ffb400}
-.fr-pos{font:400 1.3rem var(--display,Impact,sans-serif);color:#ffb400;text-align:center}
+.fr-list li{display:grid;grid-template-columns:2.2rem minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 10px;background:#17152a}
+.fr-list li.me{outline:2px solid #ffe27a}
+.fr-pos{font:400 1.3rem var(--display,Impact,sans-serif);color:#ffe27a;text-align:center}
 .fr-n{display:flex;flex-direction:column;min-width:0}.fr-n b{font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fr-n small{color:var(--muted,#a7abb6);font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fr-pts{font:400 1.4rem var(--display,Impact,sans-serif);color:#fff;font-variant-numeric:tabular-nums}.fr-pts small{font:600 .7rem var(--body,system-ui);color:var(--muted,#a7abb6);margin-left:3px}
+.fr-n small{color:var(--muted,#b4b0d0);font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fr-pts{font:400 1.4rem var(--display,Impact,sans-serif);color:#fff;font-variant-numeric:tabular-nums}.fr-pts small{font:600 .7rem var(--body,system-ui);color:var(--muted,#b4b0d0);margin-left:3px}
 .fr-all{align-self:flex-start;font-weight:700}
 .fan-txt{display:flex;flex-direction:column;gap:10px;min-width:0}.fan-txt h2{margin:0;font-size:clamp(1.8rem,4.5vw,2.8rem)}.fan-txt p{margin:0}.fan-txt .btn{align-self:flex-start}
 @media (max-width:760px){.fan{grid-template-columns:1fr}}
 .trailer{margin:0;display:flex;flex-direction:column;gap:8px}
-.trailer video{width:100%;aspect-ratio:16/9;display:block;background:#000;border:1px solid #2a2d35;object-fit:cover}
+.trailer video{width:100%;aspect-ratio:16/9;display:block;background:#000;border:1px solid #3a3752;object-fit:cover}
 .trailer figcaption{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.88rem;color:var(--muted)}
 .trailer .sound{margin-left:auto;font:700 .78rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--gold);background:transparent;border:1px solid var(--gold);padding:5px 10px;cursor:pointer}
 @media (prefers-reduced-motion:reduce){.trailer video{animation:none}}
 .camps{display:flex;flex-direction:column;gap:12px;position:relative;z-index:1;min-width:0}
-.campbar{display:flex;height:10px;background:#2a2d35;overflow:hidden}
+.campbar{display:flex;height:10px;background:#3a3752;overflow:hidden}
 .campbar i{display:block;height:100%;transition:width .5s}
-.campbar .cl{background:#e4002b}.campbar .cw{background:#ffb400}
+.campbar .cl{background:#d92a74}.campbar .cw{background:#ffe27a}
 .campcols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .camp{display:flex;flex-direction:column;gap:8px;min-width:0}
 .camp h3{display:flex;justify-content:space-between;gap:6px}
-.camp-lol h3{color:#ff4d6a!important}.camp-wow h3{color:#ffb400!important}
+.camp-lol h3{color:#ff4d6a!important}.camp-wow h3{color:#ffe27a!important}
 .camp h3 b{font:400 1.3rem var(--display);color:#fff}
 .camp .dlist{min-height:30px}
-.camp-lol .dchip{background:rgba(228,0,43,.12);border-color:#7a0018;color:#ffd6dd}
-.camp-wow .dchip{background:rgba(255,180,0,.1);border-color:#7a5600;color:#ffe7b0}
+.camp-lol .dchip{background:rgba(217,42,116,.12);border-color:#5a1240;color:#ffd6dd}
+.camp-wow .dchip{background:rgba(255,226,122,.1);border-color:#7a5600;color:#ffe7b0}
 .camp .btn{font-size:.85rem!important;padding:10px 8px!important}
 .dchip .flag,.relapse .flag{color:#ff4d6a}.dchip .pure{color:#7bd34a}.dchip .ok{color:#ffd6dd;opacity:.85}
 .dchip b{font-weight:700;font-size:.78em;margin-left:4px;text-transform:uppercase;letter-spacing:.04em}
 .wow.after .clock b{color:#ff4d6a}
 .relapse{display:flex;flex-direction:column;gap:8px;margin-top:6px}
-.relapse .alarm{background:rgba(228,0,43,.18);border:1px solid #e4002b;color:#ffd6dd;padding:8px 10px;animation:alarm 1.2s ease-in-out infinite alternate}
-@keyframes alarm{from{box-shadow:0 0 0 rgba(228,0,43,0)}to{box-shadow:0 0 18px rgba(228,0,43,.55)}}
+.relapse .alarm{background:rgba(217,42,116,.18);border:1px solid #d92a74;color:#ffd6dd;padding:8px 10px;animation:alarm 1.2s ease-in-out infinite alternate}
+@keyframes alarm{from{box-shadow:0 0 0 rgba(217,42,116,0)}to{box-shadow:0 0 18px rgba(217,42,116,.55)}}
 .rstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .rstats div{border:1px solid var(--fel2);padding:8px;display:flex;flex-direction:column;gap:2px;background:rgba(0,0,0,.25)}
 .rstats b{font:400 1.6rem var(--display);color:#fff}
 .rstats span{font-size:.75rem;color:#c7d6bd}
 @media (max-width:520px){.rstats{grid-template-columns:1fr}}
 .camp .btn[aria-pressed="true"]{outline:2px solid #fff;outline-offset:2px}
-.event{display:flex;flex-direction:column;gap:6px;padding:14px;background:#1d2027;border-left:6px solid var(--tv-red,#e4002b)}
+.event{display:flex;flex-direction:column;gap:6px;padding:14px;background:#201d38;border-left:6px solid var(--tv-red,#d92a74)}
 .ev-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .ev-when{font:700 .85rem var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
 .ev-title{font:400 1.45rem/1.05 var(--display);text-transform:uppercase;color:#fff}
 .ev-txt{margin:0;font-size:.95rem;color:var(--muted);line-height:1.45}
 .ev-cd{font:700 .95rem var(--body);color:#fff;letter-spacing:.04em}
 .ev-cd b{font:400 1.3rem var(--display);color:var(--gold);margin:0 2px}
-.recap{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;background:#2a2d35}
+.recap{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;background:#3a3752}
 @media (max-width:860px){.recap{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.recap>div{background:#15171c;padding:16px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.recap>div{background:#17152a;padding:16px;display:flex;flex-direction:column;gap:4px;min-width:0}
 .recap .k{font:700 .78rem var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
 .recap .v{font:400 2rem/1 var(--display);color:#fff}
 .recap .s{font-size:.88rem;color:var(--muted)}
@@ -238,44 +236,57 @@ input[type=text],select{font:500 1rem var(--body);color:var(--ink);background:va
 .recap .top a{margin-left:auto}
 footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margin:0 auto}
 @media (prefers-reduced-motion:reduce){.logo .glow{animation:none}.tile{transition:none}}
+
+/* Thème holographique : en-tête « main de cartes » et collection */
+.hh{display:flex;flex-wrap:wrap;gap:36px;align-items:center;padding:18px 0 8px}
+.hh-txt{flex:1 1 360px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.hh h1{font-size:clamp(2.3rem,5.6vw,4.4rem)!important}
+.hh-sub{margin:0;font-size:1.12rem;color:#c9c5e6;max-width:46ch}
+.hh-fan{flex:1 1 440px;display:flex;justify-content:center;align-items:center;min-height:380px;min-width:0;padding:10px 0}
+.hcard{flex:none;width:200px;height:300px;padding:3px;border-radius:18px;background:conic-gradient(from 210deg,#ff8ad8,#ffe27a,#8affc1,#7ad7ff,#b48aff,#ff8ad8);text-decoration:none;color:#f2f0ff;
+  display:flex;flex-direction:column;position:relative;transition:transform .25s}
+.hcard::before{content:"";position:absolute;inset:3px;border-radius:15px;background:#17152a;z-index:0}
+.hcard>*{position:relative;z-index:1;margin:0 14px}
+.hcard .hc-k{display:flex;justify-content:space-between;margin-top:14px;font:700 .68rem "JetBrains Mono",monospace;letter-spacing:.06em;text-transform:uppercase}
+.hcard .hc-k i{font-style:normal}
+.hcard .hc-art{flex:1;margin-top:10px;margin-bottom:10px;border-radius:10px;background:#221f3d;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font:900 2.4rem/1 Unbounded,sans-serif}
+.hcard .hc-art b{font:900 2.4rem/1 Unbounded,sans-serif}.hcard .hc-art small{font:700 .7rem "JetBrains Mono",monospace;letter-spacing:.14em;text-transform:uppercase;margin-top:6px;color:#f2f0ff}
+.hcard>b{font:700 1rem Unbounded,sans-serif}
+.hcard .hc-d{font-size:.8rem;color:#c9c5e6;margin-bottom:14px;margin-top:4px}
+.c-fan{transform:rotate(-10deg) translate(30px,18px)}.c-fan .hc-k,.c-fan .hc-art{color:#8affc1}
+.c-lm{z-index:2;width:216px;height:320px;transform:translateY(-12px);box-shadow:0 30px 60px rgba(0,0,0,.55)}.c-lm .hc-k,.c-lm .hc-art b{color:#ffe27a}
+.c-wd{transform:rotate(10deg) translate(-30px,18px)}.c-wd .hc-k,.c-wd .hc-art{color:#ff8ad8}.c-wd .hc-art{font-size:1.5rem;line-height:1.1}
+.c-fan:hover{transform:rotate(-12deg) translate(24px,0)}.c-lm:hover{transform:translateY(-26px)}.c-wd:hover{transform:rotate(12deg) translate(-24px,0)}
+@media (max-width:620px){.hh-fan{min-height:280px;overflow:hidden;padding:24px 0}.hcard{width:128px;height:210px}.c-lm{width:140px;height:224px}.hcard>*{margin:0 10px}.hc-k i+i{display:none}.hcard .hc-art,.hcard .hc-art b{font-size:1.7rem}.c-wd .hc-art{font-size:1.1rem}.hcard .hc-d{display:none}.c-fan{transform:rotate(-10deg) translate(36px,14px)}.c-wd{transform:rotate(10deg) translate(-36px,14px)}}
+.col-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin-top:10px}
+.col-head h2{font-size:clamp(1.5rem,3vw,2.1rem)!important}
+.tile .k{font:700 .7rem "JetBrains Mono",monospace;letter-spacing:.14em;text-transform:uppercase}
+.lm{background:linear-gradient(#17152a,#17152a) padding-box,conic-gradient(from 210deg,#ff8ad8,#ffe27a,#8affc1,#7ad7ff,#b48aff,#ff8ad8) border-box!important;border:2px solid transparent!important;border-radius:18px}
+.lm p{color:#c9c5e6}
+.lm .gift b{font:900 2.2rem/1 Unbounded,sans-serif}
+.fan{border-top:0!important;border:1px solid #3a3752;border-radius:16px}
+.fan-rank{border-radius:12px}
+.fr-list li{border-radius:10px}
+.fr-head h3{font:800 1.1rem Unbounded,sans-serif!important;letter-spacing:0!important;text-transform:none!important;color:#fff!important}
+.fr-pos,.fr-pts{font-family:Unbounded,sans-serif!important;font-weight:800!important;font-size:1.1rem!important}
+.wkc b{font:700 .95rem Unbounded,sans-serif!important;letter-spacing:0!important;text-transform:none!important;color:#fff!important}
+.wkc:hover{border-color:#f2f0ff!important}
+@media (prefers-reduced-motion:reduce){.hcard{transition:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <svg class="logo" viewBox="0 0 200 210" role="img" aria-label="Emblème du Conseil des Sages">
-      <defs>
-        <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0e6d2"/><stop offset=".45" stop-color="#c8aa6e"/><stop offset="1" stop-color="#785a28"/></linearGradient>
-        <linearGradient id="crys" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#cdfaf6"/><stop offset=".45" stop-color="#0ac8b9"/><stop offset="1" stop-color="#005a82"/></linearGradient>
-        <radialGradient id="glowG"><stop offset="0" stop-color="#0ac8b9" stop-opacity=".7"/><stop offset="1" stop-color="#0ac8b9" stop-opacity="0"/></radialGradient>
-        <linearGradient id="hood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1e3a5a"/><stop offset="1" stop-color="#0a1428"/></linearGradient>
-        <clipPath id="hexClip"><path d="M100,22 L164,58 L164,132 L100,168 L36,132 L36,58Z"/></clipPath>
-      </defs>
-      <path d="M100,8 L176,51 L176,139 L100,182 L24,139 L24,51Z" fill="#010a13" stroke="url(#gold)" stroke-width="3"/>
-      <path d="M100,22 L164,58 L164,132 L100,168 L36,132 L36,58Z" fill="#091428" stroke="#c8aa6e" stroke-width="1" stroke-opacity=".6"/>
-      <g fill="url(#gold)"><path d="M100,0 l6,9 -6,5 -6,-5z"/><path d="M24,51 l-8,-3 2,-8 8,6z"/><path d="M176,51 l8,-3 -2,-8 -8,6z"/></g>
-      <g clip-path="url(#hexClip)">
-        <circle class="glow" cx="100" cy="92" r="46" fill="url(#glowG)"/>
-        <path d="M44,170 L46,128 L60,108 L74,128 L78,170Z" fill="url(#hood)" stroke="#785a28"/>
-        <path d="M53,128 L60,116 L67,128 L60,134Z" fill="#010a13"/>
-        <circle cx="57.5" cy="126" r="1.3" fill="#0ac8b9"/><circle cx="62.5" cy="126" r="1.3" fill="#0ac8b9"/>
-        <path d="M122,170 L126,128 L140,108 L154,128 L156,170Z" fill="url(#hood)" stroke="#785a28"/>
-        <path d="M133,128 L140,116 L147,128 L140,134Z" fill="#010a13"/>
-        <circle cx="137.5" cy="126" r="1.3" fill="#0ac8b9"/><circle cx="142.5" cy="126" r="1.3" fill="#0ac8b9"/>
-        <path d="M70,172 L74,130 L100,102 L126,130 L130,172Z" fill="url(#hood)" stroke="url(#gold)" stroke-width="1.6"/>
-        <path d="M74,130 L100,140 L126,130" fill="none" stroke="#c8aa6e" stroke-opacity=".7"/>
-        <path d="M89,130 L100,116 L111,130 L100,138Z" fill="#010a13"/>
-        <path d="M94,127 l4,-1.4 M106,127 l-4,-1.4" stroke="#0ac8b9" stroke-width="1.8" stroke-linecap="round"/>
-        <path d="M100,56 L114,78 L100,104 L86,78Z" fill="url(#crys)" stroke="#cdfaf6"/>
-        <path d="M92,74 L100,60 L104,70Z" fill="#fff" opacity=".45"/>
-      </g>
-      <path d="M14,170 L186,170 L178,184 L186,198 L14,198 L22,184Z" fill="#0a1428" stroke="url(#gold)" stroke-width="2"/>
-      <text x="100" y="189" text-anchor="middle" font-family="Cinzel, Georgia, serif" font-weight="700" font-size="13" letter-spacing="1.6" fill="url(#gold)">CONSEIL DES SAGES</text>
-    </svg>
-    <div class="htxt">
-      <span class="eyebrow">Le QG</span>
-      <h1>Conseil des Sages</h1>
+  <header class="hh">
+    <div class="hh-txt">
+      <span class="eyebrow" id="hhDate">Ta main du jour</span>
+      <h1>Pioche ta soirée au Conseil.</h1>
+      <p class="hh-sub">Chaque rubrique du site est une carte. Trois sont en jeu en ce moment : les Worlds, LolMaster et la Fantasy.</p>
       <span class="me" id="me">Connexion au Conseil…</span>
+    </div>
+    <div class="hh-fan" aria-label="Les trois cartes du moment">
+      <a class="hcard c-fan" href="fantasy.html"><span class="hc-k"><i>Fantasy</i><i>Rare</i></span><span class="hc-art">5</span><b>CDS Fantasy</b><span class="hc-d">Un joueur par poste, tiré au sort. Ton capitaine compte double.</span></a>
+      <a class="hcard c-lm" href="cartes.html"><span class="hc-k"><i>LolMaster</i><i>Légendaire</i></span><span class="hc-art"><b>3 011</b><small>cartes</small></span><b>LolMaster</b><span class="hc-d" id="hcLm">2 × 10 boosters offerts à chaque sage inscrit, jusqu'au 15 novembre.</span></a>
+      <a class="hcard c-wd" href="worlds.html"><span class="hc-k"><i>Worlds</i><i>Mythique</i></span><span class="hc-art" id="hcWdBig">Finale<br>le 14 nov.</span><b>Worlds 2026</b><span class="hc-d" id="hcWd">Pick'em : un skin pour le 1er (Skryvv), un pour le 2e (Tabaskoh).</span></a>
     </div>
   </header>
   <div id="pins" hidden></div>
@@ -318,7 +329,7 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
     <div class="fan-txt">
       <span class="eyebrow">Worlds 2026 · Fantasy league</span>
       <h2 id="fanT">CDS Fantasy</h2>
-      <p>Pas de draft : chaque sage reçoit au hasard un Top, un Jungle, un Mid, un Bot et un Support. Tes joueurs marquent des points à chaque game, ton capitaine compte double et le MVP officiel de chaque game rapporte un bonus.</p>
+      <p>Pas de draft : chaque sage reçoit au hasard un Top, un Jungle, un Mid, un Bot et un Support. Tes joueurs marquent des points à chaque game (kills, multikills, premier sang…) et ton capitaine compte double.</p>
       <p class="note">Skryvv ouvre les caisses en direct sur Discord avant le premier match de chaque phase.</p>
       <a class="btn" href="fantasy.html">S'inscrire à la Fantasy</a>
     </div>
@@ -408,7 +419,8 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
     </div>
   </section>
 
-  <section class="tiles" aria-label="Rubriques du Conseil">
+  <div class="col-head"><h2 id="colT">Ta collection</h2><span class="note">Toutes les rubriques du Conseil</span></div>
+  <section class="tiles" aria-labelledby="colT">
     <a class="tile frame" href="worlds.html">
       <span class="ic" aria-hidden="true">🏆</span><b>Worlds 2026</b><span>Matchs, pronos, classement, winrates et tier list.</span>
       <span class="extra" style="color:var(--gold)">◆ 2 skins LoL à gagner : 1er et 2e du pick'em</span>
@@ -426,6 +438,13 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
     <a class="tile frame" href="communaute.html">
       <span class="ic" aria-hidden="true">◆</span><b>Le Conseil</b><span>Pronos entre potes, banc des accusés, sage de la semaine et ton profil.</span>
     </a>
+    <a class="tile frame" href="ladder.html"><span class="k" style="color:#7ad7ff">Ladder</span><b>Ladder du Conseil</b><span>Les rangs officiels des sages, mis à jour toutes les 15 minutes.</span></a>
+    <a class="tile frame" href="cartes.html"><span class="k" style="color:#ffe27a">Cartes</span><b>LolMaster</b><span>3 011 cartes, un marché et des échanges entre sages.</span></a>
+    <a class="tile frame" href="arene.html"><span class="k" style="color:#b48aff">Jeu en ligne</span><b>Arène de la Faille</b><span>Esquive les sorts de tes potes, de 2 à 8 joueurs.</span></a>
+    <a class="tile frame" href="nexus.html"><span class="k" style="color:#b48aff">Jeu en ligne</span><b>Défense du Nexus</b><span>Tourelles et champions contre les vagues, jusqu'à 4.</span></a>
+    <a class="tile frame" href="patch.html"><span class="k" style="color:#b4b0d0">Infos</span><b>Patch</b><span>Le résumé du dernier patch, sans le blabla.</span></a>
+    <a class="tile frame" href="banque.html"><span class="k" style="color:#ffe27a">Or</span><b>Banque</b><span>Tes pièces d'or et ce que tu peux en faire.</span></a>
+    <a class="tile frame" href="potes.html"><span class="k" style="color:#8affc1">Sages</span><b>Potes</b><span>Les profils et les stats des sages.</span></a>
   </section>
 
   <section class="frame panel install" data-install hidden>
@@ -445,7 +464,7 @@ function lmSetup(c){const btn=document.getElementById("lmBtn"),msg=document.getE
   if(!c.db){btn.textContent="Site injoignable";return}
   let cards=null,wallet=null,got=0;
   const draw=()=>{const n=Math.max(cards?.launchN??(cards?.launch?1:0),got);
-    if(n>=2){btn.hidden=true;msg.innerHTML=`<b style="color:#ffb400">Tes 20 boosters de lancement sont dans ta collection.</b> <a href="cartes.html#boosters">Les ouvrir (${(cards?.free||0)})</a>`;return}
+    if(n>=2){btn.hidden=true;msg.innerHTML=`<b style="color:#ffe27a">Tes 20 boosters de lancement sont dans ta collection.</b> <a href="cartes.html#boosters">Les ouvrir (${(cards?.free||0)})</a>`;return}
     if(!wallet){btn.disabled=false;btn.textContent="M'inscrire pour les recevoir";btn.onclick=()=>location.href="banque.html";msg.textContent="Ouvre ton coffre sur la page Banque avec ton pseudo, puis reviens ici.";return}
     btn.hidden=false;btn.disabled=false;btn.onclick=claim;
     if(n===1){btn.textContent="Récupérer 10 boosters de plus";msg.innerHTML=`Bonus : le Conseil t'offre une 2e tournée ! <a href="cartes.html#boosters">Ouvrir mes boosters (${(cards?.free||0)})</a>`}
@@ -767,6 +786,15 @@ conseilLoadLogos(()=>renderAll());conseilDD().then(()=>renderAll());
 })();
 
 window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
+</script>
+<script>
+// Cartes du moment : textes qui suivent le calendrier (finale des Worlds le 14 nov., boosters LolMaster jusqu'au 15 nov.)
+(function(){const now=new Date(),d=now.getDate(),m=now.getMonth(),y=now.getFullYear(),fr=now.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
+  const $=id=>document.getElementById(id);$("hhDate").textContent=fr.charAt(0).toUpperCase()+fr.slice(1)+" · ta main du jour";
+  const day=y===2026&&m===10?d:(y>2026||m>10?99:0);
+  if(day===14){$("hcWdBig").innerHTML="Finale<br>ce soir";$("hcWd").textContent="Dernier jour pour le Pick'em : un skin pour le 1er (Skryvv), un pour le 2e (Tabaskoh)."}
+  else if(day>14){$("hcWdBig").innerHTML="Le<br>bilan";$("hcWd").textContent="Résultats du Pick'em, classement final et tier list du Conseil."}
+  if(day>15)$("hcLm").textContent="Le marché et les échanges entre sages restent ouverts.";})();
 </script>
 </body>
 </html>

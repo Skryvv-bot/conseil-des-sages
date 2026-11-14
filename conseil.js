@@ -71,17 +71,17 @@ const NAV_GROUP={icathia:"jeux",arene:"jeux",nexus:"jeux",tierlist:"worlds",fant
 .csub a[aria-current="page"]{color:#0ac8b9;border-color:#0397ab}
 @media (max-width:620px){.cnav-brand span{display:none}}
 .cnav-links a.has-sub::after{content:"";display:inline-block;width:5px;height:5px;margin-left:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-3px) rotate(45deg);opacity:.7}
-.cdrop{position:fixed;z-index:60;min-width:220px;max-width:calc(100vw - 16px);max-height:calc(100vh - 90px);overflow-y:auto;background:#15171c;border-top:3px solid #e4002b;box-shadow:0 14px 34px rgba(0,0,0,.6);padding:8px 0;display:flex;flex-direction:column}
+.cdrop{position:fixed;z-index:60;min-width:220px;max-width:calc(100vw - 16px);max-height:calc(100vh - 90px);overflow-y:auto;background:#17152a;border-top:3px solid #d92a74;box-shadow:0 14px 34px rgba(0,0,0,.6);padding:8px 0;display:flex;flex-direction:column}
 .cdrop[hidden]{display:none}
 .cdrop a{display:block;text-decoration:none;color:#d5d7dd;font:700 .9rem "Barlow Condensed","Barlow",system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:9px 18px;white-space:nowrap}
-.cdrop a:hover,.cdrop a:focus-visible{background:#1d2027;color:#fff}
-.cdrop a[aria-current="page"]{color:#fff;box-shadow:inset 3px 0 0 #e4002b}
-.cdrop a.ss{font-weight:600;font-size:.82rem;color:#a7abb6;padding:6px 18px 6px 34px;text-transform:none;letter-spacing:.03em}
+.cdrop a:hover,.cdrop a:focus-visible{background:#201d38;color:#fff}
+.cdrop a[aria-current="page"]{color:#fff;box-shadow:inset 3px 0 0 #d92a74}
+.cdrop a.ss{font-weight:600;font-size:.82rem;color:#b4b0d0;padding:6px 18px 6px 34px;text-transform:none;letter-spacing:.03em}
 .cdrop a.ss::before{content:"– ";color:#5c606b}
 .cdrop.mega{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:14px 4px;padding:16px 8px;width:min(1040px,calc(100vw - 16px));max-width:none}
 .cdrop.mega .col{display:flex;flex-direction:column;min-width:0}
 .cdrop.mega a{white-space:normal;padding:7px 10px}.cdrop.mega a.ss{padding:4px 10px 4px 20px}
-.cdrop.mega .col>a:first-child{color:#ffb400;font-family:"Anton","Barlow Condensed",sans-serif;font-weight:400;font-size:1.05rem;letter-spacing:.04em}`;
+.cdrop.mega .col>a:first-child{color:#ffe27a;font-family:"Anton","Barlow Condensed",sans-serif;font-weight:400;font-size:1.05rem;letter-spacing:.04em}`;
   const s=document.createElement("style");s.textContent=css;document.head.appendChild(s);
 })();
 window.conseilNav=function(active){
@@ -199,13 +199,12 @@ window.conseilTeamLogo=function(tag,fallbackHTML,size=30){
   return `<span class="tlogo${DARK_LOGOS.includes(tag)?" light":""}" style="width:${size}px;height:${size}px" title="${tag}"><img src="${list[0]}" alt="${tag}" data-tag="${tag}" data-i="0" data-fb="${encodeURIComponent(fallbackHTML)}" referrerpolicy="no-referrer" onload="conseilLogoOk(this)" onerror="conseilLogoErr(this)"></span>`;
 };
 
-// ---------- Thème Plateau TV et bandeau « Direct » ----------
+// ---------- Thème « Collection holographique » et bandeau d'infos ----------
 (function(){const add=()=>{if(document.getElementById("tv-theme"))return;
-  const f=document.createElement("link");f.rel="stylesheet";f.href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@400;500;600;700&display=swap";document.head.appendChild(f);
-  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-tv.css";document.head.appendChild(l)};
+  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=1";document.head.appendChild(l)};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();
 function defaultTicker(){const d=Math.ceil((Date.parse("2026-11-04T23:00:00Z")-Date.now())/864e5);
-  return [...(window.CAMP_TRAITORS||[]).slice(0,3).map(TRAITOR_TXT),"Worlds 2026 : phase suisse du 23 au 31 octobre, finale le 14 novembre","Pick'em : un skin pour le 1er (offert par Skryvv) et un skin pour le 2e (offert par Tabaskoh)",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Pronos entre potes, tribunal et sage de la semaine dans Le Conseil","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes"]}
+  return [...(window.CAMP_TRAITORS||[]).slice(0,3).map(TRAITOR_TXT),"Worlds 2026 : la finale le 14 novembre, puis le bilan du Pick'em","Pick'em : un skin pour le 1er (offert par Skryvv) et un skin pour le 2e (offert par Tabaskoh)",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Pronos entre potes, tribunal et sage de la semaine dans Le Conseil","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes"]}
 window.conseilTicker=function(items){const el=document.getElementById("tvRun");if(items)window.__tickerItems=items;items=window.__tickerItems||[];
   const paid=(window.PAID_TICKER||[]).map(e=>`💬 ${e.byPseudo} : ${e.text}`);const all=[...paid,...items];if(!el||!all.length)return;
   const html=all.map(t=>`<span>${conseilEsc(t)}</span>`).join("");el.innerHTML=html+html};
@@ -288,7 +287,7 @@ async function offerClaim(db,uid){
 window.RIOT_RELAY="https://conseil-riot.perrotinyvanpro.workers.dev";
 const RIOT_TIERS=["IRON","BRONZE","SILVER","GOLD","PLATINUM","EMERALD","DIAMOND","MASTER","GRANDMASTER","CHALLENGER"];
 window.TIER_FR={IRON:"Fer",BRONZE:"Bronze",SILVER:"Argent",GOLD:"Or",PLATINUM:"Platine",EMERALD:"Émeraude",DIAMOND:"Diamant",MASTER:"Maître",GRANDMASTER:"Grand Maître",CHALLENGER:"Challenger"};
-window.TIER_COLOR={IRON:"#6b6f76",BRONZE:"#a0674b",SILVER:"#9aa4ae",GOLD:"#d4a640",PLATINUM:"#3fb6a8",EMERALD:"#2fbf71",DIAMOND:"#6f8cff",MASTER:"#b45cff",GRANDMASTER:"#e4002b",CHALLENGER:"#ffd54a"};
+window.TIER_COLOR={IRON:"#6b6f76",BRONZE:"#a0674b",SILVER:"#9aa4ae",GOLD:"#d4a640",PLATINUM:"#3fb6a8",EMERALD:"#2fbf71",DIAMOND:"#6f8cff",MASTER:"#b45cff",GRANDMASTER:"#d92a74",CHALLENGER:"#ffd54a"};
 const APEX=new Set(["MASTER","GRANDMASTER","CHALLENGER"]);
 // Valeur servant uniquement à trier les rangs officiels et à mesurer les LP gagnés ou perdus
 window.conseilRankValue=v=>{if(!v||!v.tier)return -1;const t=RIOT_TIERS.indexOf(v.tier);if(APEX.has(v.tier))return 2800+(v.lp||0);return t*400+Math.max(0,["IV","III","II","I"].indexOf(v.rank))*100+(v.lp||0)};
@@ -300,7 +299,7 @@ window.conseilRankEmblem=(tier,size=28)=>{if(!tier||!RANK_EMBLEM_FB[tier]||!size
   const Z=3.2,big=Math.round(size*Z),m=-Math.round((big-size)/2);   // les images Riot ont beaucoup de vide autour de l'emblème : on zoome dedans
   return `<span class="rke" style="width:${size}px;height:${size}px"><img width="${big}" height="${big}" style="width:${big}px;height:${big}px;margin:${m}px" alt="" loading="lazy" src="https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblem/emblem-${t}.png" data-alt="${alt}" onerror="if(this.dataset.alt){this.src=this.dataset.alt;this.dataset.alt='';this.style.cssText='width:${size}px;height:${size}px;margin:0'}else this.parentNode.remove()"></span>`};
 window.conseilRankBadge=(v,size=34)=>!v||!v.tier?`<span class="rkb none">Non classé</span>`:`<span class="rkw">${conseilRankEmblem(v.tier,size)}<span class="rkb" style="--rk:${TIER_COLOR[v.tier]}">${conseilEsc(conseilRankLabel(v,false))}</span></span>`;
-(function(){const st=document.createElement("style");st.textContent=`.rkb{display:inline-block;padding:2px 8px;font:700 .78rem "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#08090b;background:var(--rk,#a7abb6);white-space:nowrap}.rkb.none{background:transparent;color:#a7abb6;border:1px solid #3a3e48}.rkw{display:inline-flex;align-items:center;gap:6px;vertical-align:middle}.rke{display:inline-block;overflow:hidden;flex:none;position:relative}.rke img{display:block;max-width:none;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6))}`;document.head.appendChild(st)})();
+(function(){const st=document.createElement("style");st.textContent=`.rkb{display:inline-block;padding:2px 8px;font:700 .78rem "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#0c0b14;background:var(--rk,#b4b0d0);white-space:nowrap}.rkb.none{background:transparent;color:#b4b0d0;border:1px solid #4a4668}.rkw{display:inline-flex;align-items:center;gap:6px;vertical-align:middle}.rke{display:inline-block;overflow:hidden;flex:none;position:relative}.rke img{display:block;max-width:none;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6))}`;document.head.appendChild(st)})();
 const isoDay=d=>{const x=new Date(d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`};
 const weekStart=()=>{const d=new Date();const day=(d.getDay()+6)%7;d.setDate(d.getDate()-day);d.setHours(0,0,0,0);return d};
 // Ladder partagé : un seul visiteur interroge Riot toutes les 15 minutes, les autres lisent Firebase.
@@ -484,16 +483,16 @@ function conseilStars(kind,key){
   }
   function css(){if(document.getElementById("cpop-css"))return;const st=document.createElement("style");st.id="cpop-css";st.textContent=`
 .cpop{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:20px;background:rgba(8,9,11,.82);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);animation:cpopf .2s ease-out}
-.cpop-box{width:min(440px,100%);background:#15171c;border-top:6px solid var(--tv-red,#e4002b);padding:22px 22px 20px;display:flex;flex-direction:column;gap:16px;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:cpopz .25s cubic-bezier(.2,1.4,.4,1)}
-.cpop-tag{font:700 .78rem "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--tv-amber,#ffb400)}
+.cpop-box{width:min(440px,100%);background:#17152a;border-top:6px solid var(--tv-red,#d92a74);padding:22px 22px 20px;display:flex;flex-direction:column;gap:16px;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:cpopz .25s cubic-bezier(.2,1.4,.4,1)}
+.cpop-tag{font:700 .78rem "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--tv-amber,#ffe27a)}
 .cpop-q{margin:0;font:400 1.55rem/1.15 "Anton","Impact",sans-serif;text-transform:uppercase;color:#fff}
-.cpop-yes{align-self:stretch;padding:14px;border:0;background:var(--tv-red,#e4002b);color:#fff;font:700 1.15rem "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+.cpop-yes{align-self:stretch;padding:14px;border:0;background:var(--tv-red,#d92a74);color:#fff;font:700 1.15rem "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
 .cpop-btns{display:flex;flex-direction:column;gap:8px}.cpop-alt{font-size:1rem!important}
-.cpop-yes:hover,.cpop-yes:focus-visible{background:#ff1744;outline:2px solid #fff;outline-offset:2px}
-html[data-camp="wow"] .cpop-yes{background:#ffb400;color:#08090b}
-.ctoast{position:fixed;right:16px;bottom:16px;z-index:9998;width:min(360px,calc(100% - 32px));background:#15171c;border-left:6px solid #e4002b;padding:14px 40px 14px 16px;box-shadow:0 12px 40px rgba(0,0,0,.55);animation:ctin .35s ease-out;transition:opacity .3s,transform .3s}
+.cpop-yes:hover,.cpop-yes:focus-visible{background:#ff4d8d;outline:2px solid #fff;outline-offset:2px}
+html[data-camp="wow"] .cpop-yes{background:#ffe27a;color:#0c0b14}
+.ctoast{position:fixed;right:16px;bottom:16px;z-index:9998;width:min(360px,calc(100% - 32px));background:#17152a;border-left:6px solid #d92a74;padding:14px 40px 14px 16px;box-shadow:0 12px 40px rgba(0,0,0,.55);animation:ctin .35s ease-out;transition:opacity .3s,transform .3s}
 .ctoast p{margin:6px 0 0;color:#fff;font:600 1.05rem/1.3 "Barlow Condensed","Arial Narrow",sans-serif}
-.ctoast button{position:absolute;top:6px;right:8px;background:none;border:0;color:#a7abb6;font-size:1.4rem;cursor:pointer;line-height:1;padding:4px}
+.ctoast button{position:absolute;top:6px;right:8px;background:none;border:0;color:#b4b0d0;font-size:1.4rem;cursor:pointer;line-height:1;padding:4px}
 .ctoast.out{opacity:0;transform:translateY(12px)}
 @keyframes ctin{from{opacity:0;transform:translateY(20px)}}
 @keyframes cpopf{from{opacity:0}}@keyframes cpopz{from{transform:scale(.85);opacity:0}}
@@ -551,13 +550,13 @@ function conseilBank(db,uid){
 function renderPins(){const box=document.getElementById("pins");if(!box)return;
   box.innerHTML=PAID_PINS.map(e=>`<div class="pin"><span class="pin-tag">📌 Message de ${conseilEsc(e.byPseudo)}</span><p>${conseilEsc(e.text)}</p></div>`).join("");box.hidden=!PAID_PINS.length}
 (function(){const st=document.createElement("style");st.textContent=`
-.cnav-po{position:relative;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;text-decoration:none;color:#ffb400;font:700 .95rem "Barlow Condensed","Arial Narrow",sans-serif;padding:6px 10px;border:1px solid #3a3e48;margin-left:auto}
-.cnav-po:hover{border-color:#ffb400}.cnav-po i{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe08a,#ffb400 55%,#b07800);color:#5a3d00;font:800 .62rem sans-serif;font-style:normal}
+.cnav-po{position:relative;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;text-decoration:none;color:#ffe27a;font:700 .95rem "Barlow Condensed","Arial Narrow",sans-serif;padding:6px 10px;border:1px solid #4a4668;margin-left:auto}
+.cnav-po:hover{border-color:#ffe27a}.cnav-po i{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe08a,#ffe27a 55%,#b07800);color:#5a3d00;font:800 .62rem sans-serif;font-style:normal}
 .po-fly{position:absolute;right:4px;top:-4px;font:800 .9rem "Barlow Condensed",sans-serif;color:#2fbf71;animation:pofly 1.8s ease-out forwards;pointer-events:none}.po-fly.neg{color:#ff4d6a}
 @keyframes pofly{to{transform:translateY(-26px);opacity:0}}
-.nick{margin-left:6px;font:600 italic .85em "Barlow Condensed","Arial Narrow",sans-serif;color:#ffb400;white-space:nowrap}
-#pins{display:flex;flex-direction:column;gap:8px}.pin{background:#1d2027;border-left:6px solid #ffb400;padding:12px 16px}.pin p{margin:4px 0 0;color:#fff;font:600 1.15rem "Barlow Condensed",sans-serif}
-.pin-tag{font:700 .78rem "Barlow Condensed",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#ffb400}
+.nick{margin-left:6px;font:600 italic .85em "Barlow Condensed","Arial Narrow",sans-serif;color:#ffe27a;white-space:nowrap}
+#pins{display:flex;flex-direction:column;gap:8px}.pin{background:#201d38;border-left:6px solid #ffe27a;padding:12px 16px}.pin p{margin:4px 0 0;color:#fff;font:600 1.15rem "Barlow Condensed",sans-serif}
+.pin-tag{font:700 .78rem "Barlow Condensed",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#ffe27a}
 @media (prefers-reduced-motion:reduce){.po-fly{animation:none;display:none}}`;document.head.appendChild(st)})();
 
 
@@ -634,26 +633,26 @@ function openAccount(){
 }
 window.conseilOpenAccount=openAccount;
 (function(){const st=document.createElement("style");st.textContent=`
-.cnav-acc{white-space:nowrap;font:700 .9rem "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.06em;color:#fff;background:#e4002b;border:0;padding:7px 12px;cursor:pointer}
-.cnav-acc.on{background:transparent;border:1px solid #3a3e48;color:#fff}.cnav-acc.on::before{content:"● ";color:#2fbf71}
+.cnav-acc{white-space:nowrap;font:700 .9rem "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.06em;color:#fff;background:#d92a74;border:0;padding:7px 12px;cursor:pointer}
+.cnav-acc.on{background:transparent;border:1px solid #4a4668;color:#fff}.cnav-acc.on::before{content:"● ";color:#2fbf71}
 .cnav-acc:hover,.cnav-acc:focus-visible{outline:2px solid #fff;outline-offset:1px}
 .cacc{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:20px;background:rgba(8,9,11,.82);backdrop-filter:blur(4px)}
-.cacc .cpop-box{width:min(440px,100%);background:#15171c;border-top:6px solid #e4002b;padding:22px;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.6)}
-.cacc .cpop-tag{font:700 .78rem "Barlow Condensed",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#ffb400}
+.cacc .cpop-box{width:min(440px,100%);background:#17152a;border-top:6px solid #d92a74;padding:22px;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.cacc .cpop-tag{font:700 .78rem "Barlow Condensed",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#ffe27a}
 .cacc .cpop-q{margin:0;font:400 1.6rem/1.1 "Anton","Impact",sans-serif;text-transform:uppercase;color:#fff}
-.cacc .cpop-yes{padding:13px;border:0;background:#e4002b;color:#fff;font:700 1.05rem "Barlow Condensed",sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.cacc .cpop-yes{padding:13px;border:0;background:#d92a74;color:#fff;font:700 1.05rem "Barlow Condensed",sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
 .cacc .cpop-yes:disabled{opacity:.6}
 .cacc .cpop-box{position:relative;gap:12px}
-.cacc-x{position:absolute;top:6px;right:8px;background:none;border:0;color:#a7abb6;font-size:1.6rem;cursor:pointer;line-height:1;padding:4px 8px}
+.cacc-x{position:absolute;top:6px;right:8px;background:none;border:0;color:#b4b0d0;font-size:1.6rem;cursor:pointer;line-height:1;padding:4px 8px}
 .cacc-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-right:28px}
-.cacc-tabs button{background:#08090b;border:0;border-bottom:3px solid transparent;color:#a7abb6;padding:10px 6px;font:700 .9rem "Barlow Condensed",sans-serif;letter-spacing:.04em;cursor:pointer}
-.cacc-tabs button[aria-selected="true"]{color:#fff;border-bottom-color:#e4002b;background:#1d2027}
-.cacc-txt{margin:0;color:#a7abb6;font:500 1rem/1.35 "Barlow Condensed",sans-serif}
-.cacc-form{display:flex;flex-direction:column;gap:10px}.cacc-form label{display:flex;flex-direction:column;gap:4px;font:700 .78rem "Barlow Condensed",sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#ffb400}
-.cacc-form input{padding:10px;background:#08090b;border:1px solid #3a3e48;color:#fff;font:600 1.05rem "Barlow Condensed",sans-serif;text-transform:none;letter-spacing:0}
-.cacc-form input:focus{border-color:#ffb400;outline:none}
-.cacc-msg{margin:0;min-height:1.2em;color:#ffb400;font:600 .95rem "Barlow Condensed",sans-serif}
-.cacc-out{background:transparent!important;border:2px solid #3a3e48!important}`;document.head.appendChild(st)})();
+.cacc-tabs button{background:#0c0b14;border:0;border-bottom:3px solid transparent;color:#b4b0d0;padding:10px 6px;font:700 .9rem "Barlow Condensed",sans-serif;letter-spacing:.04em;cursor:pointer}
+.cacc-tabs button[aria-selected="true"]{color:#fff;border-bottom-color:#d92a74;background:#201d38}
+.cacc-txt{margin:0;color:#b4b0d0;font:500 1rem/1.35 "Barlow Condensed",sans-serif}
+.cacc-form{display:flex;flex-direction:column;gap:10px}.cacc-form label{display:flex;flex-direction:column;gap:4px;font:700 .78rem "Barlow Condensed",sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#ffe27a}
+.cacc-form input{padding:10px;background:#0c0b14;border:1px solid #4a4668;color:#fff;font:600 1.05rem "Barlow Condensed",sans-serif;text-transform:none;letter-spacing:0}
+.cacc-form input:focus{border-color:#ffe27a;outline:none}
+.cacc-msg{margin:0;min-height:1.2em;color:#ffe27a;font:600 .95rem "Barlow Condensed",sans-serif}
+.cacc-out{background:transparent!important;border:2px solid #4a4668!important}`;document.head.appendChild(st)})();
 
 
 // ---------- Plusieurs comptes Riot par sage (1 principal + 2 secondaires au maximum) ----------

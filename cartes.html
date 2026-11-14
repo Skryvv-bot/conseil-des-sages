@@ -4,12 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>LolMaster · CDS.TV</title>
-<meta name="theme-color" content="#08090b">
+<meta name="theme-color" content="#0c0b14">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png?v=2">
 <link rel="apple-touch-icon" href="icon-192.png?v=2">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@400;500;600;700;800&family=Cinzel:wght@600;700&family=Barlow:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="conseil.css">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -18,16 +16,16 @@
 <style>
 /* Cartes de Runeterra : boosters (ouverture façon Pokémon), collection, vitrines des sages, wiki du jeu.
    Le robot CDS.TV tire les cartes et tient les comptes ; la page ne fait qu'afficher. */
-:root{--r0:#8a96a3;--r1:#3fbf7f;--r2:#2f8cff;--r3:#b45cff;--r4:#ffb400;--red:#e4002b;--amber:#ffb400}
+:root{--r0:#8a96a3;--r1:#3fbf7f;--r2:#2f8cff;--r3:#b45cff;--r4:#ffe27a;--red:#d92a74;--amber:#ffe27a}
 .wrap{max-width:1120px}
-.ctabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:2px solid #2a2d35}
+.ctabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:2px solid #3a3752}
 .ctabs a{text-decoration:none;color:var(--muted);font:700 .82rem var(--body);letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-bottom:3px solid transparent;margin-bottom:-2px}
 .ctabs a[aria-current="page"]{color:#fff;border-bottom-color:var(--red)}
 .ctabs a:hover{color:#fff}
 .purse{display:flex;gap:18px;align-items:center;flex-wrap:wrap;font:700 .95rem var(--body);letter-spacing:.04em;color:var(--muted)}
 .purse b{color:#fff;font:400 1.35rem var(--display,"Anton"),sans-serif;letter-spacing:.02em}
 .purse .po b{color:var(--amber)}
-.prog{width:140px;height:6px;background:#2a2d35}.prog i{display:block;height:100%;background:var(--red)}
+.prog{width:140px;height:6px;background:#3a3752}.prog i{display:block;height:100%;background:var(--red)}
 .view{display:flex;flex-direction:column;gap:20px;min-width:0}
 
 /* ---- Cartes (5:7) ---- */
@@ -46,10 +44,10 @@ button.tc:hover{transform:translateY(-3px)}
 .tc-sub{font:600 .72rem var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tc-st{display:flex;justify-content:space-between;gap:6px;white-space:nowrap;overflow:hidden;font:700 .78rem var(--body);color:#fff;border-top:1px solid rgba(255,255,255,.18);padding-top:4px;margin-top:3px}
 .tc-st b{color:var(--rc)}
-.tc-cnt{position:absolute;top:28px;right:6px;background:rgba(1,10,19,.85);border:1px solid #3a3e48;font:700 .72rem var(--body);padding:1px 6px;color:#fff}
+.tc-cnt{position:absolute;top:28px;right:6px;background:rgba(1,10,19,.85);border:1px solid #4a4668;font:700 .72rem var(--body);padding:1px 6px;color:#fff}
 .tc-flags{display:flex;gap:4px;margin-bottom:3px}.tc-flags:empty{display:none}
 .tc-new{background:var(--red);font:700 .7rem var(--body);letter-spacing:.1em;padding:1px 6px;color:#fff}
-.tc-vit{background:var(--amber);color:#08090b;font:700 .66rem var(--body);letter-spacing:.08em;padding:1px 5px;text-transform:uppercase}
+.tc-vit{background:var(--amber);color:#0c0b14;font:700 .66rem var(--body);letter-spacing:.08em;padding:1px 5px;text-transform:uppercase}
 .tc.miss{border-color:#26303d;filter:grayscale(1) brightness(.5)}
 button.tc.miss:hover{filter:grayscale(.6) brightness(.6)}
 .tc.region .tc-art{background-position:center}
@@ -57,28 +55,28 @@ button.tc.miss:hover{filter:grayscale(.6) brightness(.6)}
 .tc.big .tc-nm{font-size:1.55rem}.tc.big .tc-sub{font-size:.85rem}.tc.big .tc-st{font-size:.95rem}
 .tc.glow{box-shadow:0 0 34px var(--rc)}
 .tc.holo::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;mix-blend-mode:color-dodge;opacity:.45;
-  background:linear-gradient(115deg,transparent 20%,rgba(255,255,255,.55) 35%,rgba(255,180,0,.35) 42%,rgba(180,92,255,.35) 50%,transparent 62%);background-size:250% 100%;animation:holo 3.2s linear infinite}
+  background:linear-gradient(115deg,transparent 20%,rgba(255,255,255,.55) 35%,rgba(255,226,122,.35) 42%,rgba(180,92,255,.35) 50%,transparent 62%);background-size:250% 100%;animation:holo 3.2s linear infinite}
 @keyframes holo{from{background-position:120% 0}to{background-position:-120% 0}}
 .rar{font:700 .78rem var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--rc)}
 
 /* ---- Boutique de boosters ---- */
 .shopc{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
-.prod{background:#15171c;border-top:3px solid var(--pc,#3a3e48);padding:16px;display:flex;flex-direction:column;gap:10px;align-items:flex-start;min-width:0}
+.prod{background:#17152a;border-top:3px solid var(--pc,#4a4668);padding:16px;display:flex;flex-direction:column;gap:10px;align-items:flex-start;min-width:0}
 .prod h3{margin:0;font:400 1.35rem var(--display,"Anton"),sans-serif;text-transform:uppercase;color:#fff!important;letter-spacing:.02em!important}
 .prod p{margin:0;color:var(--muted);font-size:.95rem}
 .prod .price{font:700 1.05rem var(--body);color:var(--amber);letter-spacing:.04em}
-.prod select{width:100%;padding:9px;background:#08090b;border:1px solid #2a2d35;color:#fff}
+.prod select{width:100%;padding:9px;background:#0c0b14;border:1px solid #3a3752;color:#fff}
 .prod .btn{margin-top:auto}
 .prod .mini{align-self:center}
-.rates{width:100%;border-collapse:collapse;font-size:.95rem}.rates td,.rates th{padding:7px 8px;border-bottom:1px solid #2a2d35;text-align:left}.rates th{font:700 .74rem var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--amber)}
+.rates{width:100%;border-collapse:collapse;font-size:.95rem}.rates td,.rates th{padding:7px 8px;border-bottom:1px solid #3a3752;text-align:left}.rates th{font:700 .74rem var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--amber)}
 .rates .num,.num{text-align:right;font-variant-numeric:tabular-nums}
 .feed{display:flex;flex-direction:column;gap:6px}
-.feed div{display:flex;gap:10px;align-items:center;background:#08090b;padding:8px 10px;font-size:.95rem}
+.feed div{display:flex;gap:10px;align-items:center;background:#0c0b14;padding:8px 10px;font-size:.95rem}
 .feed .d{margin-left:auto;color:#6f7480;font-size:.8rem;white-space:nowrap}
 
 /* ---- Booster (l'objet) ---- */
-.pack{--pw:200px;--ph:320px;--p1:#e4002b;--p2:#5c0012;position:relative;width:var(--pw);height:var(--ph);flex:none;user-select:none;-webkit-user-select:none;touch-action:none}
-.pack .pk-top,.pack .pk-body{position:absolute;left:0;right:0;background:linear-gradient(160deg,var(--p1),var(--p2) 70%,#08090b);background-size:var(--pw) var(--ph);overflow:hidden}
+.pack{--pw:200px;--ph:320px;--p1:#d92a74;--p2:#5c0012;position:relative;width:var(--pw);height:var(--ph);flex:none;user-select:none;-webkit-user-select:none;touch-action:none}
+.pack .pk-top,.pack .pk-body{position:absolute;left:0;right:0;background:linear-gradient(160deg,var(--p1),var(--p2) 70%,#0c0b14);background-size:var(--pw) var(--ph);overflow:hidden}
 .pack .pk-top{top:0;height:44px;border-radius:6px 6px 0 0;background-position:0 0;cursor:grab;z-index:3;transition:transform .55s cubic-bezier(.3,.7,.3,1),opacity .55s}
 .pack .pk-body{top:44px;bottom:0;border-radius:0 0 6px 6px;background-position:0 -44px;z-index:2;transition:transform .6s ease-in,opacity .6s}
 .pack .pk-top::before,.pack .pk-body::after{content:"";position:absolute;left:0;right:0;height:16px;background:repeating-linear-gradient(90deg,rgba(0,0,0,.28) 0 3px,rgba(255,255,255,.08) 3px 6px)}
@@ -97,15 +95,15 @@ button.tc.miss:hover{filter:grayscale(.6) brightness(.6)}
 .pack.idle{animation:bob 2.4s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(-6px) rotate(-1deg)}}
 .pack.mini{--pw:120px;--ph:192px}.pack.mini .pk-top{height:28px}.pack.mini .pk-body{top:28px;background-position:0 -28px}.pack.mini .pk-win{top:16px;left:8px;right:8px;height:50%}.pack.mini .pk-lbl b{font-size:1rem}.pack.mini .pk-lbl span{font-size:.56rem}.pack.mini .pk-lbl{bottom:16px}
-.pack[data-k="free"]{--p1:#3a3e48;--p2:#15171c}.pack[data-k="std"]{--p1:#e4002b;--p2:#5c0012}.pack[data-k="region"]{--p1:#1f7a5a;--p2:#0c2a22}.pack[data-k="chest"]{--p1:#ffb400;--p2:#6a3d00}
+.pack[data-k="free"]{--p1:#4a4668;--p2:#17152a}.pack[data-k="std"]{--p1:#d92a74;--p2:#5c0012}.pack[data-k="region"]{--p1:#1f7a5a;--p2:#0c2a22}.pack[data-k="chest"]{--p1:#ffe27a;--p2:#6a3d00}
 .pack[data-k="region"] .pk-win{background-position:center}.pack[data-k="chest"] .pk-win{background-size:92% auto;background-repeat:no-repeat;background-position:center;background-color:#06223a;box-shadow:inset 0 0 30px rgba(10,200,255,.45),0 0 0 4px rgba(0,0,0,.25)}
 
 /* ---- Scène d'ouverture ---- */
-.stage{position:fixed;inset:0;z-index:80;background:radial-gradient(circle at 50% 40%,#1d2027,#08090b 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+.stage{position:fixed;inset:0;z-index:80;background:radial-gradient(circle at 50% 40%,#201d38,#0c0b14 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
   padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));overflow:hidden}
 .stage .hint{font:700 .9rem var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-align:center;min-height:1.4em}
 .stage .tools{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:12px;display:flex;gap:8px}
-.stage .tools button{background:rgba(0,0,0,.4);border:1px solid #3a3e48;color:#fff;min-width:44px;min-height:44px;cursor:pointer;font:700 .8rem var(--body);letter-spacing:.08em;text-transform:uppercase;padding:0 12px}
+.stage .tools button{background:rgba(0,0,0,.4);border:1px solid #4a4668;color:#fff;min-width:44px;min-height:44px;cursor:pointer;font:700 .8rem var(--body);letter-spacing:.08em;text-transform:uppercase;padding:0 12px}
 .arena{position:relative;width:260px;height:370px;display:grid;place-items:center}
 .arena>.pack{position:absolute}
 .ocard{position:absolute;width:min(250px,64vw);aspect-ratio:5/7;perspective:1000px;background:none;border:0;padding:0;cursor:pointer;transition:transform .45s cubic-bezier(.2,.8,.2,1),opacity .45s}
@@ -116,9 +114,9 @@ button.tc.miss:hover{filter:grayscale(.6) brightness(.6)}
 .ocard .face.front .tc{height:100%}
 .ocard.hidden{opacity:0;transform:translateY(60px) scale(.9);pointer-events:none}
 .ocard.gone{opacity:0;transform:translate(-140%,40px) rotate(-14deg);pointer-events:none}
-.cback{display:grid;place-items:center;width:100%;height:100%;border-radius:10px;border:2px solid #3a3e48;
-  background:radial-gradient(circle at 50% 45%,rgba(228,0,43,.35),transparent 45%),repeating-linear-gradient(45deg,#101318 0 10px,#15171c 10px 20px)}
-.cback i{width:34%;aspect-ratio:1;transform:rotate(45deg);border:3px solid var(--red);box-shadow:0 0 18px rgba(228,0,43,.6)}
+.cback{display:grid;place-items:center;width:100%;height:100%;border-radius:10px;border:2px solid #4a4668;
+  background:radial-gradient(circle at 50% 45%,rgba(217,42,116,.35),transparent 45%),repeating-linear-gradient(45deg,#101318 0 10px,#17152a 10px 20px)}
+.cback i{width:34%;aspect-ratio:1;transform:rotate(45deg);border:3px solid var(--red);box-shadow:0 0 18px rgba(217,42,116,.6)}
 .cback em{position:absolute;bottom:14px;font:400 1rem var(--display,"Anton"),sans-serif;letter-spacing:.2em;color:rgba(255,255,255,.5);font-style:normal}
 .ocard.tease .cback{border-color:var(--rc);box-shadow:0 0 30px var(--rc),0 0 60px var(--rc)}
 .ocard.tease .cback i{border-color:var(--rc);box-shadow:0 0 22px var(--rc)}
@@ -138,43 +136,43 @@ button.tc.miss:hover{filter:grayscale(.6) brightness(.6)}
 
 /* ---- Wiki ---- */
 .wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
-.wtile{position:relative;aspect-ratio:3/4;border:1px solid #2a2d35;overflow:hidden;text-decoration:none;color:#fff;background-size:cover;background-position:center 15%;background-color:#15171c}
+.wtile{position:relative;aspect-ratio:3/4;border:1px solid #3a3752;overflow:hidden;text-decoration:none;color:#fff;background-size:cover;background-position:center 15%;background-color:#17152a}
 .wtile span{position:absolute;left:0;right:0;bottom:0;padding:18px 8px 6px;background:linear-gradient(180deg,transparent,rgba(8,9,11,.95));font:400 1rem var(--display,"Anton"),sans-serif;text-transform:uppercase}
 .wtile:hover{border-color:var(--amber)}
 .champ-hero{display:grid;grid-template-columns:240px minmax(0,1fr);gap:22px;align-items:start}
 @media (max-width:680px){.champ-hero{grid-template-columns:1fr}.champ-hero>img{max-width:220px}}
-.champ-hero>img{width:100%;border:2px solid #3a3e48}
+.champ-hero>img{width:100%;border:2px solid #4a4668}
 .lore{white-space:pre-line;max-width:70ch;color:#d8d8dc}
-.abil{display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;padding:12px 0;border-top:1px solid #2a2d35}
-.abil .ic{width:56px;height:56px;border:1px solid #3a3e48;background-repeat:no-repeat}
+.abil{display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;padding:12px 0;border-top:1px solid #3a3752}
+.abil .ic{width:56px;height:56px;border:1px solid #4a4668;background-repeat:no-repeat}
 .abil b{font:400 1.05rem var(--display,"Anton"),sans-serif;text-transform:uppercase;color:#fff}
 .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
-.kv div{background:#08090b;border:1px solid #2a2d35;padding:8px 10px}.kv span{display:block;font:700 .7rem var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}.kv b{font-variant-numeric:tabular-nums}
+.kv div{background:#0c0b14;border:1px solid #3a3752;padding:8px 10px}.kv span{display:block;font:700 .7rem var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}.kv b{font-variant-numeric:tabular-nums}
 .cbars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-.cbars span{font:700 .7rem var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}.cbars i{display:block;height:6px;background:#2a2d35;margin-top:4px}.cbars i b{display:block;height:100%;background:var(--red)}
-.region-hero{position:relative;min-height:220px;background-size:cover;background-position:center;border:1px solid #3a3e48;display:flex;align-items:flex-end;padding:20px}
+.cbars span{font:700 .7rem var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}.cbars i{display:block;height:6px;background:#3a3752;margin-top:4px}.cbars i b{display:block;height:100%;background:var(--red)}
+.region-hero{position:relative;min-height:220px;background-size:cover;background-position:center;border:1px solid #4a4668;display:flex;align-items:flex-end;padding:20px}
 .region-hero::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(1,10,19,.1),rgba(1,10,19,.9))}
 .region-hero>*{position:relative}
-.ctag{display:inline-block;font:700 .74rem var(--body);letter-spacing:.1em;text-transform:uppercase;border:1px solid #3a3e48;color:var(--amber);padding:2px 8px;text-decoration:none}
-.fsel{background:#08090b;border:1px solid #2a2d35;padding:9px 12px;min-height:40px;color:#fff}
+.ctag{display:inline-block;font:700 .74rem var(--body);letter-spacing:.1em;text-transform:uppercase;border:1px solid #4a4668;color:var(--amber);padding:2px 8px;text-decoration:none}
+.fsel{background:#0c0b14;border:1px solid #3a3752;padding:9px 12px;min-height:40px;color:#fff}
 input[type=search].fsel{min-width:200px;flex:1 1 200px}
 
 /* ---- Fiche carte ---- */
 .cmodal{position:fixed;inset:0;z-index:70;background:rgba(1,6,12,.9);display:flex;align-items:center;justify-content:center;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));overflow-y:auto}
-.cmodal-in{background:#15171c;border-top:3px solid var(--red);padding:20px;max-width:820px;width:100%;display:flex;gap:22px;flex-wrap:wrap;position:relative;margin:auto}
+.cmodal-in{background:#17152a;border-top:3px solid var(--red);padding:20px;max-width:820px;width:100%;display:flex;gap:22px;flex-wrap:wrap;position:relative;margin:auto}
 .cmodal-in>.info{flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:10px}
-.cmodal .x{position:absolute;top:8px;right:8px;width:44px;height:44px;background:none;border:1px solid #3a3e48;color:#fff;cursor:pointer;font-size:1.2rem}
-.ctable{width:100%;border-collapse:collapse}.ctable th,.ctable td{padding:8px;border-bottom:1px solid #2a2d35;text-align:left}.ctable th{font:700 .74rem var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--amber)}
+.cmodal .x{position:absolute;top:8px;right:8px;width:44px;height:44px;background:none;border:1px solid #4a4668;color:#fff;cursor:pointer;font-size:1.2rem}
+.ctable{width:100%;border-collapse:collapse}.ctable th,.ctable td{padding:8px;border-bottom:1px solid #3a3752;text-align:left}.ctable th{font:700 .74rem var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--amber)}
 .ctable a{color:#fff;text-decoration:none;font-weight:700}.ctable a:hover{color:var(--amber)}
-.ctoast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:95;background:#1d2027;border-left:4px solid var(--amber);padding:12px 16px;max-width:90vw;font-weight:600}
+.ctoast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:95;background:#201d38;border-left:4px solid var(--amber);padding:12px 16px;max-width:90vw;font-weight:600}
 .ctoast.err{border-left-color:var(--red)}
 .vit{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
 @media (max-width:700px){.vit{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.vit .slot{aspect-ratio:5/7;border:2px dashed #2a2d35;border-radius:10px;display:grid;place-items:center;color:#6f7480;font-size:.85rem;text-align:center;padding:10px}
+.vit .slot{aspect-ratio:5/7;border:2px dashed #3a3752;border-radius:10px;display:grid;place-items:center;color:#6f7480;font-size:.85rem;text-align:center;padding:10px}
 .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px}
-.facts div{background:#08090b;padding:10px;display:flex;flex-direction:column;gap:2px}.facts b{font:400 1.4rem var(--display,"Anton"),sans-serif;color:#fff}.facts span{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.facts div{background:#0c0b14;padding:10px;display:flex;flex-direction:column;gap:2px}.facts b{font:400 1.4rem var(--display,"Anton"),sans-serif;color:#fff}.facts span{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
 .dated{display:flex;flex-direction:column;gap:4px;min-width:0}.gotd{font:600 .78rem var(--body);color:var(--muted);text-align:center;letter-spacing:.04em}
-.vrow{display:flex;flex-direction:column;gap:10px;padding:14px 0;border-top:1px solid #2a2d35}
+.vrow{display:flex;flex-direction:column;gap:10px;padding:14px 0;border-top:1px solid #3a3752}
 .vname{color:#fff;font:400 1.3rem var(--display,"Anton"),sans-serif;text-transform:uppercase;text-decoration:none;letter-spacing:.02em}.vname:hover{color:var(--amber)}
 .vslot{display:flex;flex-direction:column;gap:6px}
 .vit.editing .vslot .tc{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
@@ -183,34 +181,34 @@ input[type=search].fsel{min-width:200px;flex:1 1 200px}
 .vit .over{outline:3px dashed var(--amber);outline-offset:3px;border-radius:10px}
 .vghost{position:fixed;z-index:120;pointer-events:none;opacity:.92;transform:rotate(3deg) scale(1.04);box-shadow:0 18px 40px rgba(0,0,0,.7)!important}
 /* ---- Fiche : collection d'un champion ---- */
-.chset{display:flex;flex-direction:column;gap:8px;background:#08090b;border:1px solid #2a2d35;padding:12px}
-.chbar{height:6px;background:#2a2d35}.chbar i{display:block;height:100%;background:var(--amber)}
+.chset{display:flex;flex-direction:column;gap:8px;background:#0c0b14;border:1px solid #3a3752;padding:12px}
+.chbar{height:6px;background:#3a3752}.chbar i{display:block;height:100%;background:var(--amber)}
 .chset .facts b small{font:600 .8rem var(--body);color:var(--muted)}
 .chset .mini-cards{grid-template-columns:repeat(auto-fill,minmax(64px,1fr));max-height:260px;overflow-y:auto;padding:2px}
 .chpick{background:none;border:0;padding:0;cursor:pointer}.chpick .tc{cursor:pointer}.chpick.cur .tc{outline:3px solid var(--amber);outline-offset:-3px}
 .chset .mini-cards .tc .tc-key,.chset .mini-cards .tc .tc-cnt,.chset .mini-cards .tc .tc-flags,.chset .mini-cards .tc .tc-gem{display:none}.chset .mini-cards .tc .tc-nm{font-size:.62rem}
 /* ---- Marché et échanges ---- */
 .lots{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:16px}
-.lot{display:flex;flex-direction:column;gap:8px;background:#15171c;padding:10px;border-top:3px solid var(--rc,#3a3e48);min-width:0}
+.lot{display:flex;flex-direction:column;gap:8px;background:#17152a;padding:10px;border-top:3px solid var(--rc,#4a4668);min-width:0}
 .lot .tc{width:100%}
 .lot .lp{display:flex;justify-content:space-between;align-items:baseline;gap:6px;font:700 1rem var(--body)}
 .lot .lp b{color:var(--amber);font:400 1.25rem var(--display,"Anton"),sans-serif;letter-spacing:.02em}
 .lot .ls{font-size:.85rem;color:var(--muted);line-height:1.3}
 .lot .ls a{color:#fff;font-weight:700;text-decoration:none}
-.lot input{width:100%;padding:8px;background:#08090b;border:1px solid #2a2d35;color:#fff;font:inherit}
+.lot input{width:100%;padding:8px;background:#0c0b14;border:1px solid #3a3752;color:#fff;font:inherit}
 .lot .btn{width:100%}
 .lot.wish{outline:2px solid var(--amber);outline-offset:-2px}
-.tc-wish{background:var(--amber);color:#08090b;font:700 .66rem var(--body);letter-spacing:.08em;padding:1px 5px;text-transform:uppercase}
+.tc-wish{background:var(--amber);color:#0c0b14;font:700 .66rem var(--body);letter-spacing:.08em;padding:1px 5px;text-transform:uppercase}
 .badge{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;margin-left:6px;border-radius:9px;background:var(--red);color:#fff;font:700 .7rem var(--body);letter-spacing:0;vertical-align:2px}
-.trade{background:#15171c;border-left:4px solid var(--amber);padding:14px;display:flex;flex-direction:column;gap:10px}
+.trade{background:#17152a;border-left:4px solid var(--amber);padding:14px;display:flex;flex-direction:column;gap:10px}
 .trade .sides{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:14px;align-items:start}
 @media (max-width:700px){.trade .sides{grid-template-columns:1fr}.trade .arrow{transform:rotate(90deg);justify-self:center}}
 .trade .arrow{font:400 2rem var(--display,"Anton"),sans-serif;color:var(--amber);align-self:center}
 .mini-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
 .mini-cards .tc .tc-body{padding:0 6px 6px}.mini-cards .tc .tc-nm{font-size:.8rem}.mini-cards .tc .tc-sub,.mini-cards .tc .tc-st,.mini-cards .tc .tc-no{display:none}.mini-cards .tc .tc-key{font-size:.85rem}
 .pick .tc{opacity:.95}.pick .tc.on{outline:3px solid var(--amber);outline-offset:-3px;opacity:1}
-.sellbox{display:flex;flex-direction:column;gap:8px;background:#08090b;padding:12px;border:1px solid #2a2d35}
-.sellbox input{padding:9px;background:#15171c;border:1px solid #2a2d35;color:#fff;font:inherit;width:140px}
+.sellbox{display:flex;flex-direction:column;gap:8px;background:#0c0b14;padding:12px;border:1px solid #3a3752}
+.sellbox input{padding:9px;background:#17152a;border:1px solid #3a3752;color:#fff;font:inherit;width:140px}
 .hist td{font-size:.92rem}
 @media (prefers-reduced-motion:reduce){.ocard,.ocard .in,.pack .pk-top,.pack .pk-body,.tc{transition:none}.pack.idle,.ocard.tease,.tc.holo::before,.pack .pk-shine{animation:none}}
 </style>
@@ -334,7 +332,7 @@ function vBoosters(v){
   if(!regSel)regSel=regs[0][0];
   const n=freeNow(),can=k=>db&&!busy&&(k==="free"?n>0:hasWallet&&(po||0)>=PACKS[k].p);
   const why=k=>!db?"Connexion…":k==="free"?(n?`Ouvrir (${n})`:"Revient bientôt"):!hasWallet?"Coffre PO fermé":(po||0)<PACKS[k].p?`Il manque ${fmt(PACKS[k].p-(po||0))} PO`:"Acheter et ouvrir";
-  v.innerHTML=`<section class="shopc">${["free","std","region","chest"].map(k=>`<div class="prod" style="--pc:${{free:"#3a3e48",std:"#e4002b",region:"#1f7a5a",chest:"#ffb400"}[k]}">
+  v.innerHTML=`<section class="shopc">${["free","std","region","chest"].map(k=>`<div class="prod" style="--pc:${{free:"#4a4668",std:"#d92a74",region:"#1f7a5a",chest:"#ffe27a"}[k]}">
       <div class="mini">${packHTML(k,{mini:true,ch:COVER[k]})}</div>
       <h3>${PACKS[k].n}</h3><span class="price">${k==="free"?`Gratuit · <span id="freeT">${n>=FREE_MAX?"Réserve pleine":`Prochain dans ${hms(freeNext())}`}</span>`:fmt(PACKS[k].p)+" PO"}</span><p>${PACKS[k].d}</p>
       ${k==="region"?`<label class="note" for="regSel">Région</label><select id="regSel">${regs.map(([s,r])=>`<option value="${s}" ${s===regSel?"selected":""}>${esc(r.name)}</option>`).join("")}</select>`:""}
@@ -536,7 +534,7 @@ function sageRows(){return Object.entries(all).filter(([u,d])=>!conseilIsClaimed
 function vSages(v){const rows=sageRows();
   v.innerHTML=`<section class="panel frame"><div class="between"><h2>Les collections du Conseil</h2><span class="note">Touche un sage pour voir sa vitrine et ses cartes</span></div>
     ${rows.length?`<div style="overflow-x:auto"><table class="ctable"><thead><tr><th>#</th><th>Sage</th><th class="num">Cartes</th><th class="num">Complétion</th><th class="num">Légendaires</th><th class="num">Épiques</th><th class="num">Boosters</th></tr></thead><tbody>
-      ${rows.map((r,i)=>`<tr${r.u===uid?' style="background:rgba(228,0,43,.12)"':""}><td>${i<3?["🥇","🥈","🥉"][i]:i+1}</td><td><a href="#sage-${encodeURIComponent(r.u)}">${esc(r.d.pseudo||"Un sage")}</a>${r.u===uid?' <span class="note">(toi)</span>':""}</td><td class="num">${r.n}</td><td class="num">${(100*r.n/total()).toFixed(1)} %</td><td class="num" style="color:var(--r4)">${r.t[4]}</td><td class="num" style="color:var(--r3)">${r.t[3]}</td><td class="num">${r.d.opened||0}</td></tr>`).join("")}</tbody></table></div>`
+      ${rows.map((r,i)=>`<tr${r.u===uid?' style="background:rgba(217,42,116,.12)"':""}><td>${i<3?["🥇","🥈","🥉"][i]:i+1}</td><td><a href="#sage-${encodeURIComponent(r.u)}">${esc(r.d.pseudo||"Un sage")}</a>${r.u===uid?' <span class="note">(toi)</span>':""}</td><td class="num">${r.n}</td><td class="num">${(100*r.n/total()).toFixed(1)} %</td><td class="num" style="color:var(--r4)">${r.t[4]}</td><td class="num" style="color:var(--r3)">${r.t[3]}</td><td class="num">${r.d.opened||0}</td></tr>`).join("")}</tbody></table></div>`
       :`<div class="empty">Personne n'a encore ouvert de booster. Sois le premier !</div>`}</section>
     <section class="panel frame"><h2>Derniers gros tirages</h2><div class="feed">${feedHTML()}</div></section>`}
 let sType="all";
@@ -707,7 +705,7 @@ function vRegions(v){v.innerHTML=`<section class="panel frame"><span class="eyeb
 function vRegion(v){const r=REG[param];if(!r){v.innerHTML=`<div class="empty">Région introuvable.</div>`;return}const list=CH.filter(c=>c.region===param),card=BY["r:"+param];
   const set=CARDS.filter(c=>(c.type==="champ"&&c.g===param)||c.id==="r:"+param);
   v.innerHTML=`<a class="chip" href="#regions" style="align-self:flex-start;text-decoration:none">← Toutes les régions</a>
-  <section class="region-hero" style="${r.img?`background-image:url('${A}${r.img}')`:"background:#1d2027"}"><div><span class="eyebrow">Région</span><h1 style="margin:0">${esc(r.name)}</h1><span class="note">${list.length} champions</span></div></section>
+  <section class="region-hero" style="${r.img?`background-image:url('${A}${r.img}')`:"background:#201d38"}"><div><span class="eyebrow">Région</span><h1 style="margin:0">${esc(r.name)}</h1><span class="note">${list.length} champions</span></div></section>
   <section class="panel frame"><p class="lore" style="margin:0">${esc(r.desc)}</p></section>
   ${card?`<section class="panel frame"><div class="between"><h2>Collection de la région</h2><span class="note">${set.filter(c=>mine(c.id)>0).length} / ${set.length} · complète = +200 PO</span></div><div class="cards">${set.map(c=>cardHTML(c,{count:mine(c.id),miss:!(mine(c.id)>0)})).join("")}</div></section>`:""}
   <section class="panel frame"><h2>Champions de ${esc(r.name)}</h2><div class="wgrid">${list.map(c=>`<a class="wtile" href="#champ-${encodeURIComponent(c.id)}" style="background-image:url('${A}c/${c.id}.webp')"><span>${esc(c.name)}</span></a>`).join("")}</div></section>`}
