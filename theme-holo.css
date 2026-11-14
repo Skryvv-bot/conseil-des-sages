@@ -222,3 +222,13 @@ footer{color:#8c88aa!important}
 .cnav-dc b{font:700 .72rem var(--mono);opacity:.9}
 .cnav-dc b:empty{display:none}
 @media (max-width:900px){.cnav-dc span,.cnav-dc b{display:none}.cnav-dc{padding:9px 11px}}
+
+/* Liste des membres en ligne, au survol du bouton Discord */
+.cdc-pop{position:fixed;z-index:60;width:260px;max-height:min(420px,70vh);overflow:auto;background:#17152a;border:1px solid var(--line);border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.55);padding:12px;display:flex;flex-direction:column;gap:8px}
+.cdc-pop[hidden]{display:none}
+.cdc-h{font:800 .9rem var(--display);color:#fff}
+.cdc-m{display:flex;align-items:center;gap:10px;min-width:0}
+.cdc-n{display:flex;flex-direction:column;min-width:0}
+.cdc-n b{color:#fff;font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cdc-n small{color:var(--holo-mint);font-size:.76rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cdc-pop p{margin:0}

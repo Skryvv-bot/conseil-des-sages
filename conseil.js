@@ -88,6 +88,26 @@ window.conseilNav=function(active){
   if(item&&item.sub&&!item.noBar){const wrap=document.querySelector(".wrap");if(wrap){const sub=document.createElement("div");sub.className="csub";
     sub.innerHTML=item.sub.map(s=>`<a href="${s.href}" ${s.id===active?'aria-current="page"':""}${s.admin?' data-admin hidden':""}>${s.label}</a>`).join("");wrap.prepend(sub)}}
   setupInstall();
+  // Discord dans la barre : au survol (ou au clavier), la liste des membres en ligne avec leur photo et leur jeu
+  (function(){const btn=document.getElementById("cnavDC");if(!btn)return;let pop=null,timer=null,at=0,members=null;
+    const load=()=>members&&Date.now()-at<120e3?Promise.resolve(members):fetch("https://discord.com/api/guilds/781876426571251743/widget.json").then(r=>r.ok?r.json():null).then(w=>{members=w?(w.members||[]):null;at=Date.now();return members}).catch(()=>null);
+    const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+    function place(){const r=btn.getBoundingClientRect();pop.style.top=Math.round(r.bottom+8)+"px";pop.style.left=Math.max(8,Math.min(r.left,innerWidth-pop.offsetWidth-8))+"px"}
+    async function open(){clearTimeout(timer);if(!pop){pop=el("div","cdc-pop");pop.setAttribute("role","tooltip");document.body.appendChild(pop);pop.addEventListener("pointerenter",()=>clearTimeout(timer));pop.addEventListener("pointerleave",close)}
+      pop.hidden=false;if(!pop.childElementCount)pop.replaceChildren(el("p","note","Chargement…"));place();
+      const m=await load();if(pop.hidden)return;
+      if(!m){pop.replaceChildren(el("p","note","Liste indisponible pour le moment."))}
+      else if(!m.length){pop.replaceChildren(el("p","note","Personne en ligne pour l'instant."))}
+      else{const list=m.slice().sort((a,b)=>(b.game?1:0)-(a.game?1:0)||String(a.username).localeCompare(String(b.username)));
+        pop.replaceChildren(el("b","cdc-h",m.length+" en ligne sur le Discord"),...list.slice(0,40).map(x=>{const row=el("div","cdc-m"),av=el("span","cav");av.style.width=av.style.height="28px";av.textContent=String(x.username).slice(0,2).toUpperCase();
+          if(x.avatar_url){const im=new Image();im.alt="";im.onload=()=>{av.textContent="";av.appendChild(im)};im.src=x.avatar_url}
+          const t=el("span","cdc-n");t.append(el("b","",x.username));if(x.game&&x.game.name)t.append(el("small","",x.game.name));row.append(av,t);return row}));
+        if(m.length>40)pop.append(el("p","note","et "+(m.length-40)+" autres"))}
+      place()}
+    function close(){timer=setTimeout(()=>{if(pop)pop.hidden=true},180)}
+    btn.addEventListener("pointerenter",e=>{if(e.pointerType==="mouse")open()});btn.addEventListener("pointerleave",e=>{if(e.pointerType==="mouse")close()});
+    btn.addEventListener("focus",open);btn.addEventListener("blur",close);
+    addEventListener("scroll",()=>{if(pop&&!pop.hidden)pop.hidden=true},{passive:true});document.addEventListener("keydown",e=>{if(e.key==="Escape"&&pop)pop.hidden=true})})();
   // Discord dans la barre : nombre de membres en ligne (gardé 5 min)
   (function(){const el=document.getElementById("cnavDCn");if(!el)return;const show=n=>{if(n!=null)el.textContent=n+" en ligne"};const c=LS.get("dc-count",null);
     if(c&&Date.now()-c.t<300e3)return show(c.n);
@@ -262,7 +282,7 @@ window.conseilHunt=async function(){const boxes=[...document.querySelectorAll("[
 
 // ---------- Thème « Collection holographique » et bandeau d'infos ----------
 (function(){const add=()=>{if(document.getElementById("tv-theme"))return;
-  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=11";document.head.appendChild(l)};
+  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=12";document.head.appendChild(l)};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();
 function defaultTicker(){const d=Math.ceil((Date.parse("2026-11-04T23:00:00Z")-Date.now())/864e5);
   return ["Worlds 2026 : la finale le 14 novembre, puis le bilan du Pick'em","Pick'em : un skin pour le 1er (offert par Skryvv) et un skin pour le 2e (offert par Tabaskoh)",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Pronos entre potes, tribunal et sage de la semaine dans Le Conseil","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes"]}
