@@ -43,13 +43,13 @@
 <div class="wrap">
   <header class="phead between">
     <div style="display:flex;flex-direction:column;gap:6px">
-      <span class="eyebrow">La vie du groupe</span>
-      <h1>Le Conseil</h1>
-      <p class="sub">Pronos sur les parties des potes, tribunal des défaites, et élection du sage de la semaine.</p>
+      <span class="eyebrow" id="pgEy">League of Legends · entre sages</span>
+      <h1 id="pgH">Pronos entre potes</h1>
+      <p class="sub" id="pgSub">Un sage lance une partie ? Ouvre un prono : victoire ou défaite. Le résultat arrive tout seul depuis Riot à la fin de la partie.</p>
     </div>
     <span class="me" id="me">Connexion au Conseil…</span>
   </header>
-  <div class="tabs" role="tablist">
+  <div class="tabs" role="tablist" hidden>
     <button role="tab" id="tab-paris" aria-selected="true">Pronos entre potes</button>
     <button role="tab" id="tab-banc" aria-selected="false">Banc des accusés</button>
     <button role="tab" id="tab-sage" aria-selected="false">Sage de la semaine</button>
@@ -114,6 +114,7 @@
         <div class="avgrid" id="avGrid"></div>
         <span class="note" id="avMsg" role="status"></span>
       </div>
+      <div class="row" style="grid-column:1/-1"><button class="btn small ghost" type="button" onclick="conseilOpenAccount()">Compte et connexion</button><span class="note">Identifiant, mot de passe, connexion sur un autre appareil.</span></div>
       <div class="row"><button class="btn" type="submit">Enregistrer mon profil</button><span class="okmsg" id="profMsg"></span></div>
     </form>
   </section>
@@ -121,7 +122,7 @@
 </div>
 
 <script>
-conseilNav("conseil");
+conseilNav(location.hash==="#profil"?"profil":"pronos");
 const $=id=>document.getElementById(id), esc=conseilEsc;
 const ROLES=["Top","Jungle","Mid","Bot","Support"];
 const RANKS=["Non classé","Fer","Bronze","Argent","Or","Platine","Émeraude","Diamant","Maître","Grand Maître","Challenger"];
@@ -134,9 +135,14 @@ let db=null,uid=null,connErr=false,members={},bets={},stakes={},trials={},sage={
 
 // ---------- onglets ----------
 const TABS=["paris","banc","sage","profil"];
-function showTab(id){for(const t of TABS){$("v-"+t).hidden=t!==id;$("tab-"+t).setAttribute("aria-selected",t===id)}}
+let showTab=function(id){for(const t of TABS){$("v-"+t).hidden=t!==id;$("tab-"+t).setAttribute("aria-selected",t===id)}};
 for(const t of TABS)$("tab-"+t).onclick=()=>{showTab(t);history.replaceState(null,"","#"+t)};
-if(TABS.includes(location.hash.slice(1)))showTab(location.hash.slice(1));
+// La page n'a plus que deux vues : les pronos (rubrique LoL) et « Mon profil » (clic sur son pseudo)
+const __show=showTab;showTab=function(id){if(id!=="profil")id="paris";__show(id);const p=id==="profil";
+  $("pgEy").textContent=p?"Ton compte sur CDS.TV":"League of Legends · entre sages";$("pgH").textContent=p?"Mon profil":"Pronos entre potes";
+  $("pgSub").textContent=p?"Ton pseudo, ton avatar, ton Riot ID et tes postes préférés. Ils servent partout sur le site.":"Un sage lance une partie ? Ouvre un prono : victoire ou défaite. Le résultat arrive tout seul depuis Riot à la fin de la partie.";
+  document.title=p?"Mon profil · CDS.TV":"Pronos entre potes · CDS.TV";document.querySelectorAll(".csub,#ccom").forEach(e=>e.style.display=p?"none":"")};
+showTab(location.hash.slice(1));const __view=location.hash==="#profil";addEventListener("hashchange",()=>{if((location.hash==="#profil")!==__view)location.reload();else showTab(location.hash.slice(1))});
 const me=()=>members[uid];const myPseudo=()=>me()?.pseudo||"";
 const nameOf=id=>members[id]?.pseudo||"Un sage";
 const ms=v=>v&&typeof v.toMillis==="function"?v.toMillis():+v||0;
@@ -171,7 +177,7 @@ async function loadLive(){
   try{const r=await fetch(RIOT_RELAY+"/live?players="+encodeURIComponent(conseilAllAccounts(members).join(",")));const j=await r.json();liveGames={};for(const [k,g] of Object.entries(j.games||{}))if(g)liveGames[k.toLowerCase()]=g}catch(e){liveGames=null}
   renderBets();
 }
-setInterval(loadLive,90000);
+setInterval(loadLive,45000);
 function betVotes(id){const ss=Object.values(stakes).filter(s=>s.bet===id);return{ss,w:ss.filter(s=>s.side==="win"),l:ss.filter(s=>s.side==="loss")}}
 function scores(){
   const sc={};
@@ -186,12 +192,12 @@ function renderBets(){
   // en partie maintenant
   const inGame=Object.entries(members).filter(([,m])=>conseilLiveOf(m,liveGames));
   $("inGame").innerHTML=liveGames===null?`<div class="note">Détection des parties indisponible pour le moment.</div>`:
-    !Object.values(members).some(m=>m.riotId)?`<div class="note">Aucun sage n'a encore ajouté son Riot ID (onglet Mon profil).</div>`:
+    !Object.values(members).some(m=>m.riotId)?`<div class="note">Aucun sage n'a encore ajouté son Riot ID (clique sur ton pseudo, en haut).</div>`:
     inGame.length?inGame.map(([id,m])=>{const lv=conseilLiveOf(m,liveGames),g=lv.g;return `<div class="item"><span class="tag live">En partie</span>${conseilChampHTML(champNames[g.championId]||"?",30)}<div class="grow"><b>${esc(m.pseudo)}</b>${conseilCampTag(id)}<div class="note">${esc(champNames[g.championId]||"Champion")} · ${esc(QUEUES[g.queueId]||"Partie")} · depuis ${ago(g.start)}${lv.acc.main?"":` · sur ${esc(lv.acc.riotId)}`}</div></div>
       ${openTargets.has(id)?'<span class="note">prono ouvert</span>':id===uid?'<span class="note">c\'est toi</span>':`<button class="btn small" data-quick="${id}">Ouvrir un prono</button>`}</div>`}).join(""):`<div class="note">Personne du Conseil n'est en partie pour l'instant.</div>`;
   $("inGame").querySelectorAll("[data-quick]").forEach(b=>b.onclick=()=>openBet(b.dataset.quick));
   // pronos en cours
-  const live=Object.entries(bets).filter(([,b])=>b.status==="open").sort((a,b)=>(b[1].created||"").localeCompare(a[1].created||""));
+  const live=Object.entries(bets).filter(([,b])=>b.status==="open"&&now-(Date.parse(b.created)||now)<PRONO_STALE).sort((a,b)=>(b[1].created||"").localeCompare(a[1].created||""));
   $("openBets").innerHTML=live.length?live.map(([id,b])=>{const v=betVotes(id),closes=ms(b.closesAt),open=now<closes,mine=stakes[id+"_"+uid],n=v.ss.length,pw=n?Math.round(100*v.w.length/n):50;
     const canCancel=uid===b.target||uid===b.openedBy;
     return `<div class="bet ${open?"open":""}" data-b="${id}"><div class="between"><div><span class="who">${esc(b.targetPseudo)}</span>${conseilCampTag(b.target)} <span class="note">· ${esc(b.label||"Partie")}${b.championName?" · "+esc(b.championName):""} · ouvert par ${esc(b.openedPseudo)}</span></div>
@@ -246,7 +252,7 @@ function renderTrials(){
     const d=el.querySelector("[data-del]");if(d)d.onclick=()=>db.doc("trials/"+id).delete().catch(()=>{})});
 }
 $("trialForm").onsubmit=async e=>{e.preventDefault();const err=$("trialErr");err.hidden=true;
-  if(!myPseudo()){err.textContent="Crée d'abord ton profil (onglet Mon profil).";err.hidden=false;return}
+  if(!myPseudo()){err.textContent="Crée d'abord ton profil (clique sur ton pseudo, en haut).";err.hidden=false;return}
   const acc=$("tAccused").value;if(!acc){err.textContent="Choisis l'accusé.";err.hidden=false;return}
   try{await db.collection("trials").add({accuser:uid,accuserPseudo:myPseudo(),accusedUid:acc,accusedPseudo:members[acc].pseudo,charge:$("tCharge").value.trim().slice(0,200),created:new Date().toISOString(),closesAt:Date.now()+24*3600e3,votes:{}});$("trialForm").reset()}
   catch(x){err.textContent="Accusation impossible pour le moment.";err.hidden=false}};

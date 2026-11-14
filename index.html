@@ -123,8 +123,8 @@ input[type=text],select{font:500 1rem var(--body);color:var(--ink);background:va
 .nextm{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.9rem}
 .top3{display:flex;flex-direction:column;gap:2px;font-size:.88rem}
 .top3 i{font-style:normal;color:var(--gold);font-weight:700;margin-right:6px}
-.wk{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
-@media (max-width:1000px){.wk{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.wk{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+@media (max-width:1000px){.wk{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}}
 @media (max-width:640px){.wk{grid-template-columns:1fr}}
 .wkc{display:flex;flex-direction:column;gap:6px;padding:14px;text-decoration:none;color:var(--ink);min-width:0}
 .wkc:hover{border-color:var(--gold)}
@@ -451,7 +451,7 @@ section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,
         <span class="note" id="liveInfo"></span>
       </div>
       <div id="riotReg"></div>
-      <p class="note riot-optin" style="font-size:.8rem">Ajouter ton Riot ID est facultatif et se fait uniquement par toi. En l'ajoutant, tu acceptes que ton Riot ID et ta partie en cours (champion, mode, durée) soient visibles par tous les visiteurs du site. Tu peux le retirer à tout moment dans Le Conseil › Mon profil (vide le champ Riot ID).</p>
+      <p class="note riot-optin" style="font-size:.8rem">Ajouter ton Riot ID est facultatif et se fait uniquement par toi. En l'ajoutant, tu acceptes que ton Riot ID et ta partie en cours (champion, mode, durée) soient visibles par tous les visiteurs du site. Tu peux le retirer à tout moment dans ton profil (clique sur ton pseudo) (vide le champ Riot ID).</p>
       <div class="players" id="players"><div class="note">Chargement des invocateurs…</div></div>
     </section>
   </div>
@@ -462,9 +462,9 @@ section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,
     <h2 id="weekT">Cette semaine au Conseil</h2>
     <div class="recap" id="recap" aria-label="Récap de la semaine"><div class="note">Récap de la semaine : chargement des rangs officiels…</div></div>
     <div class="wk">
-      <a class="wkc frame" href="communaute.html#sage"><span class="wki" aria-hidden="true">👑</span><b>Sage de la semaine</b><span id="wSage" class="wkt">Votes en cours</span></a>
+      <a class="wkc frame gone" href="communaute.html#paris"><span class="wki" aria-hidden="true">👑</span><b>Sage de la semaine</b><span id="wSage" class="wkt">Votes en cours</span></a>
       <a class="wkc frame" href="communaute.html#paris"><span class="wki" aria-hidden="true">🎯</span><b>Pronos entre potes</b><span id="wBets" class="wkt">Aucun prono en cours</span></a>
-      <a class="wkc frame" href="communaute.html#banc"><span class="wki" aria-hidden="true">⚖</span><b>Banc des accusés</b><span id="wTrial" class="wkt">Le tribunal est vide</span></a>
+      <a class="wkc frame gone" href="communaute.html#paris"><span class="wki" aria-hidden="true">⚖</span><b>Banc des accusés</b><span id="wTrial" class="wkt">Le tribunal est vide</span></a>
       <a class="wkc frame" href="customs.html#clash"><span class="wki" aria-hidden="true">🛡</span><b>Prochain Clash</b><span id="wClash" class="wkt">Aucune session prévue</span></a>
       <a class="wkc frame" href="patch.html"><span class="wki" aria-hidden="true">📜</span><b>Patch 26.22</b><span class="wkt">Mel retravaillée ; nerfs pour Locke, Thresh et Yasuo ; TFT passe sur son propre client.</span></a>
     </div>
@@ -486,14 +486,10 @@ section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,
     <a class="tile frame" href="customs.html"><span class="th" style="background-image:url('img/lol-swain.jpg');background-position:50% 14%"></span>
       <b>Customs & Clash</b><span>Équipes 5v5 équilibrées, roue des champions, inscriptions au Clash.</span>
     </a>
-    <a class="tile frame" href="communaute.html"><span class="th" style="background-image:url('img/lol-faille.jpg');background-position:50% 50%"></span>
-      <b>Le Conseil</b><span>Pronos entre potes, banc des accusés, sage de la semaine et ton profil.</span>
-    </a>
     <a class="tile frame" href="ladder.html"><span class="th" style="background-image:url('img/lol-aphelios.jpg');background-position:50% 22%"></span><span class="k" style="color:#7ad7ff">Ladder</span><b>Ladder du Conseil</b><span>Les rangs officiels des sages, mis à jour toutes les 15 minutes.</span></a>
     <a class="tile frame" href="fortnite.html"><span class="th" style="background-image:url('img/fn-map.jpg');background-position:50% 50%"></span><span class="k" style="color:#ff8ad8">Fortnite</span><b>Chasse aux trésors</b><span>Les nouveautés de la mini-saison et les taux de drop des coffres.</span></a>
     <a class="tile frame" href="wow.html"><span class="th" style="background-image:url('img/wow-packs.jpg');background-position:40% 40%"></span><span class="k" style="color:#ffe27a">WoW</span><b>WoW Forever</b><span>Ce que contient le jeu, et où en est la Grande Trahison.</span></a>
     <a class="tile frame" href="patch.html"><span class="th" style="background-image:url('img/lol-smolder.jpg');background-position:50% 36%"></span><span class="k" style="color:#b4b0d0">Infos</span><b>Patch</b><span>Le résumé du dernier patch, sans le blabla.</span></a>
-    <a class="tile frame" href="banque.html"><span class="th" style="background-image:url('img/lol-xerath.jpg');background-position:50% 30%"></span><span class="k" style="color:#ffe27a">Or</span><b>Banque</b><span>Tes pièces d'or et ce que tu peux en faire.</span></a>
   </section>
 
   <section class="frame panel install" data-install hidden>
@@ -753,7 +749,7 @@ $("dailyInfo").textContent="Nouveau défi chaque jour dans les 5 modes.";
 
 let bets={},trials={},sage={},clash={},ladder=null;
 function renderRecap(){
-  const box=$("recap");if(!ladder?.current){box.innerHTML=`<div class="note" style="grid-column:1/-1">Récap de la semaine : ajoute ton Riot ID (Le Conseil › Mon profil) pour entrer dans le ladder.</div>`;return}
+  const box=$("recap");if(!ladder?.current){box.innerHTML=`<div class="note" style="grid-column:1/-1">Récap de la semaine : ajoute ton Riot ID (ton profil (clique sur ton pseudo)) pour entrer dans le ladder.</div>`;return}
   const P=ladder.current.players||{},ids=Object.keys(P).filter(id=>!conseilIsClaimed(id));
   let games=0,wins=0;const per=[];
   for(const id of ids){let g=0,w=0,lp=0;for(const q of ["solo","flex"]){const d=conseilWeekDelta(ladder.current,ladder.base,id,q);if(d&&!d.fresh){g+=d.games;w+=d.wins;if(q==="solo")lp=d.lp||0}}
@@ -765,7 +761,7 @@ function renderRecap(){
   box.innerHTML=`<div><span class="k">Parties classées</span><span class="v">${games}</span><span class="s">jouées par le Conseil depuis lundi</span></div>
     <div><span class="k">Winrate du Conseil</span><span class="v">${games?Math.round(100*wins/games)+" %":"—"}</span><span class="s">${wins} victoires, ${games-wins} défaites</span></div>
     <div><span class="k">Meilleure grimpe</span><span class="v">${best&&best.lp>0?"+"+best.lp+" LP":"—"}</span><span class="s">${best&&best.lp>0?nm(best):"Personne n'a encore grimpé"}</span></div>
-    <div><span class="k">Le plus tilté</span><span class="v">${worst&&worst.lp<0?worst.lp+" LP":"—"}</span><span class="s">${worst&&worst.lp<0?nm(worst)+' · <a href="communaute.html#banc">l\'accuser ?</a>':"Personne n'a chuté"}</span></div>
+    <div><span class="k">Le plus tilté</span><span class="v">${worst&&worst.lp<0?worst.lp+" LP":"—"}</span><span class="s">${worst&&worst.lp<0?nm(worst)+' · <a href="communaute.html#paris">l\'accuser ?</a>':"Personne n'a chuté"}</span></div>
     <div><span class="k">Le plus actif</span><span class="v">${active&&active.g?active.g:"—"}</span><span class="s">${active&&active.g?nm(active)+" (parties)":"Pas encore de partie"}</span></div>
     <div><span class="k">Meilleur winrate</span><span class="v">${wr?Math.round(100*wr.w/wr.g)+" %":"—"}</span><span class="s">${wr?nm(wr)+" · "+wr.g+" parties":"5 parties minimum"}</span></div>
     <div class="top"><span class="k">Ladder Solo/Duo</span>${top.length?top.map(([id,p],i)=>`<span><b style="color:var(--gold)">${i+1}.</b> ${esc(p.pseudo)}${conseilCampTag(id)} ${conseilRankBadge(p.solo)}</span>`).join(""):'<span class="s">Pas encore de sage classé</span>'}<a href="ladder.html">Voir le ladder</a></div>`;

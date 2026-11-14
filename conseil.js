@@ -33,13 +33,12 @@ window.conseilShowAdmin=function(){const ok=window.CONSEIL_UID===CONSEIL_ADMIN;d
 const CONSEIL_NAV=[
   {id:"accueil",href:"index.html",label:"Accueil"},
   {id:"lol",href:"lol.html",label:"LoL",sub:[{id:"lol",href:"lol.html",label:"Accueil LoL"},{id:"ladder",href:"ladder.html",label:"Ladder"},{id:"worlds",href:"worlds.html",label:"Worlds 2026"},{id:"tierlist",href:"tierlist.html",label:"Tier list"},
-    {id:"fantasy",href:"fantasy.html",label:"Fantasy"},{id:"cartes",href:"cartes.html",label:"LolMaster"},{id:"customs",href:"customs.html",label:"Customs & Clash"},{id:"mercato",href:"mercato.html",label:"Mercato"},{id:"patch",href:"patch.html",label:"Patch"}]},
+    {id:"fantasy",href:"fantasy.html",label:"Fantasy"},{id:"cartes",href:"cartes.html",label:"LolMaster"},{id:"customs",href:"customs.html",label:"Customs & Clash"},{id:"pronos",href:"communaute.html#paris",label:"Pronos entre potes"},{id:"mercato",href:"mercato.html",label:"Mercato"},{id:"patch",href:"patch.html",label:"Patch"}]},
   {id:"wow",href:"wow.html",label:"WoW",sub:[{id:"wow",href:"wow.html",label:"WoW Forever"}]},
   {id:"fortnite",href:"fortnite.html",label:"Fortnite",sub:[{id:"fortnite",href:"fortnite.html",label:"Chasse aux trésors"},{href:"fortnite.html#taux",label:"Taux de drop"}]},
-  {id:"jeux",href:"devinettes.html",label:"Jeux",noBar:1,sub:[{id:"devinettes",href:"devinettes.html",label:"Devinettes"}]},
-  {id:"conseil",href:"communaute.html",label:"Le Conseil",sub:[{id:"conseil",href:"communaute.html",label:"Le Conseil",sub:[{href:"communaute.html#paris",label:"Pronos entre potes"}]},{id:"banque",href:"banque.html",label:"Banque · Pièces d'or"}]}
+  {id:"jeux",href:"devinettes.html",label:"Jeux",noBar:1,sub:[{id:"devinettes",href:"devinettes.html",label:"Devinettes"}]}
 ];
-const NAV_GROUP={ladder:"lol",worlds:"lol",tierlist:"lol",fantasy:"lol",cartes:"lol",customs:"lol",patch:"lol",mercato:"lol",devinettes:"jeux",jeux:"jeux",banque:"conseil"};
+const NAV_GROUP={ladder:"lol",worlds:"lol",tierlist:"lol",fantasy:"lol",cartes:"lol",customs:"lol",patch:"lol",mercato:"lol",pronos:"lol",devinettes:"jeux",jeux:"jeux"};
 (function navStyles(){
   const css=`
 .cnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;margin:-20px calc(-1*max(16px,env(safe-area-inset-left,0px))) 0;padding:10px max(16px,env(safe-area-inset-left,0px));
@@ -89,6 +88,7 @@ window.conseilNav=function(active){
     sub.innerHTML=item.sub.map(s=>`<a href="${s.href}" ${s.id===active?'aria-current="page"':""}${s.admin?' data-admin hidden':""}>${s.label}</a>`).join("");wrap.prepend(sub)}}
   setupInstall();
   conseilComments(active);conseilHunt();
+  if(!/communaute\.html$|index\.html$|\/$/.test(location.pathname))setTimeout(conseilPronoSweep,4000);
 };
 
 // Menus déroulants : survol à la souris, premier toucher sur mobile ; CDS.TV ouvre le plan complet du site
@@ -205,7 +205,7 @@ window.conseilAvatarEl=function(m,dc,size=36){const e=document.createElement("sp
 
 // ---------- Commentaires ----------
 // Un fil par page (collection « comments »). Il faut un profil avec un pseudo pour écrire ; chacun peut supprimer ses messages.
-const COMMENT_PAGES={accueil:"l'accueil",lol:"LoL",wow:"WoW Forever",fortnite:"Fortnite",mercato:"le mercato",patch:"le patch",worlds:"les Worlds",fantasy:"la Fantasy",ladder:"le ladder",tierlist:"la tier list",devinettes:"les Devinettes",customs:"les customs"};
+const COMMENT_PAGES={pronos:"les pronos entre potes",accueil:"l'accueil",lol:"LoL",wow:"WoW Forever",fortnite:"Fortnite",mercato:"le mercato",patch:"le patch",worlds:"les Worlds",fantasy:"la Fantasy",ladder:"le ladder",tierlist:"la tier list",devinettes:"les Devinettes",customs:"les customs"};
 window.conseilComments=async function(page){
   const wrap=document.querySelector(".wrap");if(!wrap||!COMMENT_PAGES[page]||document.getElementById("ccom"))return;
   const sec=document.createElement("section");sec.id="ccom";sec.className="frame panel ccom";sec.setAttribute("aria-labelledby","ccomT");
@@ -425,20 +425,29 @@ window.conseilWeekDelta=function(cur,base,id,q="solo"){
 // Résolution automatique des pronos entre potes : on demande à Riot le résultat de la partie.
 const resolving=new Set();
 window.conseilResolvePronos=async function(db,bets){
+  const me=window.CONSEIL_UID,PRONO_STALE=window.PRONO_STALE||6*3600e3,ask=async(b,withId)=>(await fetch(RIOT_RELAY+"/result?"+new URLSearchParams({player:b.riotId+"|"+(b.region||"euw1"),after:String(Date.parse(b.created)||Date.now()),...(withId&&b.gameId?{gameId:String(b.gameId)}:{})}))).json();
   for(const [id,b] of Object.entries(bets||{})){
     if(b.status!=="open"||!b.riotId||resolving.has(id))continue;
     const closes=b.closesAt?.toMillis?b.closesAt.toMillis():+b.closesAt||0;
     if(Date.now()<closes)continue;
     resolving.add(id);
     try{
-      const u=RIOT_RELAY+"/result?"+new URLSearchParams({player:b.riotId+"|"+(b.region||"euw1"),after:String(Date.parse(b.created)||Date.now()),...(b.gameId?{gameId:String(b.gameId)}:{})});
-      const r=await (await fetch(u)).json();
+      const age=Date.now()-(Date.parse(b.created)||Date.now());
+      let r=await ask(b,true);
+      // la partie repérée au départ reste introuvable après 1 h 30 : on prend la première partie terminée depuis l'ouverture du prono
+      if(!r.done&&b.gameId&&age>90*60e3)r=await ask(b,false);
       if(r.done)await db.doc("bets/"+id).update({status:"done",result:r.win?"win":"loss",settledBy:"riot",settledAt:new Date().toISOString(),
         match:{championName:r.championName||"",kills:r.kills||0,deaths:r.deaths||0,assists:r.assists||0,duration:r.duration||0,matchId:r.matchId||""}});
+      // toujours rien après 6 h : le prono est annulé (possible seulement pour le joueur concerné ou celui qui l'a ouvert)
+      else if(age>PRONO_STALE&&(me===b.target||me===b.openedBy))await db.doc("bets/"+id).update({status:"cancel",result:null,settledBy:"expire",settledAt:new Date().toISOString()});
     }catch(e){console.warn("prono",e)}
     finally{setTimeout(()=>resolving.delete(id),60000)}
   }
 };
+window.PRONO_STALE=6*3600e3;
+// Sur toutes les pages : un passage pour clôturer les pronos en attente de résultat
+window.conseilPronoSweep=async function(){try{const {db}=await conseilConnect();if(!db)return;const s=await db.collection("bets").where("status","==","open").get(),o={};s.forEach(d=>o[d.id]=d.data());if(Object.keys(o).length)conseilResolvePronos(db,o)}catch(e){}};
+
 
 // ---------- Titres de champion du monde (une étoile par titre, Worlds 2011-2025) ----------
 const WORLDS_TITLES={
@@ -636,7 +645,8 @@ const ACC_DOMAIN="conseil-des-sages.app";
 const accSlug=id=>String(id||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
 const accName=u=>u&&!u.isAnonymous?(u.displayName||(u.email||"").split("@")[0]):null;
 function renderAccount(u){const b=document.getElementById("cnavAcc");if(!b)return;b.hidden=false;const n=accName(u);
-  b.textContent=n?n:"Connexion";b.classList.toggle("on",!!n);b.title=n?"Ton compte du Conseil":"Crée ton identifiant ou connecte-toi pour retrouver tes données sur tous tes appareils";b.onclick=()=>openAccount()}
+  b.textContent=n?n:"Connexion";b.classList.toggle("on",!!n);b.title=n?"Mon profil":"Crée ton identifiant ou connecte-toi pour retrouver tes données sur tous tes appareils";b.onclick=()=>{if(!n)return openAccount();if(/communaute\.html$/.test(location.pathname)){location.hash="profil"}else location.href="communaute.html#profil"}}
+window.conseilOpenAccount=()=>openAccount();
 function accErr(e){const c=e&&e.code||"";
   if(/email-already-in-use|credential-already-in-use/.test(c))return "Cet identifiant est déjà pris. Choisis-en un autre, ou connecte-toi s'il est à toi.";
   if(/invalid-credential|wrong-password|user-not-found|invalid-login-credentials|invalid-email/.test(c))return "Identifiant ou mot de passe incorrect.";
