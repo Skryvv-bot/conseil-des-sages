@@ -1,6 +1,6 @@
 // Service worker du Conseil : rend le site installable et utilisable hors connexion (pages déjà visitées).
-const CACHE="conseil-v118";
-const CORE=["index.html","worlds.html","tierlist.html","jeux.html","devinettes.html","fortnite.html","wow.html","lol.html","mercato.html","customs.html","communaute.html","patch.html","ladder.html","banque.html","fantasy.html","fantasy/score.js","cartes.html","conseil.js","conseil.css","theme-holo.css?v=5","fonts/unbounded.woff2","fonts/manrope.woff2","fonts/jetbrains-mono.woff2","champions.js","icon-192.png","icon-512.png","manifest.webmanifest"];
+const CACHE="conseil-v119";
+const CORE=["index.html","worlds.html","tierlist.html","jeux.html","devinettes.html","fortnite.html","wow.html","lol.html","mercato.html","customs.html","communaute.html","patch.html","ladder.html","banque.html","fantasy.html","fantasy/score.js","cartes.html","conseil.js","conseil.css","theme-holo.css?v=6","fonts/unbounded.woff2","fonts/manrope.woff2","fonts/jetbrains-mono.woff2","champions.js","icon-192.png","icon-512.png","manifest.webmanifest"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting()))});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener("fetch",e=>{

@@ -25,6 +25,6 @@ jobs:
       - run: |
           git config user.name "cds-bot"
           git config user.email "cds-bot@users.noreply.github.com"
-          git add img/equipes
+          git add img/equipes/equipes.json
           git commit -m "Mercato : équipes et joueurs officiels" || echo "rien de nouveau"
           git push

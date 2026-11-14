@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0c0b14">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon-192.png?v=3">
-<link rel="apple-touch-icon" href="icon-192.png?v=3">
+<link rel="icon" href="icon-192.png?v=4">
+<link rel="apple-touch-icon" href="icon-192.png?v=4">
 <title>Conseil des Sages</title>
 <meta name="description" content="Le QG du Conseil des Sages : Discord, Worlds 2026, tier list, jeu de devinettes et parties LoL en direct.">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -273,6 +273,10 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
 .wkc:hover{border-color:#f2f0ff!important}
 
 /* Visuels de l'accueil */
+.merc-lg{display:flex;gap:10px}.merc-lg img{width:44px;height:44px;object-fit:contain}
+.merc-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.merc-g a{display:flex;gap:10px;align-items:center;text-decoration:none;color:#c9c5e6;font-size:.9rem;background:#0c0b14;border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
+.merc-g a:hover{border-color:#f2f0ff}.merc-g img{width:36px;height:36px;object-fit:contain;flex:none}.merc-g b{display:block;color:#fff;font-weight:800}
 .gone{display:none!important}
 .hc-img{background-size:cover;background-position:center;min-height:150px}.hh-fan .hcard .hc-d{font-size:.74rem}
 .c-fan .hc-k{color:#ffe27a}.c-lm .hc-k{color:#7ad7ff}.c-wd .hc-k{color:#ff8ad8}
@@ -314,6 +318,19 @@ section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,
       <div class="row"><a class="btn" href="fortnite.html#taux">Voir tous les taux de drop</a><a class="btn ghost" href="fortnite.html">La mini-saison</a></div>
     </div>
     <img src="img/fn-hero.jpg" alt="Les personnages de la mini-saison Chasse aux trésors de Fortnite, dont Nico Robin et Ace" loading="lazy" width="1200" height="675">
+  </section>
+  <section class="frame panel merc" aria-labelledby="mcT" style="padding:20px;gap:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <div><span class="eyebrow">LoL · intersaison 2026-2027</span><h2 id="mcT" style="font-size:clamp(1.4rem,3.4vw,2.1rem)!important;margin:4px 0 0">Mercato : ça bouge déjà</h2></div>
+      <div class="merc-lg"><img src="img/ligue-lec.png" alt="LEC" width="44" height="44" loading="lazy"><img src="img/ligue-lck.png" alt="LCK" width="44" height="44" loading="lazy"><img src="img/ligue-lpl.png" alt="LPL" width="44" height="44" loading="lazy"></div>
+    </div>
+    <div class="merc-g">
+      <a href="mercato.html"><img src="img/equipes/karmine-corp.png" alt="" width="36" height="36" loading="lazy"><span><b>Karmine Corp</b>kyeahoo prolongé ; SkewMond arriverait dans la jungle.</span></a>
+      <a href="mercato.html"><img src="img/equipes/g2-esports.png" alt="" width="36" height="36" loading="lazy"><span><b>G2 Esports</b>Perkz parti ; Lyncas, Mikyx et Naak Nako pressentis.</span></a>
+      <a href="mercato.html"><img src="img/equipes/fnatic.png" alt="" width="36" height="36" loading="lazy"><span><b>Fnatic</b>Yike et Labrov attendus ; Razork partirait.</span></a>
+      <a href="mercato.html"><img src="img/equipes/kt-rolster.png" alt="" width="36" height="36" loading="lazy"><span><b>KT Rolster</b>Bdd et PerfecT prolongés jusqu'en 2028.</span></a>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><a class="btn" href="mercato.html">Voir tous les transferts</a><span class="note">Ouverture du marché le 17 novembre. Les rumeurs ne sont pas des annonces.</span></div>
   </section>
   <!-- Avant le début des Worlds : pronos et tier list à faire -->
   <section class="kick" id="kick" aria-labelledby="kickT" hidden>
@@ -466,7 +483,7 @@ section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,
   </section>
 
   <section class="frame panel install" data-install hidden>
-    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><img src="icon-192.png?v=3" alt="" width="56" height="56">
+    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><img src="icon-192.png?v=4" alt="" width="56" height="56">
       <div style="flex:1;min-width:200px"><h2>L'appli du Conseil</h2><p class="note">Installe le site sur ton téléphone ou ton ordinateur : il s'ouvre comme une vraie appli, avec son icône.</p></div>
       <button class="btn" onclick="conseilInstall()">Installer</button></div>
   </section>

@@ -6,8 +6,8 @@
 <title>Mercato LoL · LEC, LCK, LPL</title>
 <meta name="theme-color" content="#0c0b14">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon-192.png?v=3">
-<link rel="apple-touch-icon" href="icon-192.png?v=3">
+<link rel="icon" href="icon-192.png?v=4">
+<link rel="apple-touch-icon" href="icon-192.png?v=4">
 <link rel="stylesheet" href="conseil.css">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -45,7 +45,7 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
 .mtabs button{min-height:44px;padding:0 18px;border-radius:999px;border:1px solid var(--line);background:transparent;color:#f2f0ff;font:800 .95rem var(--body);cursor:pointer;display:inline-flex;align-items:center;gap:8px}
 .mtabs button[aria-pressed="true"]{background:#f2f0ff;color:#0c0b14;border-color:#f2f0ff}
 .mtabs img{height:22px;width:auto}
-.teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
 .team{background:#17152a;border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
 .team h3{margin:0;font:800 1.1rem var(--display)!important;letter-spacing:0!important;text-transform:none!important;color:#fff!important}
 .mv{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
@@ -54,6 +54,23 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
 .mv span{color:#c9c5e6;font-size:.94rem}
 .st{font:700 .66rem var(--mono);letter-spacing:.08em;text-transform:uppercase;border-radius:6px;padding:3px 7px;white-space:nowrap;margin-top:2px}
 .st.of{background:#8affc1;color:#0c0b14}.st.ru{background:transparent;color:#ffe27a;border:1px solid #ffe27a}
+.team .th2{display:flex;align-items:center;gap:10px}
+.team .th2 img{width:40px;height:40px;object-fit:contain;flex:none}
+.rost{display:grid;grid-template-columns:34px minmax(0,1fr) minmax(0,1fr);gap:6px 8px;align-items:center;background:#0c0b14;border:1px solid var(--line);border-radius:12px;padding:10px}
+.rost .hd{font:700 .64rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.rost .hd.af{color:var(--holo-mint,#8affc1)}
+.rost .ro{font:700 .64rem var(--mono);letter-spacing:.06em;color:var(--muted)}
+.pl2{display:flex;flex-direction:column;gap:4px;min-width:0}
+.pp{display:flex;align-items:center;gap:6px;min-width:0;font-weight:800;font-size:.9rem;color:#fff}
+.pp i{width:28px;height:28px;border-radius:50%;background:#201d38 center 10%/cover no-repeat;flex:none;display:inline-flex;align-items:center;justify-content:center;font:700 .6rem var(--mono);font-style:normal;color:var(--muted);border:1px solid var(--line)}
+.pp span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pp.new{color:#ffe27a}.pp.new i{border-color:#ffe27a}
+.pp.ok{color:#8affc1}.pp.ok i{border-color:#8affc1}
+.pp.doubt{color:#ff9db3}.pp.doubt i{border-color:#ff9db3}
+.pp.gone{opacity:.45;text-decoration:line-through}
+.pp.empty{color:var(--muted);font-weight:600;font-style:italic}
+.rkey{display:flex;gap:12px;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
+.rkey b{font-weight:800}
 .mlegend{display:flex;gap:14px;flex-wrap:wrap;align-items:center;color:var(--muted);font-size:.9rem}
 </style>
 </head>
@@ -81,46 +98,70 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
     <div class="mtabs" role="group" aria-label="Ligue" id="tabs"></div>
     <div class="mlegend"><span><span class="st of">Officiel</span> annoncé par le club</span><span><span class="st ru">Rumeur</span> rapporté par la presse</span>
       <label style="display:inline-flex;gap:6px;align-items:center;margin-left:auto"><input type="checkbox" id="onlyOf"> Officiel seulement</label></div>
+    <div class="rkey"><span>Dans les effectifs :</span><span><b style="color:#ffe27a">jaune</b> arrivée pressentie</span><span><b style="color:#8affc1">vert</b> prolongé</span><span><b style="color:#ff9db3">rose</b> avenir incertain</span><span><s>barré</s> départ ou remplacé</span></div>
     <p class="lead" id="lnote"></p>
     <div class="teams" id="teams"></div>
   </section>
 
-  <p class="src">Sources : <a href="https://www.team-aaa.com/fr/actualite/le-mercato-league-of-legends-de-lintersaison-2026-2027-tous-les-transferts-toutes-les-rumeurs_137145" rel="noopener" target="_blank">Team aAa</a>, <a href="https://draftcoach.gg/news/story/lol-2027-offseason-roster-changes-deft-skewmond/" rel="noopener" target="_blank">DraftCoach</a>, <a href="https://esport.vision/lol/news/lck-free-agents-2027-kiin-canyon-doran-kanavi" rel="noopener" target="_blank">Esport Vision</a> et <a href="https://www.sheepesports.com/en/lol" rel="noopener" target="_blank">Sheep Esports</a>. Site de fan, sans lien avec Riot Games.</p>
+  <p class="src">Sources : <a href="https://www.team-aaa.com/fr/actualite/le-mercato-league-of-legends-de-lintersaison-2026-2027-tous-les-transferts-toutes-les-rumeurs_137145" rel="noopener" target="_blank">Team aAa</a>, <a href="https://draftcoach.gg/news/story/lol-2027-offseason-roster-changes-deft-skewmond/" rel="noopener" target="_blank">DraftCoach</a>, <a href="https://esport.vision/lol/news/lck-free-agents-2027-kiin-canyon-doran-kanavi" rel="noopener" target="_blank">Esport Vision</a> et <a href="https://www.sheepesports.com/en/lol" rel="noopener" target="_blank">Sheep Esports</a>. Logos, effectifs 2026 et photos : LoL Esports. Quand les titulaires 2026 ne sont pas certains, tous les joueurs du poste sont listés. Site de fan, sans lien avec Riot Games.</p>
 </div>
 <script>
 conseilNav("mercato");conseilConnect().catch(()=>{});
-// o = officiel, r = rumeur ; [statut, joueur ou sujet, détail]
+// o = officiel, r = rumeur ; mv : [statut, joueur ou sujet, détail]
+// slug : équipe sur LoL Esports ; start : titulaires 2026 quand ils sont connus ; inn : arrivées pressenties [joueur, poste] ;
+// out : départs ; keep : prolongés (officiel) ; doubt : fin de contrat ou avenir incertain
 const M={
  lec:{name:"LEC",note:"Europe. Beaucoup de mouvements annoncés par la presse, peu d'officialisations avant le 17 novembre.",teams:[
-  ["G2 Esports",[["o","Perkz","Fin de la collaboration comme entraîneur principal (5 nov.)."],["o","Memento","Quitte le club (8 nov.)."],["r","Mithy","Reviendrait comme entraîneur principal."],["r","Pad","Arriverait comme entraîneur stratégique."],["r","SkewMond","Écarté du cinq de départ pour 2027, alors qu'il est sous contrat jusqu'en novembre 2028."],["r","Lyncas","Arriverait dans la jungle pour le remplacer."],["r","Mikyx","Ferait son retour au poste de support."],["r","Naak Nako","Ciblé au poste de toplaner."]]],
-  ["Fnatic",[["r","Vladi","Prolongation pressentie pour 2027."],["r","Yike","Arriverait depuis la Karmine Corp."],["r","Labrov","Aurait choisi Fnatic malgré une offre de G2."],["r","Razork","Partirait chez Team Heretics."]]],
-  ["Karmine Corp",[["o","kyeahoo","Prolongé pour 2027 (12 nov.)."],["r","SkewMond","Arriverait dans la jungle."],["r","Yike","Partirait chez Fnatic."]]],
-  ["Team Heretics",[["o","Tracyn","Prolongé jusqu'en 2028 au poste de toplaner."],["o","Serin","Quitte le club (3 nov.)."],["o","Way","Quitte le club."],["o","Mithy","Quitte le staff (12 nov.)."],["r","Hype","Serait conservé au poste de botlaner."],["r","Jackies","Arriverait au poste de midlaner."],["r","Razork","Arriverait depuis Fnatic."]]],
-  ["GIANTX",[["o","Jackies","Quitte le club (12 nov.)."],["r","Effectif 2027","Les cinq titulaires seraient remplacés : Myrwn, Thayger, Feisty, HARPOON et Piero."]]],
-  ["Team Vitality",[["o","Lyncas","Quitte le club (11 nov.)."],["o","Pad et Mac","Quittent le staff (9 nov.)."],["o","Fleshy","Autorisé à explorer ses options."],["r","Naak Nako","Un échange avec SkewMond aurait été évoqué."]]],
-  ["Movistar KOI",[["o","Jojopyun","Prolongé jusqu'en 2027."],["r","Carzzy","Accord verbal au poste de botlaner."],["r","BrokenBlade","Arriverait depuis G2."]]],
-  ["SK Gaming",[["r","Kryze","Ferait son retour en LEC."],["r","Zicssi","Arriverait dans la jungle depuis Solary."],["r","Lospa","Arrivée évoquée."],["r","3XA","Retour évoqué."]]],
-  ["NAVI",[["r","Parus","Resterait au club."],["r","Rhilech","L'équipe serait reconstruite autour de lui."],["r","Supa","Rejoindrait l'équipe pour 2027."]]],
-  ["Shifters",[["r","Place en LEC","Le club chercherait à louer sa place pour 2027."]]]]},
+  {n:"G2 Esports",slug:"g2-esports",inn:[["Naak Nako","top"],["Lyncas","jungle"],["Mikyx","support"]],out:["SkewMond","BrokenBlade","Labrov"],mv:[["o","Perkz","Fin de la collaboration comme entraîneur principal (5 nov.)."],["o","Memento","Quitte le club (8 nov.)."],["r","Mithy","Reviendrait comme entraîneur principal."],["r","Pad","Arriverait comme entraîneur stratégique."],["r","SkewMond","Écarté du cinq de départ pour 2027, alors qu'il est sous contrat jusqu'en novembre 2028."],["r","Lyncas","Arriverait dans la jungle pour le remplacer."],["r","Mikyx","Ferait son retour au poste de support."],["r","Naak Nako","Ciblé au poste de toplaner."]]},
+  {n:"Fnatic",slug:"fnatic",inn:[["Yike","jungle"],["Labrov","support"]],out:["Razork","Lospa"],doubt:{Vladi:"prolongation pressentie"},mv:[["r","Vladi","Prolongation pressentie pour 2027."],["r","Yike","Arriverait depuis la Karmine Corp."],["r","Labrov","Aurait choisi Fnatic malgré une offre de G2."],["r","Razork","Partirait chez Team Heretics."]]},
+  {n:"Karmine Corp",slug:"karmine-corp",inn:[["SkewMond","jungle"]],out:["Yike"],keep:["kyeahoo"],mv:[["o","kyeahoo","Prolongé pour 2027 (12 nov.)."],["r","SkewMond","Arriverait dans la jungle."],["r","Yike","Partirait chez Fnatic."]]},
+  {n:"Team Heretics",slug:"team-heretics-lec",inn:[["Razork","jungle"],["Jackies","mid"]],out:["Serin","Way","Ice","Daglas"],keep:["Tracyn"],mv:[["o","Tracyn","Prolongé jusqu'en 2028 au poste de toplaner."],["o","Serin","Quitte le club (3 nov.)."],["o","Way","Quitte le club."],["o","Ice","Prend sa retraite (7 nov.)."],["o","Mithy","Quitte le staff (12 nov.)."],["r","Hype","Serait conservé au poste de botlaner."],["r","Jackies","Arriverait au poste de midlaner."],["r","Razork","Arriverait depuis Fnatic."]]},
+  {n:"GIANTX",slug:"giantx-lec",inn:[["Myrwn","top"],["Thayger","jungle"],["Feisty","mid"],["HARPOON","bottom"],["Piero","support"]],out:["Jackies","ISMA","Oscarinin","Lot","Flakked","Noah","Jun"],mv:[["o","Jackies","Quitte le club (12 nov.)."],["r","Effectif 2027","Les cinq titulaires seraient remplacés : Myrwn, Thayger, Feisty, HARPOON et Piero."],["r","Noah","Partirait en LCK, chez BNK FEARX."]]},
+  {n:"Team Vitality",slug:"team-vitality",out:["Lyncas","Fleshy","Carzzy"],doubt:{"Naak Nako":"ciblé par G2"},mv:[["o","Lyncas","Quitte le club (11 nov.)."],["o","Pad et Mac","Quittent le staff (9 nov.)."],["o","Fleshy","Autorisé à explorer ses options."],["r","Naak Nako","Ciblé par G2 ; un échange avec SkewMond aurait été évoqué."],["r","Carzzy","Aurait un accord verbal avec Movistar KOI."]]},
+  {n:"Movistar KOI",slug:"mad-lions",inn:[["BrokenBlade","top"],["Carzzy","bottom"]],out:["Myrwn","Supa"],keep:["Jojopyun"],mv:[["o","Jojopyun","Prolongé jusqu'en 2027."],["r","Carzzy","Accord verbal au poste de botlaner."],["r","BrokenBlade","Arriverait depuis G2."],["r","Myrwn","Partirait chez GIANTX."]]},
+  {n:"SK Gaming",slug:"sk-gaming",inn:[["Kryze","top"],["Zicssi","jungle"],["3XA","bottom"],["Lospa","support"]],out:["Mikyx"],mv:[["r","Kryze","Ferait son retour en LEC."],["r","Zicssi","Arriverait dans la jungle depuis Solary."],["r","Lospa","Arrivée évoquée."],["r","3XA","Retour évoqué."]]},
+  {n:"NAVI",slug:"natus-vincere",inn:[["Supa","bottom"]],doubt:{Parus:"resterait",Rhilech:"resterait"},mv:[["r","Parus","Resterait au club."],["r","Rhilech","L'équipe serait reconstruite autour de lui."],["r","Supa","Rejoindrait l'équipe pour 2027."]]},
+  {n:"Shifters",slug:"team-bds",mv:[["o","Stend","Prend sa retraite (29 sept.)."],["r","Place en LEC","Le club chercherait à louer sa place pour 2027."]],out:["Stend"]}]},
  lck:{name:"LCK",note:"Corée. Gen.G et T1 étaient encore aux Worlds : rien n'est attendu de leur côté avant la finale.",teams:[
-  ["KT Rolster",[["o","Bdd et PerfecT","Prolongés jusqu'en 2028."],["r","Raptor, Taeyoon, Kellin","Attendus depuis BNK FEARX, qui dément avoir autorisé des contacts."]]],
-  ["HANJIN BRION",[["o","Casting, GIDEON, Roamer, Teddy, Namgung","Tout le cinq de départ est prolongé pour 2027."]]],
-  ["Nongshim RedForce",[["r","Deft","Pressenti au poste de botlaner, à son retour du service militaire (18 nov.)."],["r","Diable","Chercherait une nouvelle équipe."]]],
-  ["Hanwha Life Esports",[["r","Zeus","Aurait refusé une première offre de prolongation ; les discussions continuent."],["o","Kanavi","En fin de contrat le 16 novembre."],["o","Zeka, Gumayusi, Delight","Sous contrat pour 2027."]]],
-  ["Gen.G",[["o","Kiin et Canyon","En fin de contrat le 16 novembre."],["o","Chovy, Ruler, Duro","Sous contrat jusqu'en novembre 2027."]]],
-  ["T1",[["o","Doran","En fin de contrat le 16 novembre."],["o","Faker et Keria","Sous contrat jusqu'en 2029."],["o","Oner et Peyz","Sous contrat jusqu'en 2028."]]],
-  ["BNK FEARX",[["r","Noah","Pressenti au poste de botlaner."]]]]},
- lpl:{name:"LPL",note:"Chine. Au 12 novembre, aucun club de LPL n'a annoncé de mouvement et la presse ne rapporte pas encore de transfert. Bilibili Gaming était encore aux Worlds. Cette partie sera remplie après l'ouverture du marché, le 17 novembre.",teams:[]}
+  {n:"KT Rolster",slug:"kt-rolster",start:{top:["PerfecT"],mid:["Bdd"]},inn:[["Raptor","jungle"],["Taeyoon","bottom"],["Kellin","support"]],keep:["Bdd","PerfecT"],mv:[["o","Bdd et PerfecT","Prolongés jusqu'en 2028."],["r","Raptor, Taeyoon, Kellin","Attendus depuis BNK FEARX, qui dément avoir autorisé des contacts."]]},
+  {n:"HANJIN BRION",slug:"fredit-brion",start:{top:["Casting"],jungle:["GIDEON"],mid:["Roamer"],bottom:["Teddy"],support:["Namgung"]},keep:["Casting","GIDEON","Roamer","Teddy","Namgung"],mv:[["o","Casting, GIDEON, Roamer, Teddy, Namgung","Tout le cinq de départ est prolongé pour 2027."]]},
+  {n:"Nongshim RedForce",slug:"nongshim-redforce",inn:[["Deft","bottom"]],out:["Diable"],mv:[["r","Deft","Pressenti au poste de botlaner, à son retour du service militaire (18 nov.)."],["r","Diable","Chercherait une nouvelle équipe."]]},
+  {n:"Hanwha Life Esports",slug:"hanwha-life-esports",start:{top:["Zeus"],jungle:["Kanavi"],mid:["Zeka"],bottom:["Gumayusi"],support:["Delight"]},doubt:{Zeus:"aurait refusé une offre",Kanavi:"fin de contrat"},mv:[["r","Zeus","Aurait refusé une première offre de prolongation ; les discussions continuent."],["o","Kanavi","En fin de contrat le 16 novembre."],["o","Zeka, Gumayusi, Delight","Sous contrat pour 2027."]]},
+  {n:"Gen.G",slug:"geng",start:{top:["Kiin"],jungle:["Canyon"],mid:["Chovy"],bottom:["Ruler"],support:["Duro"]},doubt:{Kiin:"fin de contrat",Canyon:"fin de contrat"},mv:[["o","Kiin et Canyon","En fin de contrat le 16 novembre."],["o","Chovy, Ruler, Duro","Sous contrat jusqu'en novembre 2027."]]},
+  {n:"T1",slug:"t1",start:{top:["Doran"],jungle:["Oner"],mid:["Faker"],bottom:["Peyz"],support:["Keria"]},doubt:{Doran:"fin de contrat"},mv:[["o","Doran","En fin de contrat le 16 novembre."],["o","Faker et Keria","Sous contrat jusqu'en 2029."],["o","Oner et Peyz","Sous contrat jusqu'en 2028."]]},
+  {n:"BNK FEARX",slug:"fearx",inn:[["Noah","bottom"]],out:["Raptor","Taeyoon","Kellin"],mv:[["r","Noah","Pressenti au poste de botlaner."],["r","Raptor, Taeyoon, Kellin","Annoncés chez KT Rolster ; le club dément avoir autorisé des contacts."]]}]},
+ lpl:{name:"LPL",note:"Chine. Au 12 novembre, aucun club de LPL n'a annoncé de mouvement et la presse ne rapporte pas encore de transfert. Voici les effectifs 2026 ; la colonne 2027 sera remplie après l'ouverture du marché, le 17 novembre.",teams:
+  [["Bilibili Gaming","bilibili-gaming"],["Top Esports","top-esports"],["JD Gaming","jd-gaming"],["Anyone's Legend","anyones-legend"],["Weibo Gaming","weibo-gaming"],["Invictus Gaming","invictus-gaming"],["EDward Gaming","edward-gaming"],["LNG Esports","lng-esports"],["Team WE","team-we"],["Ninjas in Pyjamas","shenzen-ninjas-in-pyjamas"],["ThunderTalk Gaming","thunder-talk-gaming"],["LGD Gaming","lgd-gaming"]].map(([n,slug])=>({n,slug,mv:[],none:true}))}
 };
-let cur="lec";const $=id=>document.getElementById(id),el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+const ROLES=[["top","TOP"],["jungle","JGL"],["mid","MID"],["bottom","BOT"],["support","SUP"]];
+let cur="lec",API={},PHOTO={};const $=id=>document.getElementById(id),el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+const key=s=>String(s).trim().toLowerCase();
+function chip(name,cls,title){const p=el("span","pp "+(cls||"")),i=el("i"),u=PHOTO[key(name)];
+  if(u)i.style.backgroundImage=`url("${u}")`;else i.textContent=name.slice(0,2).toUpperCase();
+  p.append(i,el("span","",name));if(title)p.title=title;return p}
+// effectif 2026 par poste : les titulaires connus, sinon les joueurs listés par LoL Esports à ce poste (3 au plus)
+function before(t){const api=API[t.slug],out={};for(const [r] of ROLES){out[r]=(t.start&&t.start[r])||(api?api.players.filter(p=>p.role===r).map(p=>p.n.trim()).slice(0,3):[])}return out}
+function roster(t){const b=before(t),g=el("div","rost"),outs=(t.out||[]).map(key),keep=(t.keep||[]).map(key),doubt=Object.fromEntries(Object.entries(t.doubt||{}).map(([k,v])=>[key(k),v]));
+  g.append(el("span"),el("span","hd","2026"),el("span","hd af",t.none?"2027":"2027 pressenti"));
+  for(const [r,lab] of ROLES){g.append(el("span","ro",lab));const c1=el("div","pl2"),c2=el("div","pl2"),inn=(t.inn||[]).filter(x=>x[1]===r);
+    for(const n of b[r])c1.append(chip(n,outs.includes(key(n))||inn.length?"gone":""));if(!b[r].length)c1.append(el("span","pp empty","–"));
+    if(t.none)c2.append(el("span","pp empty","Pas d'annonce"));
+    else if(inn.length)for(const [n] of inn)c2.append(chip(n,"new","Arrivée rapportée par la presse"));
+    else{const st=b[r].filter(n=>!outs.includes(key(n)));
+      for(const n of st)c2.append(chip(n,keep.includes(key(n))?"ok":doubt[key(n)]?"doubt":"",keep.includes(key(n))?"Prolongé (officiel)":doubt[key(n)]||""));
+      if(!st.length)c2.append(el("span","pp empty","À pourvoir"))}
+    g.append(c1,c2)}
+  return g}
 function tabs(){$("tabs").replaceChildren(...Object.entries(M).map(([k,l])=>{const b=el("button");b.type="button";b.setAttribute("aria-pressed",k===cur);
   const im=new Image();im.src="img/ligue-"+k+".png";im.alt="";im.onerror=()=>im.remove();b.append(im,l.name);b.onclick=()=>{cur=k;tabs();render()};return b}))}
 function render(){const l=M[cur],only=$("onlyOf").checked;$("lnote").textContent=l.note;
-  $("teams").replaceChildren(...l.teams.map(([name,mv])=>{const list=mv.filter(m=>!only||m[0]==="o");if(!list.length)return null;
-    const c=el("article","team");c.append(el("h3","",name));const ul=el("ul","mv");
-    for(const [s,p,d] of list){const li=el("li");li.append(el("span","st "+(s==="o"?"of":"ru"),s==="o"?"Officiel":"Rumeur"));const sp=el("span");sp.append(el("b","",p)," : "+d);li.append(sp);ul.append(li)}
-    c.append(ul);return c}).filter(Boolean))}
+  $("teams").replaceChildren(...l.teams.map(t=>{const list=t.mv.filter(m=>!only||m[0]==="o");
+    const c=el("article","team"),h=el("div","th2"),im=new Image();im.src="img/equipes/"+t.slug+".png";im.alt="";im.onerror=()=>im.remove();h.append(im,el("h3","",t.n));c.append(h,roster(t));
+    if(list.length){const ul=el("ul","mv");for(const [s,p,d] of list){const li=el("li");li.append(el("span","st "+(s==="o"?"of":"ru"),s==="o"?"Officiel":"Rumeur"));const sp=el("span");sp.append(el("b","",p)," : "+d);li.append(sp);ul.append(li)}c.append(ul)}
+    return c}))}
 $("onlyOf").onchange=render;tabs();render();
+fetch("img/equipes/equipes.json").then(r=>r.json()).then(d=>{for(const t of d){if(!t.players.length)continue;API[t.slug]=t;
+  for(const p of t.players)if(p.image&&!/default|silhouette/i.test(p.image))PHOTO[key(p.n)]=p.image.replace(/^http:/,"https:")}render()}).catch(()=>{});
 </script>
 </body>
 </html>

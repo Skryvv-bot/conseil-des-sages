@@ -76,7 +76,7 @@ const NAV_GROUP={ladder:"lol",worlds:"lol",tierlist:"lol",fantasy:"lol",cartes:"
 window.conseilNav=function(active){
   const group=NAV_GROUP[active]||active;
   const nav=document.createElement("nav");nav.className="cnav";nav.setAttribute("aria-label","Navigation du site");
-  nav.innerHTML=`<div class="cnav-in"><a class="cnav-brand" href="index.html" aria-label="Conseil des Sages, accueil"><span>CDS<b>.</b>TV</span></a>
+  nav.innerHTML=`<div class="cnav-in"><a class="cnav-brand" href="index.html" aria-label="Conseil des Sages, accueil"><i class="cnav-logo" aria-hidden="true"><svg viewBox="0 0 220 160" width="58" height="42"><rect x="14" y="6" width="192" height="116" rx="26" fill="#f2f0ff"/><text x="100" y="86" text-anchor="middle" font-family="Unbounded,Arial Black,sans-serif" font-weight="900" font-size="54" fill="#0c0b14">CDS</text><circle cx="180" cy="34" r="11" fill="#d92a74"/><path d="M70 122 L52 150 M150 122 L168 150" stroke="#f2f0ff" stroke-width="10" stroke-linecap="round"/></svg></i><span class="cnav-tv">.TV</span></a>
     <div class="cnav-links">${CONSEIL_NAV.map((n,i)=>`<a ${n.href?`href="${n.href}"`:'href="#" role="button"'} data-nav="${i}" class="${n.sub?"has-sub":""}" ${n.sub?'aria-haspopup="true" aria-expanded="false"':""} ${n.id===group?'aria-current="page"':""}${n.admin?' data-admin hidden':""}>${n.label}</a>`).join("")}</div>
     <a class="cnav-po" id="cnavPO" href="banque.html" title="Tes Pièces d'or : voir la banque" hidden><i>PO</i><b></b></a>
     <button class="cnav-acc" id="cnavAcc" type="button" hidden>Connexion</button>
@@ -190,7 +190,7 @@ window.conseilTeamLogo=function(tag,fallbackHTML,size=30){
 
 // ---------- Thème « Collection holographique » et bandeau d'infos ----------
 (function(){const add=()=>{if(document.getElementById("tv-theme"))return;
-  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=5";document.head.appendChild(l)};
+  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=6";document.head.appendChild(l)};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();
 function defaultTicker(){const d=Math.ceil((Date.parse("2026-11-04T23:00:00Z")-Date.now())/864e5);
   return ["Worlds 2026 : la finale le 14 novembre, puis le bilan du Pick'em","Pick'em : un skin pour le 1er (offert par Skryvv) et un skin pour le 2e (offert par Tabaskoh)",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Pronos entre potes, tribunal et sage de la semaine dans Le Conseil","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes"]}
