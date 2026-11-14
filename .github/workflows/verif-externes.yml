@@ -1,0 +1,39 @@
+name: "Vérification des données externes"
+# Interroge chaque source de données extérieure au site et affiche ce qu'elle répond.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [".github/workflows/verif-externes.yml"]
+jobs:
+  verif:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          R=https://conseil-riot.perrotinyvanpro.workers.dev
+          O="Origin: https://conseil-des-sages.pages.dev"
+          t(){ echo; echo "=== $1"; shift; code=$(curl -sS -m 25 -o out.txt -w "%{http_code}" "$@" || echo ERR); echo "HTTP $code"; head -c 900 out.txt; echo; }
+          t "Discord widget" "https://discord.com/api/guilds/781876426571251743/widget.json"
+          jq -r '"membres: \(.members|length) | avec photo: \([.members[]|select(.avatar_url)]|length) | avec jeu: \([.members[]|select(.game)]|length) | jeux: \([.members[]|select(.game)|.game.name]|unique|join(", "))"' out.txt || true
+          t "Discord invitation" "https://discord.com/api/v10/invites/ekEVAX8JN?with_counts=true"
+          jq -r '"en ligne: \(.approximate_presence_count) / membres: \(.approximate_member_count)"' out.txt || true
+          t "Robot : routes" -H "$O" "$R/"
+          t "Robot WoW (personnage cité sur le forum Blizzard)" -H "$O" "$R/wow?chars=judgement-judy,anduin-wrynn"
+          t "Robot Fortnite (compte public connu)" -H "$O" "$R/fortnite?players=Ninja%7Cepic"
+          t "Robot Riot : Clash EUW" -H "$O" "$R/clash?platform=euw1"
+          t "Robot Riot : rangs" -H "$O" "$R/ranks?players=Tabaskoh%23EUW%7Ceuw1"
+          t "Robot Riot : en partie" -H "$O" "$R/live?players=Tabaskoh%23EUW%7Ceuw1"
+          t "Robot Riot : résultat de prono" -H "$O" "$R/result?player=Tabaskoh%23EUW%7Ceuw1&after=$(( ($(date +%s) - 86400) * 1000 ))"
+          t "Data Dragon : versions" "https://ddragon.leagueoflegends.com/api/versions.json"
+          V=$(jq -r '.[0]' out.txt); t "Data Dragon : icône de champion" -I "https://ddragon.leagueoflegends.com/cdn/$V/img/champion/Ahri.png"
+          t "Fantasy : multikills" "https://raw.githubusercontent.com/Skryvv-bot/conseil-des-sages/fantasy-data/out/fx/multi.json"
+          echo; echo "=== Photos des joueurs (LoL Esports)"
+          jq -r '[.[]|.players[]|select(.image)|.image][0:400][]' img/equipes/equipes.json | sed 's#^http://#https://#' | sort -u > urls.txt
+          ok=0; ko=0; while read -r u; do c=$(curl -sS -m 15 -o /dev/null -w "%{http_code}" -I "$u" || echo ERR); if [ "$c" = "200" ]; then ok=$((ok+1)); else ko=$((ko+1)); echo "KO $c $u"; fi; done < <(shuf -n 40 urls.txt)
+          echo "photos testées: $((ok+ko)) | OK: $ok | en erreur: $ko"
+          c=$(curl -sS -m 15 -o /dev/null -w "%{http_code} %{content_type}" -H "Origin: https://conseil-des-sages.pages.dev" "$(head -1 urls.txt)"); echo "exemple complet: $c"
+          t "LoL Esports : ligues" -H "x-api-key: 0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z" "https://esports-api.lolesports.com/persisted/gw/getLeagues?hl=fr-FR"
+          t "Site : page d'accueil" -I "https://conseil-des-sages.pages.dev/"
+          t "Site : script commun" "https://conseil-des-sages.pages.dev/conseil.js"
+          grep -c "conseilAv=" out.txt || true
