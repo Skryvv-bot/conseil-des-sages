@@ -137,10 +137,7 @@ footer{color:#8c88aa!important}
 .camptag.ct-lol{background:#ff4d6a;color:#0c0b14}
 .camptag.ct-wow{background:#ffe27a;color:#0c0b14}
 
-/* Camp Azeroth : les Déserteurs voient le site en or */
-:root:root[data-camp="wow"]{--tv-red:#b07a00;--hex:#ffe27a;--hex2:#ffe27a;--tv-amber:#ffb36b;--holo-cyan:#ffe27a;
-  --foil:conic-gradient(from 210deg,#ffe27a,#ffb36b,#fff3c4,#ffd36b,#ffe27a)}
-html[data-camp="wow"] .camp-lol .btn{background:#ff4d6a!important;color:#0c0b14!important}
+.camptag{display:none!important}
 
 /* Bandeau de récupération de compte */
 .claim{display:flex;flex-direction:column;gap:10px;padding:16px 18px;background:#201d38;border-radius:14px;border-left:4px solid var(--holo-gold)}

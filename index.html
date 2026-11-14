@@ -271,6 +271,19 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
 .fr-pos,.fr-pts{font-family:Unbounded,sans-serif!important;font-weight:800!important;font-size:1.1rem!important}
 .wkc b{font:700 .95rem Unbounded,sans-serif!important;letter-spacing:0!important;text-transform:none!important;color:#fff!important}
 .wkc:hover{border-color:#f2f0ff!important}
+
+/* Visuels de l'accueil */
+.gone{display:none!important}
+.hc-img{background-size:cover;background-position:center;min-height:150px}.hh-fan .hcard .hc-d{font-size:.74rem}
+.c-fan .hc-k{color:#ffe27a}.c-lm .hc-k{color:#7ad7ff}.c-wd .hc-k{color:#ff8ad8}
+.wow{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0!important;padding:0!important;overflow:hidden}
+.wow>div:first-child{padding:22px}
+.wow-img{width:100%;height:100%;min-height:220px;object-fit:cover;display:block}
+@media (max-width:720px){.wow{grid-template-columns:1fr}.wow-img{max-height:200px;order:-1}}
+.tile{overflow:hidden}
+.tile .th{display:block;height:96px;margin:-16px -16px 6px;background-size:cover;background-color:#201d38}
+section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,42,.55)),url("img/lol-aphelios.jpg") right 24%/50% auto no-repeat!important}
+@media (max-width:720px){section.frame.panel.flt{background:#17152a!important}}
 @media (prefers-reduced-motion:reduce){.hcard{transition:none}}
 </style>
 </head>
@@ -280,27 +293,17 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
     <div class="hh-txt">
       <span class="eyebrow" id="hhDate">Ta main du jour</span>
       <h1>Pioche ta soirée au Conseil.</h1>
-      <p class="hh-sub">Chaque rubrique du site est une carte. Trois sont en jeu en ce moment : les Worlds, LolMaster et la Fantasy.</p>
+      <p class="hh-sub">Trois univers se disputent les sages en ce moment : la Faille de LoL, l'Azeroth de WoW Forever et les coffres de Fortnite.</p>
       <span class="me" id="me">Connexion au Conseil…</span>
     </div>
-    <div class="hh-fan" aria-label="Les trois cartes du moment">
-      <a class="hcard c-fan" href="fantasy.html"><span class="hc-k"><i>Fantasy</i><i>Rare</i></span><span class="hc-art">5</span><b>CDS Fantasy</b><span class="hc-d">Un joueur par poste, tiré au sort. Ton capitaine compte double.</span></a>
-      <a class="hcard c-lm" href="cartes.html"><span class="hc-k"><i>LolMaster</i><i>Légendaire</i></span><span class="hc-art"><b>3 011</b><small>cartes</small></span><b>LolMaster</b><span class="hc-d" id="hcLm">2 × 10 boosters offerts à chaque sage inscrit, jusqu'au 15 novembre.</span></a>
-      <a class="hcard c-wd" href="worlds.html"><span class="hc-k"><i>Worlds</i><i>Mythique</i></span><span class="hc-art" id="hcWdBig">Finale<br>le 14 nov.</span><b>Worlds 2026</b><span class="hc-d" id="hcWd">Pick'em : un skin pour le 1er (Skryvv), un pour le 2e (Tabaskoh).</span></a>
+    <div class="hh-fan" aria-label="Les trois jeux du moment">
+      <a class="hcard c-fan" href="wow.html"><span class="hc-k"><i>WoW</i><i>Forever</i></span><span class="hc-art hc-img" style="background-image:url('img/wow-hero.jpg');background-position:42% 70%"></span><b>WoW Forever</b><span class="hc-d">Le « Classic+ » sorti le 5 novembre : niveau 60 et contenu inédit.</span></a>
+      <a class="hcard c-lm" href="lol.html"><span class="hc-k"><i>LoL</i><i>La Faille</i></span><span class="hc-art hc-img" style="background-image:url('img/lol-kindred.jpg');background-position:50% 30%"></span><b>League of Legends</b><span class="hc-d" id="hcLol">Worlds, Fantasy, ladder et patch 26.22.</span></a>
+      <a class="hcard c-wd" href="fortnite.html"><span class="hc-k"><i>Fortnite</i><i>Trésors</i></span><span class="hc-art hc-img" style="background-image:url('img/fn-hero.jpg');background-position:62% 30%"></span><b>Chasse aux trésors</b><span class="hc-d">One Piece, 80 joueurs et la loterie des coffres.</span></a>
     </div>
   </header>
   <div id="pins" hidden></div>
   <!-- Sortie de LolMaster : 10 boosters offerts à chaque sage inscrit -->
-  <section class="lm" id="lmLaunch" aria-labelledby="lmT">
-    <div>
-      <span class="eyebrow">Nouveau sur CDS.TV</span>
-      <h2 id="lmT">LolMaster est sorti !</h2>
-      <p>Le jeu de cartes de Runeterra du Conseil : 3 011 cartes de champions, sorts, skins et régions à collectionner, un marché et des échanges entre sages. Pour la sortie, chaque sage inscrit peut récupérer 10 boosters, deux fois, jusqu'au 15 novembre.</p>
-      <div class="gift"><b>2 × 10</b> boosters offerts</div>
-      <div class="row"><button class="btn" id="lmBtn" type="button" disabled>Connexion…</button><a class="btn ghost" href="cartes.html">Découvrir LolMaster</a><span class="msg note" id="lmMsg" role="status"></span></div>
-    </div>
-    <div class="lm-fan" aria-hidden="true"><span style="background-image:url('cartes/c/Jinx.webp')"></span><span style="background-image:url('cartes/c/Ahri.webp')"></span><span style="background-image:url('cartes/c/Yasuo.webp')"></span><span style="background-image:url('cartes/c/Kaisa.webp')"></span></div>
-  </section>
   <section class="promo" aria-labelledby="fnT">
     <div>
       <span class="eyebrow">Fortnite · le nouvel objectif des déserteurs</span>
@@ -345,7 +348,7 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
       <a class="btn" href="fantasy.html">S'inscrire à la Fantasy</a>
     </div>
   </section>
-  <section class="frame panel" aria-labelledby="flT" style="padding:20px;gap:12px">
+  <section class="frame panel flt" aria-labelledby="flT" style="padding:20px;gap:12px">
     <span class="eyebrow">Bientôt · après les Worlds</span>
     <h2 id="flT" style="font-size:clamp(1.4rem,3.4vw,2.1rem)!important">La Fantasy continue : LEC, LCK et LPL</h2>
     <p style="margin:0;color:#c9c5e6;max-width:62ch">Les Worlds se terminent, pas la Fantasy. Pour la saison 2027, le Conseil prépare trois ligues Fantasy : une par grande région. Même principe : un tirage au sort, un joueur par poste, un capitaine qui compte double.</p>
@@ -366,10 +369,12 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
         <div><b id="cd-s">--</b><span>secondes</span></div>
       </div>
       <span class="note" id="clockCap"></span>
-      <div id="relapse" class="relapse" hidden></div>
-      <p id="wowMsg">Le 5 novembre, le Conseil se divise : les Fidèles restent sur la Faille, les Déserteurs partent pour Azeroth. Choisis ton camp.</p>
+      <div id="relapse" class="relapse gone" hidden></div>
+      <p>Le « Classic+ » de Blizzard a coupé le Conseil en deux. <a href="wow.html">Tout savoir sur WoW Forever</a></p>
+      <p id="wowMsg" class="gone">Le 5 novembre, le Conseil se divise : les Fidèles restent sur la Faille, les Déserteurs partent pour Azeroth. Choisis ton camp.</p>
     </div>
-    <div class="camps" aria-label="Les deux camps">
+    <img class="wow-img" src="img/wow-hero.jpg" alt="Illustration de World of Warcraft: Forever" loading="lazy" width="1600" height="900">
+    <div class="camps gone" aria-label="Les deux camps">
       <div class="campbar" role="img" id="campBar" aria-label="Répartition des camps"><i class="cl" style="width:50%"></i><i class="cw" style="width:50%"></i></div>
       <div class="campcols">
         <div class="camp camp-lol"><h3>Fidèles de la Faille <b id="nLol">0</b></h3><div class="dlist" id="lolList"><span class="note">Personne pour l'instant.</span></div>
@@ -399,10 +404,6 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
         <p class="ev-txt" id="evTxt">Le Conseil lance sa soirée CDS Game. Sniper sur les toits, îles flottantes et explosions garanties : ramène tes réflexes, ta mauvaise foi et ton meilleur micro.</p>
         <div class="ev-cd" id="evCd"></div>
       </div>
-      <figure class="trailer">
-        <video id="trailer" src="cds-bande-annonce.mp4" poster="cds-bande-annonce.jpg" muted loop playsinline autoplay preload="none" controls aria-label="Bande-annonce CDS Game"></video>
-        <figcaption><span class="tag live">Bande-annonce</span> CDS Game <button type="button" class="sound" id="soundBtn">Activer le son</button></figcaption>
-      </figure>
       <div id="dcWidget" hidden>
         <h3 style="margin-bottom:6px">En ligne maintenant</h3>
         <div class="online" id="dcOnline"></div>
@@ -440,29 +441,28 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
 
   <div class="col-head"><h2 id="colT">Ta collection</h2><span class="note">Toutes les rubriques du Conseil</span></div>
   <section class="tiles" aria-labelledby="colT">
-    <a class="tile frame" href="worlds.html">
-      <span class="ic" aria-hidden="true">🏆</span><b>Worlds 2026</b><span>Matchs, pronos, classement, winrates et tier list.</span>
+    <a class="tile frame" href="worlds.html"><span class="th" style="background-image:url('img/lol-azir.jpg');background-position:50% 22%"></span>
+      <b>Worlds 2026</b><span>Matchs, pronos, classement, winrates et tier list.</span>
       <span class="extra" style="color:var(--gold)">◆ 2 skins LoL à gagner : 1er et 2e du pick'em</span>
       <div id="nextMatch" class="nextm"></div>
       <div id="top3" class="top3"></div>
       <span class="extra" id="tierCount"></span>
     </a>
-    <a class="tile frame" href="devinettes.html">
-      <span class="ic" aria-hidden="true">?</span><b>Devinettes</b><span>Trouve le champion mystère : un nouveau défi chaque jour.</span>
+    <a class="tile frame" href="devinettes.html"><span class="th" style="background-image:url('img/lol-leblanc.jpg');background-position:50% 18%"></span>
+      <b>Devinettes</b><span>Trouve le champion mystère : un nouveau défi chaque jour.</span>
       <span class="extra" id="dailyInfo"></span>
     </a>
-    <a class="tile frame" href="customs.html">
-      <span class="ic" aria-hidden="true">⚔</span><b>Customs & Clash</b><span>Équipes 5v5 équilibrées, roue des champions, inscriptions au Clash.</span>
+    <a class="tile frame" href="customs.html"><span class="th" style="background-image:url('img/lol-swain.jpg');background-position:50% 14%"></span>
+      <b>Customs & Clash</b><span>Équipes 5v5 équilibrées, roue des champions, inscriptions au Clash.</span>
     </a>
-    <a class="tile frame" href="communaute.html">
-      <span class="ic" aria-hidden="true">◆</span><b>Le Conseil</b><span>Pronos entre potes, banc des accusés, sage de la semaine et ton profil.</span>
+    <a class="tile frame" href="communaute.html"><span class="th" style="background-image:url('img/lol-faille.jpg');background-position:50% 50%"></span>
+      <b>Le Conseil</b><span>Pronos entre potes, banc des accusés, sage de la semaine et ton profil.</span>
     </a>
-    <a class="tile frame" href="ladder.html"><span class="k" style="color:#7ad7ff">Ladder</span><b>Ladder du Conseil</b><span>Les rangs officiels des sages, mis à jour toutes les 15 minutes.</span></a>
-    <a class="tile frame" href="cartes.html"><span class="k" style="color:#ffe27a">Cartes</span><b>LolMaster</b><span>3 011 cartes, un marché et des échanges entre sages.</span></a>
-    <a class="tile frame" href="fortnite.html"><span class="k" style="color:#ff8ad8">Fortnite</span><b>Chasse aux trésors</b><span>Les nouveautés de la mini-saison et les taux de drop des coffres.</span></a>
-    <a class="tile frame" href="wow.html"><span class="k" style="color:#ffe27a">WoW</span><b>WoW Forever</b><span>Ce que contient le jeu, et où en est la Grande Trahison.</span></a>
-    <a class="tile frame" href="patch.html"><span class="k" style="color:#b4b0d0">Infos</span><b>Patch</b><span>Le résumé du dernier patch, sans le blabla.</span></a>
-    <a class="tile frame" href="banque.html"><span class="k" style="color:#ffe27a">Or</span><b>Banque</b><span>Tes pièces d'or et ce que tu peux en faire.</span></a>
+    <a class="tile frame" href="ladder.html"><span class="th" style="background-image:url('img/lol-aphelios.jpg');background-position:50% 22%"></span><span class="k" style="color:#7ad7ff">Ladder</span><b>Ladder du Conseil</b><span>Les rangs officiels des sages, mis à jour toutes les 15 minutes.</span></a>
+    <a class="tile frame" href="fortnite.html"><span class="th" style="background-image:url('img/fn-map.jpg');background-position:50% 50%"></span><span class="k" style="color:#ff8ad8">Fortnite</span><b>Chasse aux trésors</b><span>Les nouveautés de la mini-saison et les taux de drop des coffres.</span></a>
+    <a class="tile frame" href="wow.html"><span class="th" style="background-image:url('img/wow-packs.jpg');background-position:40% 40%"></span><span class="k" style="color:#ffe27a">WoW</span><b>WoW Forever</b><span>Ce que contient le jeu, et où en est la Grande Trahison.</span></a>
+    <a class="tile frame" href="patch.html"><span class="th" style="background-image:url('img/lol-smolder.jpg');background-position:50% 36%"></span><span class="k" style="color:#b4b0d0">Infos</span><b>Patch</b><span>Le résumé du dernier patch, sans le blabla.</span></a>
+    <a class="tile frame" href="banque.html"><span class="th" style="background-image:url('img/lol-xerath.jpg');background-position:50% 30%"></span><span class="k" style="color:#ffe27a">Or</span><b>Banque</b><span>Tes pièces d'or et ce que tu peux en faire.</span></a>
   </section>
 
   <section class="frame panel install" data-install hidden>
@@ -477,7 +477,7 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
 
 <script>
 // ---------- Sortie de LolMaster : récupérer ses 10 boosters ----------
-function lmSetup(c){const btn=document.getElementById("lmBtn"),msg=document.getElementById("lmMsg"),sec=document.getElementById("lmLaunch");
+function lmSetup(c){if(!document.getElementById("lmLaunch"))return;const btn=document.getElementById("lmBtn"),msg=document.getElementById("lmMsg"),sec=document.getElementById("lmLaunch");
   if(Date.now()>Date.parse("2026-11-15T23:59:59+01:00")){sec.hidden=true;return}
   if(!c.db){btn.textContent="Site injoignable";return}
   let cards=null,wallet=null,got=0;
@@ -510,7 +510,7 @@ function tickEvent(){
   document.getElementById("evCd").innerHTML=`Lancement dans <b>${h}</b>h <b>${String(m).padStart(2,"0")}</b>min <b>${String(sec).padStart(2,"0")}</b>s`;
 }
 tickEvent();setInterval(tickEvent,1000);
-(function(){const v=document.getElementById("trailer"),b=document.getElementById("soundBtn");
+(function(){const v=document.getElementById("trailer"),b=document.getElementById("soundBtn");if(!v||!b)return;
   if(matchMedia("(prefers-reduced-motion: reduce)").matches){v.removeAttribute("autoplay");v.pause()}
   b.onclick=()=>{v.muted=!v.muted;if(!v.muted){v.currentTime=0;v.play().catch(()=>{})}b.textContent=v.muted?"Activer le son":"Couper le son"};
   v.addEventListener("volumechange",()=>b.textContent=v.muted?"Activer le son":"Couper le son");})();
@@ -811,13 +811,9 @@ conseilLoadLogos(()=>renderAll());conseilDD().then(()=>renderAll());
 window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
 </script>
 <script>
-// Cartes du moment : textes qui suivent le calendrier (finale des Worlds le 14 nov., boosters LolMaster jusqu'au 15 nov.)
-(function(){const now=new Date(),d=now.getDate(),m=now.getMonth(),y=now.getFullYear(),fr=now.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
-  const $=id=>document.getElementById(id);$("hhDate").textContent=fr.charAt(0).toUpperCase()+fr.slice(1)+" · ta main du jour";
-  const day=y===2026&&m===10?d:(y>2026||m>10?99:0);
-  if(day===14){$("hcWdBig").innerHTML="Finale<br>ce soir";$("hcWd").textContent="Dernier jour pour le Pick'em : un skin pour le 1er (Skryvv), un pour le 2e (Tabaskoh)."}
-  else if(day>14){$("hcWdBig").innerHTML="Le<br>bilan";$("hcWd").textContent="Résultats du Pick'em, classement final et tier list du Conseil."}
-  if(day>15)$("hcLm").textContent="Le marché et les échanges entre sages restent ouverts.";})();
+// Date du jour dans l'en-tête
+(function(){const fr=new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
+  document.getElementById("hhDate").textContent=fr.charAt(0).toUpperCase()+fr.slice(1)+" · les jeux du moment"})();
 </script>
 </body>
 </html>
