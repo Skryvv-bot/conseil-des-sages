@@ -74,8 +74,8 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
 
   <section class="frame panel" aria-labelledby="f-rank">
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h2 id="f-rank">Classement des chasseurs</h2><span class="note" id="fnN"></span></div>
-    <p class="lead">Les chasseurs du Conseil, classés par coffres ouverts. Les kills, les parties et les Top 1 de la saison viennent de Fortnite ; le nombre de coffres n'est fourni par aucun service, chaque sage le met à jour lui-même dans son profil.</p>
-    <div class="tbox"><table class="tbl" style="min-width:560px"><thead><tr><th>Sage</th><th>Coffres ouverts</th><th>Kills</th><th>Parties</th><th>Top 1</th></tr></thead><tbody id="fnRows"><tr><td colspan="5">Chargement…</td></tr></tbody></table></div>
+    <p class="lead">Les chasseurs du Conseil, classés par Top 1. Les Top 1, les kills et les parties de la saison viennent de Fortnite et se mettent à jour tout seuls.</p>
+    <div class="tbox"><table class="tbl" style="min-width:560px"><thead><tr><th>Sage</th><th>Top 1</th><th>Kills</th><th>Parties</th></tr></thead><tbody id="fnRows"><tr><td colspan="4">Chargement…</td></tr></tbody></table></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><a class="btn ghost" href="communaute.html#profil">Ajouter mon pseudo Epic</a><span class="note">Dans ton profil, partie Fortnite.</span></div>
   </section>
 
@@ -133,20 +133,18 @@ document.getElementById("hours").replaceChildren(...R.map(r=>row([r[0],r[2]===r[
 
 // ---------- Classement des chasseurs : stats de la saison lues par le robot ----------
 (async function(){const tb=document.getElementById("fnRows"),info=document.getElementById("fnN"),el=(t,x,c)=>{const e=document.createElement(t);if(x!=null)e.textContent=x;if(c)e.className=c;return e};
-  const one=t=>{const tr=el("tr"),td=el("td",t);td.colSpan=5;tr.append(td);tb.replaceChildren(tr)};
+  const one=t=>{const tr=el("tr"),td=el("td",t);td.colSpan=4;tr.append(td);tb.replaceChildren(tr)};
   const {db}=await conseilConnect();if(!db)return one("Connexion au Conseil impossible pour le moment.");
   const [sages,dc]=await Promise.all([conseilSages(db),conseilDiscordAvatars()]);
   const list=Object.values(sages).filter(m=>m.pseudo&&m.fn&&m.fn.name);if(!list.length)return one("Aucun sage n'a encore indiqué son pseudo Epic.");
   let api={},down=false;try{const j=await (await fetch(RIOT_RELAY+"/fortnite?players="+encodeURIComponent(list.map(m=>m.fn.name.trim()+"|"+(m.fn.type||"epic")).join(",")))).json();if(j.error)down=true;api=j.players||{}}catch(e){down=true}
   if(down){info.textContent="stats indisponibles pour le moment"}
-  const ch=m=>+(m.fn.chests||0);
-  const rows=list.map(m=>({m,s:api[m.fn.name.trim().toLowerCase()]||null})).sort((a,b)=>ch(b.m)-ch(a.m)||((b.s&&b.s.wins)||0)-((a.s&&a.s.wins)||0)||((b.s&&b.s.kills)||0)-((a.s&&a.s.kills)||0)||a.m.pseudo.localeCompare(b.m.pseudo));
+  const rows=list.map(m=>({m,s:api[m.fn.name.trim().toLowerCase()]||null})).sort((a,b)=>((b.s&&b.s.wins)||0)-((a.s&&a.s.wins)||0)||((b.s&&b.s.kills)||0)-((a.s&&a.s.kills)||0)||a.m.pseudo.localeCompare(b.m.pseudo));
   if(!down)info.textContent=rows.length+(rows.length>1?" chasseurs":" chasseur");
-  const nf=n=>Number(n||0).toLocaleString("fr-FR"),luck=n=>{const p=(1-Math.pow(1-1/137500,n))*100;return (p<0.1?p.toFixed(3):p.toFixed(1)).replace(".",",")+" % de chance d'avoir vu le jeton"};
+  const nf=n=>Number(n||0).toLocaleString("fr-FR");
   tb.replaceChildren(...rows.map(({m,s})=>{const tr=el("tr"),td=el("td"),w=el("span");w.style.cssText="display:inline-flex;align-items:center;gap:8px";w.append(conseilAvatarEl(m,dc,28),el("b",m.pseudo),el("span",m.fn.name,"note"));td.append(w);tr.append(td);
-    const c=el("td"),n=ch(m);c.append(el("b",n?nf(n):"–"));if(n){const sm=el("span",luck(n),"note");sm.style.cssText="display:block;font-size:.74rem";c.append(sm)}tr.append(c);
     if(!s||s.error){const x=el("td",!s?"Stats indisponibles":s.error==="private"?"Stats privées : à rendre publiques dans Fortnite":"Pseudo Epic introuvable","note");x.colSpan=3;tr.append(x)}
-    else tr.append(el("td",nf(s.kills)),el("td",nf(s.matches)),el("td",nf(s.wins)));
+    else tr.append(el("td",nf(s.wins)),el("td",nf(s.kills)),el("td",nf(s.matches)));
     return tr}))})();
 </script>
 </body>
