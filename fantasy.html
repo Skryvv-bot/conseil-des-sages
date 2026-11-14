@@ -451,7 +451,7 @@ let cTab="sages",cPhase="";
 function sageTable(limit){const rows=Object.keys(sages).map(id=>({id,t:sagePts(id,cPhase||null)})).sort((a,b)=>b.t-a.t).slice(0,limit||999);
   if(!rows.length)return `<div class="empty">Personne n'est encore inscrit.</div>`;
   return `<div class="tw"><table><thead><tr><th>#</th><th>Sage</th>${ROLES.map(r=>`<th>${r}</th>`).join("")}<th class="num">Points</th></tr></thead><tbody>${rows.map((x,i)=>{const ph=cPhase||currentPhase(),tm=teamOf(x.id,ph)||{},cap=captains[x.id]?.[ph];
-    return `<tr class="click${x.id===uid?" me":""}" data-href="#sage-${encodeURIComponent(x.id)}"><td>${i+1}</td><td><b>${esc(sageName(x.id))}</b></td>${ROLES.map(r=>`<td>${tm[r]?`<span class="mini">${P[tm[r]]?.img?`<img src="${P[tm[r]].img}" alt="">`:""}${esc(tm[r])}${cap===tm[r]?" ©":""}${tlg(tm[r])}</span>`:'<span class="note">–</span>'}</td>`).join("")}<td class="num"><b>${fr(x.t)}</b></td></tr>`}).join("")}</tbody></table></div>`}
+    return `<tr class="click${x.id===uid?" me":""}" data-href="#sage-${encodeURIComponent(x.id)}"><td>${i+1}</td><td><b>${conseilAv(x.id,sageName(x.id),26)}${esc(sageName(x.id))}</b></td>${ROLES.map(r=>`<td>${tm[r]?`<span class="mini">${P[tm[r]]?.img?`<img src="${P[tm[r]].img}" alt="">`:""}${esc(tm[r])}${cap===tm[r]?" ©":""}${tlg(tm[r])}</span>`:'<span class="note">–</span>'}</td>`).join("")}<td class="num"><b>${fr(x.t)}</b></td></tr>`}).join("")}</tbody></table></div>`}
 function vClassement(v){
   let h=`<section class="panel"><div class="between"><h2>Classement</h2><div class="sub-tabs">${[["sages","Sages"],["joueurs","Joueurs pros"],["equipes","Équipes LoL"]].map(([k,n])=>`<button class="chip" data-ct="${k}" aria-pressed="${k===cTab}">${n}</button>`).join("")}</div></div>
     <div class="sub-tabs"><button class="chip" data-cp="" aria-pressed="${!cPhase}">Toutes les phases</button>${PHASES.map(p=>`<button class="chip" data-cp="${p.id}" aria-pressed="${p.id===cPhase}">${p.label}</button>`).join("")}</div>`;
@@ -502,7 +502,7 @@ function vParties(v){const gs=[...games].filter(g=>!gPhase||g.phase===gPhase).so
 
 function vSage(v){const id=param,s=sages[id];if(!s){v.innerHTML=`<div class="empty">Sage introuvable.</div>`;return}
   const all=Object.keys(sages).map(x=>({x,t:sagePts(x)})).sort((a,b)=>b.t-a.t),rk=all.findIndex(o=>o.x===id)+1;
-  let h=`<a class="chip" href="#classement" style="align-self:flex-start">← Classement</a><section class="panel"><span class="eyebrow">Sage du Conseil</span><h2 style="font-size:2.4rem">${esc(s.pseudo)}</h2>
+  let h=`<a class="chip" href="#classement" style="align-self:flex-start">← Classement</a><section class="panel"><span class="eyebrow">Sage du Conseil</span><h2 style="font-size:2.4rem">${conseilAv(id,s.pseudo,48)}${esc(s.pseudo)}</h2>
     <div class="kv"><div><b>${fr(sagePts(id))}</b><span>points au total</span></div><div><b>${rk}${rk===1?"er":"e"}</b><span>au classement</span></div>${PHASES.filter(p=>teamOf(id,p.id)&&Object.keys(teamOf(id,p.id)).length).map(p=>`<div><b>${fr(sagePts(id,p.id))}</b><span>${p.label}</span></div>`).join("")}</div></section>`;
   for(const ph of [...PHASES].reverse()){const tm=teamOf(id,ph.id);if(tm&&Object.keys(tm).length)h+=teamPanel(id,ph.id,id===uid)}
   if(!PHASES.some(p=>teamOf(id,p.id)&&Object.keys(teamOf(id,p.id)).length))h+=`<div class="state">Pas encore de joueurs : le tirage n'a pas eu lieu.</div>`;
@@ -565,7 +565,7 @@ render=function(){
   else if(!me)h+=`<p class="note">Inscris-toi pour recevoir tes 5 joueurs au tirage de la phase suisse. Skryvv ouvre les caisses en direct sur Discord avant le premier match (19h).</p>
     <form class="row" id="join"><input type="text" id="pseudo" maxlength="20" placeholder="Ton pseudo du Conseil" value="${esc(myProfile?.pseudo||"")}" required><button class="btn">Je participe</button></form><span class="note" id="joinMsg"></span>`;
   else h+=`<div class="state">C'est noté. Rendez-vous sur Discord pour le tirage : tes joueurs, ton capitaine et le classement apparaîtront ici ensuite.</div><div class="row"><button class="btn ghost small" id="leave">Me désinscrire</button></div>`;
-  h+=`<div><span class="eyebrow">Déjà inscrits</span><div class="locked-list" style="margin-top:8px">${Object.values(sages).sort((a,b)=>a.at-b.at).map(s=>`<span class="chip">${esc(s.pseudo)}</span>`).join("")||'<span class="note">Personne pour l\'instant, sois le premier.</span>'}</div></div></section>`;
+  h+=`<div><span class="eyebrow">Déjà inscrits</span><div class="locked-list" style="margin-top:8px">${Object.values(sages).sort((a,b)=>a.at-b.at).map(s=>`<span class="chip">${conseilAv("",s.pseudo,20)}${esc(s.pseudo)}</span>`).join("")||'<span class="note">Personne pour l\'instant, sois le premier.</span>'}</div></div></section>`;
   h+=`<section class="panel"><h2>Le principe</h2><div class="rules">
     <div><span class="eyebrow">Tirage</span><ul><li>Pas de draft : chaque sage reçoit au hasard un Top, un Jungle, un Mid, un Bot et un Support.</li><li>Un nouveau tirage à chaque phase : suisse, quarts, demies, finale.</li></ul></div>
     <div><span class="eyebrow">Points</span><ul><li>Kills, assists, farm, dégâts, objectifs : un barème propre à chaque poste.</li><li>Ton capitaine compte double.</li></ul></div>

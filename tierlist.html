@@ -282,8 +282,8 @@ function renderWho(valid){const box=$("whoDone");if(!box)return;
   if(!db){box.innerHTML=`<span class="note">Chargement…</span>`;return}
   const people=Object.values(all).filter(p=>p.pseudo),done=people.filter(p=>p.complete&&p.ratings).sort((a,b)=>a.pseudo.localeCompare(b.pseudo)),
     wip=people.filter(p=>!(p.complete&&p.ratings)).map(p=>({p,n:ratedCount(p.ratings||{})})).sort((a,b)=>b.n-a.n);
-  box.innerHTML=`<span class="lbl">Validées (${done.length})</span>${done.length?`<ul>${done.map(p=>`<li><b>${esc(p.pseudo)}</b><span class="ok">✓</span></li>`).join("")}</ul>`:'<span class="note">Personne pour l\'instant.</span>'}
-    ${wip.length?`<span class="lbl">En cours (${wip.length})</span><ul>${wip.map(x=>`<li><b>${esc(x.p.pseudo)}</b><span class="wip">${x.n} / ${TOTAL}</span></li>`).join("")}</ul>`:""}`}
+  box.innerHTML=`<span class="lbl">Validées (${done.length})</span>${done.length?`<ul>${done.map(p=>`<li><b>${conseilAv("",p.pseudo,22)}${esc(p.pseudo)}</b><span class="ok">✓</span></li>`).join("")}</ul>`:'<span class="note">Personne pour l\'instant.</span>'}
+    ${wip.length?`<span class="lbl">En cours (${wip.length})</span><ul>${wip.map(x=>`<li><b>${conseilAv("",x.p.pseudo,22)}${esc(x.p.pseudo)}</b><span class="wip">${x.n} / ${TOTAL}</span></li>`).join("")}</ul>`:""}`}
 function renderAll(){renderMe();renderEditor();renderCouncil()}
 renderAll();
 conseilLoadLogos(()=>renderAll());conseilDD().then(()=>renderAll());

@@ -416,7 +416,7 @@ function renderBoard(){
   let rank=0,prev=null;
   $("board").innerHTML=`<div class="tw"><table><thead><tr><th>#</th><th>Pseudo</th><th class="num">Points</th><th class="num">Bons pronos</th><th class="num">Réussite</th><th>Vainqueur choisi</th></tr></thead><tbody>${
     rows.map((r,i)=>{if(r.s!==prev){rank=i+1;prev=r.s}
-      return `<tr class="${r.id===uid?"mine":""}"><td class="rank">${rank}</td><td>${esc(r.p.pseudo)}${conseilCampTag(r.id)}${r.id===uid?' <span class="muted">(toi)</span>':""}</td><td class="num"><b style="color:var(--goldhi)">${r.s}</b></td><td class="num">${r.ok} / ${r.n}</td><td class="num">${wrTxt(r.ok,r.n-r.ok)}</td><td>${r.p.champion?badge(r.p.champion):'<span class="muted">—</span>'}</td></tr>`}).join("")}</tbody></table></div>`;
+      return `<tr class="${r.id===uid?"mine":""}"><td class="rank">${rank}</td><td>${conseilAv(r.id,r.p.pseudo,26)}${esc(r.p.pseudo)}${conseilCampTag(r.id)}${r.id===uid?' <span class="muted">(toi)</span>':""}</td><td class="num"><b style="color:var(--goldhi)">${r.s}</b></td><td class="num">${r.ok} / ${r.n}</td><td class="num">${wrTxt(r.ok,r.n-r.ok)}</td><td>${r.p.champion?badge(r.p.champion):'<span class="muted">—</span>'}</td></tr>`}).join("")}</tbody></table></div>`;
 }
 
 function renderTeams(){

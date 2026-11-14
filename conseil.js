@@ -228,6 +228,16 @@ window.conseilAvatarEl=function(m,dc,size=36){const e=document.createElement("sp
   const u=conseilAvatarUrl(m,dc),ini=String(m&&m.pseudo||"?").slice(0,2).toUpperCase();e.textContent=ini;
   if(u){const im=new Image();im.alt="";im.loading="lazy";im.onload=()=>{e.textContent="";e.appendChild(im)};im.src=u}return e};
 
+// Avatar à glisser dans du HTML : une pastille avec les initiales, remplie ensuite par la vraie photo (champion choisi ou photo Discord).
+// On donne l'identifiant du sage quand on l'a, sinon son pseudo suffit.
+window.conseilAv=(id,pseudo,size=26)=>`<span class="cav cav-in" data-av="${conseilEsc(id||"")}" data-avn="${conseilEsc(pseudo||"")}" style="width:${size}px;height:${size}px">${conseilEsc(String(pseudo||"?").slice(0,2).toUpperCase())}</span>`;
+(function(){let S=null,D=null,byName={},busy=false;
+  function fill(){if(!S)return;document.querySelectorAll(".cav-in:not([data-ok])").forEach(e=>{e.dataset.ok="1";const m=S[e.dataset.av]||byName[String(e.dataset.avn).toLowerCase()];if(!m)return;
+    const u=conseilAvatarUrl(m,D);if(!u)return;const im=new Image();im.alt="";im.loading="lazy";im.onload=()=>{e.textContent="";e.appendChild(im)};im.src=u})}
+  function start(){if(busy)return;busy=true;conseilConnect().then(({db})=>{if(!db)return;Promise.all([conseilSages(db),conseilDiscordAvatars()]).then(([s,d])=>{S=s;D=d;for(const m of Object.values(s))if(m.pseudo)byName[m.pseudo.toLowerCase()]=m;fill();
+    let t=null;new MutationObserver(()=>{clearTimeout(t);t=setTimeout(fill,120)}).observe(document.body,{childList:true,subtree:true})})})}
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>setTimeout(start,300));else setTimeout(start,300)})();
+
 // ---------- Commentaires ----------
 // Un fil par page (collection « comments »). Il faut un profil avec un pseudo pour écrire ; chacun peut supprimer ses messages.
 const COMMENT_PAGES={pronos:"les pronos entre potes",accueil:"l'accueil",lol:"LoL",wow:"WoW Forever",fortnite:"Fortnite",mercato:"le mercato",patch:"le patch",worlds:"les Worlds",fantasy:"la Fantasy",ladder:"le ladder",tierlist:"la tier list",devinettes:"les Devinettes",customs:"les customs"};
@@ -282,7 +292,7 @@ window.conseilHunt=async function(){const boxes=[...document.querySelectorAll("[
 
 // ---------- Thème « Collection holographique » et bandeau d'infos ----------
 (function(){const add=()=>{if(document.getElementById("tv-theme"))return;
-  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=12";document.head.appendChild(l)};
+  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=13";document.head.appendChild(l)};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();
 function defaultTicker(){const d=Math.ceil((Date.parse("2026-11-04T23:00:00Z")-Date.now())/864e5);
   return ["Worlds 2026 : la finale le 14 novembre, puis le bilan du Pick'em","Pick'em : un skin pour le 1er (offert par Skryvv) et un skin pour le 2e (offert par Tabaskoh)",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Pronos entre potes, tribunal et sage de la semaine dans Le Conseil","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes"]}

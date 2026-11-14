@@ -148,7 +148,7 @@ function renderLedger(){
 }
 function renderFortune(){
   const rows=Object.entries(wallets).filter(([id,w])=>!conseilIsClaimed(id)&&w.pseudo).sort((a,b)=>(b[1].po||0)-(a[1].po||0)).slice(0,20);
-  $("fortune").innerHTML=rows.length?`<table class="fortune"><tbody>${rows.map(([id,w],i)=>`<tr${id===uid?' style="color:#ffe27a"':""}><td>${i<3?["🥇","🥈","🥉"][i]:i+1}</td><td>${esc(w.pseudo)}${conseilCampTag(id)}</td><td class="num"><b>${fmt(w.po||0)}</b> PO</td></tr>`).join("")}</tbody></table>`:`<div class="empty">Les coffres s'ouvrent au premier passage du robot.</div>`;
+  $("fortune").innerHTML=rows.length?`<table class="fortune"><tbody>${rows.map(([id,w],i)=>`<tr${id===uid?' style="color:#ffe27a"':""}><td>${i<3?["🥇","🥈","🥉"][i]:i+1}</td><td>${conseilAv(id,w.pseudo,24)}${esc(w.pseudo)}${conseilCampTag(id)}</td><td class="num"><b>${fmt(w.po||0)}</b> PO</td></tr>`).join("")}</tbody></table>`:`<div class="empty">Les coffres s'ouvrent au premier passage du robot.</div>`;
 }
 function renderEffects(){
   const now=Date.now(),act=effects.filter(e=>ms(e.until)>now).sort((a,b)=>ms(a.until)-ms(b.until));

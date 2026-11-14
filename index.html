@@ -662,7 +662,7 @@ function renderPlayers(){
     const detail=g?`${esc(champNames[g.championId]||"Champion")} · ${esc(QUEUES[g.queueId]||"Partie")} · ${mins} min${p.lvAcc?` · sur ${esc(p.lvAcc)}`:""}`:comptes||"Aucun compte de jeu indiqué";
     // Live, op.gg et prono : seulement pendant une partie de LoL
     const links=g?`<div class="plinks"><a class="btn small" href="communaute.html#paris">Prono</a><a class="btn ghost small" href="${poro(p.lvAccObj||p)}" target="_blank" rel="noopener">Live</a><a class="btn ghost small" href="${opgg(p)}" target="_blank" rel="noopener">op.gg</a></div>`:"";
-    return `<div class="pl ${g||p.dg?"ingame":""}">${status}<div class="pinfo"><b>${esc(p.pseudo)}${conseilCampTag(p.id)}</b><small>${detail}</small></div>${links}</div>`}).join("");
+    return `<div class="pl ${g||p.dg?"ingame":""}">${status}<div class="pinfo"><b>${conseilAv(p.id,p.pseudo,26)}${esc(p.pseudo)}${conseilCampTag(p.id)}</b><small>${detail}</small></div>${links}</div>`}).join("");
   const n=list.filter(p=>p.lv).length,o=list.filter(p=>!p.lv&&p.dg).length;
   $("liveInfo").textContent=(n||o)?[n?`${n} sur LoL`:"",o?`${o} sur un autre jeu`:""].filter(Boolean).join(" · "):"Personne en jeu";
 }
@@ -828,7 +828,7 @@ function renderFanRank(){const box=$("fanRank");if(!box||!window.FantasyScore)re
   const rows=ids.map(id=>({id,p:fanD.sages[id].pseudo||"Un sage",t:F.sagePts(fanD.phases,fanD.captains,fanD.games,id),cap:ph?fanD.captains[id]?.[ph]:null})).sort((a,b)=>b.t-a.t||a.p.localeCompare(b.p));
   const n=fanD.games.length;$("fanRankNote").textContent=n?`${n} game${n>1?"s":""} comptée${n>1?"s":""}`:"les points arrivent après chaque game";
   let k=0,prev=null;box.innerHTML=rows.slice(0,10).map((r,i)=>{if(r.t!==prev){k=i+1;prev=r.t}
-    return `<li class="${r.id===uid?"me":""}"><span class="fr-pos">${k}</span><span class="fr-n"><b>${esc(r.p)}</b><small>${r.cap?"Capitaine : "+esc(r.cap):"Pas de capitaine"}</small></span><span class="fr-pts">${F.fr(r.t)}<small>pts</small></span></li>`}).join("")}
+    return `<li class="${r.id===uid?"me":""}"><span class="fr-pos">${k}</span><span class="fr-n"><b>${conseilAv(r.id,r.p,24)}${esc(r.p)}</b><small>${r.cap?"Capitaine : "+esc(r.cap):"Pas de capitaine"}</small></span><span class="fr-pts">${F.fr(r.t)}<small>pts</small></span></li>`}).join("")}
 function renderAll(){renderKick();renderFanRank();renderWeek();if(ladder)renderRecap();
   const me=riot[uid]?.pseudo||picks[uid]?.pseudo||wow[uid]?.pseudo;
   $("me").innerHTML=!db?(connErr?"Hors ligne":"Connexion au Conseil…"):me?`Bienvenue, <b>${esc(me)}</b>`:"Bienvenue, sage anonyme";

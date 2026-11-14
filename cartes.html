@@ -534,7 +534,7 @@ function sageRows(){return Object.entries(all).filter(([u,d])=>!conseilIsClaimed
 function vSages(v){const rows=sageRows();
   v.innerHTML=`<section class="panel frame"><div class="between"><h2>Les collections du Conseil</h2><span class="note">Touche un sage pour voir sa vitrine et ses cartes</span></div>
     ${rows.length?`<div style="overflow-x:auto"><table class="ctable"><thead><tr><th>#</th><th>Sage</th><th class="num">Cartes</th><th class="num">Complétion</th><th class="num">Légendaires</th><th class="num">Épiques</th><th class="num">Boosters</th></tr></thead><tbody>
-      ${rows.map((r,i)=>`<tr${r.u===uid?' style="background:rgba(217,42,116,.12)"':""}><td>${i<3?["🥇","🥈","🥉"][i]:i+1}</td><td><a href="#sage-${encodeURIComponent(r.u)}">${esc(r.d.pseudo||"Un sage")}</a>${r.u===uid?' <span class="note">(toi)</span>':""}</td><td class="num">${r.n}</td><td class="num">${(100*r.n/total()).toFixed(1)} %</td><td class="num" style="color:var(--r4)">${r.t[4]}</td><td class="num" style="color:var(--r3)">${r.t[3]}</td><td class="num">${r.d.opened||0}</td></tr>`).join("")}</tbody></table></div>`
+      ${rows.map((r,i)=>`<tr${r.u===uid?' style="background:rgba(217,42,116,.12)"':""}><td>${i<3?["🥇","🥈","🥉"][i]:i+1}</td><td><a href="#sage-${encodeURIComponent(r.u)}">${conseilAv(r.u,r.d.pseudo||"Un sage",24)}${esc(r.d.pseudo||"Un sage")}</a>${r.u===uid?' <span class="note">(toi)</span>':""}</td><td class="num">${r.n}</td><td class="num">${(100*r.n/total()).toFixed(1)} %</td><td class="num" style="color:var(--r4)">${r.t[4]}</td><td class="num" style="color:var(--r3)">${r.t[3]}</td><td class="num">${r.d.opened||0}</td></tr>`).join("")}</tbody></table></div>`
       :`<div class="empty">Personne n'a encore ouvert de booster. Sois le premier !</div>`}</section>
     <section class="panel frame"><h2>Derniers gros tirages</h2><div class="feed">${feedHTML()}</div></section>`}
 let sType="all";
@@ -544,7 +544,7 @@ function vSage(v){const d=all[param];
   const list=CARDS.filter(c=>own(c.id)>0&&(sType==="all"||c.type===sType)).sort((a,b)=>b.r-a.r||a.no-b.no);
   const rank=sageRows().findIndex(r=>r.u===param);
   v.innerHTML=`<a class="chip" href="#sages" style="align-self:flex-start;text-decoration:none">← Les sages</a>
-    <section class="panel frame"><div class="between"><div><span class="eyebrow">Collection</span><h2>${esc(d.pseudo||"Un sage")}${isMe?" (toi)":""}</h2></div>${!isMe&&me?`<a class="btn small" href="#echanges" id="tradeWith">Proposer un échange</a>`:""}</div>
+    <section class="panel frame"><div class="between"><div><span class="eyebrow">Collection</span><h2>${conseilAv(param,d.pseudo||"Un sage",40)}${esc(d.pseudo||"Un sage")}${isMe?" (toi)":""}</h2></div>${!isMe&&me?`<a class="btn small" href="#echanges" id="tradeWith">Proposer un échange</a>`:""}</div>
       <div class="facts"><div><b>${d.n||0}</b><span>cartes sur ${total()}</span></div><div><b>${rank>=0?rank+1+(rank?"e":"er"):"–"}</b><span>au classement</span></div>${RAR.map((r,i)=>i>=2?`<div><b style="color:var(--r${i})">${t[i]||0}</b><span>${r}s</span></div>`:"").join("")}<div><b>${d.opened||0}</b><span>boosters ouverts</span></div></div></section>
     <section class="panel frame"><div class="between"><h2>Vitrine</h2>${isMe?`<span class="note">Ouvre une de tes cartes pour l'ajouter ou la retirer</span>`:""}</div>
       <div class="vit">${[0,1,2,3,4].map(i=>vit[i]?cardHTML(BY[vit[i]],{count:own(vit[i]),glow:BY[vit[i]].r>=3}):`<div class="slot">${isMe?"Emplacement libre":"Vide"}</div>`).join("")}</div></section>
@@ -584,7 +584,7 @@ function vVitrines(v){
         <div class="mini-cards">${pick.slice(0,80).map(c=>cardHTML(c,{count:mine(c.id),pick:"vit"})).join("")||'<span class="note">Aucune carte.</span>'}</div>`:""}</section>
     <section class="panel frame"><div class="between"><h2>Les vitrines du Conseil</h2><span class="note">${rows.length} sage${rows.length>1?"s exposent leurs":" expose ses"} cartes</span></div>
       ${rows.length?rows.map(([u,d])=>{const own=id=>d.c?.[id]||0,ids=(d.vitrine||[]).filter(id=>BY[id]&&own(id)>0);
-        return `<div class="vrow"><div class="between"><a class="vname" href="#sage-${encodeURIComponent(u)}">${esc(d.pseudo||"Un sage")}</a><span class="note">${d.n||0} cartes · <a href="#sage-${encodeURIComponent(u)}">voir sa collection</a></span></div>${vitSlots(ids,own,false)}</div>`}).join(""):`<div class="empty">Personne n'a encore rempli sa vitrine.</div>`}</section>`;
+        return `<div class="vrow"><div class="between"><a class="vname" href="#sage-${encodeURIComponent(u)}">${conseilAv(u,d.pseudo||"Un sage",24)}${esc(d.pseudo||"Un sage")}</a><span class="note">${d.n||0} cartes · <a href="#sage-${encodeURIComponent(u)}">voir sa collection</a></span></div>${vitSlots(ids,own,false)}</div>`}).join(""):`<div class="empty">Personne n'a encore rempli sa vitrine.</div>`}</section>`;
   const ed=$("vitEd");if(ed)ed.onclick=()=>{vitEdit=!vitEdit;render();$("myVit").scrollIntoView({block:"start"})};
   v.querySelectorAll("[data-vrm]").forEach(b=>b.onclick=e=>{e.stopPropagation();saveVit(myVit.filter(x=>x!==b.dataset.vrm))});
   v.querySelectorAll("[data-vmv]").forEach(b=>b.onclick=e=>{e.stopPropagation();const [i,d]=b.dataset.vmv.split(":").map(Number),a=[...myVit];[a[i],a[i+d]]=[a[i+d],a[i]];saveVit(a)});
