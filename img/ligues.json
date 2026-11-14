@@ -1,0 +1,17 @@
+[
+  {
+    "slug": "lec",
+    "name": "LEC",
+    "image": "http://static.lolesports.com/leagues/1592516184297_LEC-01-FullonDark.png"
+  },
+  {
+    "slug": "lck",
+    "name": "LCK",
+    "image": "http://static.lolesports.com/leagues/lck-color-on-black.png"
+  },
+  {
+    "slug": "lpl",
+    "name": "LPL",
+    "image": "http://static.lolesports.com/leagues/1592516115322_LPL-01-FullonDark.png"
+  }
+]
