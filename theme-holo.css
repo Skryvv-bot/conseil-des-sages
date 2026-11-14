@@ -109,8 +109,6 @@ footer{color:#8c88aa!important}
 @keyframes tvrun{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 .cnav{margin-top:0!important;background:rgba(12,11,20,.88)!important;border-bottom:1px solid var(--line)!important;backdrop-filter:blur(10px)!important;-webkit-backdrop-filter:blur(10px)!important;padding-block:8px!important}
 .cnav-brand{font-family:var(--display)!important;font-weight:900!important;font-size:1.15rem!important;color:#fff!important;letter-spacing:0!important;text-transform:none!important;padding:4px 0;gap:10px!important}
-.cnav-brand::before{content:"C";display:inline-flex;align-items:center;justify-content:center;width:24px;height:32px;border-radius:5px;transform:rotate(-8deg);
-  background:linear-gradient(#0c0b14,#0c0b14) padding-box,var(--foil) border-box;border:2px solid transparent;font:900 .7rem var(--display);color:#fff}
 .cnav-brand b{background:var(--foil);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900}
 .cnav-brand svg{display:none}
 .cnav-links{gap:6px!important}

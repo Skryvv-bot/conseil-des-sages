@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Fortnite · Chasse aux trésors</title>
+<meta name="theme-color" content="#0c0b14">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png?v=3">
+<link rel="apple-touch-icon" href="icon-192.png?v=3">
+<link rel="stylesheet" href="conseil.css">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="conseil.js"></script>
+<style>
+.panel{padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.lead{margin:0;font-size:1.1rem;color:#c9c5e6;max-width:62ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.card{background:#0c0b14;border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.card .k{font:700 .7rem var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--holo-pink,#ff8ad8)}
+.card b{font:800 1.05rem var(--display);color:#fff}
+.card span{color:#c9c5e6;font-size:.95rem}
+.vs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.vs div{padding:12px 14px;border-top:1px solid var(--line)}
+.vs div:nth-child(-n+2){border-top:0;font:700 .72rem var(--mono);letter-spacing:.12em;text-transform:uppercase}
+.vs div:nth-child(odd){color:var(--muted)}
+.vs div:nth-child(even){background:#201d38;color:#fff}
+.vs div:nth-child(2){color:var(--holo-gold,#ffe27a)}
+.tbox{overflow-x:auto}
+.tbl{width:100%;min-width:640px;border-collapse:collapse;font-size:.95rem}
+.tbl th{font:700 .7rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+.tbl td{padding:10px 6px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.tbl td:not(:first-child),.tbl th:not(:first-child){text-align:right}
+.tbl tr.hot td{color:var(--holo-pink,#ff8ad8);font-weight:800}
+.big{font:900 clamp(2.2rem,7vw,4rem)/1 var(--display);font-variant-numeric:tabular-nums}
+.clock2{display:flex;gap:10px;flex-wrap:wrap}
+.clock2 div{background:#0c0b14;border:1px solid var(--line);border-radius:12px;padding:12px 16px;text-align:center;min-width:84px}
+.clock2 b{display:block;font:900 2rem/1 var(--display);font-variant-numeric:tabular-nums}
+.clock2 span{font:700 .68rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--holo-gold,#ffe27a)}
+.warn{border-left:4px solid var(--holo-gold,#ffe27a);background:#201d38;border-radius:12px;padding:14px 16px;margin:0;color:#d9d5ef}
+.src{font-size:.85rem;color:var(--muted)}
+ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;color:#d9d5ef}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="htxt">
+      <span class="eyebrow">Fortnite · Chapitre 7, saison 5</span>
+      <h1>Chasse aux trésors</h1>
+      <p class="lead">Après Azeroth, voici le nouvel objectif des déserteurs de la Faille : une mini-saison pirate avec One Piece, et des trésors rarissimes cachés dans les coffres. Voilà ce qui change par rapport au Battle Royale habituel, et tes vraies chances à chaque coffre.</p>
+    </div>
+  </header>
+
+  <section class="frame panel" aria-labelledby="f-obj">
+    <span class="eyebrow">Avis aux Fidèles de la Faille</span>
+    <h2 id="f-obj">Le nouvel objectif des déserteurs</h2>
+    <p class="lead">Ceux qui ont quitté la Faille ne farment plus des sbires : ils ouvrent des coffres. Leur but, le jeton de la boutique pirate, tombe 1 fois sur 137 500. À ce rythme, ils reviendront sur LoL avant de l'avoir.</p>
+    <div class="grid">
+      <div class="card"><span class="k">Dates</span><b>Du 1er novembre à début décembre 2026</b><span>Une mini-saison d'un mois, avec des mises à jour les 7, 14 et 21 novembre.</span></div>
+      <div class="card"><span class="k">Le graal</span><b>Jeton de la boutique pirate</b><span>Deux activations ; chacune ouvre pendant 14 jours une sélection de cosmétiques de la boutique, sans V-Bucks.</span></div>
+      <div class="card"><span class="k">Prochain événement</span><b>Heure des trésors, samedi 14 novembre</b><span>Environ deux heures où les chances de trésor sont multipliées.</span></div>
+    </div>
+  </section>
+
+  <section class="frame panel" aria-labelledby="f-new">
+    <h2 id="f-new">Ce qui change par rapport au Battle Royale</h2>
+    <div class="vs">
+      <div>Battle Royale classique</div><div>Chasse aux trésors</div>
+      <div>100 joueurs par partie</div><div>80 joueurs par partie</div>
+      <div>L'île habituelle</div><div>Une île entièrement nouvelle, en forme de crâne : Crossbones Isle</div>
+      <div>On saute du bus de combat</div><div>On saute du Vogue Merry, le bateau de Luffy</div>
+      <div>Les coffres donnent des armes et des soins</div><div>Chaque coffre peut aussi donner un trésor de compte : gadget, écran de chargement, musique, pioche, véhicule, tenue dorée ou jeton</div>
+      <div>Du loot au sol et dans les coffres</div><div>En plus : des coffres enterrés à déterrer et un méga-coffre verrouillé lié au Capitaine X</div>
+      <div>On se déplace à pied ou en véhicule</div><div>Des canons pirates propulsent les joueurs d'un îlot à l'autre</div>
+    </div>
+    <div class="grid">
+      <div class="card"><span class="k">Lieux</span><b>Arlong Park, le Baratie, le village des moulins</b><span>Des lieux de One Piece, plus le cuirassé d'A$AP Rocky à l'est de l'île.</span></div>
+      <div class="card"><span class="k">Pouvoirs</span><b>Fruits du démon</b><span>Le fruit Gum-Gum transforme en Luffy (bras élastiques), le fruit Flame-Flame en Ace (pouvoirs de feu).</span></div>
+      <div class="card"><span class="k">Armes</span><b>Trois sabres de Zoro, lance-pierre d'Usopp</b><span>Et aussi le boulet de canon explosif, un fusil à répétition et un fusil à pompe « dragon doré ».</span></div>
+      <div class="card"><span class="k">Boss</span><b>A$AP Rocky sur son cuirassé</b><span>Le battre donne la clé du coffre-fort du navire et sa roquette à onde de choc.</span></div>
+      <div class="card"><span class="k">Chaque semaine</span><b>Jours du capitaine</b><span>Un capitaine différent prend le contrôle des places fortes : Lil Uzi Vert, Hatsune Miku, Kasane Teto.</span></div>
+      <div class="card"><span class="k">Passe de combat</span><b>Nico Robin, Ace, Capitaine X</b><span>Six tenues, dont trois classiques revisitées. Les autres Chapeaux de paille arrivent en boutique.</span></div>
+    </div>
+  </section>
+
+  <section class="frame panel" aria-labelledby="taux" >
+    <h2 id="taux">Taux de drop des trésors</h2>
+    <p class="lead">Chances par coffre ouvert, publiées par Epic Games le 7 novembre. Chaque coffre est un tirage indépendant : en ouvrir beaucoup ne garantit rien. Un même trésor ne tombe qu'une fois, sauf les gadgets.</p>
+    <div class="tbox"><table class="tbl">
+      <thead><tr><th>Trésor</th><th>Chance par coffre</th><th>En %</th><th>Coffres pour 1 chance sur 2</th><th>Coffres pour 90 %</th></tr></thead>
+      <tbody id="rates"></tbody>
+    </table></div>
+    <h3>Pendant les Heures des trésors</h3>
+    <p class="lead">Un événement d'environ deux heures, en début de soirée et dans la nuit. Tout le monde reçoit un lance-roquettes à onde de choc, la réanimation est automatique, et les chances de trésor sont multipliées.</p>
+    <div class="tbox"><table class="tbl">
+      <thead><tr><th>Trésor</th><th>Multiplicateur</th><th>Chance par coffre, au mieux</th></tr></thead>
+      <tbody id="hours"></tbody>
+    </table></div>
+    <p class="warn">Le jeton reste presque introuvable : en partie normale, à 10 coffres par partie, il faudrait en moyenne plus de 13 000 parties, et encore près de 7 000 au meilleur multiplicateur. Des médias parlent d'enfants qui y passent leurs soirées ; mieux vaut le voir comme une loterie que comme un objectif.</p>
+  </section>
+
+  <p class="src">Sources : taux officiels repris par <a href="https://www.dexerto.fr/fortnite/fortnite-revele-enfin-chances-obtenir-jeton-boutique-pirate-1663649/" rel="noopener" target="_blank">Dexerto</a> et <a href="https://gamewave.fr/fortnite/fortnite-tout-savoir-sur-les-treasure-hours-et-les-taux-de-drop/" rel="noopener" target="_blank">GameWave</a> ; nouveautés de la saison d'après <a href="https://www.thebiglead.com/fortnite-chapter-7-season-5-patch-notes/" rel="noopener" target="_blank">The Big Lead</a> et <a href="https://winalia.gg/en/blog/fortnite-treasure-hunters-map-crossbones-isle" rel="noopener" target="_blank">Winalia</a>. Les sources donnent le 1er ou le 5 décembre pour la fin de la saison. Site de fan, sans lien avec Epic Games.</p>
+</div>
+<script>
+conseilNav("fortnite");conseilConnect().catch(()=>{});
+// [trésor, 1 chance sur N, multiplicateur min, multiplicateur max]
+const R=[["Tenue dorée de la semaine",1562500,7.5,10],["Jeton de la boutique pirate",137500,1.5,2],["Véhicule et autocollant de la semaine",7813,10,10],["Pioche ou accessoire de dos",568,1.5,2],["Piste musicale",391,1.5,2],["Écran de chargement",272,1.5,2],["Gadget",127,1.5,2]];
+const fmt=n=>Math.round(n).toLocaleString("fr-FR"),need=(n,q)=>fmt(Math.ceil(Math.log(1-q)/Math.log(1-1/n))),mul=x=>"×"+String(x).replace(".",",");
+const row=(cells,hot)=>{const tr=document.createElement("tr");if(hot)tr.className="hot";for(const c of cells){const td=document.createElement("td");td.textContent=c;tr.appendChild(td)}return tr};
+document.getElementById("rates").replaceChildren(...R.map(r=>row([r[0],"1 sur "+fmt(r[1]),(100/r[1]).toPrecision(2).replace(".",",")+" %",need(r[1],.5),need(r[1],.9)],r[1]===137500)));
+document.getElementById("hours").replaceChildren(...R.map(r=>row([r[0],r[2]===r[3]?mul(r[2]):mul(r[2])+" à "+mul(r[3]),"1 sur "+fmt(r[1]/r[3])],r[1]===137500)));
+</script>
+</body>
+</html>
