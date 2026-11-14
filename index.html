@@ -284,6 +284,12 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
 .hy-p em{font-style:normal;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hy-p .new i{border-color:#ffe27a}.hy-p .new em{color:#ffe27a}
 .hy-p small{font:700 .58rem var(--mono);color:var(--muted);letter-spacing:.06em}
+.hyp{background:#0c0b14;border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.hyp-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px}
+.hyp-t{display:flex;align-items:center;gap:8px;min-height:40px;padding:4px 8px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-weight:700;font-size:.9rem;min-width:0}
+.hyp-t img{width:24px;height:24px;object-fit:contain;flex:none}.hyp-t span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hyp-t small{font:700 .62rem var(--mono);color:var(--muted)}
+.hyp-t:has(input:checked){border-color:var(--holo-mint)}.hyp-t:has(input:disabled){opacity:.45;cursor:default}
+.hyp-r{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .merc-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
 .merc-g a{display:flex;gap:10px;align-items:center;text-decoration:none;color:#c9c5e6;font-size:.9rem;background:#0c0b14;border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
 .merc-g a:hover{border-color:#f2f0ff}.merc-g img{width:36px;height:36px;object-fit:contain;flex:none}.merc-g b{display:block;color:#fff;font-weight:800}
@@ -325,7 +331,8 @@ section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,
       <p>Après Azeroth, les abandonneurs de la Faille ont trouvé pire : ouvrir des coffres à la chaîne dans la Chasse aux trésors, en espérant le jeton de la boutique pirate.</p>
       <span class="num" style="font-size:clamp(1.4rem,3.6vw,2.1rem)">1 chance sur 137&nbsp;500</span>
       <p class="note">Par coffre ouvert. Il en faut environ 95 000 pour avoir une chance sur deux : c'est une loterie, pas un objectif.</p>
-      <div class="row"><a class="btn" href="fortnite.html#taux">Voir tous les taux de drop</a><a class="btn ghost" href="fortnite.html">La mini-saison</a></div>
+      <div class="hunt" data-hunt></div>
+      <div class="row"><a class="btn ghost" href="fortnite.html#taux">Voir tous les taux de drop</a><a class="btn ghost" href="fortnite.html">La mini-saison</a></div>
     </div>
     <img src="img/fn-hero.jpg" alt="Les personnages de la mini-saison Chasse aux trésors de Fortnite, dont Nico Robin et Ace" loading="lazy" width="1200" height="675">
   </section>
@@ -336,7 +343,8 @@ section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,
     </div>
     <p style="margin:0;color:#c9c5e6">Les cinq de départ 2027 tels que la presse les annonce. En jaune, les recrues pressenties.</p>
     <div class="hype" id="hype"></div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><a class="btn" href="mercato.html">Voir tous les transferts</a><span class="note">Ouverture du marché le 17 novembre. Les rumeurs ne sont pas des annonces.</span></div>
+    <div class="hyp" id="hypePick" hidden></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><a class="btn" href="mercato.html">Voir tous les transferts</a><button class="btn ghost" type="button" id="hypeBtn">Choisir mes 6 équipes</button><span class="note">Ouverture du marché le 17 novembre. Les rumeurs ne sont pas des annonces.</span></div>
   </section>
   <!-- Avant le début des Worlds : pronos et tier list à faire -->
   <section class="kick" id="kick" aria-labelledby="kickT" hidden>
@@ -838,20 +846,28 @@ window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
 (function(){const fr=new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
   document.getElementById("hhDate").textContent=fr.charAt(0).toUpperCase()+fr.slice(1)+" · les jeux du moment"})();
 </script>
+<script src="mercato-data.js"></script>
 <script>
-// Mercato « hype » : cinq de départ 2027 pressentis (presse au 12 nov.). 1 = recrue pressentie, "?" = poste à pourvoir.
-(function(){const T=[
-  ["G2 Esports","g2-esports",[["Naak Nako",1],["Lyncas",1],["Caps",0],["Hans Sama",0],["Mikyx",1]]],
-  ["Karmine Corp","karmine-corp",[["Canna",0],["SkewMond",1],["kyeahoo",0],["Caliste",0],["Busio",0]]],
-  ["Fnatic","fnatic",[["?",0],["Yike",1],["Vladi",0],["Upset",0],["Labrov",1]]],
-  ["Movistar KOI","mad-lions",[["BrokenBlade",1],["Elyoya",0],["Jojopyun",0],["Carzzy",1],["Alvaro",0]]],
-  ["GIANTX","giantx-lec",[["Myrwn",1],["Thayger",1],["Feisty",1],["HARPOON",1],["Piero",1]]],
-  ["KT Rolster","kt-rolster",[["PerfecT",0],["Raptor",1],["Bdd",0],["Taeyoon",1],["Kellin",1]]]],R=["TOP","JGL","MID","BOT","SUP"];
-  const box=document.getElementById("hype");if(!box)return;const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
-  function draw(P){box.replaceChildren(...T.map(([n,slug,pl])=>{const a=el("a","hy");a.href="mercato.html";const h=el("div","hy-h"),im=new Image();im.src="img/equipes/"+slug+".png";im.alt="";im.loading="lazy";h.append(im,el("b","",n));
-    const g=el("div","hy-p");pl.forEach(([p,nw],k)=>{const s=el("span",nw?"new":""),i=el("i"),u=P[p.toLowerCase()];if(u)i.style.backgroundImage='url("'+u+'")';else i.textContent=p==="?"?"?":p.slice(0,2).toUpperCase();
-      s.append(i,el("em","",p==="?"?"À pourvoir":p),el("small","",R[k]));g.append(s)});a.append(h,g);return a}))}
-  draw({});fetch("img/equipes/equipes.json").then(r=>r.json()).then(d=>{const P={};for(const t of d)for(const p of t.players)if(p.image&&!/default|silhouette/i.test(p.image))P[p.n.trim().toLowerCase()]=p.image.replace(/^http:/,"https:");draw(P)}).catch(()=>{})})();
+// Mercato « hype » : six équipes au choix du visiteur (gardées sur son appareil), avec leur cinq de départ 2027 pressenti
+(function(){const box=document.getElementById("hype");if(!box||!window.MERCATO)return;
+  const ALL=[];for(const k in MERCATO)for(const t of MERCATO[k].teams)ALL.push(Object.assign({lg:MERCATO[k].name},t));
+  const DEF=["g2-esports","karmine-corp","fnatic","mad-lions","giantx-lec","kt-rolster"],R=["TOP","JGL","MID","BOT","SUP"];
+  let mine=DEF,API={},P={};try{const v=JSON.parse(localStorage.getItem("mercato-teams")||"null");if(Array.isArray(v)&&v.length)mine=v.filter(s=>ALL.some(t=>t.slug===s)).slice(0,6)}catch(e){}
+  const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+  function draw(){box.replaceChildren(...mine.map(slug=>{const t=ALL.find(x=>x.slug===slug);if(!t)return null;const a=el("a","hy");a.href="mercato.html";const h=el("div","hy-h"),im=new Image();im.src="img/equipes/"+slug+".png";im.alt="";im.loading="lazy";h.append(im,el("b","",t.n));
+    const g=el("div","hy-p");mercatoStart(t,API[slug]).forEach(([p,nw],k)=>{const s=el("span",nw?"new":""),i=el("i"),nm=p.replace(/ \?$/,""),u=P[nm.toLowerCase()];if(u)i.style.backgroundImage='url("'+u+'")';else i.textContent=p==="?"?"?":nm.slice(0,2).toUpperCase();
+      s.append(i,el("em","",p==="?"?"À pourvoir":p),el("small","",R[k]));g.append(s)});a.append(h,g);return a}).filter(Boolean))}
+  function picker(){const pk=document.getElementById("hypePick");pk.hidden=!pk.hidden;if(pk.hidden)return;
+    const sel=new Set(mine),msg=el("span","note"),wrap=el("div","hyp-g");
+    const upd=()=>{msg.textContent=sel.size+" sur 6 équipes choisies";wrap.querySelectorAll("input").forEach(i=>i.disabled=!i.checked&&sel.size>=6)};
+    for(const t of ALL){const l=el("label","hyp-t"),i=el("input");i.type="checkbox";i.checked=sel.has(t.slug);i.onchange=()=>{i.checked?sel.add(t.slug):sel.delete(t.slug);upd()};
+      const im=new Image();im.src="img/equipes/"+t.slug+".png";im.alt="";im.loading="lazy";l.append(i,im,el("span","",t.n),el("small","",t.lg));wrap.append(l)}
+    const ok=el("button","btn small","Afficher ces équipes");ok.type="button";ok.onclick=()=>{mine=ALL.filter(t=>sel.has(t.slug)).map(t=>t.slug);if(!mine.length)mine=DEF;try{localStorage.setItem("mercato-teams",JSON.stringify(mine))}catch(e){}pk.hidden=true;draw()};
+    const rs=el("button","btn small ghost","Revenir au choix par défaut");rs.type="button";rs.onclick=()=>{mine=DEF;try{localStorage.removeItem("mercato-teams")}catch(e){}pk.hidden=true;draw()};
+    const row=el("div","hyp-r");row.append(ok,rs,msg);pk.replaceChildren(wrap,row);upd()}
+  document.getElementById("hypeBtn").onclick=picker;draw();
+  fetch("img/equipes/equipes.json").then(r=>r.json()).then(d=>{for(const t of d){API[t.slug]=t;for(const p of t.players)if(p.image&&!/default|silhouette/i.test(p.image))P[p.n.trim().toLowerCase()]=p.image.replace(/^http:/,"https:")}draw()}).catch(()=>{})})();
 </script>
+
 </body>
 </html>

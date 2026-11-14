@@ -33,9 +33,7 @@ window.conseilShowAdmin=function(){const ok=window.CONSEIL_UID===CONSEIL_ADMIN;d
 const CONSEIL_NAV=[
   {id:"accueil",href:"index.html",label:"Accueil"},
   {id:"lol",href:"lol.html",label:"LoL",sub:[{id:"lol",href:"lol.html",label:"Accueil LoL"},{id:"ladder",href:"ladder.html",label:"Ladder"},{id:"worlds",href:"worlds.html",label:"Worlds 2026"},{id:"tierlist",href:"tierlist.html",label:"Tier list"},
-    {id:"fantasy",href:"fantasy.html",label:"Fantasy",sub:[["accueil","Accueil"],["tirage","Tirage"],["classement","Classement"],["joueurs","Joueurs"],["parties","Parties"],["regles","Règles"]].map(([h,l])=>({href:"fantasy.html#"+h,label:l}))},
-    {id:"cartes",href:"cartes.html",label:"LolMaster",sub:[["boosters","Boosters"],["collection","Ma collection"],["marche","Marché"],["echanges","Échanges"],["vitrines","Vitrines"],["sages","Les sages"],["wiki","Wiki des champions"],["regions","Régions"]].map(([h,l])=>({href:"cartes.html#"+h,label:l}))},
-    {id:"customs",href:"customs.html",label:"Customs & Clash",sub:[{href:"customs.html#roue",label:"Roue des champions"}]},{id:"mercato",href:"mercato.html",label:"Mercato"},{id:"patch",href:"patch.html",label:"Patch"}]},
+    {id:"fantasy",href:"fantasy.html",label:"Fantasy"},{id:"cartes",href:"cartes.html",label:"LolMaster"},{id:"customs",href:"customs.html",label:"Customs & Clash"},{id:"mercato",href:"mercato.html",label:"Mercato"},{id:"patch",href:"patch.html",label:"Patch"}]},
   {id:"wow",href:"wow.html",label:"WoW",sub:[{id:"wow",href:"wow.html",label:"WoW Forever"}]},
   {id:"fortnite",href:"fortnite.html",label:"Fortnite",sub:[{id:"fortnite",href:"fortnite.html",label:"Chasse aux trésors"},{href:"fortnite.html#taux",label:"Taux de drop"}]},
   {id:"jeux",href:"devinettes.html",label:"Jeux",noBar:1,sub:[{id:"devinettes",href:"devinettes.html",label:"Devinettes"}]},
@@ -90,7 +88,7 @@ window.conseilNav=function(active){
   if(item&&item.sub&&!item.noBar){const wrap=document.querySelector(".wrap");if(wrap){const sub=document.createElement("div");sub.className="csub";
     sub.innerHTML=item.sub.map(s=>`<a href="${s.href}" ${s.id===active?'aria-current="page"':""}${s.admin?' data-admin hidden':""}>${s.label}</a>`).join("");wrap.prepend(sub)}}
   setupInstall();
-  conseilComments(active);
+  conseilComments(active);conseilHunt();
 };
 
 // Menus déroulants : survol à la souris, premier toucher sur mobile ; CDS.TV ouvre le plan complet du site
@@ -240,9 +238,25 @@ window.conseilComments=async function(page){
     catch(x){msg.textContent="Envoi impossible pour le moment."}};
 };
 
+// ---------- Chasse aux trésors Fortnite : les sages inscrits (champ « chasse » du profil) ----------
+window.conseilHunt=async function(){const boxes=[...document.querySelectorAll("[data-hunt]")];if(!boxes.length)return;
+  const {db,uid}=await conseilConnect();if(!db){boxes.forEach(b=>b.textContent="");return}
+  const [sages,dc]=await Promise.all([conseilSages(db),conseilDiscordAvatars()]);
+  const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+  function draw(msg){const list=Object.entries(sages).filter(([,m])=>m.chasse&&m.pseudo).sort((a,b)=>String(a[1].chasse).localeCompare(String(b[1].chasse))),me=sages[uid],inn=!!(me&&me.chasse);
+    for(const box of boxes){const btn=el("button","btn"+(inn?" ghost":""),inn?"Quitter la chasse":"Rejoindre la chasse");btn.type="button";
+      btn.onclick=async()=>{if(!me||!me.pseudo){draw("profil");return}btn.disabled=true;const v=inn?null:new Date().toISOString();
+        try{await db.doc("riot/"+uid).set({chasse:v},{merge:true});me.chasse=v;draw()}catch(e){draw("err")}};
+      const row=el("div","hunt-l");for(const [id,m] of list){const p=el("span","hunt-p"+(id===uid?" me":""));p.append(conseilAvatarEl(m,dc,32),el("span","",m.pseudo));row.append(p)}
+      const head=el("div","hunt-h");head.append(btn,el("span","note",list.length?list.length+(list.length>1?" sages en chasse":" sage en chasse"):"Personne en chasse pour l'instant. Sois le premier !"));
+      box.replaceChildren(head,row);
+      if(msg==="profil"){const n=el("span","note");n.innerHTML='Crée d\'abord ton profil : <a href="communaute.html#profil">Mon profil</a>.';box.append(n)}
+      if(msg==="err")box.append(el("span","note","Enregistrement impossible, réessaie."))}}
+  draw()};
+
 // ---------- Thème « Collection holographique » et bandeau d'infos ----------
 (function(){const add=()=>{if(document.getElementById("tv-theme"))return;
-  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=7";document.head.appendChild(l)};
+  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=8";document.head.appendChild(l)};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();
 function defaultTicker(){const d=Math.ceil((Date.parse("2026-11-04T23:00:00Z")-Date.now())/864e5);
   return ["Worlds 2026 : la finale le 14 novembre, puis le bilan du Pick'em","Pick'em : un skin pour le 1er (offert par Skryvv) et un skin pour le 2e (offert par Tabaskoh)",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Pronos entre potes, tribunal et sage de la semaine dans Le Conseil","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes"]}

@@ -13,6 +13,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="conseil.js"></script>
+<script src="mercato-data.js"></script>
 <style>
 .panel{padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
 .lead{margin:0;font-size:1.1rem;color:#c9c5e6;max-width:62ch}
@@ -107,32 +108,7 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
 </div>
 <script>
 conseilNav("mercato");conseilConnect().catch(()=>{});
-// o = officiel, r = rumeur ; mv : [statut, joueur ou sujet, détail]
-// slug : équipe sur LoL Esports ; start : titulaires 2026 quand ils sont connus ; inn : arrivées pressenties [joueur, poste] ;
-// out : départs ; keep : prolongés (officiel) ; doubt : fin de contrat ou avenir incertain
-const M={
- lec:{name:"LEC",note:"Europe. Beaucoup de mouvements annoncés par la presse, peu d'officialisations avant le 17 novembre.",teams:[
-  {n:"G2 Esports",slug:"g2-esports",inn:[["Naak Nako","top"],["Lyncas","jungle"],["Mikyx","support"]],out:["SkewMond","BrokenBlade","Labrov"],mv:[["o","Perkz","Fin de la collaboration comme entraîneur principal (5 nov.)."],["o","Memento","Quitte le club (8 nov.)."],["r","Mithy","Reviendrait comme entraîneur principal."],["r","Pad","Arriverait comme entraîneur stratégique."],["r","SkewMond","Écarté du cinq de départ pour 2027, alors qu'il est sous contrat jusqu'en novembre 2028."],["r","Lyncas","Arriverait dans la jungle pour le remplacer."],["r","Mikyx","Ferait son retour au poste de support."],["r","Naak Nako","Ciblé au poste de toplaner."]]},
-  {n:"Fnatic",slug:"fnatic",inn:[["Yike","jungle"],["Labrov","support"]],out:["Razork","Lospa"],doubt:{Vladi:"prolongation pressentie"},mv:[["r","Vladi","Prolongation pressentie pour 2027."],["r","Yike","Arriverait depuis la Karmine Corp."],["r","Labrov","Aurait choisi Fnatic malgré une offre de G2."],["r","Razork","Partirait chez Team Heretics."]]},
-  {n:"Karmine Corp",slug:"karmine-corp",inn:[["SkewMond","jungle"]],out:["Yike"],keep:["kyeahoo"],mv:[["o","kyeahoo","Prolongé pour 2027 (12 nov.)."],["r","SkewMond","Arriverait dans la jungle."],["r","Yike","Partirait chez Fnatic."]]},
-  {n:"Team Heretics",slug:"team-heretics-lec",inn:[["Razork","jungle"],["Jackies","mid"]],out:["Serin","Way","Ice","Daglas"],keep:["Tracyn"],mv:[["o","Tracyn","Prolongé jusqu'en 2028 au poste de toplaner."],["o","Serin","Quitte le club (3 nov.)."],["o","Way","Quitte le club."],["o","Ice","Prend sa retraite (7 nov.)."],["o","Mithy","Quitte le staff (12 nov.)."],["r","Hype","Serait conservé au poste de botlaner."],["r","Jackies","Arriverait au poste de midlaner."],["r","Razork","Arriverait depuis Fnatic."]]},
-  {n:"GIANTX",slug:"giantx-lec",inn:[["Myrwn","top"],["Thayger","jungle"],["Feisty","mid"],["HARPOON","bottom"],["Piero","support"]],out:["Jackies","ISMA","Oscarinin","Lot","Flakked","Noah","Jun"],mv:[["o","Jackies","Quitte le club (12 nov.)."],["r","Effectif 2027","Les cinq titulaires seraient remplacés : Myrwn, Thayger, Feisty, HARPOON et Piero."],["r","Noah","Partirait en LCK, chez BNK FEARX."]]},
-  {n:"Team Vitality",slug:"team-vitality",out:["Lyncas","Fleshy","Carzzy"],doubt:{"Naak Nako":"ciblé par G2"},mv:[["o","Lyncas","Quitte le club (11 nov.)."],["o","Pad et Mac","Quittent le staff (9 nov.)."],["o","Fleshy","Autorisé à explorer ses options."],["r","Naak Nako","Ciblé par G2 ; un échange avec SkewMond aurait été évoqué."],["r","Carzzy","Aurait un accord verbal avec Movistar KOI."]]},
-  {n:"Movistar KOI",slug:"mad-lions",inn:[["BrokenBlade","top"],["Carzzy","bottom"]],out:["Myrwn","Supa"],keep:["Jojopyun"],mv:[["o","Jojopyun","Prolongé jusqu'en 2027."],["r","Carzzy","Accord verbal au poste de botlaner."],["r","BrokenBlade","Arriverait depuis G2."],["r","Myrwn","Partirait chez GIANTX."]]},
-  {n:"SK Gaming",slug:"sk-gaming",inn:[["Kryze","top"],["Zicssi","jungle"],["3XA","bottom"],["Lospa","support"]],out:["Mikyx"],mv:[["r","Kryze","Ferait son retour en LEC."],["r","Zicssi","Arriverait dans la jungle depuis Solary."],["r","Lospa","Arrivée évoquée."],["r","3XA","Retour évoqué."]]},
-  {n:"NAVI",slug:"natus-vincere",inn:[["Supa","bottom"]],doubt:{Parus:"resterait",Rhilech:"resterait"},mv:[["r","Parus","Resterait au club."],["r","Rhilech","L'équipe serait reconstruite autour de lui."],["r","Supa","Rejoindrait l'équipe pour 2027."]]},
-  {n:"Shifters",slug:"team-bds",mv:[["o","Stend","Prend sa retraite (29 sept.)."],["r","Place en LEC","Le club chercherait à louer sa place pour 2027."]],out:["Stend"]}]},
- lck:{name:"LCK",note:"Corée. Gen.G et T1 étaient encore aux Worlds : rien n'est attendu de leur côté avant la finale.",teams:[
-  {n:"KT Rolster",slug:"kt-rolster",start:{top:["PerfecT"],mid:["Bdd"]},inn:[["Raptor","jungle"],["Taeyoon","bottom"],["Kellin","support"]],keep:["Bdd","PerfecT"],mv:[["o","Bdd et PerfecT","Prolongés jusqu'en 2028."],["r","Raptor, Taeyoon, Kellin","Attendus depuis BNK FEARX, qui dément avoir autorisé des contacts."]]},
-  {n:"HANJIN BRION",slug:"fredit-brion",start:{top:["Casting"],jungle:["GIDEON"],mid:["Roamer"],bottom:["Teddy"],support:["Namgung"]},keep:["Casting","GIDEON","Roamer","Teddy","Namgung"],mv:[["o","Casting, GIDEON, Roamer, Teddy, Namgung","Tout le cinq de départ est prolongé pour 2027."]]},
-  {n:"Nongshim RedForce",slug:"nongshim-redforce",inn:[["Deft","bottom"]],out:["Diable"],mv:[["r","Deft","Pressenti au poste de botlaner, à son retour du service militaire (18 nov.)."],["r","Diable","Chercherait une nouvelle équipe."]]},
-  {n:"Hanwha Life Esports",slug:"hanwha-life-esports",start:{top:["Zeus"],jungle:["Kanavi"],mid:["Zeka"],bottom:["Gumayusi"],support:["Delight"]},doubt:{Zeus:"aurait refusé une offre",Kanavi:"fin de contrat"},mv:[["r","Zeus","Aurait refusé une première offre de prolongation ; les discussions continuent."],["o","Kanavi","En fin de contrat le 16 novembre."],["o","Zeka, Gumayusi, Delight","Sous contrat pour 2027."]]},
-  {n:"Gen.G",slug:"geng",start:{top:["Kiin"],jungle:["Canyon"],mid:["Chovy"],bottom:["Ruler"],support:["Duro"]},doubt:{Kiin:"fin de contrat",Canyon:"fin de contrat"},mv:[["o","Kiin et Canyon","En fin de contrat le 16 novembre."],["o","Chovy, Ruler, Duro","Sous contrat jusqu'en novembre 2027."]]},
-  {n:"T1",slug:"t1",start:{top:["Doran"],jungle:["Oner"],mid:["Faker"],bottom:["Peyz"],support:["Keria"]},doubt:{Doran:"fin de contrat"},mv:[["o","Doran","En fin de contrat le 16 novembre."],["o","Faker et Keria","Sous contrat jusqu'en 2029."],["o","Oner et Peyz","Sous contrat jusqu'en 2028."]]},
-  {n:"BNK FEARX",slug:"fearx",inn:[["Noah","bottom"]],out:["Raptor","Taeyoon","Kellin"],mv:[["r","Noah","Pressenti au poste de botlaner."],["r","Raptor, Taeyoon, Kellin","Annoncés chez KT Rolster ; le club dément avoir autorisé des contacts."]]}]},
- lpl:{name:"LPL",note:"Chine. Au 12 novembre, aucun club de LPL n'a annoncé de mouvement et la presse ne rapporte pas encore de transfert. Voici les effectifs 2026 ; la colonne 2027 sera remplie après l'ouverture du marché, le 17 novembre.",teams:
-  [["Bilibili Gaming","bilibili-gaming"],["Top Esports","top-esports"],["JD Gaming","jd-gaming"],["Anyone's Legend","anyones-legend"],["Weibo Gaming","weibo-gaming"],["Invictus Gaming","invictus-gaming"],["EDward Gaming","edward-gaming"],["LNG Esports","lng-esports"],["Team WE","team-we"],["Ninjas in Pyjamas","shenzen-ninjas-in-pyjamas"],["ThunderTalk Gaming","thunder-talk-gaming"],["LGD Gaming","lgd-gaming"]].map(([n,slug])=>({n,slug,mv:[],none:true}))}
-};
+const M=window.MERCATO;
 const ROLES=[["top","TOP"],["jungle","JGL"],["mid","MID"],["bottom","BOT"],["support","SUP"]];
 let cur="lec",API={},PHOTO={};const $=id=>document.getElementById(id),el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
 const key=s=>String(s).trim().toLowerCase();
