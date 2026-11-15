@@ -117,7 +117,7 @@ window.conseilNav=function(active){
       customs:["img/lol-swain.jpg","50% 16%"],pronos:["img/lol-azir.jpg","50% 24%"],patch:["img/lol-smolder.jpg","50% 38%"],devinettes:["img/lol-leblanc.jpg","50% 18%"],banque:["img/lol-faille.jpg","50% 50%"],profil:["img/lol-faille.jpg","50% 50%"],newdawn:["img/lol-faille.jpg","50% 50%"]}[active];
     const w=document.querySelector(".wrap"),hd=w&&w.querySelector("header");if(!B||!hd||document.querySelector(".pgban"))return;
     const d=document.createElement("div");d.className="pgban";d.setAttribute("aria-hidden","true");d.style.backgroundImage=`linear-gradient(90deg,#0c0b14 0%,rgba(12,11,20,.55) 45%,rgba(12,11,20,.15) 100%),url("${B[0]}")`;d.style.backgroundPosition="center,"+B[1];hd.parentNode.insertBefore(d,hd)})();
-  conseilComments(active);conseilHunt();setTimeout(conseilPromos,1500);
+  conseilComments(active);conseilHunt();setTimeout(conseilPromos,1500);setTimeout(conseilSyncMyDiscordAvatar,5000);
   if(!/communaute\.html$|index\.html$|\/$/.test(location.pathname))setTimeout(conseilPronoSweep,4000);
 };
 
@@ -229,20 +229,37 @@ let __sages=null,__dc=null;
 window.conseilSages=function(db){return __sages||(__sages=db.collection("riot").get().then(s=>{const o={};s.forEach(d=>o[d.id]=d.data());return o}).catch(()=>({})))};
 window.conseilDiscordAvatars=function(){
   return __dc||(__dc=fetch(`https://discord.com/api/guilds/${CDS_GUILD}/widget.json`).then(r=>r.ok?r.json():{members:[]}).then(w=>{
-    const seen=LS.get("dc-avatars",{});for(const m of w.members||[])if(m.avatar_url&&conseilDcNorm(m.username))seen[conseilDcNorm(m.username)]=m.avatar_url;
-    LS.set("dc-avatars",seen);return seen}).catch(()=>LS.get("dc-avatars",{})))};
+    const st=LS.get("dc-avatars2",{}),now=Date.now();for(const k in st)if(now-st[k].t>7*864e5)delete st[k];
+    for(const m of w.members||[])if(m.avatar_url&&conseilDcNorm(m.username))st[conseilDcNorm(m.username)]={u:m.avatar_url,t:now};
+    LS.set("dc-avatars2",st);return Object.fromEntries(Object.entries(st).map(([k,v])=>[k,v.u]))}).catch(()=>Object.fromEntries(Object.entries(LS.get("dc-avatars2",{})).map(([k,v])=>[k,v.u]))))};
+// Retrouve un membre du widget Discord : nom exact (sans émojis), sinon un nom unique qui commence par le pseudo ou le contient (4 lettres au moins).
+window.conseilDcFind=function(m,dc){if(!m||!dc)return "";const keys=[m.discord,m.pseudo].map(conseilDcNorm).filter(Boolean);
+  for(const k of keys)if(dc[k])return k;
+  for(const k of keys){if(k.length<4)continue;const hit=Object.keys(dc).filter(n=>n.startsWith(k)||k.startsWith(n)&&n.length>=4||n.includes(k));if(hit.length===1)return hit[0]}
+  return ""};
+// Photo d'un sage : le champion choisi, sinon sa photo Discord vue en direct, sinon la dernière photo Discord enregistrée dans son profil.
 window.conseilAvatarUrl=function(m,dc){if(!m)return "";if(m.avatar)return conseilChampImg(m.avatar);
-  for(const k of [m.discord,m.pseudo]){const u=k&&dc&&(dc[conseilDcNorm(k)]||dc[String(k).trim().toLowerCase()]);if(u)return u}return ""};
+  const k=conseilDcFind(m,dc);if(k)return dc[k];
+  return m.dcav&&m.dcav.url?m.dcav.url:""};
+// Quand un sage connecté au site est aussi en ligne sur Discord, sa photo Discord est enregistrée dans son profil :
+// les autres la voient alors même quand il est hors ligne. Remise à jour si elle change, une fois par jour au plus sinon.
+window.conseilSyncMyDiscordAvatar=async function(){try{const {db,uid}=await conseilConnect();if(!db||!uid)return;
+  const d=await db.doc("riot/"+uid).get();if(!d.exists)return;const m=d.data();if(!m.pseudo)return;
+  const w=await fetch(`https://discord.com/api/guilds/${CDS_GUILD}/widget.json`).then(r=>r.ok?r.json():null).catch(()=>null);if(!w)return;
+  const live={};for(const x of w.members||[])if(x.avatar_url&&conseilDcNorm(x.username))live[conseilDcNorm(x.username)]=x.avatar_url;
+  const k=conseilDcFind(m,live);if(!k)return;const url=live[k],old=m.dcav||{};
+  if(old.url===url&&Date.now()-(old.at||0)<864e5)return;
+  await db.doc("riot/"+uid).set({dcav:{url,at:Date.now()}},{merge:true})}catch(e){}};
 window.conseilAvatarEl=function(m,dc,size=36){const e=document.createElement("span");e.className="cav";e.style.width=e.style.height=size+"px";
   const u=conseilAvatarUrl(m,dc),ini=String(m&&m.pseudo||"?").slice(0,2).toUpperCase();e.textContent=ini;
-  if(u){const im=new Image();im.alt="";im.loading="lazy";im.onload=()=>{e.textContent="";e.appendChild(im)};im.src=u}return e};
+  if(u){const im=new Image();im.alt="";im.decoding="async";im.referrerPolicy="no-referrer";im.onload=()=>{e.textContent="";e.appendChild(im)};im.src=u}return e};
 
 // Avatar à glisser dans du HTML : une pastille avec les initiales, remplie ensuite par la vraie photo (champion choisi ou photo Discord).
 // On donne l'identifiant du sage quand on l'a, sinon son pseudo suffit.
 window.conseilAv=(id,pseudo,size=26)=>`<span class="cav cav-in" data-av="${conseilEsc(id||"")}" data-avn="${conseilEsc(pseudo||"")}" style="width:${size}px;height:${size}px">${conseilEsc(String(pseudo||"?").slice(0,2).toUpperCase())}</span>`;
 (function(){let S=null,D=null,byName={},busy=false;
   function fill(){if(!S)return;document.querySelectorAll(".cav-in:not([data-ok])").forEach(e=>{e.dataset.ok="1";const m=S[e.dataset.av]||byName[String(e.dataset.avn).toLowerCase()];if(!m)return;
-    const u=conseilAvatarUrl(m,D);if(!u)return;const im=new Image();im.alt="";im.loading="lazy";im.onload=()=>{e.textContent="";e.appendChild(im)};im.src=u})}
+    const u=conseilAvatarUrl(m,D);if(!u)return;const im=new Image();im.alt="";im.decoding="async";im.referrerPolicy="no-referrer";im.onload=()=>{e.textContent="";e.appendChild(im)};im.src=u})}
   function start(){if(busy)return;busy=true;conseilConnect().then(({db})=>{if(!db)return;Promise.all([conseilSages(db),conseilDiscordAvatars()]).then(([s,d])=>{S=s;D=d;for(const m of Object.values(s))if(m.pseudo)byName[m.pseudo.toLowerCase()]=m;fill();
     let t=null;new MutationObserver(()=>{clearTimeout(t);t=setTimeout(fill,120)}).observe(document.body,{childList:true,subtree:true})})})}
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>setTimeout(start,300));else setTimeout(start,300)})();
@@ -324,7 +341,7 @@ window.conseilHunt=async function(){const boxes=[...document.querySelectorAll("[
 
 // ---------- Thème « Collection holographique » et bandeau d'infos ----------
 (function(){const add=()=>{if(document.getElementById("tv-theme"))return;
-  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=15";document.head.appendChild(l)};
+  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=16";document.head.appendChild(l)};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();
 function defaultTicker(){const d=Math.ceil((Date.parse("2026-11-04T23:00:00Z")-Date.now())/864e5);
   return ["Worlds 2026 : Bilibili Gaming champion du monde, 3-1 contre Gen.G","Pick'em : un skin pour le 1er (offert par Skryvv) et un skin pour le 2e (offert par Tabaskoh)",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Pronos entre potes, tribunal et sage de la semaine dans Le Conseil","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes"]}

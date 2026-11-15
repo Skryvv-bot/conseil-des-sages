@@ -164,7 +164,7 @@ footer{color:#8c88aa!important}
 .promo p{margin:0;color:#c9c5e6}
 .promo .num{font:900 clamp(1.8rem,5vw,2.8rem)/1 var(--display);color:var(--holo-pink)}
 .promo .row{display:flex;gap:10px;flex-wrap:wrap}
-@media (max-width:720px){.promo{grid-template-columns:1fr}.promo>img{max-height:220px;order:-1}}
+@media (max-width:720px){.promo{grid-template-columns:1fr}.promo>img{max-height:220px;order:-1}.promo>.vid{order:-1;min-height:0!important}}
 .leagues{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .leagues div{background:#0c0b14;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center;min-width:0}
 .leagues img{display:block;width:72px;height:72px;object-fit:contain;margin:0 auto 6px}
@@ -263,3 +263,10 @@ h2 .cav-in{margin-right:12px}
 .vids figure{margin:0;display:flex;flex-direction:column;gap:8px}
 .vids figcaption b{display:block;color:#fff;font:800 1rem var(--display)}
 .vids figcaption span{color:var(--muted);font-size:.9rem}
+
+/* Pastilles de profil : toujours rondes, jamais écrasées, texte centré */
+.cav{box-sizing:border-box;line-height:1;text-transform:uppercase;letter-spacing:0;user-select:none;aspect-ratio:1}
+.cav img{border-radius:50%}
+td .cav-in,li .cav-in,b .cav-in{flex:none}
+
+.promo>.vid{padding:0!important;align-self:stretch}

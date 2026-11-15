@@ -283,10 +283,9 @@ function render(){
 // ---------- ACCUEIL ----------
 function vAccueil(v){
   const me=uid&&sages[uid],ph=currentPhase(),d=phases[ph],next=PHASES.find(p=>!phases[p.id]?.picks);
-  let h=`<section class="panel"><div class="between"><h2>${me?`Salut ${esc(me.pseudo)}`:"Rejoindre la fantasy"}</h2><span class="note">${n2(Object.keys(sages).length,"sage inscrit","sages inscrits")}</span></div>`;
+  let h=`<section class="panel"><div class="between"><h2>${me?`Salut ${esc(me.pseudo)}`:"La Fantasy des Worlds 2026"}</h2><span class="note">${n2(Object.keys(sages).length,"sage inscrit","sages inscrits")}</span></div>`;
   if(!db)h+=`<div class="state">Connexion au site en cours… Si rien ne bouge, recharge la page.</div>`;
-  else if(!me)h+=`<p class="note">Inscris-toi pour être dans le prochain tirage${next?` (${next.label}, avant le ${fmtDate(phaseStart(next.id))})`:""}.</p>
-    <form class="row" id="join"><input type="text" id="pseudo" maxlength="20" placeholder="Ton pseudo du Conseil" value="${esc(myProfile?.pseudo||"")}" required><button class="btn">Je participe</button></form><span class="note" id="joinMsg"></span>`;
+  else if(!me)h+=`<p class="note">Les inscriptions sont fermées : la Fantasy des Worlds 2026 est terminée. Rendez-vous pour les ligues LEC, LCK et LPL en 2027.</p>`;
   else h+=`<div class="row"><span class="note">Inscrit depuis le ${fmtDate(me.at)}.</span><a class="chip" href="#sage-${encodeURIComponent(uid)}">Voir ma page</a></div>`;
   h+=`</section>`;
   if(me&&d?.picks&&teamOf(uid,ph)&&Object.keys(teamOf(uid,ph)).length){h+=teamPanel(uid,ph,true)}
@@ -353,7 +352,7 @@ function vTirage(v){
   const d=phases[tPhase],ph=PHASES.find(p=>p.id===tPhase);
   let h=`<div class="sub-tabs">${PHASES.map(p=>`<button class="chip" data-tp="${p.id}" aria-pressed="${p.id===tPhase}">${p.label}${phases[p.id]&&phases[p.id].picks.length>=totalSteps(phases[p.id])?" ✓":""}</button>`).join("")}</div>`;
   if(!d){
-    h+=`<section class="panel"><h2>Tirage · ${ph.label}</h2><div class="state">Le tirage se fait en direct sur Discord par Skryvv, avant le premier match (${fmtDate(phaseStart(ph.id))}). Inscris-toi d'ici là depuis l'accueil.</div>
+    h+=`<section class="panel"><h2>Tirage · ${ph.label}</h2><div class="state">Le tirage se fait en direct sur Discord par Skryvv, avant le premier match (${fmtDate(phaseStart(ph.id))})..</div>
       <p class="note">${n2(Object.keys(sages).length,"sage inscrit","sages inscrits")} : ${Object.values(sages).map(s=>esc(s.pseudo)).join(", ")||"personne pour l'instant"}.</p>
       ${isOwner?ownerStart(ph):""}</section>`;
     h+=demoPanel();v.innerHTML=h;bindTirage(v);return}
@@ -516,7 +515,7 @@ function bindKick(id){const b=$("kick");if(!b)return;b.onclick=()=>{if(!b.datase
 
 // ---------- VOTES ----------
 function vRegles(v){v.innerHTML=`<section class="panel"><h2>Règles</h2><div class="rules">
-  <div><span class="eyebrow">Inscription et tirage</span><ul><li>Inscris-toi depuis l'accueil avant le tirage.</li><li>Deux tirages : un pour la phase suisse, un pour les quarts. L'équipe des quarts est <b>gardée pour les demi-finales et la finale</b>.</li><li>Lane par lane : chaque sage reçoit un Top, puis un Jungle, un Mid, un Bot, un Support.</li><li>En phase suisse, un joueur ne va qu'à <b>un seul</b> sage. À partir des quarts, il reste moins de joueurs : chacun existe en <b>deux exemplaires</b>.</li><li>Les points gagnés pendant une phase restent acquis : le nouveau tirage ne change que les joueurs des phases suivantes.</li></ul></div>
+  <div><span class="eyebrow">Inscription et tirage</span><ul><li>Les inscriptions sont fermées : la Fantasy des Worlds 2026 est terminée.</li><li>Deux tirages : un pour la phase suisse, un pour les quarts. L'équipe des quarts est <b>gardée pour les demi-finales et la finale</b>.</li><li>Lane par lane : chaque sage reçoit un Top, puis un Jungle, un Mid, un Bot, un Support.</li><li>En phase suisse, un joueur ne va qu'à <b>un seul</b> sage. À partir des quarts, il reste moins de joueurs : chacun existe en <b>deux exemplaires</b>.</li><li>Les points gagnés pendant une phase restent acquis : le nouveau tirage ne change que les joueurs des phases suivantes.</li></ul></div>
 
   <div><span class="eyebrow">Capitaine</span><ul><li>Un <b>capitaine</b> par phase : ses points comptent <b>double</b>. Modifiable jusqu'au premier match de la phase.</li></ul></div>
   <div><span class="eyebrow">Raretés des cartes</span><ul><li><b style="color:var(--r-leg)">Légendaire</b> : top 3 du Conseil à son poste</li><li><b style="color:var(--r-epic)">Épique</b> : 4e à 7e</li><li><b style="color:var(--r-rare)">Rare</b> : 8e à 11e</li><li><b style="color:var(--r-com)">Commun</b> : 12e à 16e</li><li><b style="color:var(--r-goat)">Hors catégorie</b> : Faker 🐐</li></ul></div></div></section>
@@ -564,8 +563,7 @@ render=function(){
   const me=uid&&sages[uid],v=$("view");v.removeAttribute("data-view");
   let h=`<section class="panel"><div class="between"><h2>${me?`Tu es inscrit, ${esc(me.pseudo)} !`:"Inscriptions ouvertes"}</h2><span class="note">${n2(n,"sage inscrit","sages inscrits")}</span></div>`;
   if(!db||!cfgLoaded)h+=`<div class="state">Connexion au site en cours…</div>`;
-  else if(!me)h+=`<p class="note">Inscris-toi pour recevoir tes 5 joueurs au tirage de la phase suisse. Skryvv ouvre les caisses en direct sur Discord avant le premier match (19h).</p>
-    <form class="row" id="join"><input type="text" id="pseudo" maxlength="20" placeholder="Ton pseudo du Conseil" value="${esc(myProfile?.pseudo||"")}" required><button class="btn">Je participe</button></form><span class="note" id="joinMsg"></span>`;
+  else if(!me)h+=`<p class="note">Les inscriptions sont fermées : la Fantasy des Worlds 2026 est terminée. Rendez-vous pour les ligues LEC, LCK et LPL en 2027.</p>`;
   else h+=`<div class="state">C'est noté. Rendez-vous sur Discord pour le tirage : tes joueurs, ton capitaine et le classement apparaîtront ici ensuite.</div><div class="row"><button class="btn ghost small" id="leave">Me désinscrire</button></div>`;
   h+=`<div><span class="eyebrow">Déjà inscrits</span><div class="locked-list" style="margin-top:8px">${Object.values(sages).sort((a,b)=>a.at-b.at).map(s=>`<span class="chip">${conseilAv("",s.pseudo,20)}${esc(s.pseudo)}</span>`).join("")||'<span class="note">Personne pour l\'instant, sois le premier.</span>'}</div></div></section>`;
   h+=`<section class="panel"><h2>Le principe</h2><div class="rules">
