@@ -14,13 +14,11 @@ jobs:
       - run: |
           mkdir -p img/worlds
           g(){ curl -sS -L -m 30 -A "Mozilla/5.0" "$2" -o "img/worlds/$1" && file "img/worlds/$1" || echo "échec $1"; }
-          g c1.jpg "https://gaming-cdn.com/images/news/articles/23038/cover/blg-remporte-les-worlds-2026-de-league-of-legends-cover6af8f9448f781.jpg"
-          g c2.jpg "https://geekslands.fr/api/og-image/api/uploads/content/karmine-corp-worlds-2026-blg-viper.jpg"
-          g c3.jpg "https://img.youtube.com/vi/fFlOTEiQ9x0/maxresdefault.jpg"
-          for u in "https://spiritgamer.fr/worlds-2026-finale-blg-champion-gen-g/" "https://dotesports.com/league-of-legends/news/blg-win-worlds-championship-2026" "https://lolesports.com/"; do
-            echo "== $u"; curl -sS -L -m 30 -A "Mozilla/5.0" "$u" | grep -oE '(og:image|twitter:image)[^>]*content="[^"]+"' | head -3 || true; done
-          i=4; for u in "https://spiritgamer.fr/worlds-2026-finale-blg-champion-gen-g/" "https://dotesports.com/league-of-legends/news/blg-win-worlds-championship-2026"; do
-            im=$(curl -sS -L -m 30 -A "Mozilla/5.0" "$u" | grep -oE 'og:image"[^>]*content="[^"]+"' | head -1 | grep -oE 'https?://[^"]+' || true)
+          i=5; for u in "https://www.gosugamers.net/lol/news/79501-bilibili-gaming-defeat-gen-g-to-be-crowned-worlds-2026-champions" "https://lolnow.gg/worlds-2026-final-blg-beat-gen-g/" "https://news.cgtn.com/news/2026-11-15/China-s-BLG-beats-ROK-s-Gen-G-3-1-to-win-League-of-Legends-world-title-1S5lLVPDUSQ/p.html" "https://www.chinadaily.com.cn/a/202611/15/WS6af992a5e4b03ebf8519c727.html" "https://sports.khan.co.kr/en/article/202611151233007"; do
+            html=$(curl -sS -L -m 30 -A "Mozilla/5.0" "$u" || true)
+            im=$(echo "$html" | grep -oE '(property|name)="(og:image|twitter:image)"[^>]*content="[^"]+"' | head -1 | grep -oE 'content="[^"]+"' | sed 's/content="//;s/"$//' || true)
+            [ -z "$im" ] && im=$(echo "$html" | grep -oE 'content="[^"]+"[^>]*(property|name)="og:image"' | head -1 | grep -oE 'content="[^"]+"' | sed 's/content="//;s/"$//' || true)
+            echo "== $u -> $im"; case "$im" in //*) im="https:$im";; esac
             [ -n "$im" ] && g "c$i.jpg" "$im"; i=$((i+1)); done
       - run: |
           git config user.name "cds-bot"
