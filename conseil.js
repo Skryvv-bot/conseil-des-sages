@@ -268,6 +268,15 @@ window.conseilAv=(id,pseudo,size=26)=>`<span class="cav cav-in" data-av="${conse
     let t=null;new MutationObserver(()=>{clearTimeout(t);t=setTimeout(fill,120)}).observe(document.body,{childList:true,subtree:true})})})}
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>setTimeout(start,300));else setTimeout(start,300)})();
 
+// ---------- Données externes (boutique Fortnite, jeux gratuits, matchs, vidéos), récoltées toutes les 30 min par GitHub ----------
+window.conseilData=name=>fetch("https://raw.githubusercontent.com/Skryvv-bot/conseil-des-sages/donnees/out/"+name+".json?t="+Math.floor(Date.now()/300e3)).then(r=>r.ok?r.json():null).catch(()=>null);
+// Vidéos YouTube : miniature cliquable, la vidéo ne se charge qu'au clic
+window.conseilVideos=async function(box,jeu,n=4){const el=document.getElementById(box);if(!el)return;const d=await conseilData("videos"),v=(d&&d[jeu]||[]).slice(0,n);
+  if(!v.length){el.innerHTML='<p class="note">Vidéos indisponibles pour le moment.</p>';return}
+  const ago=t=>{const h=Math.floor((Date.now()-Date.parse(t))/3600e3);return h<1?"à l'instant":h<24?"il y a "+h+" h":"il y a "+Math.floor(h/24)+" j"};
+  el.innerHTML=`<div class="yt-g">${v.map(x=>`<figure class="yt"><button type="button" class="yt-b" data-id="${conseilEsc(x.id)}" aria-label="Lire : ${conseilEsc(x.t)}"><img src="https://i.ytimg.com/vi/${conseilEsc(x.id)}/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-p" aria-hidden="true"></span></button><figcaption><b>${conseilEsc(x.t)}</b><span>${conseilEsc(x.ch)} · ${ago(x.d)}</span></figcaption></figure>`).join("")}</div>`;
+  el.querySelectorAll(".yt-b").forEach(b=>b.onclick=()=>{const f=document.createElement("iframe");f.src="https://www.youtube-nocookie.com/embed/"+b.dataset.id+"?autoplay=1";f.title=b.getAttribute("aria-label");f.allow="autoplay; encrypted-media; picture-in-picture; fullscreen";f.allowFullscreen=true;f.referrerPolicy="strict-origin-when-cross-origin";b.replaceWith(f)})};
+
 // ---------- Félicitations : un sage a passé une division (affiché 4 jours, une fois par visiteur et par montée) ----------
 window.conseilPromos=async function(){try{if(document.querySelector(".cpromo"))return;
   const {db}=await conseilConnect();if(!db)return;const d=await db.doc("ladder/current").get();if(!d.exists)return;
@@ -345,7 +354,7 @@ window.conseilHunt=async function(){const boxes=[...document.querySelectorAll("[
 
 // ---------- Thème « Collection holographique » et bandeau d'infos ----------
 (function(){const add=()=>{if(document.getElementById("tv-theme"))return;
-  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=17";document.head.appendChild(l)};
+  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=18";document.head.appendChild(l)};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();
 function defaultTicker(){const d=Math.ceil((Date.parse("2026-11-04T23:00:00Z")-Date.now())/864e5);
   return ["Worlds 2026 : Bilibili Gaming champion du monde, 3-1 contre Gen.G","Pick'em : un skin pour le 1er (offert par Skryvv) et un skin pour le 2e (offert par Tabaskoh)",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Pronos entre potes, tribunal et sage de la semaine dans Le Conseil","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes"]}

@@ -41,6 +41,7 @@
 .warn{border-left:4px solid var(--holo-gold,#ffe27a);background:#201d38;border-radius:12px;padding:14px 16px;margin:0;color:#d9d5ef}
 .src{font-size:.85rem;color:var(--muted)}
 ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;color:#d9d5ef}
+.leagues-mini{display:flex;gap:8px}.leagues-mini img{width:30px;height:30px;object-fit:contain}
 </style>
 </head>
 <body>
@@ -64,6 +65,16 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
     <a class="tile frame" href="communaute.html#paris"><span class="k" style="color:#ff8ad8">Entre sages</span><b>Pronos entre potes</b><span>Parie sur la victoire ou la défaite des sages en partie.</span></a>
     <a class="tile frame" href="patch.html"><span class="k" style="color:#b4b0d0">Patch 26.22</span><b>Notes de patch</b><span>Mel retravaillée, nerfs pour Locke, Thresh et Yasuo.</span></a>
     <a class="tile frame" href="devinettes.html"><span class="k" style="color:#b48aff">Jeu</span><b>Devinettes</b><span>Trouve le champion mystère du jour.</span></a>
+  </section>
+
+  <section class="frame panel" aria-labelledby="l-m">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h2 id="l-m">Matchs LEC, LCK et LPL</h2><span class="leagues-mini"><img src="img/ligue-lec.png" alt="LEC" width="30" height="30"><img src="img/ligue-lck.png" alt="LCK" width="30" height="30"><img src="img/ligue-lpl.png" alt="LPL" width="30" height="30"></span></div>
+    <div id="matchs" style="display:flex;flex-direction:column;gap:8px"><p class="note">Chargement…</p></div>
+  </section>
+
+  <section class="frame panel" aria-labelledby="l-yt">
+    <h2 id="l-yt">Dernières vidéos de League of Legends</h2>
+    <div id="lolVids"><p class="note">Chargement…</p></div>
   </section>
 
   <section class="frame panel" aria-labelledby="l-fl">
@@ -90,6 +101,17 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
 </div>
 <script>
 conseilNav("lol");conseilConnect().catch(()=>{});
+
+// ---------- Matchs des ligues (programme sur 3 semaines, résultats des 3 derniers jours) ----------
+(async function(){const box=document.getElementById("matchs"),d=await conseilData("matchs");
+  if(!d){box.innerHTML='<p class="note">Programme indisponible pour le moment.</p>';return}
+  const M=(d.matches||[]).slice().sort((a,b)=>a.t.localeCompare(b.t));
+  if(!M.length){const r=Object.entries(d.reprise||{}).map(([k,v])=>k+" le "+new Date(v).toLocaleDateString("fr-FR",{day:"numeric",month:"long"})).join(", ");
+    box.innerHTML=`<p class="note">C'est l'intersaison : aucun match de LEC, LCK ou LPL dans les trois prochaines semaines. ${r?"Reprise : "+conseilEsc(r)+".":"Les ligues reprennent en janvier 2027 ; le programme s'affichera ici dès qu'il sera publié."}</p>`;return}
+  const tm=(x,r)=>`<span class="tm${r?" r":""}">${r?"":`<img src="${conseilEsc(x.i.replace(/^http:/,"https:"))}" alt="" loading="lazy">`}<span>${conseilEsc(x.c||x.n)}</span>${r?`<img src="${conseilEsc(x.i.replace(/^http:/,"https:"))}" alt="" loading="lazy">`:""}</span>`;
+  box.innerHTML=M.slice(0,12).map(m=>{const live=m.st==="inProgress",dt=new Date(m.t);
+    return `<div class="mt${live?" live":""}"><span class="when">${live?'<span class="tag live">En direct</span>':dt.toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short"})+"<br>"+dt.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}<br>${conseilEsc(m.lg)} · BO${m.bo}</span>${tm(m.a)}<span class="sc">${m.st==="unstarted"?"vs":m.a.w+" – "+m.b.w}</span>${tm(m.b,1)}</div>`}).join("")})();
+conseilVideos("lolVids","lol",4);
 </script>
 </body>
 </html>

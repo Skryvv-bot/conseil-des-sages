@@ -79,6 +79,17 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><a class="btn ghost" href="communaute.html#profil">Ajouter mon pseudo Epic</a><span class="note">Dans ton profil, partie Fortnite.</span></div>
   </section>
 
+  <section class="frame panel" aria-labelledby="f-shop">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h2 id="f-shop">Boutique du jour</h2><span class="note" id="shopN"></span></div>
+    <div class="shop-f" role="group" aria-label="Type d'objet" id="shopF"></div>
+    <div id="shop"><p class="note">Chargement de la boutique…</p></div>
+  </section>
+
+  <section class="frame panel" aria-labelledby="f-yt">
+    <h2 id="f-yt">Dernières vidéos Fortnite</h2>
+    <div id="fnVids"><p class="note">Chargement…</p></div>
+  </section>
+
   <section class="frame panel" aria-labelledby="f-new">
     <h2 id="f-new">Ce qui change par rapport au Battle Royale</h2>
     <div class="vs">
@@ -146,6 +157,19 @@ document.getElementById("hours").replaceChildren(...R.map(r=>row([r[0],r[2]===r[
     if(!s||s.error){const x=el("td",!s?"Stats indisponibles":s.error==="private"?"Stats privées : à rendre publiques dans Fortnite":"Pseudo Epic introuvable","note");x.colSpan=3;tr.append(x)}
     else tr.append(el("td",nf(s.wins)),el("td",nf(s.kills)),el("td",nf(s.matches)));
     return tr}))})();
+
+// ---------- Boutique du jour (mise à jour chaque jour à 1 h, heure de Paris) ----------
+(async function(){const box=document.getElementById("shop"),fb=document.getElementById("shopF"),d=await conseilData("boutique");
+  if(!d||!d.items||!d.items.length){box.innerHTML='<p class="note">Boutique indisponible pour le moment.</p>';return}
+  const items=d.items.filter(x=>x.k!=="Musique"),TYPES=[["tout","Tout"],["Tenue","Tenues"],["Pack","Packs"],["Emote","Emotes"],["Pioche","Pioches"],["Accessoire de dos","Sacs à dos"],["autre","Autres"]],main=["Tenue","Pack","Emote","Pioche","Accessoire de dos"];
+  let cur="tout";const nf=n=>Number(n||0).toLocaleString("fr-FR");
+  document.getElementById("shopN").textContent=items.length+" objets · "+new Date(d.date).toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
+  function draw(){fb.innerHTML=TYPES.map(([k,l])=>`<button type="button" data-k="${k}" aria-pressed="${k===cur}">${l}</button>`).join("");fb.querySelectorAll("button").forEach(b=>b.onclick=()=>{cur=b.dataset.k;draw()});
+    const list=items.filter(x=>cur==="tout"||(cur==="autre"?!main.includes(x.k):x.k===cur)),secs=[];
+    for(const x of list){const s=(x.sec||"Autres").trim();let g=secs.find(z=>z[0]===s);if(!g)secs.push(g=[s,[]]);g[1].push(x)}
+    box.innerHTML=secs.map(([s,xs])=>`<div class="shop-sec"><h3>${conseilEsc(s)}</h3><div class="shop-g">${xs.map(x=>`<div class="shop-i" style="${x.c?"background:#"+conseilEsc(x.c):""}"><img src="${conseilEsc(x.i)}" alt="" loading="lazy" width="256" height="256"><div><b title="${conseilEsc(x.n)}">${conseilEsc(x.n)}</b><span>${nf(x.p)} V-bucks${x.r>x.p?`<s>${nf(x.r)}</s>`:""}</span><small>${conseilEsc([x.k,x.rar].filter(Boolean).join(" · "))}</small></div></div>`).join("")}</div></div>`).join("")||'<p class="note">Rien dans cette catégorie aujourd\'hui.</p>'}
+  draw()})();
+conseilVideos("fnVids","fortnite",4);
 </script>
 </body>
 </html>

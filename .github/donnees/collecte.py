@@ -82,7 +82,7 @@ def matchs():
     save("matchs.json", {"matches": out, "live": live, "reprise": reprise, "logos": {s.upper(): lg[s]["image"] for s in ("lec", "lck", "lpl") if s in lg}})
 
 def videos():
-    CH = {"lol": ["@lolfr", "@leagueoflegends"], "wow": ["@WorldofWarcraftFR", "@Warcraft"], "fortnite": ["@FortniteFR", "@Fortnite"]}
+    CH = {"lol": ["@LeagueOfLegendsFR", "@leagueoflegends"], "wow": ["@WorldofWarcraftFR", "@Warcraft"], "fortnite": ["@FortniteFR", "@Fortnite"]}
     res = {}
     for jeu, handles in CH.items():
         vids = []

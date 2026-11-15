@@ -379,6 +379,10 @@ section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,
     </div>
     <img src="img/fn-hero.jpg" alt="Les personnages de la mini-saison Chasse aux trésors de Fortnite, dont Nico Robin et Ace" loading="lazy" width="1200" height="675">
   </section>
+  <section class="frame panel" aria-labelledby="freeT" style="padding:20px;gap:12px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h2 id="freeT" style="font-size:clamp(1.4rem,3.4vw,2.1rem)!important;margin:0">Jeux gratuits de la semaine</h2><span class="note">Epic Games Store · à récupérer gratuitement</span></div>
+    <div class="free-g" id="free"><p class="note">Chargement…</p></div>
+  </section>
   <section class="frame panel merc" aria-labelledby="mcT" style="padding:20px;gap:12px">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
       <div><span class="eyebrow">LoL · intersaison 2026-2027</span><h2 id="mcT" style="font-size:clamp(1.4rem,3.4vw,2.1rem)!important;margin:4px 0 0">Mercato : les équipes de 2027 se dessinent</h2></div>
@@ -947,5 +951,14 @@ window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
   fetch("img/equipes/equipes.json").then(r=>r.json()).then(d=>{for(const t of d){API[t.slug]=t;for(const p of t.players)if(p.image&&!/default|silhouette/i.test(p.image))P[p.n.trim().toLowerCase()]=p.image.replace(/^http:/,"https:")}draw()}).catch(()=>{})})();
 </script>
 
+<script>
+// Jeux offerts sur l'Epic Games Store : ceux de la semaine, puis ceux de la semaine suivante
+(async function(){const box=document.getElementById("free"),d=await conseilData("jeux-gratuits");if(!box)return;
+  if(!d){box.innerHTML='<p class="note">Indisponible pour le moment.</p>';return}
+  const day=t=>new Date(t).toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"}),now=Date.now();
+  const cur=(d.now||[]).filter(g=>Date.parse(g.fin)>now),nxt=(d.next||[]).filter(g=>Date.parse(g.fin)>now);
+  const card=(g,n)=>`<a class="free${n?" next":""}" href="${conseilEsc(g.u)}" target="_blank" rel="noopener"><img src="${conseilEsc(g.i)}" alt="" loading="lazy"><div><em>${n?"À partir du "+day(g.debut):"Gratuit jusqu'au "+day(g.fin)}</em><b>${conseilEsc(g.n)}</b><span>${g.prix?"Prix habituel : "+conseilEsc(g.prix):""}</span></div></a>`;
+  box.innerHTML=[...cur.map(g=>card(g)),...nxt.map(g=>card(g,1))].join("")||'<p class="note">Pas de jeu offert cette semaine.</p>'})();
+</script>
 </body>
 </html>

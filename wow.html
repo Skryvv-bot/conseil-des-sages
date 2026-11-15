@@ -87,6 +87,11 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
     <div class="chars" id="chars"><div class="empty">Chargement des personnages…</div></div>
   </section>
 
+  <section class="frame panel" aria-labelledby="w-yt">
+    <h2 id="w-yt">Dernières vidéos de World of Warcraft</h2>
+    <div id="wowVids"><p class="note">Chargement…</p></div>
+  </section>
+
   <section class="frame panel" aria-labelledby="w-what">
     <h2 id="w-what">C'est quoi, WoW Forever ?</h2>
     <p class="lead">Une troisième version de World of Warcraft, à côté du jeu actuel et de Classic : le monde d'origine, niveau 60, mais avec du contenu inédit.</p>
@@ -158,6 +163,8 @@ tick();setInterval(tick,15000);
     const dl=el("dl"),row=(k,v)=>{if(!v)return;dl.append(el("dt","",k),el("dd","",String(v)))};
     row("Niveau",x.lvl?x.lvl+(x.auto?"":" (saisi à la main)"):"");row("Race",a.race);row("Classe",a.cls);row("Faction",f==="h"?"Horde":f==="a"?"Alliance":"");row("Guilde",a.guild);row("Règles",a.ruleset);row("Niveau d'objet",a.ilvl);row("Vu en jeu",ago(a.seen));
     c.append(top,dl);if(!x.a)c.append(el("span","note",down?"Fiche Blizzard indisponible pour le moment.":"Pas encore visible chez Blizzard : il faut être niveau 10 et s'être déconnecté du jeu. Vérifie aussi le prénom et le nom dans le profil."));return c}))})();
+
+conseilVideos("wowVids","wow",4);
 </script>
 </body>
 </html>
