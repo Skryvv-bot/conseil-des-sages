@@ -272,6 +272,29 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
 .wkc b{font:700 .95rem Unbounded,sans-serif!important;letter-spacing:0!important;text-transform:none!important;color:#fff!important}
 .wkc:hover{border-color:#f2f0ff!important}
 
+/* Champions du monde et vainqueurs du Conseil */
+.champ{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);border-radius:18px;overflow:hidden;border:2px solid transparent;background:linear-gradient(#17152a,#17152a) padding-box,conic-gradient(from 210deg,#ff8ad8,#ffe27a,#8affc1,#7ad7ff,#b48aff,#ff8ad8) border-box}
+.champ-ph{margin:0;position:relative;min-height:260px}
+.champ-ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%}
+.champ-ph figcaption{position:absolute;right:8px;bottom:6px;font-size:.7rem;color:#fff;background:rgba(0,0,0,.55);padding:2px 6px;border-radius:6px}
+.champ-tx{padding:22px;display:flex;flex-direction:column;gap:10px;justify-content:center;min-width:0}
+.champ-tx h2{margin:0;font-size:clamp(1.5rem,3.4vw,2.2rem)!important}
+.champ-tx p{margin:0;color:#c9c5e6}
+.champ-sc{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.champ-sc img{width:40px;height:40px;object-fit:contain}
+.champ-sc b{font:900 1.5rem Unbounded,sans-serif;color:#ffe27a}
+.champ-ro{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.champ-ro span{background:#0c0b14;border:1px solid #3a3752;border-radius:10px;padding:6px 4px;text-align:center;font-weight:800;color:#fff;font-size:.9rem;overflow:hidden;text-overflow:ellipsis}
+.champ-ro small{display:block;font:700 .6rem "JetBrains Mono",monospace;color:#b4b0d0;letter-spacing:.08em}
+@media (max-width:820px){.champ{grid-template-columns:1fr}.champ-ph{min-height:0;aspect-ratio:16/9}}
+.winners{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.win-c{background:#17152a;border:1px solid #3a3752;border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px;text-decoration:none;color:#f2f0ff;min-width:0}
+.win-c:hover{border-color:#f2f0ff}
+.win-b{display:flex;align-items:center;gap:14px;min-width:0}
+.win-n{display:flex;flex-direction:column;min-width:0}
+.win-n b{font:900 clamp(1.3rem,3.6vw,1.9rem)/1.1 Unbounded,sans-serif;color:#fff;overflow-wrap:anywhere}
+.win-n span{color:#ffe27a;font-weight:800}
+.win-n small{color:#b4b0d0;font-size:.82rem}
 /* Visuels de l'accueil */
 .st.st-wow{background:#ffe27a!important;border-color:#ffe27a!important;color:#0c0b14!important}
 .st.st-fn{background:#7ad7ff!important;border-color:#7ad7ff!important;color:#0c0b14!important}
@@ -312,6 +335,21 @@ section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,
 </head>
 <body>
 <div class="wrap">
+  <section class="champ" aria-labelledby="chT">
+    <figure class="champ-ph"><img src="img/worlds/blg-champions.jpg" alt="Les joueurs de Bilibili Gaming soulèvent la Coupe de l'invocateur sur scène" width="1920" height="1080"><figcaption>Photo : CGTN</figcaption></figure>
+    <div class="champ-tx">
+      <span class="eyebrow">Worlds 2026 · finale du 14 novembre</span>
+      <h2 id="chT">Bilibili Gaming, champion du monde</h2>
+      <p class="champ-sc"><img src="img/equipes/bilibili-gaming.png" alt="" width="40" height="40"><b>BLG 3 – 1 Gen.G</b><span>Barclays Center, Brooklyn</span></p>
+      <p>Premier titre mondial pour BLG, et premier sacre de la Chine depuis 2021. Sur la route : les quatre équipes coréennes, dont T1 en demi-finale.</p>
+      <p class="champ-ro"><span><small>TOP</small>Bin</span><span><small>JGL</small>XUN</span><span><small>MID</small>Knight</span><span><small>BOT</small>Viper</span><span><small>SUP</small>ON</span></p>
+    </div>
+  </section>
+  <div class="winners">
+    <a class="win-c" href="worlds.html" id="winP"><span class="eyebrow" id="winPk">Pronos des Worlds</span><div class="win-b" id="winPb"><span class="note">Chargement…</span></div></a>
+    <a class="win-c" href="fantasy.html#classement" id="winF"><span class="eyebrow" id="winFk">CDS Fantasy</span><div class="win-b" id="winFb"><span class="note">Chargement…</span></div></a>
+  </div>
+
   <header class="hh">
     <div class="hh-txt">
       <span class="eyebrow" id="hhDate">Ta main du jour</span>
@@ -829,7 +867,20 @@ function renderFanRank(){const box=$("fanRank");if(!box||!window.FantasyScore)re
   const n=fanD.games.length;$("fanRankNote").textContent=n?`${n} game${n>1?"s":""} comptée${n>1?"s":""}`:"les points arrivent après chaque game";
   let k=0,prev=null;box.innerHTML=rows.slice(0,10).map((r,i)=>{if(r.t!==prev){k=i+1;prev=r.t}
     return `<li class="${r.id===uid?"me":""}"><span class="fr-pos">${k}</span><span class="fr-n"><b>${conseilAv(r.id,r.p,24)}${esc(r.p)}</b><small>${r.cap?"Capitaine : "+esc(r.cap):"Pas de capitaine"}</small></span><span class="fr-pts">${F.fr(r.t)}<small>pts</small></span></li>`}).join("")}
-function renderAll(){renderKick();renderFanRank();renderWeek();if(ladder)renderRecap();
+// Vainqueurs du Conseil : pronos des Worlds (Pick'em) et Fantasy. « Vainqueur » une fois la finale enregistrée, « En tête » avant.
+function renderWinners(){
+  const draw=(box,lab,title,doneTxt,rows,unit,over)=>{const b=$(box);if(!b)return;$(lab).textContent=title+" · "+(over?"vainqueur":"en tête");
+    if(!rows.length){b.innerHTML=`<span class="note">Pas encore de classement.</span>`;return}
+    const top=rows.filter(r=>r.s===rows[0].s),second=rows.find(r=>r.s<rows[0].s);
+    b.innerHTML=`${top.length===1?conseilAv(top[0].id,top[0].n,64):""}<div class="win-n"><b>${top.map(r=>esc(r.n)).join(" et ")}</b><span>${String(Math.round(rows[0].s*10)/10).replace(".",",")} ${unit}${top.length>1?" · ex æquo":""}</span><small>${second?"2e : "+esc(second.n)+" ("+String(Math.round(second.s*10)/10).replace(".",",")+")":""}${over?"":" · "+doneTxt}</small></div>`};
+  const done=(results?.matches||[]).filter(m=>m.status==="done"),finalDone=!!results?.champion||(results?.matches||[]).some(m=>/finale$/i.test(m.stage||"")&&!/demi|quart/i.test(m.stage||"")&&m.status==="done");
+  const pr=Object.entries(picks||{}).filter(([,p])=>p.pseudo).map(([id,p])=>{let s=0;for(const m of done)if(p.picks?.[m.id]===m.winner)s+=PTS[m.bo]||1;if(results?.champion&&p.champion===results.champion)s+=5;return{id,n:p.pseudo,s}}).sort((a,b)=>b.s-a.s||a.n.localeCompare(b.n));
+  draw("winPb","winPk","Pronos des Worlds","en attente du résultat de la finale",pr,"pts",finalDone);
+  let fd=null;try{fd=fanD}catch(e){}
+  if(window.FantasyScore&&fd){const F=window.FantasyScore,fz=Object.keys(fanD.sages||{}).map(id=>({id,n:fanD.sages[id].pseudo||"Un sage",s:F.sagePts(fanD.phases,fanD.captains,fanD.games,id)})).sort((a,b)=>b.s-a.s||a.n.localeCompare(b.n));
+    draw("winFb","winFk","CDS Fantasy","en attente des games de la finale",fz,"pts",(fanD.games||[]).filter(g=>g.phase==="finale").length>=3)}
+}
+function renderAll(){renderWinners();renderKick();renderFanRank();renderWeek();if(ladder)renderRecap();
   const me=riot[uid]?.pseudo||picks[uid]?.pseudo||wow[uid]?.pseudo;
   $("me").innerHTML=!db?(connErr?"Hors ligne":"Connexion au Conseil…"):me?`Bienvenue, <b>${esc(me)}</b>`:"Bienvenue, sage anonyme";
   renderRiotReg();renderPlayers();renderWow();renderSummary();

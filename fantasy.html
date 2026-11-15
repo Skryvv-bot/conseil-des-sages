@@ -243,10 +243,12 @@ const VR={};function vr(g){return VR[g.id]||(VR[g.id]=voteResult(g))}
 function gamePts(g,name){const st=g.players?.[name];if(!st)return null;const s=base(st,P[name]?.role,g);return Math.round(s*10)/10}
 function gameDetail(g,name){return detail(g.players[name],P[name]?.role,g)}
 function playerPts(name,phase){let t=0,n=0;for(const g of games){if(phase&&g.phase!==phase)continue;const s=gamePts(g,name);if(s!=null){t+=s;n++}}return {t,n}}
-function teamOf(id,phase){const d=phases[phase];if(!d?.picks)return null;const o={};for(const x of d.picks)if(x.uid===id)o[x.role]=x.name;return o}
-function sagePts(id,phase){let t=0;for(const ph of phase?[phase]:PHASES.map(p=>p.id)){const tm=teamOf(id,ph);if(!tm)continue;const cap=captains[id]?.[ph];
+// Les demi-finales et la finale se jouent avec l'équipe tirée pour les quarts (pas de nouveau tirage).
+const CARRY={demis:"quarts",finale:"quarts"},srcPh=ph=>CARRY[ph]||ph;
+function teamOf(id,phase){const d=phases[srcPh(phase)];if(!d?.picks)return null;const o={};for(const x of d.picks)if(x.uid===id)o[x.role]=x.name;return o}
+function sagePts(id,phase){let t=0;for(const ph of phase?[phase]:PHASES.map(p=>p.id)){const tm=teamOf(id,ph);if(!tm)continue;const cap=captains[id]?.[ph]||captains[id]?.[srcPh(ph)];
   for(const r of ROLES){const n=tm[r];if(!n)continue;const pt=playerPts(n,ph).t;t+=n===cap?pt*PTS.captain:pt}}return Math.round(t*10)/10}
-function ownersOf(name,phase){const d=phases[phase];if(!d?.picks)return[];return d.picks.filter(x=>x.name===name).map(x=>x.uid)}
+function ownersOf(name,phase){const d=phases[srcPh(phase)];if(!d?.picks)return[];return d.picks.filter(x=>x.name===name).map(x=>x.uid)}
 const currentPhase=()=>{const drawn=PHASES.filter(p=>phases[p.id]?.picks);return drawn.length?drawn[drawn.length-1].id:"swiss"};
 const sageName=id=>id==="demo"?"l'essai":sages[id]?.pseudo||names[id]?.name||"Un sage";
 
@@ -310,7 +312,7 @@ function teamReveal(){if(!uid||busy)return;for(const ph of PHASES){const d=phase
 // Capitaine : modifiable jusqu'au premier match de la phase, ou pendant une fenêtre rouverte par Skryvv (sage ajouté en retard)
 const capUntil=(id,ph)=>Math.max(phaseStart(ph),+(phases[ph]?.capOpen?.[id]||0));
 const capLocked=(id,ph)=>Date.now()>=capUntil(id,ph);
-function teamPanel(id,ph,mine){const tm=teamOf(id,ph),cap=captains[id]?.[ph],locked=capLocked(id,ph),label=PHASES.find(p=>p.id===ph).label;
+function teamPanel(id,ph,mine){const tm=teamOf(id,ph),cap=captains[id]?.[ph]||captains[id]?.[srcPh(ph)],locked=capLocked(id,ph),label=PHASES.find(p=>p.id===ph).label;
   return `<section class="panel"><div class="between"><h2>${mine?"Mon équipe":"Équipe"} · ${label}</h2><span class="note">${fr(sagePts(id,ph))} points cette phase${mine&&!locked?` · capitaine modifiable jusqu'au ${fmtDate(capUntil(id,ph))}`:""}</span></div>
     <div class="squad">${ROLES.map(r=>{const n=tm[r],p=P[n];if(!p)return `<div class="slot"><span class="lane">${r}</span><div class="empty">—</div></div>`;
       const pts=playerPts(n,ph).t;
@@ -450,7 +452,7 @@ function playCsgo(pick,seq,box,isDemo){return new Promise(res=>{if(!box)return r
 let cTab="sages",cPhase="";
 function sageTable(limit){const rows=Object.keys(sages).map(id=>({id,t:sagePts(id,cPhase||null)})).sort((a,b)=>b.t-a.t).slice(0,limit||999);
   if(!rows.length)return `<div class="empty">Personne n'est encore inscrit.</div>`;
-  return `<div class="tw"><table><thead><tr><th>#</th><th>Sage</th>${ROLES.map(r=>`<th>${r}</th>`).join("")}<th class="num">Points</th></tr></thead><tbody>${rows.map((x,i)=>{const ph=cPhase||currentPhase(),tm=teamOf(x.id,ph)||{},cap=captains[x.id]?.[ph];
+  return `<div class="tw"><table><thead><tr><th>#</th><th>Sage</th>${ROLES.map(r=>`<th>${r}</th>`).join("")}<th class="num">Points</th></tr></thead><tbody>${rows.map((x,i)=>{const ph=cPhase||currentPhase(),tm=teamOf(x.id,ph)||{},cap=captains[x.id]?.[ph]||captains[x.id]?.[srcPh(ph)];
     return `<tr class="click${x.id===uid?" me":""}" data-href="#sage-${encodeURIComponent(x.id)}"><td>${i+1}</td><td><b>${conseilAv(x.id,sageName(x.id),26)}${esc(sageName(x.id))}</b></td>${ROLES.map(r=>`<td>${tm[r]?`<span class="mini">${P[tm[r]]?.img?`<img src="${P[tm[r]].img}" alt="">`:""}${esc(tm[r])}${cap===tm[r]?" ©":""}${tlg(tm[r])}</span>`:'<span class="note">–</span>'}</td>`).join("")}<td class="num"><b>${fr(x.t)}</b></td></tr>`}).join("")}</tbody></table></div>`}
 function vClassement(v){
   let h=`<section class="panel"><div class="between"><h2>Classement</h2><div class="sub-tabs">${[["sages","Sages"],["joueurs","Joueurs pros"],["equipes","Équipes LoL"]].map(([k,n])=>`<button class="chip" data-ct="${k}" aria-pressed="${k===cTab}">${n}</button>`).join("")}</div></div>
@@ -514,7 +516,7 @@ function bindKick(id){const b=$("kick");if(!b)return;b.onclick=()=>{if(!b.datase
 
 // ---------- VOTES ----------
 function vRegles(v){v.innerHTML=`<section class="panel"><h2>Règles</h2><div class="rules">
-  <div><span class="eyebrow">Inscription et tirage</span><ul><li>Inscris-toi depuis l'accueil avant le tirage.</li><li>Un tirage à <b>chaque phase</b> : suisse, quarts, demies, finale.</li><li>Lane par lane : chaque sage reçoit un Top, puis un Jungle, un Mid, un Bot, un Support.</li><li>En phase suisse, un joueur ne va qu'à <b>un seul</b> sage. À partir des quarts, il reste moins de joueurs : chacun existe en <b>deux exemplaires</b>.</li><li>Les points gagnés pendant une phase restent acquis : le nouveau tirage ne change que les joueurs des phases suivantes.</li></ul></div>
+  <div><span class="eyebrow">Inscription et tirage</span><ul><li>Inscris-toi depuis l'accueil avant le tirage.</li><li>Deux tirages : un pour la phase suisse, un pour les quarts. L'équipe des quarts est <b>gardée pour les demi-finales et la finale</b>.</li><li>Lane par lane : chaque sage reçoit un Top, puis un Jungle, un Mid, un Bot, un Support.</li><li>En phase suisse, un joueur ne va qu'à <b>un seul</b> sage. À partir des quarts, il reste moins de joueurs : chacun existe en <b>deux exemplaires</b>.</li><li>Les points gagnés pendant une phase restent acquis : le nouveau tirage ne change que les joueurs des phases suivantes.</li></ul></div>
 
   <div><span class="eyebrow">Capitaine</span><ul><li>Un <b>capitaine</b> par phase : ses points comptent <b>double</b>. Modifiable jusqu'au premier match de la phase.</li></ul></div>
   <div><span class="eyebrow">Raretés des cartes</span><ul><li><b style="color:var(--r-leg)">Légendaire</b> : top 3 du Conseil à son poste</li><li><b style="color:var(--r-epic)">Épique</b> : 4e à 7e</li><li><b style="color:var(--r-rare)">Rare</b> : 8e à 11e</li><li><b style="color:var(--r-com)">Commun</b> : 12e à 16e</li><li><b style="color:var(--r-goat)">Hors catégorie</b> : Faker 🐐</li></ul></div></div></section>
@@ -567,7 +569,7 @@ render=function(){
   else h+=`<div class="state">C'est noté. Rendez-vous sur Discord pour le tirage : tes joueurs, ton capitaine et le classement apparaîtront ici ensuite.</div><div class="row"><button class="btn ghost small" id="leave">Me désinscrire</button></div>`;
   h+=`<div><span class="eyebrow">Déjà inscrits</span><div class="locked-list" style="margin-top:8px">${Object.values(sages).sort((a,b)=>a.at-b.at).map(s=>`<span class="chip">${conseilAv("",s.pseudo,20)}${esc(s.pseudo)}</span>`).join("")||'<span class="note">Personne pour l\'instant, sois le premier.</span>'}</div></div></section>`;
   h+=`<section class="panel"><h2>Le principe</h2><div class="rules">
-    <div><span class="eyebrow">Tirage</span><ul><li>Pas de draft : chaque sage reçoit au hasard un Top, un Jungle, un Mid, un Bot et un Support.</li><li>Un nouveau tirage à chaque phase : suisse, quarts, demies, finale.</li></ul></div>
+    <div><span class="eyebrow">Tirage</span><ul><li>Pas de draft : chaque sage reçoit au hasard un Top, un Jungle, un Mid, un Bot et un Support.</li><li>Deux tirages (phase suisse, puis quarts) ; l'équipe des quarts est gardée pour les demies et la finale.</li></ul></div>
     <div><span class="eyebrow">Points</span><ul><li>Kills, assists, farm, dégâts, objectifs : un barème propre à chaque poste.</li><li>Ton capitaine compte double.</li></ul></div>
     </div></section>`;
   v.innerHTML=h;
