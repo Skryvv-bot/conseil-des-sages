@@ -1,0 +1,947 @@
+[
+ {
+  "page": "index.html",
+  "vue": "pc",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?gsessionid=3XGl-BGSIQ3mS8pmB9ElPXBIMoKaLvBeI_ZmFkS87uRDRleRiMia",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525"
+  ],
+  "avatars": 25,
+  "avatarsPhoto": 15,
+  "initiales": [
+   "Brato",
+   "Brato",
+   "Gurvan 2",
+   "Leukos",
+   "Karym",
+   "Kynaan",
+   "Gurvan 2",
+   "HOOtHOOtsHiNy",
+   "Mort 2 Kaiser ",
+   "Trendy"
+  ],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "lol.html",
+  "vue": "pc",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=5iRSJvneqEbEL34D4GQBh2ePCZRaJb6s5XJCzVKftELLmT1UuMG",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525"
+  ],
+  "avatars": 0,
+  "avatarsPhoto": 0,
+  "initiales": [],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "newdawn.html",
+  "vue": "pc",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=8WItD_wJu1cyLWPXb2-Zi9-6cN3JycStwr_DDxujDgGY9znRrtF",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525"
+  ],
+  "avatars": 0,
+  "avatarsPhoto": 0,
+  "initiales": [],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "mercato.html",
+  "vue": "pc",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=HPsnUwBqLNkVpJ6YPy8m5ics_YWVlrJ371euXxKUQoNNvT9nlh-",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 1,
+  "avatarsPhoto": 1,
+  "initiales": [],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "worlds.html",
+  "vue": "pc",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=bA-yd5miMCrieM4HbMncxHnMDHkYgZjanHi9xoKmAZYZMRdTzQx",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 15,
+  "avatarsPhoto": 7,
+  "initiales": [
+   "Axoes",
+   "Rebloche",
+   "Kynaan",
+   "Gurvan 2",
+   "Karym",
+   "Rebloche",
+   "Kyky",
+   "TrendySD#SCF"
+  ],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "tierlist.html",
+  "vue": "pc",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 10,
+  "avatarsPhoto": 7,
+  "initiales": [
+   "Axoes",
+   "Gurvan 2",
+   "GarenBourreTon"
+  ],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "fantasy.html",
+  "vue": "pc",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=bQKw6TclPh6kvTQthcsUvzf4gQ_wOxZnYuXluXxkzviKFLfcmbJ",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 5,
+  "avatarsPhoto": 3,
+  "initiales": [
+   "Brato",
+   "Gurvan 2"
+  ],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "fantasy.html#classement",
+  "vue": "pc",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=NZg58ZPwEdATgVxwTRlRkCooJ5mScGpTqeynk0Grf4hZov_eGfO",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 15,
+  "avatarsPhoto": 8,
+  "initiales": [
+   "Brato",
+   "Gurvan 2",
+   "Leukos",
+   "Karym",
+   "Kynaan",
+   "Sley",
+   "Rebloche"
+  ],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "cartes.html",
+  "vue": "pc",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 0,
+  "avatarsPhoto": 0,
+  "initiales": [],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "cartes.html#sages",
+  "vue": "pc",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=tGvrZDMrk2BcEDT5NW_N-VYJKV5yInT0cVl97i-nwngDRC7O3Bx",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 9,
+  "avatarsPhoto": 5,
+  "initiales": [
+   "Mort 2 Kaiser ",
+   "Rebloche",
+   "lebrat7",
+   "Un sage"
+  ],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "ladder.html",
+  "vue": "pc",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=0XMFXu3dgBy-jv529WYoquooltQWpiQpXDyvJls2pYQSDrVOmEp",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 0,
+  "avatarsPhoto": 0,
+  "initiales": [],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "customs.html",
+  "vue": "pc",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=WW0EbkSbV1WCXvHQqDmefBjRuGF0QHClmsun9DPzakA4Rd6rj6l",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 0,
+  "avatarsPhoto": 0,
+  "initiales": [],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "communaute.html#paris",
+  "vue": "pc",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 8,
+  "avatarsPhoto": 4,
+  "initiales": [
+   "Gurvan 2",
+   "Gurvan 2",
+   "Mort 2 Kaiser ",
+   "?"
+  ],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "communaute.html#profil",
+  "vue": "pc",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=U2xzwcMFg0ZLhWX-xsf5DrMg8thNcgeTniLDQk-BVvJvnZZJpY6",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 8,
+  "avatarsPhoto": 4,
+  "initiales": [
+   "Gurvan 2",
+   "Gurvan 2",
+   "Mort 2 Kaiser ",
+   "?"
+  ],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "patch.html",
+  "vue": "pc",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 0,
+  "avatarsPhoto": 0,
+  "initiales": [],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "wow.html",
+  "vue": "pc",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=yxDX6yg9GV1QArTRiduLBFRTCbZoUlG6nd77R6PVyDguYqZTxek",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 0,
+  "avatarsPhoto": 0,
+  "initiales": [],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "fortnite.html",
+  "vue": "pc",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=vynHNNdsZLMN9c9Ji9MV8D_SIikutzAa-G6pJVG5cl1sPbaFip_",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 4,
+  "avatarsPhoto": 4,
+  "initiales": [],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "devinettes.html",
+  "vue": "pc",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 0,
+  "avatarsPhoto": 0,
+  "initiales": [],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "banque.html",
+  "vue": "pc",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 20,
+  "avatarsPhoto": 8,
+  "initiales": [
+   "Axoes",
+   "Gurvan 2",
+   "Kynaan",
+   "Rebloche",
+   "HOOtHOOtsHiNy",
+   "Mort 2 Kaiser ",
+   "Trendy",
+   "Kyky",
+   "kynan",
+   "kynan",
+   "kynan",
+   "lebrat7"
+  ],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "jeux.html",
+  "vue": "pc",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 0,
+  "avatarsPhoto": 0,
+  "initiales": [],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "index.html",
+  "vue": "tel",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?gsessionid=nECvN8kBL_Lec9Q1D9TYUt3yoe7lnOl6d1gpkiQmB0G-L9z8uurW",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525"
+  ],
+  "avatars": 25,
+  "avatarsPhoto": 15,
+  "initiales": [
+   "Brato",
+   "Brato",
+   "Gurvan 2",
+   "Leukos",
+   "Karym",
+   "Kynaan",
+   "Gurvan 2",
+   "HOOtHOOtsHiNy",
+   "Mort 2 Kaiser ",
+   "Trendy"
+  ],
+  "broken": [],
+  "overflowX": 0,
+  "over": [
+   "SPAN."
+  ],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "lol.html",
+  "vue": "tel",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=ukevCLiLa0vbzRTtgoqzgbCp9DI_sH4CAglo4n0Nqw3EIqnk__h",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525"
+  ],
+  "avatars": 0,
+  "avatarsPhoto": 0,
+  "initiales": [],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "newdawn.html",
+  "vue": "tel",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=5VuaLlMpj2zFF4zTwaVCv0A5oP-dAaQEL_rsRe9HH2Dr-3BB3rf",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 0,
+  "avatarsPhoto": 0,
+  "initiales": [],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "mercato.html",
+  "vue": "tel",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 1,
+  "avatarsPhoto": 1,
+  "initiales": [],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "worlds.html",
+  "vue": "tel",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=BeeNayDjMce0i_pR8tm-QKPpicrziuXf_YrC472rpnwLgmQw6_V",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 15,
+  "avatarsPhoto": 7,
+  "initiales": [
+   "Axoes",
+   "Rebloche",
+   "Kynaan",
+   "Gurvan 2",
+   "Karym",
+   "Rebloche",
+   "Kyky",
+   "TrendySD#SCF"
+  ],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "tierlist.html",
+  "vue": "tel",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=qrkiRgUeZ0MqSFrxY7es2x0iPpSYEHPxgI8nqqKTog_kJ9dQI_K",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 10,
+  "avatarsPhoto": 7,
+  "initiales": [
+   "Axoes",
+   "Gurvan 2",
+   "GarenBourreTon"
+  ],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "fantasy.html",
+  "vue": "tel",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=pv41Nfv9uwMW0tUwHBpwIw9isr0jv2fGR5ugtBmWRgx7mn1GvO5",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 5,
+  "avatarsPhoto": 3,
+  "initiales": [
+   "Brato",
+   "Gurvan 2"
+  ],
+  "broken": [],
+  "overflowX": 0,
+  "over": [
+   "A.",
+   "A.",
+   "A.",
+   "A."
+  ],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "fantasy.html#classement",
+  "vue": "tel",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 15,
+  "avatarsPhoto": 8,
+  "initiales": [
+   "Brato",
+   "Gurvan 2",
+   "Leukos",
+   "Karym",
+   "Kynaan",
+   "Sley",
+   "Rebloche"
+  ],
+  "broken": [],
+  "overflowX": 0,
+  "over": [
+   "A.",
+   "A.",
+   "A.",
+   "A."
+  ],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "cartes.html",
+  "vue": "tel",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=gY8lWHPgyYfZNANSbumrKuWjqWoaRGt2dEnpFpjEMEJuotrKe8Z",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 0,
+  "avatarsPhoto": 0,
+  "initiales": [],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "cartes.html#sages",
+  "vue": "tel",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=YZkPQ-gl_LSiV5ODvdK4c7zc_UQP8ExEprSpnWj3kxJbS4LAAl-",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 9,
+  "avatarsPhoto": 5,
+  "initiales": [
+   "Mort 2 Kaiser ",
+   "Rebloche",
+   "lebrat7",
+   "Un sage"
+  ],
+  "broken": [],
+  "overflowX": 0,
+  "over": [
+   "TABLE.ctable",
+   "THEAD.",
+   "TR.",
+   "TH.num"
+  ],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "ladder.html",
+  "vue": "tel",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=g5R11acqOWoY54LjSj4RyYZzYSwVlStPN3-uI7D_QTaf2bv1XIv",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 19,
+  "avatarsPhoto": 15,
+  "initiales": [
+   "Mort 2 Kaiser ",
+   "Trendy",
+   "Gurvan 2",
+   "HOOtHOOtsHiNy"
+  ],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "customs.html",
+  "vue": "tel",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=kZUlLoA-XVDZHRC3-xcTNtvjoCMgySEc1yub8eGN1rdITGmurkR",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 0,
+  "avatarsPhoto": 0,
+  "initiales": [],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "communaute.html#paris",
+  "vue": "tel",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=Bzf8XmsqMf_e2qB672U_TzjijALCyu5-fbrB-zlKziYWFP6jo5O",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 7,
+  "avatarsPhoto": 4,
+  "initiales": [
+   "Gurvan 2",
+   "Mort 2 Kaiser ",
+   "?"
+  ],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "communaute.html#profil",
+  "vue": "tel",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 7,
+  "avatarsPhoto": 4,
+  "initiales": [
+   "Gurvan 2",
+   "Mort 2 Kaiser ",
+   "?"
+  ],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "patch.html",
+  "vue": "tel",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=kuGxZfQImZM2_69P7r8GfhH95PYOwD-SYAbObewNFp2F5n7PHXC",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 0,
+  "avatarsPhoto": 0,
+  "initiales": [],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "wow.html",
+  "vue": "tel",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=PgDuh33UWi2t3RjLNz_j25FENrs7QlCGS_RT-fo_NMMvST-GNTy",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 0,
+  "avatarsPhoto": 0,
+  "initiales": [],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "fortnite.html",
+  "vue": "tel",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=c2femTqwAF4P4XPRfySHS2AHXanir_BLJeQpW7waBBAwOQ49qg8",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 2,
+  "avatarsPhoto": 2,
+  "initiales": [],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [
+   "Chargement…"
+  ],
+  "acc": "Connexion"
+ },
+ {
+  "page": "devinettes.html",
+  "vue": "tel",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=8GUcLKHSEvPoWnJ2zI9BpbthSaInXS8kfvl0_d96CDEDf9m2T2k",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 0,
+  "avatarsPhoto": 0,
+  "initiales": [],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "banque.html",
+  "vue": "tel",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 20,
+  "avatarsPhoto": 8,
+  "initiales": [
+   "Axoes",
+   "Gurvan 2",
+   "Kynaan",
+   "Rebloche",
+   "HOOtHOOtsHiNy",
+   "Mort 2 Kaiser ",
+   "Trendy",
+   "Kyky",
+   "kynan",
+   "kynan",
+   "kynan",
+   "lebrat7"
+  ],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ },
+ {
+  "page": "jeux.html",
+  "vue": "tel",
+  "errs": [
+   "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "bad": [
+   "ECHEC https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=6M9EgY9xR9xAcJO79O3kCaxJTm9iw5EidPUtqYz8bheRW2hPBIb",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Nera%2306660%7Ceuw1&after=1794760726473&gameId=8047241129",
+   "502 https://conseil-riot.perrotinyvanpro.workers.dev/result?player=Mort+2+Kaiser%23BONK%7Ceuw1&after=1794770930525&gameId=8047488355"
+  ],
+  "avatars": 0,
+  "avatarsPhoto": 0,
+  "initiales": [],
+  "broken": [],
+  "overflowX": 0,
+  "over": [],
+  "suspects": [],
+  "acc": "Connexion"
+ }
+]
