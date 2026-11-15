@@ -1,0 +1,25 @@
+name: "Données externes du site"
+# Boutique Fortnite, jeux gratuits Epic, matchs LEC/LCK/LPL et vidéos YouTube, mis à jour automatiquement.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "3,33 * * * *"
+  push:
+    branches: [main]
+    paths: [".github/workflows/donnees.yml", ".github/donnees/collecte.py"]
+permissions:
+  contents: write
+concurrency: { group: donnees, cancel-in-progress: false }
+jobs:
+  collecte:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: mkdir w && cd w && python3 ../.github/donnees/collecte.py
+        env:
+          FORTNITE_KEY: ${{ secrets.FORTNITE_KEY }}
+      - run: |
+          cd w/out && ls -la
+          git init -q -b donnees && git config user.name "cds-bot" && git config user.email "cds-bot@users.noreply.github.com"
+          mkdir -p out && mv *.json out/ && git add -A && git commit -qm "Données externes $(date -u +%FT%TZ)"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" donnees
