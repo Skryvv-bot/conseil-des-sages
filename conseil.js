@@ -530,7 +530,9 @@ window.conseilWeekDelta=function(cur,base,id,q="solo"){
 // Résolution automatique des pronos entre potes : on demande à Riot le résultat de la partie.
 const resolving=new Set();
 window.conseilResolvePronos=async function(db,bets){
-  const me=window.CONSEIL_UID,PRONO_STALE=window.PRONO_STALE||6*3600e3,ask=async(b,withId)=>(await fetch(RIOT_RELAY+"/result?"+new URLSearchParams({player:b.riotId+"|"+(b.region||"euw1"),after:String(Date.parse(b.created)||Date.now()),...(withId&&b.gameId?{gameId:String(b.gameId)}:{})}))).json();
+  const me=window.CONSEIL_UID,PRONO_STALE=window.PRONO_STALE||6*3600e3,ask=async(b,withId)=>{const r=await fetch(RIOT_RELAY+"/result?"+new URLSearchParams({player:b.riotId+"|"+(b.region||"euw1"),after:String(Date.parse(b.created)||Date.now()),...(withId&&b.gameId?{gameId:String(b.gameId)}:{})})),d=await r.json().catch(()=>({}));if(/429/.test(d.error||"")){LS.set("riot-429",Date.now());throw new Error("Limite Riot")}return d};
+  // Riot a répondu « trop de demandes » il y a moins de 5 min : on attend avant de redemander
+  if(Date.now()-(+LS.get("riot-429",0))<5*60e3)return;
   for(const [id,b] of Object.entries(bets||{})){
     if(b.status!=="open"||!b.riotId||resolving.has(id))continue;
     const closes=b.closesAt?.toMillis?b.closesAt.toMillis():+b.closesAt||0;
@@ -545,13 +547,15 @@ window.conseilResolvePronos=async function(db,bets){
         match:{championName:r.championName||"",kills:r.kills||0,deaths:r.deaths||0,assists:r.assists||0,duration:r.duration||0,matchId:r.matchId||""}});
       // toujours rien après 6 h : le prono est annulé (possible seulement pour le joueur concerné ou celui qui l'a ouvert)
       else if(age>PRONO_STALE&&(me===b.target||me===b.openedBy))await db.doc("bets/"+id).update({status:"cancel",result:null,settledBy:"expire",settledAt:new Date().toISOString()});
-    }catch(e){console.warn("prono",e)}
+    }catch(e){if(/Limite Riot/.test(e.message)){resolving.delete(id);break}console.warn("prono",e)}
     finally{setTimeout(()=>resolving.delete(id),60000)}
   }
 };
 window.PRONO_STALE=6*3600e3;
 // Sur toutes les pages : un passage pour clôturer les pronos en attente de résultat
-window.conseilPronoSweep=async function(){try{const {db}=await conseilConnect();if(!db)return;const s=await db.collection("bets").where("status","==","open").get(),o={};s.forEach(d=>o[d.id]=d.data());if(Object.keys(o).length)conseilResolvePronos(db,o)}catch(e){}};
+window.conseilPronoSweep=async function(){try{
+  // une fois toutes les 15 min par navigateur au plus : la limite de Riot est partagée par tout le site
+  if(Date.now()-(+LS.get("prono-sweep",0))<15*60e3)return;LS.set("prono-sweep",Date.now());const {db}=await conseilConnect();if(!db)return;const s=await db.collection("bets").where("status","==","open").get(),o={};s.forEach(d=>o[d.id]=d.data());if(Object.keys(o).length)conseilResolvePronos(db,o)}catch(e){}};
 
 
 // ---------- Titres de champion du monde (une étoile par titre, Worlds 2011-2025) ----------
