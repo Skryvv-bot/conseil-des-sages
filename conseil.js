@@ -257,10 +257,14 @@ window.conseilAvatarEl=function(m,dc,size=36){const e=document.createElement("sp
 // Avatar à glisser dans du HTML : une pastille avec les initiales, remplie ensuite par la vraie photo (champion choisi ou photo Discord).
 // On donne l'identifiant du sage quand on l'a, sinon son pseudo suffit.
 window.conseilAv=(id,pseudo,size=26)=>`<span class="cav cav-in" data-av="${conseilEsc(id||"")}" data-avn="${conseilEsc(pseudo||"")}" style="width:${size}px;height:${size}px">${conseilEsc(String(pseudo||"?").slice(0,2).toUpperCase())}</span>`;
-(function(){let S=null,D=null,byName={},busy=false;
-  function fill(){if(!S)return;document.querySelectorAll(".cav-in:not([data-ok])").forEach(e=>{e.dataset.ok="1";const m=S[e.dataset.av]||byName[String(e.dataset.avn).toLowerCase()];if(!m)return;
-    const u=conseilAvatarUrl(m,D);if(!u)return;const im=new Image();im.alt="";im.decoding="async";im.referrerPolicy="no-referrer";im.onload=()=>{e.textContent="";e.appendChild(im)};im.src=u})}
-  function start(){if(busy)return;busy=true;conseilConnect().then(({db})=>{if(!db)return;Promise.all([conseilSages(db),conseilDiscordAvatars()]).then(([s,d])=>{S=s;D=d;for(const m of Object.values(s))if(m.pseudo)byName[m.pseudo.toLowerCase()]=m;fill();
+(function(){let S=null,D=null,byName={},busy=false;const READY=new Set(),WAIT=new Set();
+  // Une photo déjà chargée une fois est posée tout de suite : les listes qui se redessinent souvent (parties en cours, classements) ne repassent plus par les initiales.
+  const put=(e,u)=>{const im=new Image();im.alt="";im.decoding="async";im.referrerPolicy="no-referrer";im.src=u;e.textContent="";e.appendChild(im)};
+  function fill(){if(!S)return;document.querySelectorAll(".cav-in:not([data-ok])").forEach(e=>{const m=S[e.dataset.av]||byName[String(e.dataset.avn).toLowerCase()]||byName[conseilDcNorm(e.dataset.avn)];
+    const u=m?conseilAvatarUrl(m,D):"";if(!u){e.dataset.ok="1";return}
+    if(READY.has(u)){e.dataset.ok="1";put(e,u);return}
+    if(WAIT.has(u))return;WAIT.add(u);const im=new Image();im.referrerPolicy="no-referrer";im.onload=()=>{READY.add(u);WAIT.delete(u);fill()};im.onerror=()=>{WAIT.delete(u);document.querySelectorAll(".cav-in:not([data-ok])").forEach(x=>{const mm=S[x.dataset.av]||byName[String(x.dataset.avn).toLowerCase()];if(mm&&conseilAvatarUrl(mm,D)===u)x.dataset.ok="1"})};im.src=u})}
+  function start(){if(busy)return;busy=true;conseilConnect().then(({db})=>{if(!db)return;Promise.all([conseilSages(db),conseilDiscordAvatars()]).then(([s,d])=>{S=s;D=d;for(const m of Object.values(s))if(m.pseudo){byName[m.pseudo.toLowerCase()]=m;byName[conseilDcNorm(m.pseudo)]=byName[conseilDcNorm(m.pseudo)]||m}fill();
     let t=null;new MutationObserver(()=>{clearTimeout(t);t=setTimeout(fill,120)}).observe(document.body,{childList:true,subtree:true})})})}
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>setTimeout(start,300));else setTimeout(start,300)})();
 
