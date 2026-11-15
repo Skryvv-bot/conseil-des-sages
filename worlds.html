@@ -410,7 +410,7 @@ async function pick(mid,t){
 }
 
 function renderBoard(){
-  const rows=Object.entries(picks).filter(([,p])=>p.pseudo).map(([id,p])=>({id,p,...score(p)})).sort((a,b)=>b.s-a.s||b.ok-a.ok||a.p.pseudo.localeCompare(b.p.pseudo));
+  const rows=Object.entries(picks).filter(([,p])=>p.pseudo).map(([id,p])=>({id,p,...score(p)})).sort((a,b)=>b.s-a.s||(b.p.champion===(state?.champion||"BLG"))-(a.p.champion===(state?.champion||"BLG"))||b.ok-a.ok||a.p.pseudo.localeCompare(b.p.pseudo));
   if(!db){$("board").innerHTML=`<div class="empty">Chargement du classement…</div>`;return}
   if(!rows.length){$("board").innerHTML=`<div class="empty">Personne n'est encore inscrit. Sois le premier sage à rejoindre le pick'em depuis l'onglet Matchs.</div>`;return}
   let rank=0,prev=null;
