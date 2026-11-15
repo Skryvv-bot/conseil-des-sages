@@ -167,6 +167,8 @@ document.getElementById("hours").replaceChildren(...R.map(r=>row([r[0],r[2]===r[
   function draw(){fb.innerHTML=TYPES.map(([k,l])=>`<button type="button" data-k="${k}" aria-pressed="${k===cur}">${l}</button>`).join("");fb.querySelectorAll("button").forEach(b=>b.onclick=()=>{cur=b.dataset.k;draw()});
     const list=items.filter(x=>cur==="tout"||(cur==="autre"?!main.includes(x.k):x.k===cur)),secs=[];
     for(const x of list){const s=(x.sec||"Autres").trim();let g=secs.find(z=>z[0]===s);if(!g)secs.push(g=[s,[]]);g[1].push(x)}
+    // One Piece en premier (la saison), les objets sans rubrique à la fin
+    secs.sort((a,b)=>(/one piece/i.test(b[0])-/one piece/i.test(a[0]))||((a[0]==="Autres")-(b[0]==="Autres")));
     box.innerHTML=secs.map(([s,xs])=>`<div class="shop-sec"><h3>${conseilEsc(s)}</h3><div class="shop-g">${xs.map(x=>`<div class="shop-i" style="${x.c?"background:#"+conseilEsc(x.c):""}"><img src="${conseilEsc(x.i)}" alt="" loading="lazy" width="256" height="256"><div><b title="${conseilEsc(x.n)}">${conseilEsc(x.n)}</b><span>${nf(x.p)} V-bucks${x.r>x.p?`<s>${nf(x.r)}</s>`:""}</span><small>${conseilEsc([x.k,x.rar].filter(Boolean).join(" · "))}</small></div></div>`).join("")}</div></div>`).join("")||'<p class="note">Rien dans cette catégorie aujourd\'hui.</p>'}
   draw()})();
 conseilVideos("fnVids","fortnite",4);
