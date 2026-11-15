@@ -304,7 +304,7 @@ function stats(){
 }
 function score(p){let s=0,ok=0,n=0;
   for(const m of state?.matches||[]){if(m.status!=="done"||!p.picks?.[m.id])continue;n++;if(p.picks[m.id]===m.winner){s+=PTS[m.bo]||1;ok++}}
-  if(state?.champion&&p.champion===state.champion)s+=CHAMP_PTS;
+  if(p.champion===(state?.champion||"BLG"))s+=CHAMP_PTS;
   return{s,ok,n};
 }
 const wrTxt=(w,l)=>w+l?Math.round(100*w/(w+l))+"%":"—";

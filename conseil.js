@@ -32,13 +32,13 @@ window.conseilShowAdmin=function(){const ok=window.CONSEIL_UID===CONSEIL_ADMIN;d
 // ---------- Navigation commune ----------
 const CONSEIL_NAV=[
   {id:"accueil",href:"index.html",label:"Accueil"},
-  {id:"lol",href:"lol.html",label:"LoL",sub:[{id:"lol",href:"lol.html",label:"Accueil LoL"},{id:"mercato",href:"mercato.html",label:"Mercato"},{id:"worlds",href:"worlds.html",label:"Worlds 2026"},{id:"fantasy",href:"fantasy.html",label:"Fantasy"},{id:"cartes",href:"cartes.html",label:"LolMaster"},
+  {id:"lol",href:"lol.html",label:"LoL",sub:[{id:"lol",href:"lol.html",label:"Accueil LoL"},{id:"newdawn",href:"newdawn.html",label:"LoL 2 · New Dawn"},{id:"mercato",href:"mercato.html",label:"Mercato"},{id:"worlds",href:"worlds.html",label:"Worlds 2026"},{id:"fantasy",href:"fantasy.html",label:"Fantasy"},{id:"cartes",href:"cartes.html",label:"LolMaster"},
     {id:"ladder",href:"ladder.html",label:"Ladder"},{id:"customs",href:"customs.html",label:"Customs & Clash"},{id:"pronos",href:"communaute.html#paris",label:"Pronos entre potes"},{id:"patch",href:"patch.html",label:"Patch"}]},
   {id:"wow",href:"wow.html",label:"WoW",sub:[{id:"wow",href:"wow.html",label:"WoW Forever"}]},
   {id:"fortnite",href:"fortnite.html",label:"Fortnite",sub:[{id:"fortnite",href:"fortnite.html",label:"Chasse aux trésors"},{href:"fortnite.html#taux",label:"Taux de drop"}]},
   {id:"jeux",href:"devinettes.html",label:"Jeux",noBar:1,sub:[{id:"devinettes",href:"devinettes.html",label:"Devinettes"}]}
 ];
-const NAV_GROUP={ladder:"lol",worlds:"lol",tierlist:"lol",fantasy:"lol",cartes:"lol",customs:"lol",patch:"lol",mercato:"lol",pronos:"lol",devinettes:"jeux",jeux:"jeux"};
+const NAV_GROUP={ladder:"lol",worlds:"lol",tierlist:"lol",fantasy:"lol",cartes:"lol",customs:"lol",patch:"lol",mercato:"lol",pronos:"lol",newdawn:"lol",devinettes:"jeux",jeux:"jeux"};
 (function navStyles(){
   const css=`
 .cnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;margin:-20px calc(-1*max(16px,env(safe-area-inset-left,0px))) 0;padding:10px max(16px,env(safe-area-inset-left,0px));
@@ -112,6 +112,11 @@ window.conseilNav=function(active){
   (function(){const el=document.getElementById("cnavDCn");if(!el)return;const show=n=>{if(n!=null)el.textContent=n+" en ligne"};const c=LS.get("dc-count",null);
     if(c&&Date.now()-c.t<300e3)return show(c.n);
     fetch("https://discord.com/api/v10/invites/ekEVAX8JN?with_counts=true").then(r=>r.json()).then(d=>{if(d.approximate_presence_count!=null){LS.set("dc-count",{n:d.approximate_presence_count,t:Date.now()});show(d.approximate_presence_count)}}).catch(()=>{})})();
+  // Bandeau illustré en haut des pages qui n'ont pas déjà leur grande image
+  (function(){const B={mercato:["img/worlds/blg-champions.jpg","50% 28%"],worlds:["img/worlds/blg-champions.jpg","50% 28%"],fantasy:["img/lol-kindred.jpg","50% 22%"],cartes:["img/lol-xerath.jpg","50% 30%"],ladder:["img/lol-aphelios.jpg","50% 24%"],
+      customs:["img/lol-swain.jpg","50% 16%"],pronos:["img/lol-azir.jpg","50% 24%"],patch:["img/lol-smolder.jpg","50% 38%"],devinettes:["img/lol-leblanc.jpg","50% 18%"],banque:["img/lol-faille.jpg","50% 50%"],profil:["img/lol-faille.jpg","50% 50%"],newdawn:["img/lol-faille.jpg","50% 50%"]}[active];
+    const w=document.querySelector(".wrap"),hd=w&&w.querySelector("header");if(!B||!hd||document.querySelector(".pgban"))return;
+    const d=document.createElement("div");d.className="pgban";d.setAttribute("aria-hidden","true");d.style.backgroundImage=`linear-gradient(90deg,#0c0b14 0%,rgba(12,11,20,.55) 45%,rgba(12,11,20,.15) 100%),url("${B[0]}")`;d.style.backgroundPosition="center,"+B[1];hd.parentNode.insertBefore(d,hd)})();
   conseilComments(active);conseilHunt();setTimeout(conseilPromos,1500);
   if(!/communaute\.html$|index\.html$|\/$/.test(location.pathname))setTimeout(conseilPronoSweep,4000);
 };
@@ -267,7 +272,7 @@ window.conseilPromos=async function(){try{if(document.querySelector(".cpromo"))r
 
 // ---------- Commentaires ----------
 // Un fil par page (collection « comments »). Il faut un profil avec un pseudo pour écrire ; chacun peut supprimer ses messages.
-const COMMENT_PAGES={pronos:"les pronos entre potes",accueil:"l'accueil",lol:"LoL",wow:"WoW Forever",fortnite:"Fortnite",mercato:"le mercato",patch:"le patch",worlds:"les Worlds",fantasy:"la Fantasy",ladder:"le ladder",tierlist:"la tier list",devinettes:"les Devinettes",customs:"les customs"};
+const COMMENT_PAGES={newdawn:"New Dawn",pronos:"les pronos entre potes",accueil:"l'accueil",lol:"LoL",wow:"WoW Forever",fortnite:"Fortnite",mercato:"le mercato",patch:"le patch",worlds:"les Worlds",fantasy:"la Fantasy",ladder:"le ladder",tierlist:"la tier list",devinettes:"les Devinettes",customs:"les customs"};
 window.conseilComments=async function(page){
   const wrap=document.querySelector(".wrap");if(!wrap||!COMMENT_PAGES[page]||document.getElementById("ccom"))return;
   const sec=document.createElement("section");sec.id="ccom";sec.className="frame panel ccom";sec.setAttribute("aria-labelledby","ccomT");
@@ -319,7 +324,7 @@ window.conseilHunt=async function(){const boxes=[...document.querySelectorAll("[
 
 // ---------- Thème « Collection holographique » et bandeau d'infos ----------
 (function(){const add=()=>{if(document.getElementById("tv-theme"))return;
-  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=14";document.head.appendChild(l)};
+  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=15";document.head.appendChild(l)};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();
 function defaultTicker(){const d=Math.ceil((Date.parse("2026-11-04T23:00:00Z")-Date.now())/864e5);
   return ["Worlds 2026 : Bilibili Gaming champion du monde, 3-1 contre Gen.G","Pick'em : un skin pour le 1er (offert par Skryvv) et un skin pour le 2e (offert par Tabaskoh)",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Pronos entre potes, tribunal et sage de la semaine dans Le Conseil","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes"]}
