@@ -1,0 +1,27 @@
+name: "Vérification : captures du site en ligne"
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [".github/workflows/verif-captures.yml", ".github/verif/captures.js"]
+permissions:
+  contents: write
+jobs:
+  captures:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: |
+          sleep 75
+          mkdir work && cp .github/verif/captures.js work/ && cd work
+          npm init -y >/dev/null && npm i playwright@1.48.2 >/dev/null 2>&1 && npx playwright install --with-deps chromium >/dev/null 2>&1
+          node captures.js
+          ls out | wc -l
+      - run: |
+          cd work/out
+          git init -q -b verif-captures
+          git config user.name "cds-bot"; git config user.email "cds-bot@users.noreply.github.com"
+          git add -A && git commit -qm "Captures du site en ligne"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" verif-captures
