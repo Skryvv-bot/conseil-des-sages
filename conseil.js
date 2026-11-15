@@ -341,7 +341,7 @@ window.conseilHunt=async function(){const boxes=[...document.querySelectorAll("[
 
 // ---------- Thème « Collection holographique » et bandeau d'infos ----------
 (function(){const add=()=>{if(document.getElementById("tv-theme"))return;
-  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=16";document.head.appendChild(l)};
+  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=17";document.head.appendChild(l)};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();
 function defaultTicker(){const d=Math.ceil((Date.parse("2026-11-04T23:00:00Z")-Date.now())/864e5);
   return ["Worlds 2026 : Bilibili Gaming champion du monde, 3-1 contre Gen.G","Pick'em : un skin pour le 1er (offert par Skryvv) et un skin pour le 2e (offert par Tabaskoh)",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Pronos entre potes, tribunal et sage de la semaine dans Le Conseil","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes"]}
@@ -405,7 +405,7 @@ async function offerClaim(db,uid){
     const list=Object.entries(people).sort((a,b)=>a[1].localeCompare(b[1]));
     if(!list.length)return;
     const box=document.createElement("section");box.className="claim";box.setAttribute("aria-label","Récupérer mon ancien compte");
-    box.innerHTML=`<div><b>Nouvelle adresse du site !</b><span>Tu avais déjà un compte (pronos, tier list, profil, camp) ? Choisis ton pseudo pour tout récupérer.</span></div>
+    box.innerHTML=`<div><b>Nouvelle adresse du site !</b><span>Tu avais déjà un compte (pronos, tier list, profil) ? Choisis ton pseudo pour tout récupérer.</span></div>
       <div class="claim-row"><select aria-label="Mon ancien pseudo"><option value="">Mon ancien pseudo…</option>${list.map(([id,p])=>`<option value="${id}">${conseilEsc(p)}</option>`).join("")}</select>
       <button type="button" class="btn" data-go>Récupérer</button><button type="button" class="btn ghost" data-no>Je suis nouveau</button></div><p class="claim-msg" role="status"></p>`;
     const wrap=document.querySelector(".wrap")||document.body;wrap.prepend(box);
@@ -724,7 +724,7 @@ window.conseilClaim=async function(db,uid,old,pseudo){
 };
 window.conseilTakeover=function(el,db,uid,old,pseudo){
   if(!el)return;el.hidden=false;
-  el.innerHTML=`Le pseudo <b>${conseilEsc(pseudo)}</b> est déjà pris. Si c'est toi sur un autre téléphone ou navigateur, récupère ton compte (pronos, tier list, profil, camp) : <button type="button" class="btn small" data-take>C'est moi, récupérer</button>`;
+  el.innerHTML=`Le pseudo <b>${conseilEsc(pseudo)}</b> est déjà pris. Si c'est toi sur un autre téléphone ou navigateur, récupère ton compte (pronos, tier list, profil) : <button type="button" class="btn small" data-take>C'est moi, récupérer</button>`;
   el.querySelector("[data-take]").onclick=async e=>{e.target.disabled=true;e.target.textContent="Récupération…";
     try{await conseilClaim(db,uid,old,pseudo);el.textContent="C'est fait ! Rechargement…";setTimeout(()=>location.reload(),900)}
     catch(err){console.warn(err);el.textContent="Récupération impossible (compte déjà récupéré ?). Choisis un autre pseudo ou demande à Ivan."}};

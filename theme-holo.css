@@ -270,3 +270,10 @@ h2 .cav-in{margin-right:12px}
 td .cav-in,li .cav-in,b .cav-in{flex:none}
 
 .promo>.vid{padding:0!important;align-self:stretch}
+
+/* Rien ne dépasse de l'écran : les blocs de page et les listes se réduisent au lieu de pousser la page */
+.wrap>*{min-width:0;max-width:100%}
+.list,.item{min-width:0;max-width:100%;box-sizing:border-box}
+.item{flex-wrap:wrap}
+.item>.grow{flex:1 1 140px}
+.item .note{overflow-wrap:anywhere}
