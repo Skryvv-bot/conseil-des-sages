@@ -41,6 +41,10 @@
 .warn{border-left:4px solid var(--holo-gold,#ffe27a);background:#201d38;border-radius:12px;padding:14px 16px;margin:0;color:#d9d5ef}
 .src{font-size:.85rem;color:var(--muted)}
 ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;color:#d9d5ef}
+.ccbox{background:#0c0b14;border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.ccbox b{color:#fff;font:800 1rem var(--display)}
+.ccbox ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;color:#d9d5ef}
+.ccbox code{background:#201d38;border-radius:6px;padding:1px 6px;font:500 .85rem var(--mono);color:#ffe27a;overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -74,9 +78,20 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
 
   <section class="frame panel" aria-labelledby="f-rank">
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h2 id="f-rank">Classement des chasseurs</h2><span class="note" id="fnN"></span></div>
-    <p class="lead">Les chasseurs du Conseil, classés par Top 1. Les Top 1, les kills et les parties de la saison viennent de Fortnite et se mettent à jour tout seuls.</p>
-    <div class="tbox"><table class="tbl" style="min-width:560px"><thead><tr><th>Sage</th><th>Top 1</th><th>Kills</th><th>Parties</th></tr></thead><tbody id="fnRows"><tr><td colspan="4">Chargement…</td></tr></tbody></table></div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><a class="btn ghost" href="communaute.html#profil">Ajouter mon pseudo Epic</a><span class="note">Dans ton profil, partie Fortnite.</span></div>
+    <p class="lead">Les chasseurs du Conseil, classés par coffres ouverts. Les Top 1, les kills et les parties viennent de Fortnite et se mettent à jour tout seuls. Les coffres et les trésors viennent de ChestCounter, un compteur gratuit pour PC.</p>
+    <div class="tbox"><table class="tbl" style="min-width:680px"><thead><tr><th>Sage</th><th>Coffres ouverts</th><th>Trésors</th><th>Top 1</th><th>Kills</th><th>Parties</th></tr></thead><tbody id="fnRows"><tr><td colspan="6">Chargement…</td></tr></tbody></table></div>
+    <div class="ccbox">
+      <b>Compter tes coffres, en deux étapes</b>
+      <ol>
+        <li>Installe <a href="https://github.com/LED-N/Fortnite-ChestCounter" target="_blank" rel="noopener">ChestCounter</a> sur ton PC (Windows) et laisse-le ouvert quand tu joues. Dans Fortnite, active « Enregistrer les replays ».</li>
+        <li>Clique sur le bouton, colle <code>%APPDATA%\ChestCounter</code> dans la barre d'adresse de la fenêtre, puis choisis <code>data.json</code>. Refais-le quand tu veux mettre ton total à jour.</li>
+      </ol>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="btn" type="button" id="ccBtn">Importer mon ChestCounter</button><input type="file" id="ccFile" accept=".json,application/json" hidden>
+        <a class="btn ghost small" href="communaute.html#profil">Mon pseudo Epic</a><span class="note" id="ccMsg" role="status"></span>
+      </div>
+      <span class="note">Le fichier est lu sur ton appareil : seuls tes totaux (coffres, parties comptées, trésors) sont enregistrés sur le site. ChestCounter est un outil indépendant, à installer sous ta responsabilité. Il ne marche pas sur console.</span>
+    </div>
   </section>
 
   <section class="frame panel" aria-labelledby="f-new">
@@ -131,21 +146,42 @@ const row=(cells,hot)=>{const tr=document.createElement("tr");if(hot)tr.classNam
 document.getElementById("rates").replaceChildren(...R.map(r=>row([r[0],"1 sur "+fmt(r[1]),(100/r[1]).toPrecision(2).replace(".",",")+" %",need(r[1],.5),need(r[1],.9)],r[1]===137500)));
 document.getElementById("hours").replaceChildren(...R.map(r=>row([r[0],r[2]===r[3]?mul(r[2]):mul(r[2])+" à "+mul(r[3]),"1 sur "+fmt(r[1]/r[3])],r[1]===137500)));
 
-// ---------- Classement des chasseurs : stats de la saison lues par le robot ----------
+// ---------- Classement des chasseurs : stats Fortnite lues par le robot, coffres et trésors importés depuis ChestCounter ----------
 (async function(){const tb=document.getElementById("fnRows"),info=document.getElementById("fnN"),el=(t,x,c)=>{const e=document.createElement(t);if(x!=null)e.textContent=x;if(c)e.className=c;return e};
-  const one=t=>{const tr=el("tr"),td=el("td",t);td.colSpan=4;tr.append(td);tb.replaceChildren(tr)};
-  const {db}=await conseilConnect();if(!db)return one("Connexion au Conseil impossible pour le moment.");
-  const [sages,dc]=await Promise.all([conseilSages(db),conseilDiscordAvatars()]);
-  const list=Object.values(sages).filter(m=>m.pseudo&&m.fn&&m.fn.name);if(!list.length)return one("Aucun sage n'a encore indiqué son pseudo Epic.");
-  let api={},down=false;try{const j=await (await fetch(RIOT_RELAY+"/fortnite?players="+encodeURIComponent(list.map(m=>m.fn.name.trim()+"|"+(m.fn.type||"epic")).join(",")))).json();if(j.error)down=true;api=j.players||{}}catch(e){down=true}
-  if(down){info.textContent="stats indisponibles pour le moment"}
-  const rows=list.map(m=>({m,s:api[m.fn.name.trim().toLowerCase()]||null})).sort((a,b)=>((b.s&&b.s.wins)||0)-((a.s&&a.s.wins)||0)||((b.s&&b.s.kills)||0)-((a.s&&a.s.kills)||0)||a.m.pseudo.localeCompare(b.m.pseudo));
-  if(!down)info.textContent=rows.length+(rows.length>1?" chasseurs":" chasseur");
-  const nf=n=>Number(n||0).toLocaleString("fr-FR");
-  tb.replaceChildren(...rows.map(({m,s})=>{const tr=el("tr"),td=el("td"),w=el("span");w.style.cssText="display:inline-flex;align-items:center;gap:8px";w.append(conseilAvatarEl(m,dc,28),el("b",m.pseudo),el("span",m.fn.name,"note"));td.append(w);tr.append(td);
-    if(!s||s.error){const x=el("td",!s?"Stats indisponibles":s.error==="private"?"Stats privées : à rendre publiques dans Fortnite":"Pseudo Epic introuvable","note");x.colSpan=3;tr.append(x)}
-    else tr.append(el("td",nf(s.wins)),el("td",nf(s.kills)),el("td",nf(s.matches)));
-    return tr}))})();
+  const one=t=>{const tr=el("tr"),td=el("td",t);td.colSpan=6;tr.append(td);tb.replaceChildren(tr)};
+  const {db,uid}=await conseilConnect();if(!db)return one("Connexion au Conseil impossible pour le moment.");
+  const [sages,dc]=await Promise.all([conseilSages(db),conseilDiscordAvatars()]),nf=n=>Number(n||0).toLocaleString("fr-FR");
+  async function draw(){
+    const list=Object.values(sages).filter(m=>m.pseudo&&m.fn&&(m.fn.name||m.fn.cc));if(!list.length)return one("Aucun chasseur pour l'instant. Importe ton ChestCounter ou ajoute ton pseudo Epic.");
+    let api={},down=false;const named=list.filter(m=>m.fn.name);
+    if(named.length)try{const j=await (await fetch(RIOT_RELAY+"/fortnite?players="+encodeURIComponent(named.map(m=>m.fn.name.trim()+"|"+(m.fn.type||"epic")).join(",")))).json();if(j.error)down=true;api=j.players||{}}catch(e){down=true}
+    const ch=m=>(m.fn.cc&&m.fn.cc.chests)||0;
+    const rows=list.map(m=>({m,s:m.fn.name?api[m.fn.name.trim().toLowerCase()]||null:null})).sort((a,b)=>ch(b.m)-ch(a.m)||((b.s&&b.s.wins)||0)-((a.s&&a.s.wins)||0)||((b.s&&b.s.kills)||0)-((a.s&&a.s.kills)||0)||a.m.pseudo.localeCompare(b.m.pseudo));
+    info.textContent=rows.length+(rows.length>1?" chasseurs":" chasseur")+(down?" · stats Fortnite indisponibles":"");
+    tb.replaceChildren(...rows.map(({m,s})=>{const tr=el("tr"),td=el("td"),w=el("span"),cc=m.fn.cc;w.style.cssText="display:inline-flex;align-items:center;gap:8px";w.append(conseilAvatarEl(m,dc,28),el("b",m.pseudo));if(m.fn.name)w.append(el("span",m.fn.name,"note"));td.append(w);tr.append(td);
+      const c=el("td");if(cc){c.append(el("b",nf(cc.chests)));const sm=el("span",nf(cc.matches)+" parties comptées · "+new Date(cc.at).toLocaleDateString("fr-FR",{day:"numeric",month:"short"}),"note");sm.style.cssText="display:block;font-size:.74rem";c.append(sm)}else c.textContent="–";tr.append(c);
+      const t=el("td");if(cc&&cc.treasures){t.append(el("b",nf(cc.treasures)));if(cc.finds&&cc.finds.length){t.title=cc.finds.join(", ");const sm=el("span",cc.finds.slice(0,2).join(", ")+(cc.finds.length>2?"…":""),"note");sm.style.cssText="display:block;font-size:.74rem;max-width:180px;margin-left:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";t.append(sm)}}else t.textContent=cc?"0":"–";tr.append(t);
+      if(!m.fn.name){const x=el("td","Pseudo Epic à ajouter dans le profil","note");x.colSpan=3;tr.append(x)}
+      else if(!s||s.error){const x=el("td",!s?"Stats indisponibles":s.error==="private"?"Stats privées dans Fortnite":"Pseudo Epic introuvable","note");x.colSpan=3;tr.append(x)}
+      else tr.append(el("td",nf(s.wins)),el("td",nf(s.kills)),el("td",nf(s.matches)));
+      return tr}))}
+  draw();
+  // Import du fichier data.json de ChestCounter : lu sur l'appareil, seuls les totaux sont enregistrés dans le profil
+  const btn=document.getElementById("ccBtn"),inp=document.getElementById("ccFile"),msg=document.getElementById("ccMsg");
+  btn.onclick=()=>inp.click();
+  inp.onchange=async()=>{const file=inp.files[0];inp.value="";if(!file)return;msg.textContent="Lecture du fichier…";
+    try{if(file.size>80e6)throw new Error("trop gros");const d=JSON.parse(await file.text()),M=d&&(d.Matches||d.matches);if(!Array.isArray(M))throw new Error("format");
+      const g=(o,k)=>o[k]!==undefined?o[k]:o[k.charAt(0).toLowerCase()+k.slice(1)],br=M.filter(x=>g(x,"IsBattleRoyale")!==false);
+      const counted=br.reduce((a,x)=>a+(+g(x,"ChestsOpened")||0),0),manual=Object.values(g(d,"ManualChests")||{}).reduce((a,v)=>a+(+v||0),0),chests=Math.max(0,counted+manual);
+      const finds=br.flatMap(x=>(g(x,"TreasureFinds")||[]).map(t=>String(g(t,"Item")||g(t,"PrizeId")||"Trésor").slice(0,40))),uniq=[...new Set(finds)].slice(0,12);
+      const names=br.map(x=>g(x,"PlayerName")).filter(Boolean),epic=names.length?names[names.length-1]:"";
+      let me=sages[uid];if(!me||!me.pseudo){const s=await db.doc("riot/"+uid).get();if(s.exists)me=sages[uid]=s.data()}
+      if(!me||!me.pseudo){msg.innerHTML='Crée d\'abord ton profil : <a href="communaute.html#profil">Mon profil</a>, puis réimporte.';return}
+      const fn=Object.assign({},me.fn||{},{cc:{chests,matches:br.length,treasures:finds.length,finds:uniq,at:Date.now()}});if(!fn.name&&epic){fn.name=String(epic).slice(0,32);fn.type=fn.type||"epic"}
+      await db.doc("riot/"+uid).set({fn},{merge:true});me.fn=fn;
+      msg.textContent="Importé : "+nf(chests)+" coffres sur "+nf(br.length)+" parties"+(finds.length?", "+nf(finds.length)+" trésors":"")+".";draw()}
+    catch(e){msg.textContent=/format|JSON|Unexpected/i.test(String(e.message))?"Ce n'est pas le bon fichier : choisis data.json dans le dossier ChestCounter.":e.message==="trop gros"?"Fichier trop volumineux.":"Import impossible, réessaie."}};
+})();
 </script>
 </body>
 </html>
