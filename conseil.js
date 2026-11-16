@@ -807,6 +807,10 @@ function openAccount(opt){opt=opt||{};
     el.innerHTML=`<div class="cpop-box"><button class="cacc-x" type="button" aria-label="Fermer">×</button>
       ${name?`<span class="cpop-tag">Ton compte</span><p class="cpop-q" id="caccT">${conseilEsc(name)}</p>
         <p class="cacc-txt">Tu es connecté avec ton identifiant : tu retrouves tes pronos, ta tier list, tes Pièces d'or et ton camp sur tous tes appareils.</p>
+        <form class="cacc-form" data-chg novalidate style="margin-top:6px"><p class="cacc-txt" style="margin:0;font-weight:800">Changer mon mot de passe</p>
+          <label>Nouveau mot de passe<input id="caccN1" type="password" autocomplete="new-password" minlength="6" required></label>
+          <label>Confirme<input id="caccN2" type="password" autocomplete="new-password" minlength="6" required></label>
+          <p class="cacc-msg" role="status"></p><button class="cpop-yes" type="submit">Changer</button></form>
         <button class="cpop-yes cacc-out" type="button" data-out>Se déconnecter</button>`
       :`<div class="cacc-tabs" role="tablist"><button role="tab" type="button" data-t="create" aria-selected="${tab==="create"}">Créer mon identifiant</button><button role="tab" type="button" data-t="login" aria-selected="${tab==="login"}">J'ai déjà un identifiant</button></div>
         ${opt.note?`<p class="cacc-txt" style="color:#ffe27a;font-weight:800">${conseilEsc(opt.note)}</p>`:""}<p class="cacc-txt">${tab==="create"?"Ajoute un identifiant et un mot de passe à ton compte actuel. Tu gardes tout (pronos, tier list, Pièces d'or, camp) et tu pourras te connecter sur n'importe quel appareil.":"Connecte-toi pour retrouver ton compte sur cet appareil."}</p>
@@ -820,7 +824,11 @@ function openAccount(opt){opt=opt||{};
     el.querySelector(".cacc-x").onclick=close;
     el.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{tab=b.dataset.t;draw()});
     const out=el.querySelector("[data-out]");if(out)out.onclick=async()=>{try{await auth.signOut()}catch(e){}location.reload()};
-    const f=el.querySelector("form");if(f)f.onsubmit=async e=>{e.preventDefault();const msg=el.querySelector(".cacc-msg"),btn=f.querySelector("button[type=submit]");
+    const chg=el.querySelector("form[data-chg]");if(chg)chg.onsubmit=async e=>{e.preventDefault();const msg=chg.querySelector(".cacc-msg"),a1=el.querySelector("#caccN1").value,a2=el.querySelector("#caccN2").value;
+      if(a1.length<6){msg.textContent="6 caractères minimum.";return}if(a1!==a2){msg.textContent="Les deux mots de passe ne sont pas identiques.";return}
+      try{await auth.currentUser.updatePassword(a1);msg.textContent="Mot de passe changé !";chg.reset()}
+      catch(err){msg.textContent=/recent-login/.test(err&&err.code||"")?"Par sécurité, déconnecte-toi puis reconnecte-toi, et réessaie tout de suite.":accErr(err)}};
+    const f=el.querySelector("form:not([data-chg])");if(f)f.onsubmit=async e=>{e.preventDefault();const msg=el.querySelector(".cacc-msg"),btn=f.querySelector("button[type=submit]");
       const id=el.querySelector("#caccId").value.trim(),pw=el.querySelector("#caccPw").value,slug=accSlug(id);
       if(slug.length<3){msg.textContent="Identifiant trop court : 3 caractères minimum (lettres ou chiffres).";return}
       if(pw.length<6){msg.textContent="Mot de passe trop court : 6 caractères minimum.";return}
