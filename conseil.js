@@ -28,6 +28,9 @@ window.conseilConnect=function(){
 
 // Pages en préparation : visibles seulement par Skryvv
 window.CONSEIL_ADMIN="7ggyIoUpvlRrJCpqKkgdYlsMhcp2";
+// Le Sage, la mascotte : poses sage, victoire, tilt, jeu, dodo, devin (img/sage/*.svg)
+const SAGE_ALT={sage:"Le Sage, mascotte du Conseil",victoire:"Le Sage fête une victoire",tilt:"Le Sage est tilté",jeu:"Le Sage en partie",dodo:"Le Sage dort",devin:"Le Sage devin"};
+window.conseilSage=(pose="sage",size=64,cls="")=>`<img class="csage ${cls}" src="img/sage/${pose}.svg" width="${size}" height="${Math.round(size*124/120)}" alt="${SAGE_ALT[pose]||""}" decoding="async">`;
 window.conseilShowAdmin=function(){const ok=window.CONSEIL_UID===CONSEIL_ADMIN;document.querySelectorAll("[data-admin]").forEach(e=>e.hidden=!ok)};
 // ---------- Navigation commune ----------
 const CONSEIL_NAV=[
@@ -287,7 +290,7 @@ window.conseilPromos=async function(){try{if(document.querySelector(".cpromo"))r
   const [sages,dc]=await Promise.all([conseilSages(db),conseilDiscordAvatars()]);if(document.querySelector(".cpromo"))return;
   const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
   const box=el("div","cpromo");box.setAttribute("role","dialog");box.setAttribute("aria-modal","true");box.setAttribute("aria-labelledby","cpromoT");
-  const card=el("div","cpromo-c");card.append(el("span","eyebrow","Montée de division"),Object.assign(el("h2","",list.length>1?"Félicitations aux sages !":"Félicitations !"),{id:"cpromoT"}));
+  const card=el("div","cpromo-c");card.insertAdjacentHTML("afterbegin",conseilSage("victoire",96,"csage-bob"));card.append(el("span","eyebrow","Montée de division"),Object.assign(el("h2","",list.length>1?"Félicitations aux sages !":"Félicitations !"),{id:"cpromoT"}));
   for(const p of list.slice(0,6)){const m=sages[p.id]||{pseudo:p.pseudo},r=el("div","cpromo-r"),t=el("div","cpromo-t");
     t.append(el("b","",m.pseudo||p.pseudo),el("span","","passe "+conseilRankLabel(p.to,false)+" en "+(Q[p.q]||p.q)),el("small","","depuis "+conseilRankLabel(p.from,false)));
     const em=el("span");em.innerHTML=conseilRankEmblem(p.to.tier,56);r.append(conseilAvatarEl(m,dc,52),t,em);card.append(r)}
@@ -319,7 +322,7 @@ window.conseilComments=async function(page){
     const rows=[];s.forEach(d=>rows.push([d.id,d.data()]));rows.sort((a,b)=>String(b[1].at).localeCompare(String(a[1].at)));
     $("ccomN").textContent=rows.length?rows.length+(rows.length>1?" messages":" message"):"";
     const L=$("ccomL");L.replaceChildren();
-    if(!rows.length){const e=document.createElement("div");e.className="empty";e.textContent="Aucun commentaire pour l'instant. Lance la discussion !";L.appendChild(e);return}
+    if(!rows.length){const e=document.createElement("div");e.className="empty csage-empty";e.innerHTML=conseilSage("sage",56)+"<span>Aucun commentaire pour l'instant. Lance la discussion !</span>";L.appendChild(e);return}
     for(const [id,c] of rows.slice(0,60)){const it=document.createElement("article");it.className="ccom-i";
       const m=sages[c.uid]||{pseudo:c.pseudo},body=document.createElement("div"),head=document.createElement("div"),b=document.createElement("b"),t=document.createElement("time"),p=document.createElement("p");
       head.className="ccom-m";b.textContent=m.pseudo||c.pseudo;t.textContent=fmt(c.at);p.textContent=c.text;head.append(b,t);
@@ -353,7 +356,7 @@ window.conseilHunt=async function(){const boxes=[...document.querySelectorAll("[
 
 // ---------- Thème « Collection holographique » et bandeau d'infos ----------
 (function(){const add=()=>{if(document.getElementById("tv-theme"))return;
-  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=18";document.head.appendChild(l)};
+  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=19";document.head.appendChild(l)};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();
 function defaultTicker(){const d=Math.ceil((Date.parse("2026-11-04T23:00:00Z")-Date.now())/864e5);
   return ["Worlds 2026 : Bilibili Gaming champion du monde, 3-1 contre Gen.G","Pick'em : un skin pour le 1er (offert par Skryvv) et un skin pour le 2e (offert par Tabaskoh)",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Pronos entre potes, tribunal et sage de la semaine dans Le Conseil","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes"]}

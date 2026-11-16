@@ -523,7 +523,7 @@ section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,
     <!-- Parties LoL -->
     <section class="frame panel" aria-labelledby="lolT">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-        <h2 id="lolT">Qui joue en ce moment</h2>
+        <h2 id="lolT" style="display:flex;align-items:center;gap:10px"><img id="sageLive" class="csage csage-bob" src="img/sage/dodo.svg" width="54" height="56" alt="Le Sage dort">Qui joue en ce moment</h2>
         <span class="note" id="liveInfo"></span>
       </div>
       <div id="riotReg" class="gone"></div>
@@ -744,6 +744,7 @@ function renderPlayers(){
     const links=g?`<div class="plinks"><a class="btn small" href="communaute.html#paris">Prono</a><a class="btn ghost small" href="${poro(p.lvAccObj||p)}" target="_blank" rel="noopener">Live</a><a class="btn ghost small" href="${opgg(p)}" target="_blank" rel="noopener">op.gg</a></div>`:"";
     return `<div class="pl ${g||p.dg?"ingame":""}">${status}<div class="pinfo"><b>${conseilAv(p.id,p.pseudo,26)}${esc(p.pseudo)}${conseilCampTag(p.id)}</b><small>${detail}</small></div>${links}</div>`}).join("");
   const n=list.filter(p=>p.lv).length,o=list.filter(p=>!p.lv&&p.dg).length;
+  const sl=$("sageLive");if(sl){const on=n||o;sl.src="img/sage/"+(on?"jeu":"dodo")+".svg";sl.alt=on?"Le Sage en partie":"Le Sage dort"}
   $("liveInfo").textContent=(n||o)?[n?`${n} sur LoL`:"",o?`${o} sur un autre jeu`:""].filter(Boolean).join(" · "):"Personne en jeu";
 }
 async function loadChampNames(){
@@ -859,8 +860,8 @@ function renderRecap(){
   const nm=p=>esc(p.name)+conseilCampTag(p.id);
   box.innerHTML=`<div><span class="k">Parties classées</span><span class="v">${games}</span><span class="s">jouées par le Conseil depuis lundi</span></div>
     <div><span class="k">Winrate du Conseil</span><span class="v">${games?Math.round(100*wins/games)+" %":"—"}</span><span class="s">${wins} victoires, ${games-wins} défaites</span></div>
-    <div><span class="k">Meilleure grimpe</span><span class="v">${best&&best.lp>0?"+"+best.lp+" LP":"—"}</span><span class="s">${best&&best.lp>0?nm(best):"Personne n'a encore grimpé"}</span></div>
-    <div><span class="k">Le plus tilté</span><span class="v">${worst&&worst.lp<0?worst.lp+" LP":"—"}</span><span class="s">${worst&&worst.lp<0?nm(worst)+' · <a href="communaute.html#paris">l\'accuser ?</a>':"Personne n'a chuté"}</span></div>
+    <div><span class="k">${conseilSage("victoire",22)} Meilleure grimpe</span><span class="v">${best&&best.lp>0?"+"+best.lp+" LP":"—"}</span><span class="s">${best&&best.lp>0?nm(best):"Personne n'a encore grimpé"}</span></div>
+    <div><span class="k">${conseilSage("tilt",22)} Le plus tilté</span><span class="v">${worst&&worst.lp<0?worst.lp+" LP":"—"}</span><span class="s">${worst&&worst.lp<0?nm(worst)+' · <a href="communaute.html#paris">l\'accuser ?</a>':"Personne n'a chuté"}</span></div>
     <div><span class="k">Le plus actif</span><span class="v">${active&&active.g?active.g:"—"}</span><span class="s">${active&&active.g?nm(active)+" (parties)":"Pas encore de partie"}</span></div>
     <div><span class="k">Meilleur winrate</span><span class="v">${wr?Math.round(100*wr.w/wr.g)+" %":"—"}</span><span class="s">${wr?nm(wr)+" · "+wr.g+" parties":"5 parties minimum"}</span></div>
     <div class="top"><span class="k">Ladder Solo/Duo</span>${top.length?top.map(([id,p],i)=>`<span><b style="color:var(--gold)">${i+1}.</b> ${esc(p.pseudo)}${conseilCampTag(id)} ${conseilRankBadge(p.solo)}</span>`).join(""):'<span class="s">Pas encore de sage classé</span>'}<a href="ladder.html">Voir le ladder</a></div>`;

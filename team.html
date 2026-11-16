@@ -91,8 +91,9 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <div class="htxt">
+  <header style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+    <img class="csage csage-bob" src="img/sage/jeu.svg" width="120" height="124" alt="Le Sage en partie, casque sur les oreilles">
+    <div class="htxt" style="flex:1;min-width:240px">
       <span class="eyebrow">League of Legends · 5 contre 5</span>
       <h1>La team du Conseil recrute</h1>
       <p class="lead">Skryvv et Audric montent une équipe pour jouer des games régulières en semaine et grimper ensemble. Il manque un jungler, un ADC et un support : inscris-toi, ton profil sera visible ici et Skryvv valide les candidatures.</p>
@@ -155,7 +156,7 @@ const $=id=>document.getElementById(id),esc=conseilEsc,DAYS=["Lun","Mar","Mer","
         <div class="chipr">${DAYS.map((d,i)=>`<span class="${(c.days||[]).includes(i)?"on":""}">${d}</span>`).join("")}${c.hours?`<span>${esc(c.hours)}</span>`:""}</div>
         ${c.msg?`<p>${esc(c.msg)}</p>`:""}
         ${isAdmin?`<div class="adm">${c.status!=="ok"?`<button class="btn small" type="button" data-st="ok" data-u="${esc(c.uid)}">Valider</button>`:""}${c.status!=="no"?`<button class="btn small ghost" type="button" data-st="no" data-u="${esc(c.uid)}">Refuser</button>`:""}${c.status!=="pending"?`<button class="btn small ghost" type="button" data-st="pending" data-u="${esc(c.uid)}">Remettre en attente</button>`:""}</div>`:""}
-      </article>`}).join(""):'<p class="note">Pas encore de candidature. Sois le premier !</p>';
+      </article>`}).join(""):'<div class="csage-empty">${conseilSage("sage",56)}<p class="note" style="margin:0">Pas encore de candidature. Sois le premier !</p></div>';
     $("cands").querySelectorAll("[data-st]").forEach(b=>b.onclick=async()=>{b.disabled=true;try{await db.doc("team/"+b.dataset.u).update({status:b.dataset.st,decidedAt:new Date().toISOString()})}catch(e){alertBox("Action impossible : "+e.message)}});
     form()}
   const alertBox=t=>{const n=$("formMsg");if(n)n.textContent=t};

@@ -319,3 +319,11 @@ td .cav-in,li .cav-in,b .cav-in{flex:none}
 .mt .tm img{width:28px;height:28px;object-fit:contain;flex:none}
 .mt .tm.r{justify-content:flex-end;text-align:right}
 .mt .sc{font:900 1.1rem var(--display);color:#ffe27a;min-width:52px;text-align:center}
+
+/* Le Sage, mascotte du Conseil */
+.csage{display:inline-block;flex:none;height:auto;vertical-align:middle;user-select:none;pointer-events:none}
+.csage-bob{animation:csage-bob 3.2s ease-in-out infinite}
+@keyframes csage-bob{50%{transform:translateY(-5px)}}
+@media (prefers-reduced-motion:reduce){.csage-bob{animation:none}}
+.csage-empty{display:flex;align-items:center;gap:14px}
+.cpromo-c .csage{display:block;margin:0 auto 6px}
