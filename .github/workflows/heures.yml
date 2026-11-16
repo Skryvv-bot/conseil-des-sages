@@ -1,0 +1,22 @@
+name: "Heures de jeu du Conseil"
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/10 * * * *"
+  push:
+    branches: [main]
+    paths: [".github/workflows/heures.yml", ".github/donnees/heures.py"]
+permissions:
+  contents: write
+concurrency: { group: heures, cancel-in-progress: false }
+jobs:
+  releve:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: site }
+      - run: |
+          git clone -q --depth 1 -b heures "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" h || (mkdir h && cd h && git init -q -b heures)
+          cd h && python3 ../site/.github/donnees/heures.py
+          git config user.name "cds-bot" && git config user.email "cds-bot@users.noreply.github.com"
+          git add -A && git commit -qm "Relevé $(date -u +%FT%TZ)" && git push -q "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" heures
