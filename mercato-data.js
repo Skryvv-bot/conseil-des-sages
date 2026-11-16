@@ -24,8 +24,22 @@ window.MERCATO={
  lpl:{name:"LPL",note:"Chine. Au 12 novembre, aucun club de LPL n'a annoncé de mouvement et la presse ne rapporte pas encore de transfert. Voici les effectifs 2026 ; la colonne 2027 sera remplie après l'ouverture du marché, le 17 novembre.",teams:
   [["Bilibili Gaming","bilibili-gaming"],["Top Esports","top-esports"],["JD Gaming","jd-gaming"],["Anyone's Legend","anyones-legend"],["Weibo Gaming","weibo-gaming"],["Invictus Gaming","invictus-gaming"],["EDward Gaming","edward-gaming"],["LNG Esports","lng-esports"],["Team WE","team-we"],["Ninjas in Pyjamas","shenzen-ninjas-in-pyjamas"],["ThunderTalk Gaming","thunder-talk-gaming"],["LGD Gaming","lgd-gaming"]].map(([n,slug])=>({n,slug,mv:[],none:true}))}
 };
+// Effectifs LEC 2026 -> 2027 pressentis, poste par poste (top, jungle, mid, bot, support, coach) : [avant, après] ; "=" inchangé, "" = pas encore de joueur
+window.MERCATO_ROWS={
+ "giantx-lec":[["Oscarinin","Myrwn"],["ISMA","Thayger"],["Jackies","Feisty"],["Flakked","Harpoon"],["Jun","Piero"],["Guilhoto","="]],
+ "mad-lions":[["Myrwn","BrokenBlade"],["Elyoa","="],["Jojopyun","="],["Supa","Carzzy"],["Alvaro","="],["Melzhet","="]],
+ "sk-gaming":[["Wunder","Kryze"],["Skeanz","Zicssi"],["SlowQ","="],["Jopa","3XA"],["Mikyx","Lospa"],["Own3r","="]],
+ "team-heretics-lec":[["Tracyn","="],["Daglas","Razork"],["Serin","Jackies"],["Hype","="],["Way","Jun"],["Nukeduck","="]],
+ "fnatic":[["Soboro",""],["Razork","Yike"],["Vladi","="],["Upset",""],["Lospa","Labrov"],["GrabbZ",""]],
+ "g2-esports":[["BrokenBlade",""],["SkewMond","Lyncas"],["Caps","="],["Hans Sama","="],["Labrov","Mikyx"],["Perkz","Mithy"]],
+ "karmine-corp":[["Canna","="],["Yike",""],["Kyeahoo","="],["Caliste","="],["Busio","="],["Reapered",""]],
+ "natus-vincere":[["Maynter","Zest"],["Rhilech","="],["Poby",""],["SamD","Supa"],["Parus","="],["TheRock","="]],
+ "team-vitality":[["Naak Nako",""],["Lyncas",""],["FIESTA",""],["Carzzy","Jopa"],["Fleshy",""],["Pad","Wadi"]],
+ "team-bds":null
+};
 // Cinq de départ 2027 pressenti d'une équipe : [joueur, 1 si recrue pressentie] par poste (top, jungle, mid, bot, support) ; "?" = à pourvoir
-window.mercatoStart=function(t,api){const outs=(t.out||[]).map(x=>x.toLowerCase());
+window.mercatoStart=function(t,api){const R=(window.MERCATO_ROWS||{})[t.slug];if(R)return R.slice(0,5).map(([o,n])=>n==="="?[o,0]:n?[n,1]:["?",0]);
+  const outs=(t.out||[]).map(x=>x.toLowerCase());
   return ["top","jungle","mid","bottom","support"].map(r=>{const inn=(t.inn||[]).find(x=>x[1]===r);if(inn)return [inn[0],1];
     const b=((t.start&&t.start[r])||(api?api.players.filter(p=>p.role===r).map(p=>p.n.trim()):[])).filter(n=>!outs.includes(n.toLowerCase()));
     return b.length===1||(b.length&&t.none)||(b.length&&t.start&&t.start[r])?[b[0],0]:b.length?[b[0]+" ?",0]:["?",0]})};
