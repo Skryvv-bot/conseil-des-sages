@@ -32,7 +32,7 @@ window.conseilShowAdmin=function(){const ok=window.CONSEIL_UID===CONSEIL_ADMIN;d
 // ---------- Navigation commune ----------
 const CONSEIL_NAV=[
   {id:"accueil",href:"index.html",label:"Accueil"},
-  {id:"lol",href:"lol.html",label:"LoL",sub:[{id:"lol",href:"lol.html",label:"Accueil LoL"},{id:"newdawn",href:"newdawn.html",label:"LoL 2 · New Dawn"},{id:"mercato",href:"mercato.html",label:"Mercato"},{id:"worlds",href:"worlds.html",label:"Worlds 2026"},{id:"fantasy",href:"fantasy.html",label:"Fantasy"},{id:"cartes",href:"cartes.html",label:"LolMaster"},
+  {id:"lol",href:"lol.html",label:"LoL",sub:[{id:"lol",href:"lol.html",label:"Accueil LoL",hide:1},{id:"newdawn",href:"newdawn.html",label:"LoL 2 · New Dawn"},{id:"mercato",href:"mercato.html",label:"Mercato"},{id:"worlds",href:"worlds.html",label:"Worlds 2026",hide:1},{id:"fantasy",href:"fantasy.html",label:"Fantasy",hide:1},{id:"cartes",href:"cartes.html",label:"LolMaster",hide:1},
     {id:"ladder",href:"ladder.html",label:"Ladder"},{id:"customs",href:"customs.html",label:"Customs & Clash"},{id:"team",href:"team.html",label:"Team 5v5 · recrutement"},{id:"pronos",href:"communaute.html#paris",label:"Pronos entre potes"},{id:"patch",href:"patch.html",label:"Patch"}]},
   {id:"wow",href:"wow.html",label:"WoW",sub:[{id:"wow",href:"wow.html",label:"WoW Forever"}]},
   {id:"fortnite",href:"fortnite.html",label:"Fortnite",sub:[{id:"fortnite",href:"fortnite.html",label:"Chasse aux trésors"},{href:"fortnite.html#taux",label:"Taux de drop"}]},
@@ -86,7 +86,7 @@ window.conseilNav=function(active){
   setupDrops(nav,active,group);
   const item=CONSEIL_NAV.find(n=>n.id===group);
   if(item&&item.sub&&!item.noBar){const wrap=document.querySelector(".wrap");if(wrap){const sub=document.createElement("div");sub.className="csub";
-    sub.innerHTML=item.sub.map(s=>`<a href="${s.href}" ${s.id===active?'aria-current="page"':""}${s.admin?' data-admin hidden':""}>${s.label}</a>`).join("");wrap.prepend(sub)}}
+    sub.innerHTML=item.sub.filter(s=>!s.hide).map(s=>`<a href="${s.href}" ${s.id===active?'aria-current="page"':""}${s.admin?' data-admin hidden':""}>${s.label}</a>`).join("");wrap.prepend(sub)}}
   setupInstall();
   // Discord dans la barre : au survol (ou au clavier), la liste des membres en ligne avec leur photo et leur jeu
   (function(){const btn=document.getElementById("cnavDC");if(!btn)return;let pop=null,timer=null,at=0,members=null;
@@ -125,7 +125,7 @@ window.conseilNav=function(active){
 function setupDrops(nav,active,group){
   const drop=document.createElement("div");drop.className="cdrop";drop.hidden=true;drop.id="cnavDrop";nav.appendChild(drop);
   const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-  const vis=x=>!x.admin||window.CONSEIL_UID===window.CONSEIL_ADMIN;
+  const vis=x=>!x.hide&&(!x.admin||window.CONSEIL_UID===window.CONSEIL_ADMIN);
   const here=h=>{const [f,hash]=h.split("#"),p=location.pathname.split("/").pop()||"index.html";return f===p&&(!hash||location.hash.slice(1)===hash)};
   const link=(x,cls="")=>x.href?`<a href="${x.href}" class="${cls}" ${here(x.href)?'aria-current="page"':""}>${esc(x.label)}</a>`:"";
   const list=n=>(n.sub||[]).filter(vis).map(x=>link(x)+(x.sub||[]).map(y=>link(y,"ss")).join("")).join("");
