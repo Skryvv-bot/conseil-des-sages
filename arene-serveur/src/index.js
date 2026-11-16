@@ -9,7 +9,7 @@ import * as AR from "./sim.js";
 import * as TD from "./td.js";
 const GAMES = { ar: AR, td: TD };
 
-const ORIGINS = [/^https:\/\/conseil-des-sages\.pages\.dev$/, /^https:\/\/[a-z0-9-]+\.conseil-des-sages\.pages\.dev$/, /^https:\/\/conseil-des-sages\.netlify\.app$/, /^http:\/\/localhost(:\d+)?$/, /^http:\/\/127\.0\.0\.1(:\d+)?$/, /^https:\/\/[a-z0-9-]+\.claudeusercontent\.com$/];
+const ORIGINS = [/^https:\/\/(www\.)?leconseildessages\.fr$/, /^https:\/\/conseil-des-sages\.pages\.dev$/, /^https:\/\/[a-z0-9-]+\.conseil-des-sages\.pages\.dev$/, /^https:\/\/conseil-des-sages\.netlify\.app$/, /^http:\/\/localhost(:\d+)?$/, /^http:\/\/127\.0\.0\.1(:\d+)?$/, /^https:\/\/[a-z0-9-]+\.claudeusercontent\.com$/];
 const FB_KEY = "AIzaSyBnmVwD79y26gs4dVjMEzYyOa7sxdhtR_I";
 const PUBLIC_ROOMS = { ar: ["CDS", "FAILLE", "ICATHIA"], td: ["NEXUS", "BASTION", "REMPART"] };
 const cors = o => ({ "Access-Control-Allow-Origin": ORIGINS.some(r => r.test(o || "")) ? o : "https://conseil-des-sages.pages.dev", "Vary": "Origin", "Access-Control-Allow-Methods": "GET, OPTIONS" });

@@ -41,4 +41,5 @@ jobs:
           t "LoL Esports : ligues" -H "x-api-key: 0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z" "https://esports-api.lolesports.com/persisted/gw/getLeagues?hl=fr-FR"
           t "Site : page d'accueil" -I "https://conseil-des-sages.pages.dev/"
           t "Site : script commun" "https://conseil-des-sages.pages.dev/conseil.js"
+          t "Domaine : leconseildessages.fr" -I "https://leconseildessages.fr/"
           grep -c "conseilAv=" out.txt || true

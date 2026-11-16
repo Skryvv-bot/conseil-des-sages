@@ -238,7 +238,7 @@ conseilNav("worlds");
 (function(){
   const CH=[["kamet0","Kameto (FR)"],["otplol_","OTP LoL (FR)"],["riotgames","Riot Games (EN)"],["skyyart","Skyyart (FR)"]];
   let ch="kamet0",on=false;try{ch=localStorage.getItem("live-ch")||ch}catch(e){}
-  const host=location.hostname||"conseil-des-sages.pages.dev",parents=[...new Set([host,"conseil-des-sages.pages.dev"])].map(p=>"&parent="+encodeURIComponent(p)).join("");
+  const host=location.hostname||"conseil-des-sages.pages.dev",parents=[...new Set([host,"leconseildessages.fr","www.leconseildessages.fr","conseil-des-sages.pages.dev"])].map(p=>"&parent="+encodeURIComponent(p)).join("");
   function render(){
     const c=document.getElementById("liveCh");if(!c)return;
     c.innerHTML=CH.map(([id,n])=>`<button class="chip" data-ch="${id}" aria-pressed="${id===ch}">${n}</button>`).join("");
