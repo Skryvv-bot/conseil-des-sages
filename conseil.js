@@ -33,12 +33,12 @@ window.conseilShowAdmin=function(){const ok=window.CONSEIL_UID===CONSEIL_ADMIN;d
 const CONSEIL_NAV=[
   {id:"accueil",href:"index.html",label:"Accueil"},
   {id:"lol",href:"lol.html",label:"LoL",sub:[{id:"lol",href:"lol.html",label:"Accueil LoL"},{id:"newdawn",href:"newdawn.html",label:"LoL 2 · New Dawn"},{id:"mercato",href:"mercato.html",label:"Mercato"},{id:"worlds",href:"worlds.html",label:"Worlds 2026"},{id:"fantasy",href:"fantasy.html",label:"Fantasy"},{id:"cartes",href:"cartes.html",label:"LolMaster"},
-    {id:"ladder",href:"ladder.html",label:"Ladder"},{id:"customs",href:"customs.html",label:"Customs & Clash"},{id:"pronos",href:"communaute.html#paris",label:"Pronos entre potes"},{id:"patch",href:"patch.html",label:"Patch"}]},
+    {id:"ladder",href:"ladder.html",label:"Ladder"},{id:"customs",href:"customs.html",label:"Customs & Clash"},{id:"team",href:"team.html",label:"Team 5v5 · recrutement"},{id:"pronos",href:"communaute.html#paris",label:"Pronos entre potes"},{id:"patch",href:"patch.html",label:"Patch"}]},
   {id:"wow",href:"wow.html",label:"WoW",sub:[{id:"wow",href:"wow.html",label:"WoW Forever"}]},
   {id:"fortnite",href:"fortnite.html",label:"Fortnite",sub:[{id:"fortnite",href:"fortnite.html",label:"Chasse aux trésors"},{href:"fortnite.html#taux",label:"Taux de drop"}]},
   {id:"jeux",href:"devinettes.html",label:"Jeux",noBar:1,sub:[{id:"devinettes",href:"devinettes.html",label:"Devinettes"}]}
 ];
-const NAV_GROUP={ladder:"lol",worlds:"lol",tierlist:"lol",fantasy:"lol",cartes:"lol",customs:"lol",patch:"lol",mercato:"lol",pronos:"lol",newdawn:"lol",devinettes:"jeux",jeux:"jeux"};
+const NAV_GROUP={ladder:"lol",worlds:"lol",tierlist:"lol",fantasy:"lol",cartes:"lol",customs:"lol",patch:"lol",mercato:"lol",pronos:"lol",team:"lol",newdawn:"lol",devinettes:"jeux",jeux:"jeux"};
 (function navStyles(){
   const css=`
 .cnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;margin:-20px calc(-1*max(16px,env(safe-area-inset-left,0px))) 0;padding:10px max(16px,env(safe-area-inset-left,0px));
@@ -302,7 +302,7 @@ window.conseilPromos=async function(){try{if(document.querySelector(".cpromo"))r
 
 // ---------- Commentaires ----------
 // Un fil par page (collection « comments »). Il faut un profil avec un pseudo pour écrire ; chacun peut supprimer ses messages.
-const COMMENT_PAGES={newdawn:"New Dawn",pronos:"les pronos entre potes",accueil:"l'accueil",lol:"LoL",wow:"WoW Forever",fortnite:"Fortnite",mercato:"le mercato",patch:"le patch",worlds:"les Worlds",fantasy:"la Fantasy",ladder:"le ladder",tierlist:"la tier list",devinettes:"les Devinettes",customs:"les customs"};
+const COMMENT_PAGES={team:"la team",newdawn:"New Dawn",pronos:"les pronos entre potes",accueil:"l'accueil",lol:"LoL",wow:"WoW Forever",fortnite:"Fortnite",mercato:"le mercato",patch:"le patch",worlds:"les Worlds",fantasy:"la Fantasy",ladder:"le ladder",tierlist:"la tier list",devinettes:"les Devinettes",customs:"les customs"};
 window.conseilComments=async function(page){
   const wrap=document.querySelector(".wrap");if(!wrap||!COMMENT_PAGES[page]||document.getElementById("ccom"))return;
   const sec=document.createElement("section");sec.id="ccom";sec.className="frame panel ccom";sec.setAttribute("aria-labelledby","ccomT");
