@@ -295,6 +295,16 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
 .win-n b{font:900 clamp(1.3rem,3.6vw,1.9rem)/1.1 Unbounded,sans-serif;color:#fff;overflow-wrap:anywhere}
 .win-n span{color:#ffe27a;font-weight:800}
 .win-n small{color:#b4b0d0;font-size:.82rem}
+/* Heures de jeu */
+.hrs{display:flex;flex-direction:column;gap:8px}
+.hr{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr) auto;gap:12px;align-items:center}
+.hr b{color:#fff;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hr .bar{height:14px;border-radius:99px;background:#201d38;overflow:hidden}
+.hr .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#7ad7ff,#b48aff,#ff8ad8)}
+.hr .bar i.wow{background:linear-gradient(90deg,#ffb36b,#ffe27a)}.hr .bar i.lol{background:linear-gradient(90deg,#3a8dff,#7ad7ff)}.hr .bar i.fn{background:linear-gradient(90deg,#8affc1,#7ad7ff)}
+.hr span{font:700 .85rem "JetBrains Mono",monospace;color:#f2f0ff;text-align:right;white-space:nowrap}
+.hr span small{display:block;font:500 .7rem Manrope,sans-serif;color:#b4b0d0}
+@media (max-width:560px){.hr{grid-template-columns:minmax(0,1fr) auto}.hr .bar{grid-column:1/-1;grid-row:2}}
 /* Visuels de l'accueil */
 .st.st-wow{background:#ffe27a!important;border-color:#ffe27a!important;color:#0c0b14!important}
 .st.st-fn{background:#7ad7ff!important;border-color:#7ad7ff!important;color:#0c0b14!important}
@@ -512,6 +522,13 @@ section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,
       <div class="players" id="players"><div class="note">Chargement des invocateurs…</div></div>
     </section>
   </div>
+
+  <section class="frame panel" aria-labelledby="hrT" style="padding:20px;gap:12px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h2 id="hrT" style="font-size:clamp(1.4rem,3.4vw,2.1rem)!important;margin:0">Heures de jeu du Conseil</h2><span class="note" id="hrN"></span></div>
+    <div class="shop-f" role="group" aria-label="Période" id="hrP"></div>
+    <div class="hrs" id="hrs"><p class="note">Chargement…</p></div>
+    <p class="note" style="margin:0">Temps passé en jeu par les membres connectés au Discord, relevé toutes les 10 minutes. Seul le total par jeu est gardé, pas le temps de chaque sage.</p>
+  </section>
 
   <!-- Tuiles -->
   <!-- Cette semaine au Conseil -->
@@ -959,6 +976,28 @@ window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
   const cur=(d.now||[]).filter(g=>Date.parse(g.fin)>now),nxt=(d.next||[]).filter(g=>Date.parse(g.fin)>now);
   const card=(g,n)=>`<a class="free${n?" next":""}" href="${conseilEsc(g.u)}" target="_blank" rel="noopener"><img src="${conseilEsc(g.i)}" alt="" loading="lazy"><div><em>${n?"À partir du "+day(g.debut):"Gratuit jusqu'au "+day(g.fin)}</em><b>${conseilEsc(g.n)}</b><span>${g.prix?"Prix habituel : "+conseilEsc(g.prix):""}</span></div></a>`;
   box.innerHTML=[...cur.map(g=>card(g)),...nxt.map(g=>card(g,1))].join("")||'<p class="note">Pas de jeu offert cette semaine.</p>'})();
+</script>
+<script>
+// Heures de jeu par jeu (relevé Discord toutes les 10 min, branche « heures »)
+(async function(){const box=document.getElementById("hrs"),pb=document.getElementById("hrP");if(!box)return;
+  const d=await fetch("https://raw.githubusercontent.com/Skryvv-bot/conseil-des-sages/heures/out/heures.json?t="+Math.floor(Date.now()/300e3)).then(r=>r.ok?r.json():null).catch(()=>null);
+  if(!d||!d.days){box.innerHTML='<p class="note">Relevé indisponible pour le moment.</p>';return}
+  const iso=t=>new Date(t).toLocaleDateString("sv-SE",{timeZone:"Europe/Paris"}),today=iso(Date.now());
+  const monday=(()=>{const x=new Date();const k=(x.getDay()+6)%7;x.setDate(x.getDate()-k);return iso(x)})();
+  const P=[["semaine","Cette semaine",monday],["7","7 jours",iso(Date.now()-6*864e5)],["30","30 jours",iso(Date.now()-29*864e5)],["mois","Ce mois-ci",today.slice(0,8)+"01"],["an","Cette année",today.slice(0,5)+"01-01"],["tout","Depuis le début","0000"]];
+  let cur="semaine";try{cur=localStorage.getItem("hr-periode")||cur}catch(e){}
+  const fmt=m=>{m=Math.round(m);const h=Math.floor(m/60);return h?h+" h"+(m%60?" "+String(m%60).padStart(2,"0"):""):m+" min"};
+  const cls=g=>/warcraft/i.test(g)?"wow":/league of legends/i.test(g)?"lol":/fortnite/i.test(g)?"fn":"";
+  const since=new Date(d.since+"T12:00:00").toLocaleDateString("fr-FR",{day:"numeric",month:"long"}).replace(/^1 /,"1er ");
+  function draw(){pb.innerHTML=P.map(([k,l])=>`<button type="button" data-k="${k}" aria-pressed="${k===cur}">${l}</button>`).join("");pb.querySelectorAll("button").forEach(b=>b.onclick=()=>{cur=b.dataset.k;try{localStorage.setItem("hr-periode",cur)}catch(e){}draw()});
+    const from=P.find(p=>p[0]===cur)[2],tot={};
+    for(const [day,games] of Object.entries(d.days))if(day>=from)for(const [g,e] of Object.entries(games)){const t=tot[g]||(tot[g]={m:0,p:new Set()});t.m+=e.m;e.p.forEach(x=>t.p.add(x))}
+    const L=Object.entries(tot).sort((a,b)=>b[1].m-a[1].m),all=L.reduce((a,[,t])=>a+t.m,0),max=L.length?L[0][1].m:1;
+    document.getElementById("hrN").textContent=all?fmt(all)+" au total · relevé depuis le "+since:"relevé depuis le "+since;
+    if(!L.length){box.innerHTML='<p class="note">Personne n\'a encore joué sur cette période.</p>';return}
+    const top=L.slice(0,8),rest=L.slice(8).reduce((a,[,t])=>a+t.m,0);
+    box.innerHTML=top.map(([g,t])=>`<div class="hr"><b title="${esc(g)}">${esc(g)}</b><div class="bar"><i class="${cls(g)}" style="width:${Math.max(2,Math.round(t.m/max*100))}%"></i></div><span>${fmt(t.m)}<small>${t.p.size} sage${t.p.size>1?"s":""}</small></span></div>`).join("")+(rest?`<p class="note" style="margin:0">Et ${fmt(rest)} sur ${L.length-8} autre${L.length-8>1?"s":""} jeu${L.length-8>1?"x":""}.</p>`:"")}
+  draw()})();
 </script>
 </body>
 </html>
