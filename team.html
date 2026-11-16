@@ -124,7 +124,13 @@ const $=id=>document.getElementById(id),esc=conseilEsc,DAYS=["Lun","Mar","Mer","
   const {db,uid}=await conseilConnect();if(!db){$("formBox").innerHTML='<p class="note">Connexion au Conseil impossible pour le moment.</p>';return}
   const isAdmin=uid===window.CONSEIL_ADMIN;
   const [sages,dc,lad]=await Promise.all([conseilSages(db),conseilDiscordAvatars(),db.doc("ladder/current").get().then(d=>d.exists?d.data().players||{}:{}).catch(()=>({}))]);
-  const rank=id=>{const p=lad[id];return p&&p.flex&&p.flex.tier?conseilRankLabel(p.flex,true)+" (Flex)":"Flex non classé"};
+  // rang Flex du compte principal actuel du profil (même si le ladder n'a pas encore vu l'échange de comptes)
+  const rank=id=>{const p=lad[id],rid=((sages[id]||{}).riotId||"").toLowerCase();if(!p)return "Flex non classé";
+    const acc=[p,...(p.alts||[])].find(x=>(x.riotId||"").toLowerCase()===rid)||p;return acc.flex&&acc.flex.tier?conseilRankLabel(acc.flex,true)+" (Flex)":"Flex non classé"};
+  // admin : inverser le compte principal et le compte secondaire 1 d'un joueur
+  window.teamSwap=async id=>{const m=sages[id];if(!isAdmin||!m||!m.riotId||!(m.alts||[]).length)return;const a=m.alts.slice(),b=a[0];
+    a[0]={riotId:m.riotId,region:m.region||"euw1"};try{await db.doc("riot/"+id).update({riotId:b.riotId,region:b.region||m.region||"euw1",alts:a});
+      m.riotId=b.riotId;m.region=b.region||m.region;m.alts=a;draw()}catch(e){alert("Échange impossible : "+e.message)}};
   const opgg=m=>m.riotId?`https://www.op.gg/summoners/euw/${encodeURIComponent(m.riotId.replace("#","-"))}`:"";
   // fondateurs fixés : Audric au top, Skryvv (compte admin) au mid
   const audric=Object.entries(sages).filter(([id,m])=>id!==window.CONSEIL_ADMIN&&m.pseudo&&m.pseudo.trim().toLowerCase()==="audric").sort((a,b)=>(lad[b[0]]?1:0)-(lad[a[0]]?1:0))[0];
@@ -136,7 +142,7 @@ const $=id=>document.getElementById(id),esc=conseilEsc,DAYS=["Lun","Mar","Mer","
     // chaque validé occupe un seul poste : d'abord son poste principal, puis ses autres choix
     const seat={...FIX},used=new Set([FIX.top.uid,FIX.mid.uid]);for(let r=0;r<5;r++)for(const c of mem){const k=(c.roles||[])[r];if(k&&!seat[k]&&!used.has(c.uid)){seat[k]=c;used.add(c.uid)}}
     $("roles").innerHTML=ROLES.map(([k,l,s])=>{const v=seat[k];
-      if(v)return `<div class="rl"><small>${s}${FIX[k]?" · fondateur":""}</small>${conseilAv(v.uid,v.pseudo,52)}<b>${esc(v.pseudo)}</b><span class="note">${esc(rank(v.uid))}</span></div>`;
+      if(v)return `<div class="rl"><small>${s}${FIX[k]?" · fondateur":""}</small>${conseilAv(v.uid,v.pseudo,52)}<b>${esc(v.pseudo)}</b><span class="note">${esc(rank(v.uid))}</span>${isAdmin&&sages[v.uid]&&(sages[v.uid].alts||[]).length?`<span class="note" style="font-size:.72rem">${esc(sages[v.uid].riotId)}</span><button class="btn small ghost" type="button" onclick="teamSwap('${esc(v.uid)}')">⇄ Compte 1 / 2</button>`:""}</div>`;
       if(WANTED.includes(k))return `<div class="rl open"><small>${s}</small><em>On recrute</em><span class="note">${l}</span></div>`;
       return `<div class="rl"><small>${s}</small><span class="note">${l}</span></div>`}).join("");
     // ---- candidatures (refusées : visibles seulement par Skryvv et par le candidat)
