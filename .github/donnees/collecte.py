@@ -103,4 +103,16 @@ def videos():
         res[jeu] = vids[:8]
     save("videos.json", res)
 
-for f in (boutique, jeux_gratuits, matchs, videos): safe(f)
+def top_jeux():
+    # Jeux les plus joués du moment sur Steam (joueurs connectés en même temps), API publique Steam Charts
+    r = get("https://api.steampowered.com/ISteamChartsService/GetGamesByConcurrentPlayers/v1/")["response"]
+    out = []
+    for x in r.get("ranks", [])[:20]:
+        a = x["appid"]; name = ""
+        try: name = get(f"https://store.steampowered.com/api/appdetails?appids={a}&filters=basic&l=french")[str(a)]["data"]["name"]
+        except Exception as e: print("nom introuvable", a, repr(e)[:100])
+        out.append({"rang": x.get("rank"), "id": a, "n": name or f"Jeu {a}", "now": x.get("concurrent_in_game"), "pic": x.get("peak_in_game"),
+                    "img": f"https://cdn.cloudflare.steamstatic.com/steam/apps/{a}/header.jpg", "u": f"https://store.steampowered.com/app/{a}/"})
+    save("top-jeux.json", {"maj": r.get("last_update"), "jeux": out})
+
+for f in (boutique, jeux_gratuits, matchs, videos, top_jeux): safe(f)
