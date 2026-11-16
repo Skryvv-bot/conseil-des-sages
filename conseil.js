@@ -20,7 +20,7 @@ window.conseilConnect=function(){
       const auth=firebase.auth(), db=firebase.firestore();
       let done=false,tried=false;
       auth.onAuthStateChanged(async u=>{
-        if(u&&!done){done=true;window.CONSEIL_UID=u.uid;conseilShowAdmin();renderAccount(u);await loadClaims(db);watchCamps(db,u.uid);resolve({db,uid:u.uid});offerClaim(db,u.uid);conseilBank(db,u.uid);conseilMove(db,u)}
+        if(u&&!done){done=true;window.CONSEIL_UID=u.uid;conseilShowAdmin();renderAccount(u);await loadClaims(db);watchCamps(db,u.uid);resolve({db,uid:u.uid});conseilBank(db,u.uid);conseilMove(db,u)}
         else if(u)renderAccount(u);
         else if(!done&&!tried){tried=true;auth.signInAnonymously().catch(e=>{if(!done){done=true;console.error(e);resolve({db:null,error:e})}})}   // pas de session : compte anonyme
       });
@@ -744,8 +744,20 @@ window.conseilClaim=async function(db,uid,old,pseudo){
   for(const c of CLAIM_COLS){const d=await db.doc(c+"/"+old).get();if(d.exists)await db.doc(c+"/"+uid).set(d.data())}
   await db.doc("claims/"+old).set({by:uid,pseudo:pseudo||"",at:new Date().toISOString()});
 };
+// Un pseudo = un seul compte : la réservation pseudos/{pseudo en minuscules} appartient au compte qui l'a pris en premier
+window.conseilPseudoKey=p=>String(p||"").trim().toLowerCase();
+window.conseilReservePseudo=async function(db,uid,pseudo,oldPseudo){
+  const k=conseilPseudoKey(pseudo);if(!k||/\//.test(k)||k==="."||k==="..")throw new Error("pseudo invalide");
+  const ref=db.doc("pseudos/"+k),d=await ref.get();
+  if(d.exists&&d.data().uid!==uid){const e=new Error("pseudo pris");e.taken=true;throw e}
+  if(!d.exists)await ref.set({uid,pseudo:String(pseudo).trim().slice(0,20),at:Date.now()});
+  const ok=conseilPseudoKey(oldPseudo);if(ok&&ok!==k){try{const o=await db.doc("pseudos/"+ok).get();if(o.exists&&o.data().uid===uid)await db.doc("pseudos/"+ok).delete()}catch(e){}}
+};
 window.conseilTakeover=function(el,db,uid,old,pseudo){
   if(!el)return;el.hidden=false;
+  // un pseudo appartient à un seul compte : si c'est toi, connecte-toi avec ton identifiant (l'ancienne « récupération » copiait le profil et créait des doublons)
+  el.innerHTML=`Le pseudo <b>${conseilEsc(pseudo)}</b> est déjà pris. Si c'est ton compte, connecte-toi avec ton identifiant : <button type="button" class="btn small" data-login>Me connecter</button>`;
+  el.querySelector("[data-login]").onclick=()=>openAccount({tab:"login"});return;
   el.innerHTML=`Le pseudo <b>${conseilEsc(pseudo)}</b> est déjà pris. Si c'est toi sur un autre téléphone ou navigateur, récupère ton compte (pronos, tier list, profil) : <button type="button" class="btn small" data-take>C'est moi, récupérer</button>`;
   el.querySelector("[data-take]").onclick=async e=>{e.target.disabled=true;e.target.textContent="Récupération…";
     try{await conseilClaim(db,uid,old,pseudo);el.textContent="C'est fait ! Rechargement…";setTimeout(()=>location.reload(),900)}
@@ -760,7 +772,8 @@ const accSlug=id=>String(id||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLower
 const accName=u=>u&&!u.isAnonymous?(u.displayName||(u.email||"").split("@")[0]):null;
 function renderAccount(u){const b=document.getElementById("cnavAcc");if(!b)return;b.hidden=false;const n=accName(u);
   b.textContent=n?n:"Connexion";b.classList.toggle("on",!!n);b.classList.remove("has-av");if(n)setTimeout(accAvatar,0);b.title=n?"Mon profil":"Crée ton identifiant ou connecte-toi pour retrouver tes données sur tous tes appareils";b.onclick=()=>{if(!n)return openAccount();if(/communaute\.html$/.test(location.pathname)){location.hash="profil"}else location.href="communaute.html#profil"}}
-window.conseilOpenAccount=()=>openAccount();
+window.conseilOpenAccount=(o)=>openAccount(o);
+window.conseilLogout=async()=>{try{await firebase.auth().signOut()}catch(e){}try{sessionStorage.removeItem("cds-admin-pin")}catch(e){}location.href="index.html"};
 // Photo de profil à côté du pseudo, dans la barre du haut (champion choisi, sinon photo Discord, sinon initiales)
 let __accAv=0;
 async function accAvatar(){const b=document.getElementById("cnavAcc");if(!b||!b.classList.contains("on"))return;const my=++__accAv;

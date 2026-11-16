@@ -96,7 +96,7 @@
 
   <!-- PROFIL -->
   <section id="v-profil" class="frame panel" hidden>
-    <h2>Mon profil</h2>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><h2 style="margin:0">Mon profil</h2><button type="button" class="btn ghost" id="logoutBtn" hidden>Se déconnecter</button></div>
     <p class="note">Ton profil sert partout sur le site : générateur d’équipes, Clash, pronos, votes, ladder et parties en direct.</p>
     <form class="form" id="profForm">
       <div class="pf-h"><h3>Général</h3><span class="note">Ton identité sur tout le site.</span></div>
@@ -178,6 +178,8 @@ $("profForm").onsubmit=async e=>{e.preventDefault();if(!db)return;const msg=$("p
     if(!riotId){msg.className="err";msg.textContent="Indique d'abord ton compte principal.";return}
     if(a.toLowerCase()!==riotId.toLowerCase()&&!alts.some(x=>x.riotId.toLowerCase()===a.toLowerCase()))alts.push({riotId:a,region:$("pAlt"+i+"Reg").value})}
   {const t=Object.entries(members).find(([id,m])=>id!==uid&&m.pseudo?.toLowerCase()===pseudo.toLowerCase());if(t){msg.className="err";conseilTakeover(msg,db,uid,t[0],t[1].pseudo);return}}
+  if(/\//.test(pseudo)){msg.className="err";msg.textContent="Le pseudo ne peut pas contenir de « / ».";return}
+  try{await conseilReservePseudo(db,uid,pseudo,(members[uid]||{}).pseudo)}catch(x){msg.className="err";if(x.taken){const t=Object.entries(members).find(([id,m])=>id!==uid&&m.pseudo?.toLowerCase()===pseudo.toLowerCase());conseilTakeover(msg,db,uid,t?t[0]:"",pseudo)}else msg.textContent="Pseudo impossible à réserver, réessaie.";return}
   try{await db.doc("riot/"+uid).set({pseudo,riotId,region:$("pRegion").value,rank:$("pRank").value,discord:$("pDiscord").value.trim().slice(0,40),fn:$("pFnN").value.trim()?{name:$("pFnN").value.trim().slice(0,32),type:$("pFnT").value}:null,wow:$("pWowN").value.trim()?{name:$("pWowN").value.trim().slice(0,24),surname:$("pWowS").value.trim().slice(0,24),lvl:Math.max(0,Math.min(60,+$("pWowL").value||0))}:null,roles:profRoles.slice(),alts,updated:new Date().toISOString()},{merge:true});
     msg.className="okmsg";msg.textContent="Profil enregistré."}catch(x){msg.className="err";msg.textContent="Enregistrement impossible, réessaie."}};
 
@@ -312,6 +314,8 @@ window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
   Promise.all([conseilDD(),conseilDiscordAvatars()]).then(([v,d])=>{dc=d;grid()});
   const iv=setInterval(()=>{if(window.__membersLoaded){clearInterval(iv);prev()}},400);
 })();
+// bouton « Se déconnecter » : seulement avec un identifiant (un compte anonyme serait perdu)
+try{firebase.auth().onAuthStateChanged(u=>{const b=document.getElementById("logoutBtn");if(!b)return;b.hidden=!(u&&!u.isAnonymous);b.onclick=()=>{if(b.dataset.sure){conseilLogout();return}b.dataset.sure=1;b.textContent="Confirmer la déconnexion";setTimeout(()=>{delete b.dataset.sure;b.textContent="Se déconnecter"},5000)}})}catch(e){}
 </script>
 </body>
 </html>

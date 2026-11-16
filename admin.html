@@ -88,6 +88,7 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
     <div class="htxt">
       <span class="eyebrow">Réservé à Skryvv</span>
       <h1>Les sages inscrits</h1>
+      <button type="button" class="btn ghost" onclick="conseilLogout()" style="align-self:flex-start">Se déconnecter</button>
       <p class="lead">Tous les profils créés sur le site. Les doublons (même pseudo) sont surlignés en rose. Supprimer un profil efface aussi ses données WoW, Jeux, Worlds, sa candidature Team 5v5 et ses cœurs du mercato. Ses PO restent dans la banque. « Nouveau mot de passe » débloque un sage qui a oublié le sien : donne-lui le mot de passe provisoire, il pourra le changer dans son compte.</p>
     </div>
   </header>
@@ -159,10 +160,15 @@ function draw(){
     b.disabled=true;b.textContent="Suppression…";const id=b.dataset.id;
     try{await DB.doc("riot/"+id).delete();
       await Promise.allSettled(["wow","warmup","picks","tiers","team","mercatoLikes"].map(c=>DB.doc(c+"/"+id).delete()));
+      try{const k=conseilPseudoKey(P[id]&&P[id].pseudo),r=k&&await DB.doc("pseudos/"+k).get();if(r&&r.exists&&r.data().uid===id)await DB.doc("pseudos/"+k).delete()}catch(x){}
       delete P[id];draw()}catch(e){b.disabled=false;b.classList.remove("sure");b.textContent="Échec : règles à publier ?"}});
   const O=Object.entries(W).filter(([id,w])=>!P[id]&&(w.po||0)>0).sort((a,b)=>(b[1].po||0)-(a[1].po||0));
   $("orph").hidden=!O.length;$("orows").innerHTML=O.map(([id,w])=>`<tr><td><small>${esc(id)}</small></td><td><small style="color:#ffe27a">${w.po||0}</small></td></tr>`).join("");
 }
+// réserve le pseudo des profils existants (un pseudo en double n'est réservé qu'une fois le doublon supprimé)
+async function seedPseudos(){try{const s=await DB.collection("pseudos").get(),have={};s.forEach(d=>have[d.id]=d.data().uid);const cnt={};
+  for(const m of Object.values(P)){const k=conseilPseudoKey(m.pseudo);if(k)cnt[k]=(cnt[k]||0)+1}
+  for(const [id,m] of Object.entries(P)){const k=conseilPseudoKey(m.pseudo);if(!k||/\//.test(k)||have[k]||cnt[k]>1)continue;try{await DB.doc("pseudos/"+k).set({uid:id,pseudo:m.pseudo,at:Date.now()})}catch(e){break}}}catch(e){}}
 // le robot donne l'identifiant de chaque compte (jamais le mot de passe, que personne ne peut lire)
 async function adminCall(body){const tok=await firebase.auth().currentUser.getIdToken();
   const r=await fetch(RIOT_RELAY+"/admin",{method:"POST",headers:{Authorization:"Bearer "+tok,"Content-Type":"application/json"},body:JSON.stringify(body)});
@@ -187,6 +193,7 @@ conseilConnect().then(async({db,uid})=>{
   DB=db;$("locked").hidden=true;$("box").hidden=false;
   const [r,w]=await Promise.all([db.collection("riot").get(),db.collection("wallets").get().catch(()=>null)]);
   r.forEach(d=>P[d.id]=d.data());if(w)w.forEach(d=>W[d.id]=d.data());draw();
+  seedPseudos();
   adminCall({action:"users",uids:Object.keys(P)}).then(j=>{if(j.users)U=j.users;else UERR=j.error||"erreur";draw()}).catch(e=>{UERR=String(e.message||e);draw()})});
 </script>
 </body>
