@@ -113,31 +113,32 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h2 id="t-c">Les candidatures</h2><span class="note" id="candN"></span></div>
     <div class="cands" id="cands"><p class="note">Chargement…</p></div>
   </section>
-  <p class="src">Le rang affiché vient du ladder du Conseil (Solo/Duo, compte principal).</p>
+  <p class="src">Le rang affiché est le rang Flex du compte principal, tiré du ladder du Conseil.</p>
 </div>
 <script>
 conseilNav("team");
 // Équipe : Skryvv et Audric sont déjà dedans ; les postes cherchés sont marqués « on recrute »
-const ROLES=[["top","Top","TOP"],["jungle","Jungle","JGL"],["mid","Mid","MID"],["adc","ADC","BOT"],["support","Support","SUP"]],WANTED=["jungle","adc","support"],FOUNDERS=["skryvv","audric"];
+const ROLES=[["top","Top","TOP"],["jungle","Jungle","JGL"],["mid","Mid","MID"],["adc","ADC","BOT"],["support","Support","SUP"]],WANTED=["jungle","adc","support"];
 const $=id=>document.getElementById(id),esc=conseilEsc,DAYS=["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
 (async function(){
   const {db,uid}=await conseilConnect();if(!db){$("formBox").innerHTML='<p class="note">Connexion au Conseil impossible pour le moment.</p>';return}
   const isAdmin=uid===window.CONSEIL_ADMIN;
   const [sages,dc,lad]=await Promise.all([conseilSages(db),conseilDiscordAvatars(),db.doc("ladder/current").get().then(d=>d.exists?d.data().players||{}:{}).catch(()=>({}))]);
-  const rank=id=>{const p=lad[id];return p&&p.solo&&p.solo.tier?conseilRankLabel(p.solo,true):"Non classé"};
+  const rank=id=>{const p=lad[id];return p&&p.flex&&p.flex.tier?conseilRankLabel(p.flex,true)+" (Flex)":"Flex non classé"};
   const opgg=m=>m.riotId?`https://www.op.gg/summoners/euw/${encodeURIComponent(m.riotId.replace("#","-"))}`:"";
-  const founders=Object.entries(sages).filter(([,m])=>m.pseudo&&FOUNDERS.includes(m.pseudo.trim().toLowerCase()));
+  // fondateurs fixés : Audric au top, Skryvv (compte admin) au mid
+  const audric=Object.entries(sages).filter(([id,m])=>id!==window.CONSEIL_ADMIN&&m.pseudo&&m.pseudo.trim().toLowerCase()==="audric").sort((a,b)=>(lad[b[0]]?1:0)-(lad[a[0]]?1:0))[0];
+  const FIX={top:audric?{uid:audric[0],pseudo:audric[1].pseudo}:{uid:"",pseudo:"Audric"},mid:{uid:window.CONSEIL_ADMIN,pseudo:(sages[window.CONSEIL_ADMIN]||{}).pseudo||"Skryvv"}};
   let cand={};
   function draw(){
     // ---- l'équipe, poste par poste (fondateurs et candidats validés)
     const mem=Object.values(cand).filter(c=>c.status==="ok");
     // chaque validé occupe un seul poste : d'abord son poste principal, puis ses autres choix
-    const seat={},used=new Set();for(let r=0;r<5;r++)for(const c of mem){const k=(c.roles||[])[r];if(k&&!seat[k]&&!used.has(c.uid)){seat[k]=c;used.add(c.uid)}}
+    const seat={...FIX},used=new Set([FIX.top.uid,FIX.mid.uid]);for(let r=0;r<5;r++)for(const c of mem){const k=(c.roles||[])[r];if(k&&!seat[k]&&!used.has(c.uid)){seat[k]=c;used.add(c.uid)}}
     $("roles").innerHTML=ROLES.map(([k,l,s])=>{const v=seat[k];
-      if(v)return `<div class="rl"><small>${s}</small>${conseilAv(v.uid,v.pseudo,52)}<b>${esc(v.pseudo)}</b><span class="note">${esc(rank(v.uid))}</span></div>`;
+      if(v)return `<div class="rl"><small>${s}${FIX[k]?" · fondateur":""}</small>${conseilAv(v.uid,v.pseudo,52)}<b>${esc(v.pseudo)}</b><span class="note">${esc(rank(v.uid))}</span></div>`;
       if(WANTED.includes(k))return `<div class="rl open"><small>${s}</small><em>On recrute</em><span class="note">${l}</span></div>`;
-      return `<div class="rl"><small>${s}</small><span class="note">${l}</span></div>`}).join("")+
-      `<p class="note" style="grid-column:1/-1;margin:0">Fondateurs : ${founders.map(([id,m])=>conseilAv(id,m.pseudo,22)+esc(m.pseudo)+" ("+esc(rank(id))+")").join(" · ")||"Skryvv et Audric"}.</p>`;
+      return `<div class="rl"><small>${s}</small><span class="note">${l}</span></div>`}).join("");
     // ---- candidatures (refusées : visibles seulement par Skryvv et par le candidat)
     const L=Object.values(cand).filter(c=>c.status!=="no"||isAdmin||c.uid===uid).sort((a,b)=>({pending:0,ok:1,no:2}[a.status]-{pending:0,ok:1,no:2}[b.status])||String(b.at).localeCompare(String(a.at)));
     $("candN").textContent=L.length?L.filter(c=>c.status==="pending").length+" en attente · "+L.filter(c=>c.status==="ok").length+" validée(s)":"";
