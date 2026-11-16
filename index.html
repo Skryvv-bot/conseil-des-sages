@@ -301,10 +301,20 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
 .hr b{color:#fff;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hr .bar{height:14px;border-radius:99px;background:#201d38;overflow:hidden}
 .hr .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#7ad7ff,#b48aff,#ff8ad8)}
-.hr .bar i.wow{background:linear-gradient(90deg,#ffb36b,#ffe27a)}.hr .bar i.lol{background:linear-gradient(90deg,#3a8dff,#7ad7ff)}.hr .bar i.fn{background:linear-gradient(90deg,#8affc1,#7ad7ff)}
+.hr .bar i.g-wow{background:linear-gradient(90deg,#ffb36b,#ffe27a)}.hr .bar i.g-lol{background:linear-gradient(90deg,#3a8dff,#7ad7ff)}.hr .bar i.g-fn{background:linear-gradient(90deg,#8affc1,#7ad7ff)}
 .hr span{font:700 .85rem "JetBrains Mono",monospace;color:#f2f0ff;text-align:right;white-space:nowrap}
 .hr span small{display:block;font:500 .7rem Manrope,sans-serif;color:#b4b0d0}
 @media (max-width:560px){.hr{grid-template-columns:minmax(0,1fr) auto}.hr .bar{grid-column:1/-1;grid-row:2}}
+.hr2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px}
+@media (max-width:860px){.hr2{grid-template-columns:1fr}}
+.hr2 h3{margin:0 0 4px;font:800 .78rem "JetBrains Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:#b4b0d0}
+.hr2 .hr{width:100%;border:0;background:transparent;color:inherit;font:inherit;text-align:left;padding:6px 8px;border-radius:12px;cursor:pointer}
+.hr2 .hr:hover{background:#201d38}.hr2 .hr[aria-pressed="true"]{background:#201d38;outline:1px solid #f2f0ff}
+.hr2 .hr.sg{grid-template-columns:minmax(0,190px) minmax(0,1fr) auto}
+.hr2 .hr b{font-family:Manrope,sans-serif}
+.hr .who{display:flex;align-items:center;gap:8px;min-width:0}.hr .who b{min-width:0}
+.hr-f{display:flex;gap:8px;flex-wrap:wrap;align-items:center;min-height:0}
+.hr-f button{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 12px;border-radius:999px;border:1px solid #f2f0ff;background:#f2f0ff;color:#0c0b14;font:800 .8rem Manrope,sans-serif;cursor:pointer}
 /* Visuels de l'accueil */
 .st.st-wow{background:#ffe27a!important;border-color:#ffe27a!important;color:#0c0b14!important}
 .st.st-fn{background:#7ad7ff!important;border-color:#7ad7ff!important;color:#0c0b14!important}
@@ -526,8 +536,9 @@ section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,
   <section class="frame panel" aria-labelledby="hrT" style="padding:20px;gap:12px">
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h2 id="hrT" style="font-size:clamp(1.4rem,3.4vw,2.1rem)!important;margin:0">Heures de jeu du Conseil</h2><span class="note" id="hrN"></span></div>
     <div class="shop-f" role="group" aria-label="Période" id="hrP"></div>
-    <div class="hrs" id="hrs"><p class="note">Chargement…</p></div>
-    <p class="note" style="margin:0">Temps passé en jeu par les membres connectés au Discord, relevé toutes les 10 minutes. Seul le total par jeu est gardé, pas le temps de chaque sage.</p>
+    <div class="hr-f" id="hrF"></div>
+    <div class="hr2"><div><h3>Jeux</h3><div class="hrs" id="hrs"><p class="note">Chargement…</p></div></div><div><h3>Sages</h3><div class="hrs" id="hrU"><p class="note">Chargement…</p></div></div></div>
+    <p class="note" style="margin:0">Temps passé en jeu par les membres connectés au Discord, relevé toutes les 10 minutes. Clique sur un jeu pour voir qui y joue, ou sur un sage pour voir ses jeux.</p>
   </section>
 
   <!-- Tuiles -->
@@ -987,16 +998,32 @@ window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
   const P=[["semaine","Cette semaine",monday],["7","7 jours",iso(Date.now()-6*864e5)],["30","30 jours",iso(Date.now()-29*864e5)],["mois","Ce mois-ci",today.slice(0,8)+"01"],["an","Cette année",today.slice(0,5)+"01-01"],["tout","Depuis le début","0000"]];
   let cur="semaine";try{cur=localStorage.getItem("hr-periode")||cur}catch(e){}
   const fmt=m=>{m=Math.round(m);const h=Math.floor(m/60);return h?h+" h"+(m%60?" "+String(m%60).padStart(2,"0"):""):m+" min"};
-  const cls=g=>/warcraft/i.test(g)?"wow":/league of legends/i.test(g)?"lol":/fortnite/i.test(g)?"fn":"";
+  const cls=g=>/warcraft/i.test(g)?"g-wow":/league of legends/i.test(g)?"g-lol":/fortnite/i.test(g)?"g-fn":"";
   const since=new Date(d.since+"T12:00:00").toLocaleDateString("fr-FR",{day:"numeric",month:"long"}).replace(/^1 /,"1er ");
+  // nom Discord -> sage du site (pseudo et photo), sinon nom et photo Discord
+  let sages={},fG="",fU="";const ub=document.getElementById("hrU"),fb=document.getElementById("hrF");
+  try{const c=await conseilConnect();if(c&&c.db)sages=await conseilSages(c.db)}catch(e){}
+  const who={};const whoOf=u=>{if(who[u])return who[u];const k={[conseilDcNorm(u)]:1};const s=Object.entries(sages).find(([,m])=>m.pseudo&&conseilDcFind(m,k));
+    return who[u]=s?{id:s[0],name:s[1].pseudo}:{id:"",name:u}};
+  const avOf=u=>{const w=whoOf(u);if(w.id)return conseilAv(w.id,w.name,26);const a=(d.av||{})[u];return a?`<img class="cav" src="${esc(a)}" alt="" width="26" height="26" style="width:26px;height:26px;border-radius:50%;object-fit:cover" referrerpolicy="no-referrer">`:`<span class="cav" style="width:26px;height:26px;border-radius:50%;display:inline-grid;place-items:center;background:#201d38;font-size:.6rem">${esc(u.slice(0,2).toUpperCase())}</span>`};
+  const row=(kind,key,label,lead,m,max,sub)=>`<button type="button" class="hr${kind==="u"?" sg":""}" data-${kind}="${esc(key)}" aria-pressed="${(kind==="g"?fG:fU)===key}"><span class="who">${lead}<b title="${esc(label)}">${esc(label)}</b></span><div class="bar"><i class="${kind==="g"?cls(key):""}" style="width:${Math.max(2,Math.round(m/max*100))}%"></i></div><span>${fmt(m)}${sub?`<small>${sub}</small>`:""}</span></button>`;
   function draw(){pb.innerHTML=P.map(([k,l])=>`<button type="button" data-k="${k}" aria-pressed="${k===cur}">${l}</button>`).join("");pb.querySelectorAll("button").forEach(b=>b.onclick=()=>{cur=b.dataset.k;try{localStorage.setItem("hr-periode",cur)}catch(e){}draw()});
-    const from=P.find(p=>p[0]===cur)[2],tot={};
-    for(const [day,games] of Object.entries(d.days))if(day>=from)for(const [g,e] of Object.entries(games)){const t=tot[g]||(tot[g]={m:0,p:new Set()});t.m+=e.m;e.p.forEach(x=>t.p.add(x))}
+    const from=P.find(p=>p[0]===cur)[2],tot={},ut={};let anyU=false;
+    for(const [day,games] of Object.entries(d.days))if(day>=from)for(const [g,e] of Object.entries(games)){
+      if(e.u)anyU=true;
+      // filtre sage : on ne compte que ses minutes à lui
+      if(fU){const n=Object.entries(e.u||{}).filter(([u])=>whoOf(u).name===fU).reduce((a,[,v])=>a+v,0);if(n){const t=tot[g]||(tot[g]={m:0,p:new Set()});t.m+=n;t.p.add(fU)}}
+      else{const t=tot[g]||(tot[g]={m:0,p:new Set()});t.m+=e.m;e.p.forEach(x=>t.p.add(x))}
+      if(!fG||fG===g)for(const [u,v] of Object.entries(e.u||{})){const k=whoOf(u).name,x=ut[k]||(ut[k]={m:0,u,g:new Set()});x.m+=v;x.g.add(g)}}
     const L=Object.entries(tot).sort((a,b)=>b[1].m-a[1].m),all=L.reduce((a,[,t])=>a+t.m,0),max=L.length?L[0][1].m:1;
-    document.getElementById("hrN").textContent=all?fmt(all)+" au total · relevé depuis le "+since:"relevé depuis le "+since;
-    if(!L.length){box.innerHTML='<p class="note">Personne n\'a encore joué sur cette période.</p>';return}
-    const top=L.slice(0,8),rest=L.slice(8).reduce((a,[,t])=>a+t.m,0);
-    box.innerHTML=top.map(([g,t])=>`<div class="hr"><b title="${esc(g)}">${esc(g)}</b><div class="bar"><i class="${cls(g)}" style="width:${Math.max(2,Math.round(t.m/max*100))}%"></i></div><span>${fmt(t.m)}<small>${t.p.size} sage${t.p.size>1?"s":""}</small></span></div>`).join("")+(rest?`<p class="note" style="margin:0">Et ${fmt(rest)} sur ${L.length-8} autre${L.length-8>1?"s":""} jeu${L.length-8>1?"x":""}.</p>`:"")}
+    document.getElementById("hrN").textContent=all?fmt(all)+" au total"+(fU?" pour "+fU:"")+" · relevé depuis le "+since:"relevé depuis le "+since;
+    fb.innerHTML=(fG?`<button type="button" data-x="g">${esc(fG)} ✕</button>`:"")+(fU?`<button type="button" data-x="u">${esc(fU)} ✕</button>`:"")+(fG||fU?"":`<span class="note" style="margin:0">Clique sur un jeu ou un sage pour filtrer.</span>`);
+    fb.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{b.dataset.x==="g"?fG="":fU="";draw()});
+    box.innerHTML=L.length?L.slice(0,10).map(([g,t])=>row("g",g,g,"",t.m,max,fU?"":t.p.size+" sage"+(t.p.size>1?"s":""))).join("")+(L.length>10?`<p class="note" style="margin:0">Et ${fmt(L.slice(10).reduce((a,[,t])=>a+t.m,0))} sur ${L.length-10} autre${L.length>11?"s":""} jeu${L.length>11?"x":""}.</p>`:""):'<p class="note">Personne n\'a encore joué sur cette période.</p>';
+    const U=Object.entries(ut).sort((a,b)=>b[1].m-a[1].m),mu=U.length?U[0][1].m:1;
+    ub.innerHTML=U.length?U.slice(0,12).map(([k,x])=>row("u",k,k,avOf(x.u),x.m,mu,fG?"":x.g.size+" jeu"+(x.g.size>1?"x":""))).join(""):`<p class="note">${anyU?"Personne sur cette période"+(fG?" pour ce jeu":"")+".":"Le temps par sage est relevé à partir d'aujourd'hui : il apparaîtra au prochain relevé."}</p>`;
+    box.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{fG=fG===b.dataset.g?"":b.dataset.g;draw()});
+    ub.querySelectorAll("[data-u]").forEach(b=>b.onclick=()=>{fU=fU===b.dataset.u?"":b.dataset.u;draw()})}
   draw()})();
 </script>
 </body>

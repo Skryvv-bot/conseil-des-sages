@@ -1,5 +1,5 @@
 # Heures de jeu du Conseil : toutes les 10 min, lit le widget Discord du serveur et ajoute le temps écoulé à chaque jeu en cours.
-# Seuls des totaux par jeu sont gardés (et un identifiant haché par joueur, pour compter combien de sages ont joué). Fichier : out/heures.json
+# Gardé par jour : total par jeu, et minutes par sage (nom Discord) pour chaque jeu. Photos Discord dans « av ». Fichier : out/heures.json
 import json, os, re, time, hashlib, urllib.request
 from datetime import datetime, timezone, timedelta
 F = "out/heures.json"; os.makedirs("out", exist_ok=True)
@@ -20,6 +20,10 @@ for m in w.get("members", []):
     e["m"] = round(e["m"] + mins, 1)
     h = hashlib.sha1(("cds:" + str(m.get("username", ""))).encode()).hexdigest()[:8]
     if h not in e["p"]: e["p"].append(h)
+    u = str(m.get("username", ""))[:40]
+    if u:
+        e.setdefault("u", {})[u] = round(e.get("u", {}).get(u, 0) + mins, 1)
+        if m.get("avatar_url"): d.setdefault("av", {})[u] = m["avatar_url"]
     n += 1
 d["last"] = now; d["since"] = d["since"] or day
 for k in sorted(d["days"])[:-400]: del d["days"][k]
