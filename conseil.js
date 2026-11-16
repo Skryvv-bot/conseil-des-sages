@@ -1,4 +1,6 @@
 // Outils partagés par toutes les pages du Conseil des Sages
+// Le site vit sur leconseildessages.fr : www. renvoie vers l'adresse sans www
+if(location.hostname==="www.leconseildessages.fr")location.replace("https://leconseildessages.fr"+location.pathname+location.search+location.hash);
 const FIREBASE_CONFIG={
   apiKey:"AIzaSyBnmVwD79y26gs4dVjMEzYyOa7sxdhtR_I",
   authDomain:"conseil-des-sages.firebaseapp.com",
@@ -18,7 +20,7 @@ window.conseilConnect=function(){
       const auth=firebase.auth(), db=firebase.firestore();
       let done=false,tried=false;
       auth.onAuthStateChanged(async u=>{
-        if(u&&!done){done=true;window.CONSEIL_UID=u.uid;conseilShowAdmin();renderAccount(u);await loadClaims(db);watchCamps(db,u.uid);resolve({db,uid:u.uid});offerClaim(db,u.uid);conseilBank(db,u.uid)}
+        if(u&&!done){done=true;window.CONSEIL_UID=u.uid;conseilShowAdmin();renderAccount(u);await loadClaims(db);watchCamps(db,u.uid);resolve({db,uid:u.uid});offerClaim(db,u.uid);conseilBank(db,u.uid);conseilMove(db,u)}
         else if(u)renderAccount(u);
         else if(!done&&!tried){tried=true;auth.signInAnonymously().catch(e=>{if(!done){done=true;console.error(e);resolve({db:null,error:e})}})}   // pas de session : compte anonyme
       });
@@ -772,8 +774,32 @@ function accErr(e){const c=e&&e.code||"";
   if(/too-many-requests/.test(c))return "Trop d'essais. Attends quelques minutes.";
   if(/network/.test(c))return "Pas de connexion internet.";
   return "Ça n'a pas marché ("+(c||"erreur")+"). Réessaie.";}
-function openAccount(){
-  const auth=firebase.auth(),u=auth.currentUser,name=accName(u);let tab=name?"me":"create";
+// Déménagement vers leconseildessages.fr
+// Sur l'ancienne adresse : un compte avec identifiant part directement sur le nouveau site (on lui redemandera de se connecter) ;
+// un compte anonyme qui a un profil ou des PO doit d'abord créer son identifiant, sinon il perdrait tout (la session anonyme est liée à l'adresse).
+const NEW_HOST="leconseildessages.fr",OLD_HOST="conseil-des-sages.pages.dev";
+async function conseilMove(db,u){
+  const h=location.hostname;
+  if(h===NEW_HOST){const q=new URLSearchParams(location.search);if(!q.has("demenage"))return;const id=q.get("id")||"";q.delete("demenage");q.delete("id");
+    history.replaceState(null,"",location.pathname+(q.toString()?"?"+q:"")+location.hash);
+    if(u.isAnonymous&&id)setTimeout(()=>openAccount({tab:"login",id,note:"Bienvenue sur leconseildessages.fr ! Reconnecte-toi une fois avec ton identifiant pour retrouver ton compte."}),500);return}
+  if(h!==OLD_HOST)return;
+  const go=id=>{const q=new URLSearchParams(location.search);q.set("demenage","1");if(id)q.set("id",id);location.replace("https://"+NEW_HOST+location.pathname+"?"+q+location.hash)};
+  if(!u.isAnonymous){go(accName(u));return}
+  let has=false;try{const [a,b]=await Promise.all([db.doc("riot/"+u.uid).get(),db.doc("wallets/"+u.uid).get()]);has=a.exists||(b.exists&&(b.data().po||b.data().balance||0)>0)}catch(e){has=true}
+  if(!has){go("");return}
+  if(document.getElementById("cmove"))return;
+  const el=document.createElement("div");el.id="cmove";el.className="cpop cacc";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-labelledby","cmoveT");
+  el.innerHTML=`<div class="cpop-box" style="gap:14px;text-align:center;align-items:center">${conseilSage("victoire",88,"csage-bob")}<span class="cpop-tag">Le site déménage</span><p class="cpop-q" id="cmoveT">CDS.TV devient leconseildessages.fr</p>
+    <p class="cacc-txt">Ton compte est <b>anonyme</b> : il est lié à cette ancienne adresse. Crée ton identifiant (30 secondes) pour garder ton profil, tes PO et tes pronos sur le nouveau site.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center"><button class="cpop-yes" type="button" data-c>Créer mon identifiant</button><button type="button" data-l style="padding:13px 18px;border:1px solid #4a4668;border-radius:12px;background:transparent;color:#f2f0ff;font:700 1rem var(--body,sans-serif);cursor:pointer">Plus tard</button></div></div>`;
+  document.body.appendChild(el);
+  el.querySelector("[data-c]").onclick=()=>{el.remove();openAccount({tab:"create",note:"Après ça, tu seras envoyé automatiquement sur leconseildessages.fr."})};
+  el.querySelector("[data-l]").onclick=()=>el.remove();
+  el.querySelector("[data-c]").focus()}
+
+function openAccount(opt){opt=opt||{};
+  const auth=firebase.auth(),u=auth.currentUser,name=accName(u);let tab=name?"me":(opt.tab||"create");
   let known="";try{known=localStorage.getItem("potes-pseudo")||""}catch(e){}
   const el=document.createElement("div");el.className="cpop cacc";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-labelledby","caccT");
   const draw=()=>{
@@ -782,9 +808,9 @@ function openAccount(){
         <p class="cacc-txt">Tu es connecté avec ton identifiant : tu retrouves tes pronos, ta tier list, tes Pièces d'or et ton camp sur tous tes appareils.</p>
         <button class="cpop-yes cacc-out" type="button" data-out>Se déconnecter</button>`
       :`<div class="cacc-tabs" role="tablist"><button role="tab" type="button" data-t="create" aria-selected="${tab==="create"}">Créer mon identifiant</button><button role="tab" type="button" data-t="login" aria-selected="${tab==="login"}">J'ai déjà un identifiant</button></div>
-        <p class="cacc-txt">${tab==="create"?"Ajoute un identifiant et un mot de passe à ton compte actuel. Tu gardes tout (pronos, tier list, Pièces d'or, camp) et tu pourras te connecter sur n'importe quel appareil.":"Connecte-toi pour retrouver ton compte sur cet appareil."}</p>
+        ${opt.note?`<p class="cacc-txt" style="color:#ffe27a;font-weight:800">${conseilEsc(opt.note)}</p>`:""}<p class="cacc-txt">${tab==="create"?"Ajoute un identifiant et un mot de passe à ton compte actuel. Tu gardes tout (pronos, tier list, Pièces d'or, camp) et tu pourras te connecter sur n'importe quel appareil.":"Connecte-toi pour retrouver ton compte sur cet appareil."}</p>
         <form class="cacc-form" novalidate>
-          <label>Identifiant<input id="caccId" autocomplete="username" maxlength="20" required value="${tab==="create"?conseilEsc(known):""}"></label>
+          <label>Identifiant<input id="caccId" autocomplete="username" maxlength="20" required value="${conseilEsc(tab==="create"?known:(opt.id||""))}"></label>
           <label>Mot de passe<input id="caccPw" type="password" autocomplete="${tab==="create"?"new-password":"current-password"}" minlength="6" required></label>
           ${tab==="create"?`<label>Confirme le mot de passe<input id="caccPw2" type="password" autocomplete="new-password" minlength="6" required></label>`:""}
           <p class="cacc-msg" role="status"></p>
