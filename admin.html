@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Les sages inscrits · admin</title>
+<meta name="theme-color" content="#0c0b14">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png?v=4">
+<link rel="apple-touch-icon" href="icon-192.png?v=4">
+<link rel="stylesheet" href="conseil.css">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="conseil.js"></script>
+<style>
+.panel{padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.lead{margin:0;font-size:1.1rem;color:#c9c5e6;max-width:62ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.card{background:#0c0b14;border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.card .k{font:700 .7rem var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--holo-pink,#ff8ad8)}
+.card b{font:800 1.05rem var(--display);color:#fff}
+.card span{color:#c9c5e6;font-size:.95rem}
+.vs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.vs div{padding:12px 14px;border-top:1px solid var(--line)}
+.vs div:nth-child(-n+2){border-top:0;font:700 .72rem var(--mono);letter-spacing:.12em;text-transform:uppercase}
+.vs div:nth-child(odd){color:var(--muted)}
+.vs div:nth-child(even){background:#201d38;color:#fff}
+.vs div:nth-child(2){color:var(--holo-gold,#ffe27a)}
+.tbox{overflow-x:auto}
+.tbl{width:100%;min-width:640px;border-collapse:collapse;font-size:.95rem}
+.tbl th{font:700 .7rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+.tbl td{padding:10px 6px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.tbl td:not(:first-child),.tbl th:not(:first-child){text-align:right}
+.tbl tr.hot td{color:var(--holo-pink,#ff8ad8);font-weight:800}
+.big{font:900 clamp(2.2rem,7vw,4rem)/1 var(--display);font-variant-numeric:tabular-nums}
+.clock2{display:flex;gap:10px;flex-wrap:wrap}
+.clock2 div{background:#0c0b14;border:1px solid var(--line);border-radius:12px;padding:12px 16px;text-align:center;min-width:84px}
+.clock2 b{display:block;font:900 2rem/1 var(--display);font-variant-numeric:tabular-nums}
+.clock2 span{font:700 .68rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--holo-gold,#ffe27a)}
+.warn{border-left:4px solid var(--holo-gold,#ffe27a);background:#201d38;border-radius:12px;padding:14px 16px;margin:0;color:#d9d5ef}
+.src{font-size:.85rem;color:var(--muted)}
+ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;color:#d9d5ef}
+.race{display:flex;flex-direction:column;gap:8px}
+.rc{display:grid;grid-template-columns:28px 44px minmax(0,1fr) auto;gap:12px;align-items:center;background:#0c0b14;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.rc .pos{font:800 1rem var(--display);color:var(--holo-gold,#ffe27a);text-align:center}
+.rc .who b{color:#fff}.rc .who span{display:block;font-size:.84rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rc .bar{height:8px;border-radius:99px;background:#201d38;overflow:hidden;margin-top:6px}
+.rc .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#7ad7ff,#8affc1,#ffe27a)}
+.rc .lv{font:900 1.5rem/1 var(--display);font-variant-numeric:tabular-nums;text-align:right}
+.rc .lv small{display:block;font:700 .62rem var(--mono);letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-top:3px}
+.rc.max{border-color:var(--holo-gold,#ffe27a)}
+.fac{font:700 .62rem var(--mono);letter-spacing:.06em;border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:middle}
+.fac.a{background:#7ad7ff;color:#0c0b14}.fac.h{background:#ff6b6b;color:#0c0b14}
+.chars{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.ch{background:#0c0b14;border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.ch.a{border-top:4px solid #7ad7ff}.ch.h{border-top:4px solid #ff6b6b}
+.ch-top{display:flex;gap:12px;align-items:center;min-width:0}
+.ch-top b{display:block;font:800 1.05rem var(--display);color:#fff;overflow-wrap:anywhere}
+.ch-top span{font-size:.85rem;color:var(--muted)}
+.ch dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;font-size:.9rem}
+.ch dt{color:var(--muted)}.ch dd{margin:0;color:#fff;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ch .note{font-size:.8rem}
+.adm-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.adm-tools input[type=search]{min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:#0c0b14;color:#f2f0ff;font:600 1rem var(--body);flex:1;min-width:200px}
+.adm-tools label{display:inline-flex;gap:6px;align-items:center;font-weight:700}
+.adm-stats{display:flex;gap:10px;flex-wrap:wrap}
+.adm-stats span{padding:6px 12px;border-radius:999px;border:1px solid var(--line);font:700 .82rem var(--mono)}
+.adm-stats .dup{border-color:#ff9db3;color:#ff9db3}
+.adm-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
+.adm{width:100%;border-collapse:collapse;min-width:900px;font-size:.92rem}
+.adm th{text-align:left;font:700 .7rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#b4b0d0;padding:10px 12px;border-bottom:1px solid var(--line);background:#121022;cursor:pointer;white-space:nowrap}
+.adm td{padding:10px 12px;border-bottom:1px solid #1d1a33;vertical-align:middle}
+.adm tr.dup td{background:#2a1422}
+.adm .who{display:flex;align-items:center;gap:10px;min-width:0}
+.adm .who b{color:#fff}
+.adm small{color:#b4b0d0;font-family:var(--mono);font-size:.72rem}
+.adm .tag{display:inline-block;padding:2px 8px;border-radius:6px;font:700 .68rem var(--mono);margin:1px 4px 1px 0;border:1px solid var(--line);color:#d9d5ef}
+.adm .tag.d{border-color:#ff9db3;color:#ff9db3}.adm .tag.me{border-color:#ffe27a;color:#ffe27a}
+.adm .del{min-height:36px;padding:0 12px;border-radius:10px;border:1px solid #ff9db3;background:transparent;color:#ff9db3;font:800 .82rem var(--body);cursor:pointer;white-space:nowrap}
+.adm .del.sure{background:#ff9db3;color:#0c0b14}
+.adm .del:disabled{opacity:.5;cursor:default}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="htxt">
+      <span class="eyebrow">Réservé à Skryvv</span>
+      <h1>Les sages inscrits</h1>
+      <p class="lead">Tous les profils créés sur le site. Les doublons (même pseudo) sont surlignés en rose. Supprimer un profil efface aussi ses données WoW, Jeux, Worlds, sa candidature Team 5v5 et ses cœurs du mercato. Ses PO restent dans la banque.</p>
+    </div>
+  </header>
+
+  <section class="frame panel" id="locked"><p class="note">Chargement…</p></section>
+
+  <section class="frame panel" id="box" hidden aria-labelledby="t-l">
+    <h2 id="t-l">Profils</h2>
+    <div class="adm-stats" id="stats"></div>
+    <div class="adm-tools">
+      <input type="search" id="q" placeholder="Rechercher un pseudo, un Riot ID, un Discord, un identifiant…" aria-label="Rechercher">
+      <label><input type="checkbox" id="onlyDup"> Doublons seulement</label>
+    </div>
+    <div class="adm-wrap"><table class="adm">
+      <thead><tr><th data-s="pseudo" scope="col">Sage</th><th data-s="riot" scope="col">LoL</th><th scope="col">Autres jeux</th><th data-s="po" scope="col">PO</th><th data-s="at" scope="col">Profil créé / modifié</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table></div>
+  </section>
+
+  <section class="frame panel" id="orph" hidden aria-labelledby="t-o">
+    <h2 id="t-o">Comptes sans profil</h2>
+    <p class="note">Ces comptes ont des PO dans la banque mais aucun profil (souvent des connexions anonymes depuis un autre appareil). Ils n'apparaissent nulle part sur le site.</p>
+    <div class="adm-wrap"><table class="adm" style="min-width:520px"><thead><tr><th scope="col">Identifiant du compte</th><th scope="col">PO</th></tr></thead><tbody id="orows"></tbody></table></div>
+  </section>
+</div>
+<script>
+conseilNav("admin");
+const $=id=>document.getElementById(id),esc=conseilEsc;
+let DB,P={},W={},sortK="pseudo",sortDir=1;
+const norm=s=>String(s||"").trim().toLowerCase();
+const when=d=>{const t=d&&(d.updatedAt||d.at||d.createdAt);if(!t)return "";const x=typeof t==="number"?new Date(t):t.toDate?t.toDate():new Date(t);return isNaN(x)?"":x.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})};
+const stamp=d=>{const t=d&&(d.updatedAt||d.at||d.createdAt);if(!t)return 0;const x=typeof t==="number"?t:t.toDate?t.toDate().getTime():Date.parse(t);return x||0};
+function draw(){
+  const q=norm($("q").value),only=$("onlyDup").checked,cnt={};
+  for(const m of Object.values(P))if(m.pseudo)cnt[norm(m.pseudo)]=(cnt[norm(m.pseudo)]||0)+1;
+  let L=Object.entries(P).map(([id,m])=>({id,m,dup:cnt[norm(m.pseudo)]>1,po:(W[id]||{}).po||0}));
+  const dups=L.filter(x=>x.dup).length;
+  $("stats").innerHTML=`<span>${L.length} profils</span><span>${L.filter(x=>x.m.riotId).length} avec Riot ID</span><span>${L.filter(x=>x.m.wow&&x.m.wow.name).length} sur WoW</span><span>${L.filter(x=>x.m.fn&&x.m.fn.name).length} sur Fortnite</span><span class="${dups?"dup":""}">${dups} en double</span>`;
+  if(only)L=L.filter(x=>x.dup);
+  if(q)L=L.filter(({id,m})=>[m.pseudo,m.riotId,m.discord,id,m.wow&&m.wow.name,m.fn&&m.fn.name,...(m.alts||[]).map(a=>a.riotId)].some(v=>norm(v).includes(q)));
+  const key={pseudo:x=>norm(x.m.pseudo),riot:x=>norm(x.m.riotId),po:x=>x.po,at:x=>stamp(x.m)}[sortK];
+  L.sort((a,b)=>(key(a)>key(b)?1:key(a)<key(b)?-1:0)*sortDir||(a.dup&&b.dup?norm(a.m.pseudo).localeCompare(norm(b.m.pseudo)):0));
+  $("rows").innerHTML=L.map(({id,m,dup,po})=>{const me=id===window.CONSEIL_ADMIN;
+    const games=[m.wow&&m.wow.name?`<span class="tag">WoW · ${esc(m.wow.name)}${m.wow.lvl?" niv. "+esc(m.wow.lvl):""}</span>`:"",m.fn&&m.fn.name?`<span class="tag">Fortnite · ${esc(m.fn.name)}</span>`:"",m.chasse?`<span class="tag">En chasse</span>`:"",m.discord?`<span class="tag">Discord · ${esc(m.discord)}</span>`:""].join("")||'<small>—</small>';
+    return `<tr class="${dup?"dup":""}"><td><div class="who">${conseilAv(id,m.pseudo||"?",36)}<div><b>${esc(m.pseudo||"(sans pseudo)")}</b> ${me?'<span class="tag me">Toi</span>':""}${dup?'<span class="tag d">Doublon</span>':""}<br><small>${esc(id)}</small></div></div></td>
+      <td>${m.riotId?esc(m.riotId):"<small>—</small>"}${(m.alts||[]).length?`<br><small>+ ${m.alts.map(a=>esc(a.riotId||"")).join(", ")}</small>`:""}</td>
+      <td>${games}</td><td><small style="color:#ffe27a">${po}</small></td><td><small>${esc(when(m))||"—"}</small></td>
+      <td>${me?"":`<button type="button" class="del" data-id="${esc(id)}" aria-label="Supprimer le profil de ${esc(m.pseudo||id)}">Supprimer</button>`}</td></tr>`}).join("")||'<tr><td colspan="6"><p class="note">Aucun profil.</p></td></tr>';
+  $("rows").querySelectorAll(".del").forEach(b=>b.onclick=async()=>{
+    if(!b.classList.contains("sure")){b.classList.add("sure");b.textContent="Confirmer";setTimeout(()=>{if(b.isConnected&&!b.disabled){b.classList.remove("sure");b.textContent="Supprimer"}},5000);return}
+    b.disabled=true;b.textContent="Suppression…";const id=b.dataset.id;
+    try{await DB.doc("riot/"+id).delete();
+      await Promise.allSettled(["wow","warmup","picks","tiers","team","mercatoLikes"].map(c=>DB.doc(c+"/"+id).delete()));
+      delete P[id];draw()}catch(e){b.disabled=false;b.classList.remove("sure");b.textContent="Échec : règles à publier ?"}});
+  const O=Object.entries(W).filter(([id,w])=>!P[id]&&(w.po||0)>0).sort((a,b)=>(b[1].po||0)-(a[1].po||0));
+  $("orph").hidden=!O.length;$("orows").innerHTML=O.map(([id,w])=>`<tr><td><small>${esc(id)}</small></td><td><small style="color:#ffe27a">${w.po||0}</small></td></tr>`).join("");
+}
+document.querySelectorAll("th[data-s]").forEach(th=>th.onclick=()=>{const k=th.dataset.s;sortDir=sortK===k?-sortDir:1;sortK=k;draw()});
+$("q").oninput=draw;$("onlyDup").onchange=draw;
+conseilConnect().then(async({db,uid})=>{
+  if(!db||uid!==window.CONSEIL_ADMIN){$("locked").innerHTML='<p class="note">Cette page est réservée à Skryvv. Connecte-toi avec ton identifiant.</p>';return}
+  DB=db;$("locked").hidden=true;$("box").hidden=false;
+  const [r,w]=await Promise.all([db.collection("riot").get(),db.collection("wallets").get().catch(()=>null)]);
+  r.forEach(d=>P[d.id]=d.data());if(w)w.forEach(d=>W[d.id]=d.data());draw()});
+</script>
+</body>
+</html>

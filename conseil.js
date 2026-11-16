@@ -40,7 +40,8 @@ const CONSEIL_NAV=[
   {id:"lol",href:"lol.html",label:"LoL",sub:[{id:"lol",href:"lol.html",label:"Accueil LoL",hide:1},{id:"newdawn",href:"newdawn.html",label:"LoL 2 · New Dawn"},{id:"mercato",href:"mercato.html",label:"Mercato"},{id:"worlds",href:"worlds.html",label:"Worlds 2026",hide:1},{id:"fantasy",href:"fantasy.html",label:"Fantasy",hide:1},{id:"cartes",href:"cartes.html",label:"LolMaster",hide:1},
     {id:"ladder",href:"ladder.html",label:"Ladder"},{id:"customs",href:"customs.html",label:"Customs & Clash"},{id:"team",href:"team.html",label:"Team 5v5 · recrutement"},{id:"pronos",href:"communaute.html#paris",label:"Pronos entre potes"},{id:"patch",href:"patch.html",label:"Patch"},{id:"devinettes",href:"devinettes.html",label:"Devinettes"}]},
   {id:"wow",href:"wow.html",label:"WoW",sub:[{id:"wow",href:"wow.html",label:"WoW Forever"}]},
-  {id:"fortnite",href:"fortnite.html",label:"Fortnite",sub:[{id:"fortnite",href:"fortnite.html",label:"Chasse aux trésors"},{href:"fortnite.html#taux",label:"Taux de drop"}]}
+  {id:"fortnite",href:"fortnite.html",label:"Fortnite",sub:[{id:"fortnite",href:"fortnite.html",label:"Chasse aux trésors"},{href:"fortnite.html#taux",label:"Taux de drop"}]},
+  {id:"admin",href:"admin.html",label:"Sages",admin:1,noBar:1}
 ];
 const NAV_GROUP={ladder:"lol",worlds:"lol",tierlist:"lol",fantasy:"lol",cartes:"lol",customs:"lol",patch:"lol",mercato:"lol",pronos:"lol",team:"lol",newdawn:"lol",devinettes:"lol",jeux:"lol"};
 (function navStyles(){
