@@ -94,6 +94,17 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
 
   <section class="frame panel" id="locked"><p class="note">Chargement…</p></section>
 
+  <section class="frame panel" id="pinBox" hidden aria-labelledby="t-p">
+    <h2 id="t-p">Code d'accès</h2>
+    <form id="pinF" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+      <label style="display:flex;flex-direction:column;gap:6px;font-weight:700">Code
+        <input id="pin" type="password" inputmode="numeric" autocomplete="off" maxlength="12" required style="min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:#0c0b14;color:#f2f0ff;font:700 1.2rem var(--mono);width:160px">
+      </label>
+      <button class="btn" type="submit">Entrer</button>
+      <span class="note" id="pinMsg" role="status"></span>
+    </form>
+  </section>
+
   <section class="frame panel" id="box" hidden aria-labelledby="t-l">
     <h2 id="t-l">Profils</h2>
     <div class="adm-stats" id="stats"></div>
@@ -149,6 +160,14 @@ document.querySelectorAll("th[data-s]").forEach(th=>th.onclick=()=>{const k=th.d
 $("q").oninput=draw;$("onlyDup").onchange=draw;
 conseilConnect().then(async({db,uid})=>{
   if(!db||uid!==window.CONSEIL_ADMIN){$("locked").innerHTML='<p class="note">Cette page est réservée à Skryvv. Connecte-toi avec ton identifiant.</p>';return}
+  // deuxième verrou : le code d'accès (seule son empreinte est dans la page), redemandé à chaque nouvelle session du navigateur
+  const PIN_HASH="97707d58e60ab0db6e4a6ffc0dd983b3ebba472407b7d84cb25c1ab1729277e3";
+  const sha=async s=>[...new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s)))].map(b=>b.toString(16).padStart(2,"0")).join("");
+  let okPin=false;try{okPin=sessionStorage.getItem("cds-admin-pin")===PIN_HASH}catch(e){}
+  if(!okPin){$("locked").hidden=true;$("pinBox").hidden=false;$("pin").focus();
+    await new Promise(res=>{let tries=0;$("pinF").onsubmit=async e=>{e.preventDefault();const v=$("pin").value.trim();
+      if(await sha("cds-admin:"+v)===PIN_HASH){try{sessionStorage.setItem("cds-admin-pin",PIN_HASH)}catch(x){}$("pinBox").hidden=true;res()}
+      else{tries++;$("pin").value="";$("pinMsg").textContent="Code incorrect.";if(tries>=5){$("pinF").querySelector("button").disabled=true;$("pinMsg").textContent="Trop d'essais. Recharge la page pour réessayer.";}}}})}
   DB=db;$("locked").hidden=true;$("box").hidden=false;
   const [r,w]=await Promise.all([db.collection("riot").get(),db.collection("wallets").get().catch(()=>null)]);
   r.forEach(d=>P[d.id]=d.data());if(w)w.forEach(d=>W[d.id]=d.data());draw()});
