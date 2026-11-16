@@ -305,6 +305,16 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
 .hr span{font:700 .85rem "JetBrains Mono",monospace;color:#f2f0ff;text-align:right;white-space:nowrap}
 .hr span small{display:block;font:500 .7rem Manrope,sans-serif;color:#b4b0d0}
 @media (max-width:560px){.hr{grid-template-columns:minmax(0,1fr) auto}.hr .bar{grid-column:1/-1;grid-row:2}}
+.tj{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.tj a{display:grid;grid-template-columns:28px 112px minmax(0,1fr);gap:10px;align-items:center;padding:8px;border-radius:12px;border:1px solid var(--line);background:#0c0b14;color:#f2f0ff;text-decoration:none;min-width:0}
+.tj a:hover{border-color:#f2f0ff}
+.tj em{font:800 1rem "JetBrains Mono",monospace;font-style:normal;color:#b4b0d0;text-align:center}
+.tj li:nth-child(-n+3) em{color:#ffe27a}
+.tj img{width:112px;aspect-ratio:460/215;object-fit:cover;border-radius:8px;background:#201d38;display:block}
+.tj div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.tj b{color:#fff;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tj span{font:700 .8rem "JetBrains Mono",monospace;color:#7ad7ff}
+.tj small{font-size:.72rem;color:#b4b0d0}.tj small.cds{color:#8affc1;font-weight:800}
 .hr2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px}
 @media (max-width:860px){.hr2{grid-template-columns:1fr}}
 .hr2 h3{margin:0 0 4px;font:800 .78rem "JetBrains Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:#b4b0d0}
@@ -539,6 +549,12 @@ section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,
     <div class="hr-f" id="hrF"></div>
     <div class="hr2"><div><h3>Jeux</h3><div class="hrs" id="hrs"><p class="note">Chargement…</p></div></div><div><h3>Sages</h3><div class="hrs" id="hrU"><p class="note">Chargement…</p></div></div></div>
     <p class="note" style="margin:0">Temps passé en jeu par les membres connectés au Discord, relevé toutes les 10 minutes. Clique sur un jeu pour voir qui y joue, ou sur un sage pour voir ses jeux.</p>
+  </section>
+
+  <section class="frame panel" aria-labelledby="tjT" style="padding:20px;gap:12px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h2 id="tjT" style="font-size:clamp(1.4rem,3.4vw,2.1rem)!important;margin:0">Les jeux les plus joués du moment</h2><span class="note" id="tjN"></span></div>
+    <ol class="tj" id="tj"><li class="note">Chargement…</li></ol>
+    <p class="note" style="margin:0">Joueurs connectés en même temps sur Steam, d'après l'API Steam Charts. LoL, WoW et Fortnite ne passent pas par Steam : ils n'apparaissent donc pas ici. « Joué au Conseil » = un sage y a joué ces 30 derniers jours.</p>
   </section>
 
   <!-- Tuiles -->
@@ -1025,6 +1041,17 @@ window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
     box.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{fG=fG===b.dataset.g?"":b.dataset.g;draw()});
     ub.querySelectorAll("[data-u]").forEach(b=>b.onclick=()=>{fU=fU===b.dataset.u?"":b.dataset.u;draw()})}
   draw()})();
+</script>
+<script>
+// Jeux les plus joués du moment (Steam, collecté par GitHub Actions dans la branche « donnees »)
+(async function(){const box=document.getElementById("tj");if(!box)return;
+  const [d,h]=await Promise.all([conseilData("top-jeux"),fetch("https://raw.githubusercontent.com/Skryvv-bot/conseil-des-sages/heures/out/heures.json?t="+Math.floor(Date.now()/300e3)).then(r=>r.ok?r.json():null).catch(()=>null)]);
+  const L=d&&d.jeux||[];if(!L.length){box.innerHTML='<li class="note">Classement indisponible pour le moment.</li>';return}
+  const norm=s=>conseilDcNorm(s),from=new Date(Date.now()-30*864e5).toLocaleDateString("sv-SE"),cds=new Set();
+  for(const [day,g] of Object.entries(h&&h.days||{}))if(day>=from)for(const n of Object.keys(g))cds.add(norm(n));
+  const nf=n=>n>=1e6?(n/1e6).toLocaleString("fr-FR",{maximumFractionDigits:1})+" M":n>=1e3?Math.round(n/1e3).toLocaleString("fr-FR")+" k":String(n);
+  box.innerHTML=L.slice(0,15).map((g,i)=>`<li><a href="${esc(g.u)}" target="_blank" rel="noopener"><em>${i+1}</em><img src="${esc(g.img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'"><div><b title="${esc(g.n)}">${esc(g.n)}</b><span>${nf(g.now||0)} en jeu</span><small${cds.has(norm(g.n))?' class="cds"':""}>${cds.has(norm(g.n))?"Joué au Conseil":"Pic du jour : "+nf(g.pic||0)}</small></div></a></li>`).join("");
+  if(d.maj)document.getElementById("tjN").textContent="mis à jour à "+new Date(d.maj*1000).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})})();
 </script>
 </body>
 </html>
