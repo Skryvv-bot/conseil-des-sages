@@ -121,8 +121,8 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
 
   <section class="frame panel" id="orph" hidden aria-labelledby="t-o">
     <h2 id="t-o">Comptes sans profil</h2>
-    <p class="note">Ces comptes ont des PO dans la banque mais aucun profil (souvent des connexions anonymes depuis un autre appareil). Ils n'apparaissent nulle part sur le site.</p>
-    <div class="adm-wrap"><table class="adm" style="min-width:520px"><thead><tr><th scope="col">Identifiant du compte</th><th scope="col">PO</th></tr></thead><tbody id="orows"></tbody></table></div>
+    <p class="note">Ces comptes ont des PO dans la banque mais aucun profil (souvent des connexions anonymes depuis un autre appareil). Ceux marqués « Doublon » portent le pseudo d'un sage qui a déjà un profil : ce sont des restes de doublons. « Supprimer les PO » efface leur portefeuille de la banque.</p>
+    <div class="adm-wrap"><table class="adm" style="min-width:520px"><thead><tr><th scope="col">Compte</th><th scope="col">PO</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead><tbody id="orows"></tbody></table></div>
   </section>
 </div>
 <script>
@@ -168,7 +168,9 @@ function draw(){
       try{const k=conseilPseudoKey(P[id]&&P[id].pseudo),r=k&&await DB.doc("pseudos/"+k).get();if(r&&r.exists&&r.data().uid===id)await DB.doc("pseudos/"+k).delete()}catch(x){}
       delete P[id];draw()}catch(e){b.disabled=false;b.classList.remove("sure");b.textContent="Échec : règles à publier ?"}});
   const O=Object.entries(W).filter(([id,w])=>!P[id]&&(w.po||0)>0).sort((a,b)=>(b[1].po||0)-(a[1].po||0));
-  $("orph").hidden=!O.length;$("orows").innerHTML=O.map(([id,w])=>`<tr><td><small>${esc(id)}</small></td><td><small style="color:#ffe27a">${w.po||0}</small></td></tr>`).join("");
+  $("orph").hidden=!O.length;$("orows").innerHTML=O.map(([id,w])=>`<tr><td>${w.pseudo?`<b>${esc(w.pseudo)}</b>${Object.values(P).some(m=>norm(m.pseudo)===norm(w.pseudo))?' <span class="tag d">Doublon</span>':""}<br>`:""}<small>${esc(id)}</small></td><td><small style="color:#ffe27a">${w.po||0}</small></td><td><button type="button" class="del" data-w="${esc(id)}">Supprimer les PO</button></td></tr>`).join("");
+  $("orows").querySelectorAll("[data-w]").forEach(b=>b.onclick=async()=>{if(!b.classList.contains("sure")){b.classList.add("sure");b.textContent="Confirmer";return}
+    b.disabled=true;try{await DB.doc("wallets/"+b.dataset.w).delete();delete W[b.dataset.w];draw()}catch(e){b.disabled=false;b.classList.remove("sure");b.textContent="Échec : règles à publier ?"}});
 }
 // réserve le pseudo des profils existants (un pseudo en double n'est réservé qu'une fois le doublon supprimé)
 // anciennes « récupérations » dont le compte récupérateur n'a plus de profil : elles masquaient l'ancien compte partout (site et robot)

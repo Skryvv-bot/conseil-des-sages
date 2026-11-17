@@ -113,13 +113,13 @@ function renderVault(){
   $("open").hidden=!!w||!db;
   $("vnote").textContent=!db?"Connexion…":w?`Coffre de ${w.pseudo}`:"Ton coffre s'ouvre tout seul dès ta première activité avec un pseudo (tier list, pronos, jeux…). Ou ouvre-le ici :";
   $("fStreak").textContent=w?(w.lastDaily===todayParis()?w.streak||1:0):"–";
-  const rk=Object.entries(wallets).filter(([id])=>!conseilIsClaimed(id)).sort((a,b)=>(b[1].po||0)-(a[1].po||0)).findIndex(([id])=>id===uid);
+  const rk=Object.entries(wallets).filter(([id,w])=>!conseilIsClaimed(id)&&!oldDup(id,w)).sort((a,b)=>(b[1].po||0)-(a[1].po||0)).findIndex(([id])=>id===uid);
   $("fRank").textContent=w&&rk>=0?rk+1+(rk?"e":"er"):"–";
   const td=ledger.filter(l=>l.day===todayParis()&&l.amount>0).reduce((a,l)=>a+l.amount,0);$("fToday").textContent=w?"+"+fmt(td):"–";
   const used=w&&w.gameDay===todayParis()?w.gameToday||0:0;$("capTxt").textContent=`Jeux : ${used} / 300 PO gagnés aujourd'hui`;$("capBar").style.width=Math.min(100,used/3)+"%";
 }
 function renderShop(){
-  const w=wallets[uid],bal=w?.po||0,people=Object.entries(wallets).filter(([id,v])=>id!==uid&&!conseilIsClaimed(id)&&v.pseudo).sort((a,b)=>a[1].pseudo.localeCompare(b[1].pseudo));
+  const w=wallets[uid],bal=w?.po||0,people=Object.entries(wallets).filter(([id,v])=>id!==uid&&!conseilIsClaimed(id)&&v.pseudo&&!oldDup(id,v)).sort((a,b)=>a[1].pseudo.localeCompare(b[1].pseudo));
   const hasNick=effects.some(e=>e.kind==="nickname"&&e.target===uid);
   const keep={};document.querySelectorAll("#shop input,#shop select").forEach(e=>keep[e.id]=e.value);
   $("shop").innerHTML=SHOP.map(s=>{const cant=!w||bal<s.p||(s.k==="unnick"&&!hasNick);
@@ -146,8 +146,10 @@ function renderLedger(){
   const L=[...ledger].sort((a,b)=>ms(b.at)-ms(a.at)).slice(0,60);
   $("ledger").innerHTML=L.length?L.map(l=>`<div class="lrow"><span class="d">${new Date(ms(l.at)).toLocaleString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</span><span>${esc(l.reason)}</span><span class="a ${l.amount>0?"pos":"neg"}">${l.amount>0?"+":""}${fmt(l.amount)}</span></div>`).join(""):`<div class="empty">Aucun mouvement pour l'instant.</div>`;
 }
+// portefeuille d'un ancien compte en double : pas de profil, et son pseudo appartient au profil d'un autre compte
+let PROFS={};const oldDup=(id,w)=>!PROFS[id]&&w&&w.pseudo&&Object.entries(PROFS).some(([pid,m])=>pid!==id&&m.pseudo&&m.pseudo.trim().toLowerCase()===w.pseudo.trim().toLowerCase());
 function renderFortune(){
-  const rows=Object.entries(wallets).filter(([id,w])=>!conseilIsClaimed(id)&&w.pseudo).sort((a,b)=>(b[1].po||0)-(a[1].po||0)).slice(0,20);
+  const rows=Object.entries(wallets).filter(([id,w])=>!conseilIsClaimed(id)&&w.pseudo&&!oldDup(id,w)).sort((a,b)=>(b[1].po||0)-(a[1].po||0)).slice(0,20);
   $("fortune").innerHTML=rows.length?`<table class="fortune"><tbody>${rows.map(([id,w],i)=>`<tr${id===uid?' style="color:#ffe27a"':""}><td>${i<3?["🥇","🥈","🥉"][i]:i+1}</td><td>${conseilAv(id,w.pseudo,24)}${esc(w.pseudo)}${conseilCampTag(id)}</td><td class="num"><b>${fmt(w.po||0)}</b> PO</td></tr>`).join("")}</tbody></table>`:`<div class="empty">Les coffres s'ouvrent au premier passage du robot.</div>`;
 }
 function renderEffects(){
@@ -164,6 +166,7 @@ renderAll();
   const c=await conseilConnect();if(!c.db){$("vnote").textContent="Banque injoignable pour le moment, recharge la page.";return}
   db=c.db;uid=c.uid;try{$("pseudo").value=localStorage.getItem("potes-pseudo")||""}catch(e){}
   db.collection("wallets").onSnapshot(q=>{wallets={};q.docs.forEach(d=>wallets[d.id]=d.data());renderAll()},()=>{});
+  db.collection("riot").onSnapshot(q=>{PROFS={};q.docs.forEach(d=>PROFS[d.id]=d.data());renderAll()},()=>{});
   db.collection("ledger").where("uid","==",uid).onSnapshot(q=>{ledger=q.docs.map(d=>d.data());renderVault();renderLedger()},()=>{});
   db.collection("orders").where("uid","==",uid).onSnapshot(q=>{orders=q.docs.map(d=>({id:d.id,...d.data()}));renderOrders()},()=>{});
   db.collection("effects").where("until",">",new Date()).onSnapshot(q=>{effects=q.docs.map(d=>({id:d.id,...d.data()}));renderEffects();renderShop()},()=>{});
