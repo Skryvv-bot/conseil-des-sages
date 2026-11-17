@@ -729,14 +729,14 @@ function renderPlayers(){
   for(const [id,p] of Object.entries(riot))if(!p.riotId&&p.pseudo&&((p.wow&&p.wow.name)||(p.fn&&p.fn.name)))uniq.set("autre:"+id,[id,p]);
   loadWowChars();
   const list=[...uniq.values()].map(([id,p])=>{const L=p.riotId?conseilLiveOf(p,live):null,dg=DCGAME[conseilDcFind(p,DCGAME)]||"";   // même recherche que pour les photos : « Ewolo LE J » sur Discord = Ewolo
-    return {id,...p,lv:L?.g||null,lvAcc:L&&!L.acc.main?L.acc.riotId:null,lvAccObj:L&&!L.acc.main?{riotId:L.acc.riotId,region:L.acc.region||p.region}:null,dg:/league of legends/i.test(dg)?"":dg}});
+    return {id,...p,lv:L?.g||null,lvAcc:L&&!L.acc.main?L.acc.riotId:null,lvAccObj:L&&!L.acc.main?{riotId:L.acc.riotId,region:L.acc.region||p.region}:null,dg:L&&/league of legends/i.test(dg)?"":dg}});   // LoL vu sur Discord mais pas (encore) chez Riot : sélection des champions, chargement, ou Riot ID introuvable
   if(!db&&!list.length){$("players").innerHTML=`<div class="note">${connErr?"Liste indisponible.":"Chargement des sages…"}</div>`;return}
   if(!list.length){$("players").innerHTML=`<div class="note">Aucun sage inscrit pour l'instant. Ajoute tes comptes de jeu dans ton profil pour apparaître ici.</div>`;return}
   list.sort((a,b)=>(b.lv?2:b.dg?1:0)-(a.lv?2:a.dg?1:0)||a.pseudo.localeCompare(b.pseudo));
-  const short=g=>/warcraft/i.test(g)?"WoW":/fortnite/i.test(g)?"Fortnite":g.length>14?g.slice(0,13)+"…":g;
+  const short=g=>/warcraft/i.test(g)?"WoW":/fortnite/i.test(g)?"Fortnite":/league of legends/i.test(g)?"LoL":g.length>14?g.slice(0,13)+"…":g;
   $("players").innerHTML=list.map(p=>{
     const g=p.lv, mins=g?Math.max(0,Math.floor((Date.now()-g.start)/60000)):0;
-    const status=g?`<span class="st on">En partie · LoL</span>`:p.dg?`<span class="st on st-g${/warcraft/i.test(p.dg)?" st-wow":/fortnite/i.test(p.dg)?" st-fn":""}">Sur ${esc(short(p.dg))}</span>`:`<span class="st">Hors jeu</span>`;
+    const status=g?`<span class="st on">En partie · LoL</span>`:p.dg?`<span class="st on st-g${/warcraft/i.test(p.dg)?" st-wow":/fortnite/i.test(p.dg)?" st-fn":""}" ${/league of legends/i.test(p.dg)?'title="Vu sur Discord. Live et prono apparaissent quand Riot voit la partie (après le chargement, avec un Riot ID valide)."':""}>Sur ${esc(short(p.dg))}</span>`:`<span class="st">Hors jeu</span>`;
     const wc=p.wow&&p.wow.name?WOWCH[wowSlug(p.wow)]:null,wl=p.wow&&p.wow.name?(wc&&wc.level?wc.level:p.wow.lvl||0):0;
     const wowTxt=p.wow&&p.wow.name?` · <span style="color:#ffe27a">WoW : ${esc(p.wow.name)}${wl?" niv. "+wl:""}${wc&&wc.cls?" · "+esc(wc.cls):""}</span>`:"";
     const comptes=[p.riotId?"LoL : "+esc(p.riotId)+(p.alts?.length?` <span style="opacity:.7">+${p.alts.length}</span>`:""):"",wowTxt.replace(/^ · /,""),p.fn&&p.fn.name?`<span style="color:#7ad7ff">Fortnite : ${esc(p.fn.name)}</span>`:""].filter(Boolean).join(" · ");
