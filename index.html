@@ -728,7 +728,7 @@ function renderPlayers(){
   const uniq=new Map();for(const [id,p] of Object.entries(riot).filter(([,p])=>p.riotId&&p.pseudo).sort((a,b)=>String(a[1].updated||"").localeCompare(String(b[1].updated||""))))uniq.set(p.riotId.toLowerCase(),[id,p]);
   for(const [id,p] of Object.entries(riot))if(!p.riotId&&p.pseudo&&((p.wow&&p.wow.name)||(p.fn&&p.fn.name)))uniq.set("autre:"+id,[id,p]);
   loadWowChars();
-  const list=[...uniq.values()].map(([id,p])=>{const L=p.riotId?conseilLiveOf(p,live):null,dg=DCGAME[conseilDcNorm(p.discord)]||DCGAME[conseilDcNorm(p.pseudo)]||"";
+  const list=[...uniq.values()].map(([id,p])=>{const L=p.riotId?conseilLiveOf(p,live):null,dg=DCGAME[conseilDcFind(p,DCGAME)]||"";   // même recherche que pour les photos : « Ewolo LE J » sur Discord = Ewolo
     return {id,...p,lv:L?.g||null,lvAcc:L&&!L.acc.main?L.acc.riotId:null,lvAccObj:L&&!L.acc.main?{riotId:L.acc.riotId,region:L.acc.region||p.region}:null,dg:/league of legends/i.test(dg)?"":dg}});
   if(!db&&!list.length){$("players").innerHTML=`<div class="note">${connErr?"Liste indisponible.":"Chargement des sages…"}</div>`;return}
   if(!list.length){$("players").innerHTML=`<div class="note">Aucun sage inscrit pour l'instant. Ajoute tes comptes de jeu dans ton profil pour apparaître ici.</div>`;return}
