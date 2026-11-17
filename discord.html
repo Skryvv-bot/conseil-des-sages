@@ -69,6 +69,11 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
     <img class="csage csage-bob" src="img/sage/sage.svg" width="110" height="114" alt="Le Sage">
     <h1 id="dcT" style="margin:0">Liaison avec Discord…</h1>
     <p class="lead" id="dcM">Un instant, le Sage vérifie ton compte.</p>
+    <form id="rsF" hidden style="display:flex;flex-direction:column;gap:10px;width:min(360px,100%);text-align:left">
+      <label style="display:flex;flex-direction:column;gap:6px;font-weight:700">Nouveau mot de passe<input id="rs1" type="password" autocomplete="new-password" minlength="6" required style="min-height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:#0c0b14;color:#f2f0ff"></label>
+      <label style="display:flex;flex-direction:column;gap:6px;font-weight:700">Confirme<input id="rs2" type="password" autocomplete="new-password" minlength="6" required style="min-height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:#0c0b14;color:#f2f0ff"></label>
+      <button class="btn" type="submit">Changer mon mot de passe</button><span class="note" id="rsM" role="status"></span>
+    </form>
     <a class="btn" href="communaute.html#profil" id="dcBack" hidden>Retour à mon profil</a>
   </section>
 </div>
@@ -76,10 +81,20 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
 conseilNav("profil");
 const $=id=>document.getElementById(id);
 const done=(ok,t,m)=>{$("dcT").textContent=t;$("dcM").textContent=m;$("dcBack").hidden=false;document.querySelector(".csage").src="img/sage/"+(ok?"victoire":"tilt")+".svg"};
+// mot de passe oublié : Discord a confirmé qui tu es, choisis le nouveau mot de passe (le code Discord expire après quelques minutes)
+function resetFlow(code){$("dcT").textContent="Nouveau mot de passe";$("dcM").textContent="Discord a confirmé ton identité. Choisis ton nouveau mot de passe.";$("rsF").hidden=false;$("rs1").focus();
+  $("rsF").onsubmit=async e=>{e.preventDefault();const a=$("rs1").value,b=$("rs2").value;if(a.length<6){$("rsM").textContent="6 caractères minimum.";return}if(a!==b){$("rsM").textContent="Les deux mots de passe ne sont pas identiques.";return}
+    $("rsF").querySelector("button").disabled=true;$("rsM").textContent="Changement…";
+    const r=await fetch(RIOT_RELAY+"/discord",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"reset",code,password:a,redirect:location.origin+"/discord.html"})}).then(x=>x.json()).catch(()=>({error:"robot injoignable"}));
+    if(!r.ok){$("rsF").hidden=true;done(false,"Changement impossible",r.error||"Réessaie.");return}
+    $("rsF").hidden=true;
+    try{await conseilConnect().catch(()=>{});await firebase.auth().signInWithEmailAndPassword(r.id+"@conseil-des-sages.app",a);done(true,"Mot de passe changé !","Tu es connecté avec ton identifiant « "+r.id+" ».")}
+    catch(x){done(true,"Mot de passe changé !","Connecte-toi avec ton identifiant « "+r.id+" » et ton nouveau mot de passe.")}}}
 (async()=>{const q=new URLSearchParams(location.search),code=q.get("code"),st=q.get("state");let saved=null;try{saved=sessionStorage.getItem("dc-state");sessionStorage.removeItem("dc-state")}catch(e){}
   history.replaceState(null,"",location.pathname);
   if(q.get("error")){done(false,"Liaison annulée","Tu n'as pas autorisé la liaison sur Discord. Tu peux réessayer depuis ton profil.");return}
   if(!code||!st||st!==saved){done(false,"Lien expiré","Relance la liaison depuis ton profil.");return}
+  if(st.startsWith("r")){resetFlow(code);return}
   await conseilConnect().catch(()=>{});
   const r=await conseilDiscordCall({code,redirect:location.origin+"/discord.html"}).catch(e=>({error:String(e.message||e)}));
   if(r.ok){const d=r.dc||{};done(true,"Discord lié !",`Ton profil est relié à ${d.nick||d.global||d.user}${d.inGuild?"":" (rejoins le serveur du Conseil pour apparaître en ligne)"}.`)}

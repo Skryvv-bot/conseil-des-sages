@@ -782,12 +782,12 @@ function renderAccount(u){const b=document.getElementById("cnavAcc");if(!b)retur
   b.textContent=n?n:"Connexion";b.classList.toggle("on",!!n);b.classList.remove("has-av");if(n)setTimeout(accAvatar,0);b.title=n?"Mon profil":"Crée ton identifiant ou connecte-toi pour retrouver tes données sur tous tes appareils";b.onclick=()=>{if(!n)return openAccount();if(/communaute\.html$/.test(location.pathname)){location.hash="profil"}else location.href="communaute.html#profil"}}
 window.conseilOpenAccount=(o)=>openAccount(o);
 // Lier son compte Discord : on part sur Discord, qui revient sur discord.html avec un code
-window.conseilDiscordLink=async function(){
+window.conseilDiscordLink=async function(mode){
   const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),12000);let r={},why="";
   try{const x=await fetch(RIOT_RELAY+"/discord?t="+Date.now(),{signal:ctl.signal,cache:"no-store"});r=await x.json().catch(()=>({}));if(!x.ok)why=" (robot : erreur "+x.status+")"}
   catch(e){why=e.name==="AbortError"?" (le robot ne répond pas)":" (robot injoignable)"}finally{clearTimeout(to)}
   if(!r.client_id)throw new Error(r.error?"Robot : "+r.error:"La liaison Discord n'est pas encore activée dans le robot"+why+". Vérifie DISCORD_CLIENT_ID et le nouveau worker.js.");
-  const st=Math.random().toString(36).slice(2)+Date.now().toString(36);try{sessionStorage.setItem("dc-state",st)}catch(e){}
+  const st=(mode==="reset"?"r":"l")+Math.random().toString(36).slice(2)+Date.now().toString(36);try{sessionStorage.setItem("dc-state",st)}catch(e){}
   const redirect=location.origin+"/discord.html";
   location.href="https://discord.com/oauth2/authorize?"+new URLSearchParams({client_id:r.client_id,response_type:"code",redirect_uri:redirect,scope:"identify guilds.members.read",state:st})};
 window.conseilDiscordCall=async function(body){const tok=await firebase.auth().currentUser.getIdToken();
@@ -853,8 +853,15 @@ function openAccount(opt){opt=opt||{};
           ${tab==="create"?`<label>Confirme le mot de passe<input id="caccPw2" type="password" autocomplete="new-password" minlength="6" required></label>`:""}
           <p class="cacc-msg" role="status"></p>
           <button class="cpop-yes" type="submit">${tab==="create"?"Créer mon identifiant":"Se connecter"}</button>
+          ${tab==="login"?`<button type="button" data-forgot style="background:none;border:0;color:#c9c5e6;text-decoration:underline;cursor:pointer;font:600 .9rem var(--body,sans-serif);min-height:36px">Mot de passe oublié ?</button>
+          <div data-forgotbox hidden style="display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid #3a3752;border-radius:12px;text-align:left">
+            <p class="cacc-txt" style="margin:0">Si ton Discord est lié à ton profil, change ton mot de passe en te connectant avec Discord :</p>
+            <button type="button" class="cpop-yes" data-dcreset style="background:#5865f2;color:#fff">Changer mon mot de passe avec Discord</button>
+            <p class="cacc-txt" style="margin:0">Sinon, demande à Skryvv sur Discord : il peut te donner un mot de passe provisoire.</p></div>`:""}
         </form>`}</div>`;
     el.querySelector(".cacc-x").onclick=close;
+    const fg=el.querySelector("[data-forgot]");if(fg)fg.onclick=()=>{const b=el.querySelector("[data-forgotbox]");b.hidden=!b.hidden};
+    const dr=el.querySelector("[data-dcreset]");if(dr)dr.onclick=()=>{dr.disabled=true;dr.textContent="Ouverture de Discord…";conseilDiscordLink("reset").catch(e=>{dr.disabled=false;dr.textContent=e.message})};
     el.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{tab=b.dataset.t;draw()});
     const out=el.querySelector("[data-out]");if(out)out.onclick=async()=>{try{await auth.signOut()}catch(e){}location.reload()};
     const chg=el.querySelector("form[data-chg]");if(chg)chg.onsubmit=async e=>{e.preventDefault();const msg=chg.querySelector(".cacc-msg"),a1=el.querySelector("#caccN1").value,a2=el.querySelector("#caccN2").value;
