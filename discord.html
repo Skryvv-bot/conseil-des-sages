@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Lier mon Discord · CDS.TV</title>
+<meta name="theme-color" content="#0c0b14">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png?v=4">
+<link rel="apple-touch-icon" href="icon-192.png?v=4">
+<link rel="stylesheet" href="conseil.css">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="conseil.js"></script>
+<style>
+.panel{padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.lead{margin:0;font-size:1.1rem;color:#c9c5e6;max-width:62ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.card{background:#0c0b14;border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.card .k{font:700 .7rem var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--holo-pink,#ff8ad8)}
+.card b{font:800 1.05rem var(--display);color:#fff}
+.card span{color:#c9c5e6;font-size:.95rem}
+.vs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.vs div{padding:12px 14px;border-top:1px solid var(--line)}
+.vs div:nth-child(-n+2){border-top:0;font:700 .72rem var(--mono);letter-spacing:.12em;text-transform:uppercase}
+.vs div:nth-child(odd){color:var(--muted)}
+.vs div:nth-child(even){background:#201d38;color:#fff}
+.vs div:nth-child(2){color:var(--holo-gold,#ffe27a)}
+.tbox{overflow-x:auto}
+.tbl{width:100%;min-width:640px;border-collapse:collapse;font-size:.95rem}
+.tbl th{font:700 .7rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+.tbl td{padding:10px 6px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.tbl td:not(:first-child),.tbl th:not(:first-child){text-align:right}
+.tbl tr.hot td{color:var(--holo-pink,#ff8ad8);font-weight:800}
+.big{font:900 clamp(2.2rem,7vw,4rem)/1 var(--display);font-variant-numeric:tabular-nums}
+.clock2{display:flex;gap:10px;flex-wrap:wrap}
+.clock2 div{background:#0c0b14;border:1px solid var(--line);border-radius:12px;padding:12px 16px;text-align:center;min-width:84px}
+.clock2 b{display:block;font:900 2rem/1 var(--display);font-variant-numeric:tabular-nums}
+.clock2 span{font:700 .68rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--holo-gold,#ffe27a)}
+.warn{border-left:4px solid var(--holo-gold,#ffe27a);background:#201d38;border-radius:12px;padding:14px 16px;margin:0;color:#d9d5ef}
+.src{font-size:.85rem;color:var(--muted)}
+ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;color:#d9d5ef}
+.race{display:flex;flex-direction:column;gap:8px}
+.rc{display:grid;grid-template-columns:28px 44px minmax(0,1fr) auto;gap:12px;align-items:center;background:#0c0b14;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.rc .pos{font:800 1rem var(--display);color:var(--holo-gold,#ffe27a);text-align:center}
+.rc .who b{color:#fff}.rc .who span{display:block;font-size:.84rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rc .bar{height:8px;border-radius:99px;background:#201d38;overflow:hidden;margin-top:6px}
+.rc .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#7ad7ff,#8affc1,#ffe27a)}
+.rc .lv{font:900 1.5rem/1 var(--display);font-variant-numeric:tabular-nums;text-align:right}
+.rc .lv small{display:block;font:700 .62rem var(--mono);letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-top:3px}
+.rc.max{border-color:var(--holo-gold,#ffe27a)}
+.fac{font:700 .62rem var(--mono);letter-spacing:.06em;border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:middle}
+.fac.a{background:#7ad7ff;color:#0c0b14}.fac.h{background:#ff6b6b;color:#0c0b14}
+.chars{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.ch{background:#0c0b14;border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.ch.a{border-top:4px solid #7ad7ff}.ch.h{border-top:4px solid #ff6b6b}
+.ch-top{display:flex;gap:12px;align-items:center;min-width:0}
+.ch-top b{display:block;font:800 1.05rem var(--display);color:#fff;overflow-wrap:anywhere}
+.ch-top span{font-size:.85rem;color:var(--muted)}
+.ch dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;font-size:.9rem}
+.ch dt{color:var(--muted)}.ch dd{margin:0;color:#fff;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ch .note{font-size:.8rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="frame panel" style="align-items:center;text-align:center;gap:14px">
+    <img class="csage csage-bob" src="img/sage/sage.svg" width="110" height="114" alt="Le Sage">
+    <h1 id="dcT" style="margin:0">Liaison avec Discord…</h1>
+    <p class="lead" id="dcM">Un instant, le Sage vérifie ton compte.</p>
+    <a class="btn" href="communaute.html#profil" id="dcBack" hidden>Retour à mon profil</a>
+  </section>
+</div>
+<script>
+conseilNav("profil");
+const $=id=>document.getElementById(id);
+const done=(ok,t,m)=>{$("dcT").textContent=t;$("dcM").textContent=m;$("dcBack").hidden=false;document.querySelector(".csage").src="img/sage/"+(ok?"victoire":"tilt")+".svg"};
+(async()=>{const q=new URLSearchParams(location.search),code=q.get("code"),st=q.get("state");let saved=null;try{saved=sessionStorage.getItem("dc-state");sessionStorage.removeItem("dc-state")}catch(e){}
+  history.replaceState(null,"",location.pathname);
+  if(q.get("error")){done(false,"Liaison annulée","Tu n'as pas autorisé la liaison sur Discord. Tu peux réessayer depuis ton profil.");return}
+  if(!code||!st||st!==saved){done(false,"Lien expiré","Relance la liaison depuis ton profil.");return}
+  await conseilConnect().catch(()=>{});
+  const r=await conseilDiscordCall({code,redirect:location.origin+"/discord.html"}).catch(e=>({error:String(e.message||e)}));
+  if(r.ok){const d=r.dc||{};done(true,"Discord lié !",`Ton profil est relié à ${d.nick||d.global||d.user}${d.inGuild?"":" (rejoins le serveur du Conseil pour apparaître en ligne)"}.`)}
+  else done(false,"Liaison impossible",r.error||"Réessaie dans un instant.")})();
+</script>
+</body>
+</html>

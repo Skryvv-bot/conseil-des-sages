@@ -101,7 +101,11 @@
     <form class="form" id="profForm">
       <div class="pf-h"><h3>Général</h3><span class="note">Ton identité sur tout le site.</span></div>
       <label class="f">Pseudo<input type="text" id="pPseudo" maxlength="20" required></label>
-      <label class="f">Pseudo Discord (pour ta photo et tes jeux en cours)<input type="text" id="pDiscord" maxlength="40" placeholder="Ton nom affiché sur le serveur"></label>
+      <div class="f" id="dcLinkBox" style="display:flex;flex-direction:column;gap:8px">
+        <span style="font-weight:700">Compte Discord</span>
+        <div id="dcLink" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span class="note">Chargement…</span></div>
+      </div>
+      <label class="f">Pseudo Discord (si tu ne lies pas ton compte)<input type="text" id="pDiscord" maxlength="40" placeholder="Ton nom affiché sur le serveur"></label>
       <div class="avpick" aria-labelledby="avT">
         <div class="avpick-top"><span id="avPrev"></span><div><b id="avT">Ton avatar</b><p class="note" id="avInfo" style="margin:2px 0 0">Par défaut : ta photo de profil Discord.</p></div>
           <button class="btn small ghost" type="button" id="avDiscord" style="margin-left:auto">Revenir à ma photo Discord</button></div>
@@ -316,6 +320,16 @@ window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
 })();
 // bouton « Se déconnecter » : seulement avec un identifiant (un compte anonyme serait perdu)
 try{firebase.auth().onAuthStateChanged(u=>{const b=document.getElementById("logoutBtn");if(!b)return;b.hidden=!(u&&!u.isAnonymous);b.onclick=()=>{if(b.dataset.sure){conseilLogout();return}b.dataset.sure=1;b.textContent="Confirmer la déconnexion";setTimeout(()=>{delete b.dataset.sure;b.textContent="Se déconnecter"},5000)}})}catch(e){}
+// ---------- Compte Discord lié ----------
+function drawDcLink(){const box=document.getElementById("dcLink");if(!box)return;const m=(members||{})[uid]||{},L=m.dc;
+  if(!m.pseudo){box.innerHTML='<span class="note">Enregistre d\'abord ton profil, puis lie ton Discord.</span>';return}
+  if(L&&L.id){box.innerHTML=`<img src="${conseilEsc(L.av||"")}" alt="" width="40" height="40" style="border-radius:50%" referrerpolicy="no-referrer"><span><b>${conseilEsc(L.nick||L.global||L.user)}</b><br><span class="note">@${conseilEsc(L.user)}${L.inGuild?" · membre du serveur":" · pas encore sur le serveur du Conseil"}</span></span><button type="button" class="btn ghost small" id="dcRelink">Mettre à jour</button><button type="button" class="btn ghost small" id="dcUnlink">Délier</button><span class="note" id="dcMsg" role="status"></span>`;
+    document.getElementById("dcRelink").onclick=()=>conseilDiscordLink().catch(e=>{document.getElementById("dcMsg").textContent=e.message});
+    document.getElementById("dcUnlink").onclick=async e=>{const b=e.target;if(!b.dataset.sure){b.dataset.sure=1;b.textContent="Confirmer";return}b.disabled=true;
+      const r=await conseilDiscordCall({action:"unlink"});document.getElementById("dcMsg").textContent=r.ok?"Discord délié.":(r.error||"échec")};}
+  else{box.innerHTML='<button type="button" class="btn" id="dcGo" style="background:#5865f2;border-color:#5865f2;color:#fff">Lier mon Discord</button><span class="note" id="dcMsg" role="status">Ta photo et ton jeu en cours seront retrouvés à coup sûr.</span>';
+    document.getElementById("dcGo").onclick=()=>conseilDiscordLink().catch(e=>{document.getElementById("dcMsg").textContent=e.message})}}
+setInterval(()=>{const m=(members||{})[uid];const sig=JSON.stringify([m&&m.pseudo,m&&m.dc]);if(sig!==window.__dcSig){window.__dcSig=sig;drawDcLink()}},800);
 </script>
 </body>
 </html>

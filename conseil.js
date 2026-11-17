@@ -238,12 +238,15 @@ window.conseilDiscordAvatars=function(){
     for(const m of w.members||[])if(m.avatar_url&&conseilDcNorm(m.username))st[conseilDcNorm(m.username)]={u:m.avatar_url,t:now};
     LS.set("dc-avatars2",st);return Object.fromEntries(Object.entries(st).map(([k,v])=>[k,v.u]))}).catch(()=>Object.fromEntries(Object.entries(LS.get("dc-avatars2",{})).map(([k,v])=>[k,v.u]))))};
 // Retrouve un membre du widget Discord : nom exact (sans émojis), sinon un nom unique qui commence par le pseudo ou le contient (4 lettres au moins).
-window.conseilDcFind=function(m,dc){if(!m||!dc)return "";const keys=[m.discord,m.pseudo].map(conseilDcNorm).filter(Boolean);
+window.conseilDcFind=function(m,dc){if(!m||!dc)return "";const L=m.dc||{};
+  // compte Discord lié : son surnom sur le serveur, puis son nom d'affichage et son nom d'utilisateur, exactement
+  for(const k of [L.nick,L.global,L.user].map(conseilDcNorm).filter(Boolean))if(dc[k])return k;
+  const keys=[m.discord,m.pseudo].map(conseilDcNorm).filter(Boolean);
   for(const k of keys)if(dc[k])return k;
   for(const k of keys){if(k.length<4)continue;const hit=Object.keys(dc).filter(n=>n.startsWith(k)||k.startsWith(n)&&n.length>=4||n.includes(k));if(hit.length===1)return hit[0]}
   return ""};
 // Photo d'un sage : le champion choisi, sinon sa photo Discord vue en direct, sinon la dernière photo Discord enregistrée dans son profil.
-window.conseilAvatarUrl=function(m,dc){if(!m)return "";if(m.avatar)return conseilChampImg(m.avatar);
+window.conseilAvatarUrl=function(m,dc){if(!m)return "";if(m.avatar)return conseilChampImg(m.avatar);if(m.dc&&m.dc.av)return m.dc.av;
   const k=conseilDcFind(m,dc);if(k)return dc[k];
   return m.dcav&&m.dcav.url?m.dcav.url:""};
 // Quand un sage connecté au site est aussi en ligne sur Discord, sa photo Discord est enregistrée dans son profil :
@@ -775,6 +778,15 @@ const accName=u=>u&&!u.isAnonymous?(u.displayName||(u.email||"").split("@")[0]):
 function renderAccount(u){const b=document.getElementById("cnavAcc");if(!b)return;b.hidden=false;const n=accName(u);
   b.textContent=n?n:"Connexion";b.classList.toggle("on",!!n);b.classList.remove("has-av");if(n)setTimeout(accAvatar,0);b.title=n?"Mon profil":"Crée ton identifiant ou connecte-toi pour retrouver tes données sur tous tes appareils";b.onclick=()=>{if(!n)return openAccount();if(/communaute\.html$/.test(location.pathname)){location.hash="profil"}else location.href="communaute.html#profil"}}
 window.conseilOpenAccount=(o)=>openAccount(o);
+// Lier son compte Discord : on part sur Discord, qui revient sur discord.html avec un code
+window.conseilDiscordLink=async function(){
+  const r=await fetch(RIOT_RELAY+"/discord").then(x=>x.json()).catch(()=>({}));if(!r.client_id)throw new Error("La liaison Discord n'est pas encore activée.");
+  const st=Math.random().toString(36).slice(2)+Date.now().toString(36);try{sessionStorage.setItem("dc-state",st)}catch(e){}
+  const redirect=location.origin+"/discord.html";
+  location.href="https://discord.com/oauth2/authorize?"+new URLSearchParams({client_id:r.client_id,response_type:"code",redirect_uri:redirect,scope:"identify guilds.members.read",state:st})};
+window.conseilDiscordCall=async function(body){const tok=await firebase.auth().currentUser.getIdToken();
+  const r=await fetch(RIOT_RELAY+"/discord",{method:"POST",headers:{Authorization:"Bearer "+tok,"Content-Type":"application/json"},body:JSON.stringify(body)});
+  const j=await r.json().catch(()=>({error:"réponse illisible ("+r.status+")"}));if(!r.ok&&!j.error)j.error="erreur "+r.status;return j};
 window.conseilLogout=async()=>{try{await firebase.auth().signOut()}catch(e){}try{sessionStorage.removeItem("cds-admin-pin")}catch(e){}location.href="index.html"};
 // Photo de profil à côté du pseudo, dans la barre du haut (champion choisi, sinon photo Discord, sinon initiales)
 let __accAv=0;
