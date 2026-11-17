@@ -1,0 +1,17 @@
+name: diag-robot
+on:
+  workflow_dispatch:
+    inputs:
+      players:
+        description: "Comptes Riot (Pseudo#TAG|euw1, séparés par des virgules)"
+        required: true
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Interroge le robot (ranks + live)
+        env:
+          P: ${{ inputs.players }}
+        run: |
+          Q=$(python3 -c "import urllib.parse,os;print(urllib.parse.quote(os.environ['P']))")
+          for r in ranks live; do echo "== /$r"; curl -s -H "Origin: https://leconseildessages.fr" "https://conseil-riot.perrotinyvanpro.workers.dev/$r?players=$Q" | head -c 3000; echo; done
