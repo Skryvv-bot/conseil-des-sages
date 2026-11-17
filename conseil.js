@@ -411,7 +411,9 @@ window.conseilCampTag=function(idOrPseudo,byPseudo){
 // ses données sont recopiées sur sa nouvelle identité et l'ancienne est masquée partout (collection claims).
 window.CLAIMED=new Set();window.CLAIM_BY={};
 window.conseilIsClaimed=function(id){if(!CLAIMED.size)return false;if(CLAIMED.has(id))return true;const i=id.lastIndexOf("_");return i>0&&CLAIMED.has(id.slice(i+1))};
-async function loadClaims(db){try{const q=await db.collection("claims").get();q.docs.forEach(d=>{CLAIMED.add(d.id);CLAIM_BY[d.data().by]=d.id})}catch(e){console.warn("claims",e)}}
+// un ancien compte « récupéré » n'est masqué que si le compte qui l'a récupéré a toujours un profil (sinon il réapparaît)
+async function loadClaims(db){try{const [q,r]=await Promise.all([db.collection("claims").get(),db.collection("riot").get()]);const live=new Set(r.docs.map(d=>d.id));
+  q.docs.forEach(d=>{const by=d.data().by;if(!by||!live.has(by))return;CLAIMED.add(d.id);CLAIM_BY[by]=d.id})}catch(e){console.warn("claims",e)}}
 const CLAIM_COLS=["picks","tiers","riot","wow","warmup"];
 async function offerClaim(db,uid){
   try{
