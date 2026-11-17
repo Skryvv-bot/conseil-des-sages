@@ -401,12 +401,15 @@ window.conseilCampTag=function(idOrPseudo,byPseudo){
   return nk+(s==="wow"?`<span class="camptag ct-wow" title="Déserteur d'Azeroth">WoW</span>`:`<span class="camptag ct-lol" title="Fidèle de la Faille">LoL</span>`);
 };
 
-// ---------- Mention légale Riot Games (obligatoire pour les sites de fans) ----------
+// ---------- Mentions légales : Riot Games (obligatoire pour les sites de fans) et les autres jeux, studios et services ----------
 (function(){const add=()=>{if(document.getElementById("riot-legal"))return;
   const p=document.createElement("p");p.id="riot-legal";
   p.style.cssText="max-width:1040px;margin:18px auto 0;font-size:.75rem;line-height:1.5;color:#6f7480;text-align:center";
   p.textContent="Conseil des Sages isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.";
-  const f=document.querySelector("footer");(f&&f.parentNode?f.parentNode:document.body).appendChild(p)};
+  // les autres jeux, studios et services présents sur le site
+  const q=document.createElement("p");q.id="other-legal";q.style.cssText=p.style.cssText.replace("margin:18px auto 0","margin:8px auto 0");
+  q.textContent="Ce site de fan n'est ni approuvé ni soutenu par les éditeurs des jeux et services qu'il cite. World of Warcraft et Blizzard Entertainment sont des marques de Blizzard Entertainment, Inc. Fortnite et Epic Games sont des marques d'Epic Games, Inc. One Piece © Eiichiro Oda / Shueisha, Toei Animation. Discord est une marque de Discord Inc. ; les vidéos proviennent de YouTube et Twitch. Les noms, logos et images des jeux, équipes et joueurs appartiennent à leurs propriétaires respectifs.";
+  const f=document.querySelector("footer"),host=f&&f.parentNode?f.parentNode:document.body;host.appendChild(p);host.appendChild(q)};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();
 
 // ---------- Récupération des comptes de l'ancienne adresse (Netlify) ----------
