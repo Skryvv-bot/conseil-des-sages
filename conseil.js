@@ -290,13 +290,13 @@ window.conseilPromos=async function(){try{if(document.querySelector(".cpromo"))r
   const {db}=await conseilConnect();if(!db)return;const d=await db.doc("ladder/current").get();if(!d.exists)return;
   const seen=LS.get("promos-vues",{}),now=Date.now(),Q={solo:"Solo/Duo",flex:"Flex"};
   const key=p=>p.id+"|"+p.q+"|"+p.to.tier+p.to.rank;
-  const list=(d.data().promos||[]).filter(p=>now-p.at<4*864e5&&!seen[key(p)]).sort((a,b)=>b.at-a.at);
+  const list=(d.data().promos||[]).filter(p=>now-p.at<4*864e5&&!seen[key(p)]&&p.from&&p.to&&p.from.tier!==p.to.tier).sort((a,b)=>b.at-a.at);
   for(const k of Object.keys(seen))if(now-seen[k]>6*864e5)delete seen[k];
   if(!list.length)return;
   const [sages,dc]=await Promise.all([conseilSages(db),conseilDiscordAvatars()]);if(document.querySelector(".cpromo"))return;
   const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
   const box=el("div","cpromo");box.setAttribute("role","dialog");box.setAttribute("aria-modal","true");box.setAttribute("aria-labelledby","cpromoT");
-  const card=el("div","cpromo-c");card.insertAdjacentHTML("afterbegin",conseilSage("victoire",96,"csage-bob"));card.append(el("span","eyebrow","Montée de division"),Object.assign(el("h2","",list.length>1?"Félicitations aux sages !":"Félicitations !"),{id:"cpromoT"}));
+  const card=el("div","cpromo-c");card.insertAdjacentHTML("afterbegin",conseilSage("victoire",96,"csage-bob"));card.append(el("span","eyebrow","Nouveau palier"),Object.assign(el("h2","",list.length>1?"Félicitations aux sages !":"Félicitations !"),{id:"cpromoT"}));
   for(const p of list.slice(0,6)){const m=sages[p.id]||{pseudo:p.pseudo},r=el("div","cpromo-r"),t=el("div","cpromo-t");
     t.append(el("b","",m.pseudo||p.pseudo),el("span","","passe "+conseilRankLabel(p.to,false)+" en "+(Q[p.q]||p.q)),el("small","","depuis "+conseilRankLabel(p.from,false)));
     const em=el("span");em.innerHTML=conseilRankEmblem(p.to.tier,56);r.append(conseilAvatarEl(m,dc,52),t,em);card.append(r)}
@@ -486,11 +486,11 @@ window.conseilLadder=async function(db,riotProfiles,{force=false}={}){
         const keep=(id,riotId,x)=>{if(x)return {solo:x.solo||null,flex:x.flex||null};const pv=prevOf(id,riotId),e=j.errors?.[riotId.toLowerCase()]||"";return pv&&!/introuvable/i.test(e)?{solo:pv.solo||null,flex:pv.flex||null}:{solo:null,flex:null}};
         for(const [id,p] of players){const rk=j.ranks?.[p.riotId.toLowerCase()],k=keep(id,p.riotId,rk);out[id]={pseudo:p.pseudo,riotId:p.riotId,solo:k.solo,flex:k.flex,err:rk?null:(j.errors?.[p.riotId.toLowerCase()]||null),
           alts:conseilAccounts(p).filter(a=>!a.main).map(a=>{const x=j.ranks?.[a.riotId.toLowerCase()],ka=keep(id,a.riotId,x);return {riotId:a.riotId,solo:ka.solo,flex:ka.flex}})}}
-        // montées de division (Solo/Duo et Flex, compte principal) : gardées 4 jours pour le message de félicitations
+        // montées de palier (Platine → Émeraude, Émeraude → Diamant…, pas les divisions II → I), Solo/Duo et Flex, compte principal : gardées 4 jours pour le message de félicitations
         const PROMO_KEEP=4*864e5,nowT=Date.now(),promos=(cur?.promos||[]).filter(x=>nowT-x.at<PROMO_KEEP);
         for(const [id,v] of Object.entries(out)){const pv=cur?.players?.[id];if(!pv||pv.riotId?.toLowerCase()!==v.riotId.toLowerCase()||v.err)continue;
           for(const q of ["solo","flex"]){const a=pv[q],b=v[q];if(!a||!b||!a.tier||!b.tier)continue;
-            if(conseilRankValue(b)>conseilRankValue(a)&&!promos.some(x=>x.id===id&&x.q===q&&x.to.tier===b.tier&&x.to.rank===b.rank))
+            if(RIOT_TIERS.indexOf(b.tier)>RIOT_TIERS.indexOf(a.tier)&&!promos.some(x=>x.id===id&&x.q===q&&x.to.tier===b.tier&&x.to.rank===b.rank))
               promos.push({id,pseudo:v.pseudo,q,from:{tier:a.tier,rank:a.rank||""},to:{tier:b.tier,rank:b.rank||""},at:nowT})}}
         cur={updatedAt:new Date().toISOString(),players:out,promos:promos.slice(-30)};
         await db.doc("ladder/current").set(cur);
