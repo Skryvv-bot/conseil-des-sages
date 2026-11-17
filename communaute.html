@@ -324,11 +324,15 @@ try{firebase.auth().onAuthStateChanged(u=>{const b=document.getElementById("logo
 function drawDcLink(){const box=document.getElementById("dcLink");if(!box)return;const m=(members||{})[uid]||{},L=m.dc;
   if(!m.pseudo){box.innerHTML='<span class="note">Enregistre d\'abord ton profil, puis lie ton Discord.</span>';return}
   if(L&&L.id){box.innerHTML=`<img src="${conseilEsc(L.av||"")}" alt="" width="40" height="40" style="border-radius:50%" referrerpolicy="no-referrer"><span><b>${conseilEsc(L.nick||L.global||L.user)}</b><br><span class="note">@${conseilEsc(L.user)}${L.inGuild?" · membre du serveur":" · pas encore sur le serveur du Conseil"}</span></span><button type="button" class="btn ghost small" id="dcRelink">Mettre à jour</button><button type="button" class="btn ghost small" id="dcUnlink">Délier</button><span class="note" id="dcMsg" role="status"></span>`;
-    document.getElementById("dcRelink").onclick=()=>conseilDiscordLink().catch(e=>{document.getElementById("dcMsg").textContent=e.message});
+    document.getElementById("dcRelink").onclick=e=>dcStart(e.currentTarget);
     document.getElementById("dcUnlink").onclick=async e=>{const b=e.target;if(!b.dataset.sure){b.dataset.sure=1;b.textContent="Confirmer";return}b.disabled=true;
       const r=await conseilDiscordCall({action:"unlink"});document.getElementById("dcMsg").textContent=r.ok?"Discord délié.":(r.error||"échec")};}
   else{box.innerHTML='<button type="button" class="btn" id="dcGo" style="background:#5865f2;border-color:#5865f2;color:#fff">Lier mon Discord</button><span class="note" id="dcMsg" role="status">Ta photo et ton jeu en cours seront retrouvés à coup sûr.</span>';
-    document.getElementById("dcGo").onclick=()=>conseilDiscordLink().catch(e=>{document.getElementById("dcMsg").textContent=e.message})}}
+    document.getElementById("dcGo").onclick=e=>dcStart(e.currentTarget)}}
+// lance la liaison en montrant ce qui se passe, et l'erreur s'il y en a une
+async function dcStart(btn){const msg=document.getElementById("dcMsg"),txt=btn.textContent;btn.disabled=true;btn.textContent="Ouverture de Discord…";msg.textContent="";
+  try{if(typeof conseilDiscordLink!=="function")throw new Error("Le site n'est pas à jour sur cet appareil : recharge la page (Ctrl + F5).");await conseilDiscordLink()}
+  catch(e){console.warn("Discord",e);msg.textContent=e.message||String(e);msg.style.color="#ff9db3";btn.disabled=false;btn.textContent=txt}}
 setInterval(()=>{const m=(members||{})[uid];const sig=JSON.stringify([m&&m.pseudo,m&&m.dc]);if(sig!==window.__dcSig){window.__dcSig=sig;drawDcLink()}},800);
 </script>
 </body>

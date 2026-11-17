@@ -783,7 +783,10 @@ function renderAccount(u){const b=document.getElementById("cnavAcc");if(!b)retur
 window.conseilOpenAccount=(o)=>openAccount(o);
 // Lier son compte Discord : on part sur Discord, qui revient sur discord.html avec un code
 window.conseilDiscordLink=async function(){
-  const r=await fetch(RIOT_RELAY+"/discord").then(x=>x.json()).catch(()=>({}));if(!r.client_id)throw new Error("La liaison Discord n'est pas encore activée.");
+  const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),12000);let r={},why="";
+  try{const x=await fetch(RIOT_RELAY+"/discord?t="+Date.now(),{signal:ctl.signal,cache:"no-store"});r=await x.json().catch(()=>({}));if(!x.ok)why=" (robot : erreur "+x.status+")"}
+  catch(e){why=e.name==="AbortError"?" (le robot ne répond pas)":" (robot injoignable)"}finally{clearTimeout(to)}
+  if(!r.client_id)throw new Error(r.error?"Robot : "+r.error:"La liaison Discord n'est pas encore activée dans le robot"+why+". Vérifie DISCORD_CLIENT_ID et le nouveau worker.js.");
   const st=Math.random().toString(36).slice(2)+Date.now().toString(36);try{sessionStorage.setItem("dc-state",st)}catch(e){}
   const redirect=location.origin+"/discord.html";
   location.href="https://discord.com/oauth2/authorize?"+new URLSearchParams({client_id:r.client_id,response_type:"code",redirect_uri:redirect,scope:"identify guilds.members.read",state:st})};
