@@ -4,14 +4,38 @@ on:
     inputs:
       players:
         description: "Comptes Riot (Pseudo#TAG|euw1, séparés par des virgules)"
-        required: true
+        required: false
+        default: ""
 jobs:
   diag:
     runs-on: ubuntu-latest
     steps:
       - name: Interroge le robot (ranks + live)
+        if: ${{ inputs.players != '' }}
         env:
           P: ${{ inputs.players }}
         run: |
           Q=$(python3 -c "import urllib.parse,os;print(urllib.parse.quote(os.environ['P']))")
           for r in ranks live; do echo "== /$r"; curl -s -H "Origin: https://leconseildessages.fr" "https://conseil-riot.perrotinyvanpro.workers.dev/$r?players=$Q" | head -c 3000; echo; done
+      - name: Profils, récupérations et pseudos réservés (lecture publique)
+        run: |
+          python3 - <<'PY'
+          import json,urllib.request
+          B="https://firestore.googleapis.com/v1/projects/conseil-des-sages/databases/(default)/documents/"
+          def lst(c):
+              out,tok=[],""
+              while True:
+                  d=json.load(urllib.request.urlopen(B+c+"?pageSize=300"+("&pageToken="+tok if tok else "")))
+                  out+=d.get("documents",[]);tok=d.get("nextPageToken")
+                  if not tok:return out
+          def v(f,k):
+              x=f.get(k,{});return x.get("stringValue") or x.get("integerValue") or ("map" if "mapValue" in x else "")
+          print("== riot")
+          for d in lst("riot"):
+              f=d.get("fields",{});print(d["name"].split("/")[-1],"|",v(f,"pseudo"),"|",v(f,"riotId"),"| dc:",bool(f.get("dc")),"|",d.get("updateTime"))
+          for c in ["claims","pseudos"]:
+              print("==",c)
+              try:
+                  for d in lst(c):print(d["name"].split("/")[-1],"|",json.dumps({k:list(x.values())[0] for k,x in d.get("fields",{}).items()})[:160])
+              except Exception as e:print("lecture impossible",e)
+          PY
