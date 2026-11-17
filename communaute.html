@@ -96,7 +96,7 @@
 
   <!-- PROFIL -->
   <section id="v-profil" class="frame panel" hidden>
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><h2 style="margin:0">Mon profil</h2><button type="button" class="btn ghost" id="logoutBtn" hidden>Se déconnecter</button></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><h2 style="margin:0">Mon profil</h2><span style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn ghost" id="pwBtn" hidden onclick="conseilOpenAccount()">Changer mon mot de passe</button><button type="button" class="btn ghost" id="logoutBtn" hidden>Se déconnecter</button></span></div>
     <p class="note">Ton profil sert partout sur le site : générateur d’équipes, Clash, pronos, votes, ladder et parties en direct.</p>
     <form class="form" id="profForm">
       <div class="pf-h"><h3>Général</h3><span class="note">Ton identité sur tout le site.</span></div>
@@ -319,7 +319,7 @@ window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
   const iv=setInterval(()=>{if(window.__membersLoaded){clearInterval(iv);prev()}},400);
 })();
 // bouton « Se déconnecter » : seulement avec un identifiant (un compte anonyme serait perdu)
-try{firebase.auth().onAuthStateChanged(u=>{const b=document.getElementById("logoutBtn");if(!b)return;b.hidden=!(u&&!u.isAnonymous);b.onclick=()=>{if(b.dataset.sure){conseilLogout();return}b.dataset.sure=1;b.textContent="Confirmer la déconnexion";setTimeout(()=>{delete b.dataset.sure;b.textContent="Se déconnecter"},5000)}})}catch(e){}
+try{firebase.auth().onAuthStateChanged(u=>{const b=document.getElementById("logoutBtn");if(!b)return;b.hidden=!(u&&!u.isAnonymous);const pb=document.getElementById("pwBtn");if(pb)pb.hidden=b.hidden;b.onclick=()=>{if(b.dataset.sure){conseilLogout();return}b.dataset.sure=1;b.textContent="Confirmer la déconnexion";setTimeout(()=>{delete b.dataset.sure;b.textContent="Se déconnecter"},5000)}})}catch(e){}
 // ---------- Compte Discord lié ----------
 function drawDcLink(){const box=document.getElementById("dcLink");if(!box)return;const m=(members||{})[uid]||{},L=m.dc;
   if(!m.pseudo){box.innerHTML='<span class="note">Enregistre d\'abord ton profil, puis lie ton Discord.</span>';return}

@@ -853,7 +853,7 @@ function openAccount(opt){opt=opt||{};
           ${tab==="create"?`<label>Confirme le mot de passe<input id="caccPw2" type="password" autocomplete="new-password" minlength="6" required></label>`:""}
           <p class="cacc-msg" role="status"></p>
           <button class="cpop-yes" type="submit">${tab==="create"?"Créer mon identifiant":"Se connecter"}</button>
-          ${tab==="login"?`<button type="button" data-forgot style="background:none;border:0;color:#c9c5e6;text-decoration:underline;cursor:pointer;font:600 .9rem var(--body,sans-serif);min-height:36px">Mot de passe oublié ?</button>
+          ${tab==="login"?`<button type="button" data-forgot style="background:transparent;border:1px solid #4a4668;border-radius:12px;color:#f2f0ff;cursor:pointer;font:700 .95rem var(--body,sans-serif);min-height:44px">Réinitialiser mon mot de passe</button>
           <div data-forgotbox hidden style="display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid #3a3752;border-radius:12px;text-align:left">
             <p class="cacc-txt" style="margin:0">Si ton Discord est lié à ton profil, change ton mot de passe en te connectant avec Discord :</p>
             <button type="button" class="cpop-yes" data-dcreset style="background:#5865f2;color:#fff">Changer mon mot de passe avec Discord</button>

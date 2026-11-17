@@ -89,7 +89,7 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
       <span class="eyebrow">Réservé à Skryvv</span>
       <h1>Les sages inscrits</h1>
       <button type="button" class="btn ghost" onclick="conseilLogout()" style="align-self:flex-start">Se déconnecter</button>
-      <p class="lead">Tous les profils créés sur le site. Les doublons (même pseudo) sont surlignés en rose. Supprimer un profil efface aussi ses données WoW, Jeux, Worlds, sa candidature Team 5v5 et ses cœurs du mercato. Ses PO restent dans la banque. « Nouveau mot de passe » débloque un sage qui a oublié le sien : donne-lui le mot de passe provisoire, il pourra le changer dans son compte.</p>
+      <p class="lead">Tous les profils créés sur le site. Les doublons (même pseudo) sont surlignés en rose. Supprimer un profil efface aussi ses données WoW, Jeux, Worlds, sa candidature Team 5v5 et ses cœurs du mercato. Ses PO restent dans la banque. « Mot de passe » change celui de n'importe quel sage (laisse vide pour un mot de passe provisoire) ; « Créer un identifiant » transforme un compte anonyme en compte avec identifiant, sans rien perdre. Il pourra ensuite changer son mot de passe dans son compte.</p>
     </div>
   </header>
 
@@ -128,7 +128,7 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
 <script>
 conseilNav("admin");
 const $=id=>document.getElementById(id),esc=conseilEsc;
-let DB,P={},W={},U=null,UERR="",PW={},sortK="pseudo",sortDir=1;
+let DB,P={},W={},U=null,UERR="",PW={},EDIT={},sortK="pseudo",sortDir=1;
 const norm=s=>String(s||"").trim().toLowerCase();
 const when=d=>{const t=d&&(d.updatedAt||d.at||d.createdAt);if(!t)return "";const x=typeof t==="number"?new Date(t):t.toDate?t.toDate():new Date(t);return isNaN(x)?"":x.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})};
 const stamp=d=>{const t=d&&(d.updatedAt||d.at||d.createdAt);if(!t)return 0;const x=typeof t==="number"?t:t.toDate?t.toDate().getTime():Date.parse(t);return x||0};
@@ -148,13 +148,17 @@ function draw(){
       <td>${acc(id)}</td>
       <td>${m.riotId?esc(m.riotId):"<small>—</small>"}${(m.alts||[]).length?`<br><small>+ ${m.alts.map(a=>esc(a.riotId||"")).join(", ")}</small>`:""}</td>
       <td>${games}</td><td><small style="color:#ffe27a">${po}</small></td><td><small>${esc(when(m))||"—"}</small></td>
-      <td style="display:flex;flex-direction:column;gap:6px;align-items:flex-start">${me||!U||!U[id]||U[id].anon?"":`<button type="button" class="del pw" data-pw="${esc(id)}" style="border-color:#7ad7ff;color:#7ad7ff">Nouveau mot de passe</button>`}${me?"":`<button type="button" class="del" data-id="${esc(id)}" aria-label="Supprimer le profil de ${esc(m.pseudo||id)}">Supprimer</button>`}</td></tr>`}).join("")||'<tr><td colspan="7"><p class="note">Aucun profil.</p></td></tr>';
+      <td style="display:flex;flex-direction:column;gap:6px;align-items:flex-start">${me||!U||!U[id]?"":EDIT[id]?pwForm(id,m):`<button type="button" class="del pw" data-pw="${esc(id)}" style="border-color:#7ad7ff;color:#7ad7ff">${U[id].anon?"Créer un identifiant":"Mot de passe"}</button>`}${me?"":`<button type="button" class="del" data-id="${esc(id)}" aria-label="Supprimer le profil de ${esc(m.pseudo||id)}">Supprimer</button>`}</td></tr>`}).join("")||'<tr><td colspan="7"><p class="note">Aucun profil.</p></td></tr>';
   $("rows").querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(b.dataset.copy).then(()=>{b.textContent="Copié !"}).catch(()=>{})});
-  $("rows").querySelectorAll("[data-pw]").forEach(b=>b.onclick=async()=>{
-    if(!b.classList.contains("sure")){b.classList.add("sure");b.style.background="#7ad7ff";b.style.color="#0c0b14";b.textContent="Confirmer";setTimeout(()=>{if(b.isConnected&&!b.disabled){b.classList.remove("sure");b.style.background="";b.style.color="#7ad7ff";b.textContent="Nouveau mot de passe"}},5000);return}
-    b.disabled=true;b.textContent="…";const id=b.dataset.pw;
-    try{const r=await adminCall({action:"reset",uid:id});if(!r.password)throw new Error(r.error||"échec");PW[id]=r.password;draw()}
-    catch(e){b.disabled=false;b.classList.remove("sure");b.style.background="";b.style.color="#7ad7ff";b.textContent="Échec : "+String(e.message||e).slice(0,60)}});
+  $("rows").querySelectorAll("[data-pw]").forEach(b=>b.onclick=()=>{EDIT[b.dataset.pw]=true;draw();const f=document.querySelector(`form[data-pwf="${b.dataset.pw}"] input:not([readonly])`);if(f)f.focus()});
+  $("rows").querySelectorAll("[data-pwx]").forEach(b=>b.onclick=()=>{delete EDIT[b.dataset.pwx];draw()});
+  $("rows").querySelectorAll("form[data-pwf]").forEach(f=>f.onsubmit=async e=>{e.preventDefault();const id=f.dataset.pwf,msg=f.querySelector("[data-m]"),btn=f.querySelector("[type=submit]");
+    const pw=f.querySelector("[name=pw]").value.trim(),nid=(f.querySelector("[name=id]")||{}).value||"";
+    if(pw&&pw.length<6){msg.textContent="6 caractères minimum (ou vide pour un mot de passe provisoire).";return}
+    btn.disabled=true;msg.textContent="…";
+    try{const r=await adminCall({action:"reset",uid:id,password:pw||undefined,id:nid.trim().toLowerCase()});if(!r.password)throw new Error(r.error||"échec");
+      PW[id]=r.password;if(r.created&&U[id]){U[id].anon=false;U[id].id=r.id}delete EDIT[id];draw()}
+    catch(x){btn.disabled=false;msg.textContent=String(x.message||x)}});
   $("rows").querySelectorAll(".del:not([data-pw])").forEach(b=>b.onclick=async()=>{
     if(!b.classList.contains("sure")){b.classList.add("sure");b.textContent="Confirmer";setTimeout(()=>{if(b.isConnected&&!b.disabled){b.classList.remove("sure");b.textContent="Supprimer"}},5000);return}
     b.disabled=true;b.textContent="Suppression…";const id=b.dataset.id;
@@ -179,10 +183,18 @@ async function seedPseudos(){try{const s=await DB.collection("pseudos").get(),ha
 async function adminCall(body){const tok=await firebase.auth().currentUser.getIdToken();
   const r=await fetch(RIOT_RELAY+"/admin",{method:"POST",headers:{Authorization:"Bearer "+tok,"Content-Type":"application/json"},body:JSON.stringify(body)});
   const j=await r.json().catch(()=>({error:"réponse illisible ("+r.status+")"}));if(!r.ok&&!j.error)j.error="erreur "+r.status;return j}
+// petit formulaire : identifiant (à créer pour un compte anonyme) et mot de passe (vide = provisoire)
+const slugify=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+function pwForm(id,m){const u=U[id],inp='style="min-height:36px;padding:0 10px;border-radius:8px;border:1px solid var(--line);background:#0c0b14;color:#f2f0ff;font:600 .85rem var(--body);width:170px"';
+  return `<form data-pwf="${esc(id)}" style="display:flex;flex-direction:column;gap:6px">
+    <label style="font-size:.75rem;color:#b4b0d0">Identifiant<input name="id" ${inp} ${u.anon?"":"readonly"} value="${esc(u.anon?slugify(m.pseudo):u.id)}"></label>
+    <label style="font-size:.75rem;color:#b4b0d0">Mot de passe<input name="pw" type="text" autocomplete="off" ${inp} placeholder="vide = provisoire"></label>
+    <span style="display:flex;gap:6px"><button type="submit" class="del" style="border-color:#7ad7ff;color:#7ad7ff">Valider</button><button type="button" class="del" data-pwx="${esc(id)}" style="border-color:#4a4668;color:#c9c5e6">Annuler</button></span>
+    <small data-m role="status"></small></form>`}
 function acc(id){if(UERR)return "<small>?</small>";if(!U)return "<small>…</small>";const u=U[id];if(!u)return "<small>introuvable</small>";
   const last=u.last?new Date(u.last).toLocaleDateString("fr-FR",{day:"numeric",month:"short"}):"";
   let h=u.anon?'<span class="tag">Anonyme</span>':`<b>${esc(u.id)}</b>`;h+=last?`<br><small>vu le ${esc(last)}</small>`:"";
-  if(PW[id])h+=`<br><span style="display:inline-block;margin-top:4px;color:#ffe27a;font-weight:800">Mot de passe provisoire : <code style="font:700 .95rem var(--mono);text-transform:none;letter-spacing:0;color:#fff;background:#0c0b14;padding:2px 6px;border-radius:6px;user-select:all">${esc(PW[id])}</code></span> <button type="button" class="del" data-copy="${esc(PW[id])}" style="min-height:30px;border-color:#ffe27a;color:#ffe27a">Copier</button>`;
+  if(PW[id])h+=`<br><span style="display:inline-block;margin-top:4px;color:#ffe27a;font-weight:800">Identifiant ${esc((U[id]||{}).id||"")} · mot de passe : <code style="font:700 .95rem var(--mono);text-transform:none;letter-spacing:0;color:#fff;background:#0c0b14;padding:2px 6px;border-radius:6px;user-select:all">${esc(PW[id])}</code></span> <button type="button" class="del" data-copy="${esc(PW[id])}" style="min-height:30px;border-color:#ffe27a;color:#ffe27a">Copier</button>`;
   return h}
 document.querySelectorAll("th[data-s]").forEach(th=>th.onclick=()=>{const k=th.dataset.s;sortDir=sortK===k?-sortDir:1;sortK=k;draw()});
 $("q").oninput=draw;$("onlyDup").onchange=draw;
