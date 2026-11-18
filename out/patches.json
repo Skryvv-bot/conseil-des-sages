@@ -1,1 +1,1 @@
-{"patches": [{"patch": "16.23", "parties": 111}, {"patch": "16.22", "parties": 949}], "ddragon": "16.23.1", "maj": "2026-11-18T13:21:18Z"}
+{"regions": {"euw": [{"patch": "16.23", "parties": 205}, {"patch": "16.22", "parties": 1528}], "kr": [{"patch": "16.23", "parties": 285}, {"patch": "16.22", "parties": 374}], "na": [{"patch": "16.23", "parties": 1}, {"patch": "16.22", "parties": 641}]}, "ddragon": "16.23.1", "maj": "2026-11-18T14:03:54Z"}
