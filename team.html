@@ -150,7 +150,7 @@ const $=id=>document.getElementById(id),esc=conseilEsc,DAYS=["Lun","Mar","Mer","
     const L=Object.values(cand).filter(c=>c.status!=="no"||isAdmin||c.uid===uid).sort((a,b)=>({pending:0,ok:1,no:2}[a.status]-{pending:0,ok:1,no:2}[b.status])||String(b.at).localeCompare(String(a.at)));
     $("candN").textContent=L.length?L.filter(c=>c.status==="pending").length+" en attente · "+L.filter(c=>c.status==="ok").length+" validée(s)":"";
     $("cands").innerHTML=L.length?L.map(c=>{const m=sages[c.uid]||{pseudo:c.pseudo};const ST={pending:"En attente",ok:"Validé",no:"Refusé"}[c.status];
-      return `<article class="cand ${c.status}"><div class="cand-h">${conseilAv(c.uid,c.pseudo,48)}<div><b>${esc(c.pseudo)}</b><span>${m.riotId?`<a href="${opgg(m)}" target="_blank" rel="noopener">${esc(m.riotId)}</a> · `:""}${esc(rank(c.uid))}</span></div></div>
+      return `<article class="cand ${c.status}"><div class="cand-h">${conseilAv(c.uid,c.pseudo,48)}<div><b>${esc(c.pseudo)}${conseilDcMsg(c.uid,sages[c.uid])}</b><span>${m.riotId?`<a href="${opgg(m)}" target="_blank" rel="noopener">${esc(m.riotId)}</a> · `:""}${esc(rank(c.uid))}</span></div></div>
         <span class="st2 ${c.status}">${ST}</span>
         <div class="chipr">${ROLES.map(([k,l])=>`<span class="${(c.roles||[]).includes(k)?"on":""}">${l}${(c.roles||[])[0]===k?" ★":""}</span>`).join("")}</div>
         <div class="chipr">${DAYS.map((d,i)=>`<span class="${(c.days||[]).includes(i)?"on":""}">${d}</span>`).join("")}${c.hours?`<span>${esc(c.hours)}</span>`:""}</div>

@@ -743,7 +743,7 @@ function renderPlayers(){
     const detail=g?`${esc(champNames[g.championId]||"Champion")} · ${esc(QUEUES[g.queueId]||"Partie")} · ${mins} min${p.lvAcc?` · sur ${esc(p.lvAcc)}`:""}`:comptes||"Aucun compte de jeu indiqué";
     // Live, op.gg et prono : seulement pendant une partie de LoL
     const links=g?`<div class="plinks"><a class="btn small" href="communaute.html#paris">Prono</a><a class="btn ghost small" href="${poro(p.lvAccObj||p)}" target="_blank" rel="noopener">Live</a><a class="btn ghost small" href="${opgg(p)}" target="_blank" rel="noopener">op.gg</a></div>`:"";
-    return `<div class="pl ${g||p.dg?"ingame":""}">${status}<div class="pinfo"><b>${conseilAv(p.id,p.pseudo,26)}${esc(p.pseudo)}${conseilCampTag(p.id)}</b><small>${detail}</small></div>${links}</div>`}).join("");
+    return `<div class="pl ${g||p.dg?"ingame":""}">${status}<div class="pinfo"><b>${conseilAv(p.id,p.pseudo,26)}${esc(p.pseudo)}${conseilCampTag(p.id)}${conseilDcMsg(p.id,riot[p.id])}</b><small>${detail}</small></div>${links}</div>`}).join("");
   const n=list.filter(p=>p.lv).length,o=list.filter(p=>!p.lv&&p.dg).length;
   const sl=$("sageLive");if(sl){const on=n||o;sl.src="img/sage/"+(on?"jeu":"dodo")+".svg";sl.alt=on?"Le Sage en partie":"Le Sage dort"}
   $("liveInfo").textContent=(n||o)?[n?`${n} sur LoL`:"",o?`${o} sur un autre jeu`:""].filter(Boolean).join(" · "):"Personne en jeu";

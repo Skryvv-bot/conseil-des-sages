@@ -327,3 +327,9 @@ td .cav-in,li .cav-in,b .cav-in{flex:none}
 @media (prefers-reduced-motion:reduce){.csage-bob{animation:none}}
 .csage-empty{display:flex;align-items:center;gap:14px}
 .cpromo-c .csage{display:block;margin:0 auto 6px}
+
+/* bouton « Message sur Discord » à côté d'un pseudo */
+.dcmsg{display:inline-grid;place-items:center;width:28px;height:28px;margin-left:8px;border-radius:50%;background:#5865f2;color:#fff!important;vertical-align:middle;flex:none;text-decoration:none}
+.dcmsg:hover{background:#7983f5}
+.cdc-login,.cdc-login:hover{background:#5865f2!important;background-image:none!important;color:#fff!important;border-color:#5865f2!important}
+.cdc-login:hover{filter:brightness(1.1)}

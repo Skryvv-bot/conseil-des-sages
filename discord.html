@@ -81,6 +81,16 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
 conseilNav("profil");
 const $=id=>document.getElementById(id);
 const done=(ok,t,m)=>{$("dcT").textContent=t;$("dcM").textContent=m;$("dcBack").hidden=false;document.querySelector(".csage").src="img/sage/"+(ok?"victoire":"tilt")+".svg"};
+// se connecter avec Discord : le robot retrouve (ou crée) le compte et renvoie un jeton de connexion
+async function loginFlow(code){$("dcT").textContent="Connexion avec Discord…";
+  await conseilConnect().catch(()=>{});
+  let r;try{const u=firebase.auth().currentUser,h={"Content-Type":"application/json"};if(u)h.Authorization="Bearer "+await u.getIdToken();
+    r=await fetch(RIOT_RELAY+"/discord",{method:"POST",headers:h,body:JSON.stringify({action:"login",code,redirect:location.origin+"/discord.html"})}).then(x=>x.json())}catch(e){r={error:"robot injoignable"}}
+  if(!r||!r.token){done(false,"Connexion impossible",(r&&r.error)||"Réessaie dans un instant.");return}
+  try{await firebase.auth().signInWithCustomToken(r.token)}catch(e){done(false,"Connexion impossible","Firebase a refusé la connexion ("+(e.code||e.message)+").");return}
+  const d=r.dc||{},name=d.nick||d.global||d.user||"";let back="index.html";try{back=sessionStorage.getItem("dc-return")||back;sessionStorage.removeItem("dc-return")}catch(e){}
+  if(r.created){done(true,"Bienvenue au Conseil, "+name+" !","Ton compte et ton profil sont créés. Ajoute ton Riot ID et tes jeux dans ton profil.");$("dcBack").textContent="Compléter mon profil";return}
+  done(true,"Connecté !","Bon retour, "+name+".");$("dcBack").href=back;$("dcBack").textContent="Continuer";setTimeout(()=>location.href=back,1500)}
 // mot de passe oublié : Discord a confirmé qui tu es, choisis le nouveau mot de passe (le code Discord expire après quelques minutes)
 function resetFlow(code){$("dcT").textContent="Nouveau mot de passe";$("dcM").textContent="Discord a confirmé ton identité. Choisis ton nouveau mot de passe.";$("rsF").hidden=false;$("rs1").focus();
   $("rsF").onsubmit=async e=>{e.preventDefault();const a=$("rs1").value,b=$("rs2").value;if(a.length<6){$("rsM").textContent="6 caractères minimum.";return}if(a!==b){$("rsM").textContent="Les deux mots de passe ne sont pas identiques.";return}
@@ -95,6 +105,7 @@ function resetFlow(code){$("dcT").textContent="Nouveau mot de passe";$("dcM").te
   if(q.get("error")){done(false,"Liaison annulée","Tu n'as pas autorisé la liaison sur Discord. Tu peux réessayer depuis ton profil.");return}
   if(!code||!st||st!==saved){done(false,"Lien expiré","Relance la liaison depuis ton profil.");return}
   if(st.startsWith("r")){resetFlow(code);return}
+  if(st.startsWith("g")){loginFlow(code);return}
   await conseilConnect().catch(()=>{});
   const r=await conseilDiscordCall({code,redirect:location.origin+"/discord.html"}).catch(e=>({error:String(e.message||e)}));
   if(r.ok){const d=r.dc||{};done(true,"Discord lié !",`Ton profil est relié à ${d.nick||d.global||d.user}${d.inGuild?"":" (rejoins le serveur du Conseil pour apparaître en ligne)"}.`)}

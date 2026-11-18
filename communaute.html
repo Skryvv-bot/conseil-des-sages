@@ -130,6 +130,9 @@
       <div class="pf-h"><h3>Fortnite</h3><span class="note">Pour le classement des chasseurs. Tes stats doivent être publiques dans Fortnite (Compte et confidentialité).</span></div>
       <label class="f">Pseudo Epic Games<input type="text" id="pFnN" maxlength="32" placeholder="Ton nom affiché dans Fortnite"></label>
       <label class="f">Plateforme du compte<select id="pFnT"><option value="epic">Epic (PC, Switch, mobile)</option><option value="psn">PlayStation</option><option value="xbl">Xbox</option></select></label>
+      <div class="pf-h"><h3>Valorant</h3><span class="note">Pour le classement Valorant. Ton rang est lu avec ton Riot ID (le même compte Riot que LoL, en général).</span></div>
+      <label class="f" style="flex-direction:row;align-items:center;gap:10px"><input type="checkbox" id="pValOn" style="width:22px;height:22px"> Je joue à Valorant : afficher mon rang sur le site</label>
+      <label class="f">Riot ID Valorant (seulement s'il est différent de LoL)<input type="text" id="pValId" maxlength="40" placeholder="Pseudo#TAG"></label>
       <div class="row"><button class="btn" type="submit">Enregistrer mon profil</button><span class="okmsg" id="profMsg"></span></div>
       <div class="row" style="grid-column:1/-1"><button class="btn small ghost" type="button" onclick="conseilOpenAccount()">Compte et connexion</button><span class="note">Identifiant, mot de passe, connexion sur un autre appareil.</span></div>
     </form>
@@ -171,7 +174,7 @@ function renderRoleChips(){$("pRoles").innerHTML=ROLES.map(r=>{const i=profRoles
   $("pRoles").querySelectorAll(".chip").forEach(c=>c.onclick=()=>{const r=c.dataset.r,i=profRoles.indexOf(r);i>=0?profRoles.splice(i,1):profRoles.push(r);renderRoleChips()})}
 let profFilled=false;
 function fillProfile(){if(profFilled||!db||!window.__membersLoaded)return;const m=me()||{};profFilled=true;
-  $("pPseudo").value=m.pseudo||"";$("pRiot").value=m.riotId||"";$("pRegion").value=m.region||"euw1";$("pRank").value=m.rank||"Non classé";$("pDiscord").value=m.discord||"";$("pFnN").value=m.fn?.name||"";$("pFnT").value=m.fn?.type||"epic";$("pWowN").value=m.wow?.name||"";$("pWowS").value=m.wow?.surname||"";$("pWowL").value=m.wow?.lvl||"";profRoles=(m.roles||[]).slice();renderRoleChips();
+  $("pPseudo").value=m.pseudo||"";$("pRiot").value=m.riotId||"";$("pRegion").value=m.region||"euw1";$("pRank").value=m.rank||"Non classé";$("pDiscord").value=m.discord||"";$("pFnN").value=m.fn?.name||"";$("pValOn").checked=!!(m.val&&m.val.on);$("pValId").value=m.val?.id||"";$("pFnT").value=m.fn?.type||"epic";$("pWowN").value=m.wow?.name||"";$("pWowS").value=m.wow?.surname||"";$("pWowL").value=m.wow?.lvl||"";profRoles=(m.roles||[]).slice();renderRoleChips();
   const al=Array.isArray(m.alts)?m.alts:[];[1,2].forEach(i=>{$("pAlt"+i).value=al[i-1]?.riotId||"";$("pAlt"+i+"Reg").value=al[i-1]?.region||m.region||"euw1"})}
 renderRoleChips();
 $("profForm").onsubmit=async e=>{e.preventDefault();if(!db)return;const msg=$("profMsg");
@@ -184,7 +187,7 @@ $("profForm").onsubmit=async e=>{e.preventDefault();if(!db)return;const msg=$("p
   {const t=Object.entries(members).find(([id,m])=>id!==uid&&m.pseudo?.toLowerCase()===pseudo.toLowerCase());if(t){msg.className="err";conseilTakeover(msg,db,uid,t[0],t[1].pseudo);return}}
   if(/\//.test(pseudo)){msg.className="err";msg.textContent="Le pseudo ne peut pas contenir de « / ».";return}
   try{await conseilReservePseudo(db,uid,pseudo,(members[uid]||{}).pseudo)}catch(x){msg.className="err";if(x.taken){const t=Object.entries(members).find(([id,m])=>id!==uid&&m.pseudo?.toLowerCase()===pseudo.toLowerCase());conseilTakeover(msg,db,uid,t?t[0]:"",pseudo)}else msg.textContent="Pseudo impossible à réserver, réessaie.";return}
-  try{await db.doc("riot/"+uid).set({pseudo,riotId,region:$("pRegion").value,rank:$("pRank").value,discord:$("pDiscord").value.trim().slice(0,40),fn:$("pFnN").value.trim()?{name:$("pFnN").value.trim().slice(0,32),type:$("pFnT").value}:null,wow:$("pWowN").value.trim()?{name:$("pWowN").value.trim().slice(0,24),surname:$("pWowS").value.trim().slice(0,24),lvl:Math.max(0,Math.min(60,+$("pWowL").value||0))}:null,roles:profRoles.slice(),alts,updated:new Date().toISOString()},{merge:true});
+  try{await db.doc("riot/"+uid).set({pseudo,riotId,region:$("pRegion").value,rank:$("pRank").value,discord:$("pDiscord").value.trim().slice(0,40),fn:$("pFnN").value.trim()?{name:$("pFnN").value.trim().slice(0,32),type:$("pFnT").value}:null,val:$("pValOn").checked||$("pValId").value.trim()?{on:$("pValOn").checked,id:/^.{2,24}#.{2,6}$/.test($("pValId").value.trim())?$("pValId").value.trim():""}:null,wow:$("pWowN").value.trim()?{name:$("pWowN").value.trim().slice(0,24),surname:$("pWowS").value.trim().slice(0,24),lvl:Math.max(0,Math.min(60,+$("pWowL").value||0))}:null,roles:profRoles.slice(),alts,updated:new Date().toISOString()},{merge:true});
     msg.className="okmsg";msg.textContent="Profil enregistré."}catch(x){msg.className="err";msg.textContent="Enregistrement impossible, réessaie."}};
 
 // ---------- Pronos entre potes ----------
@@ -319,7 +322,7 @@ window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
   const iv=setInterval(()=>{if(window.__membersLoaded){clearInterval(iv);prev()}},400);
 })();
 // bouton « Se déconnecter » : seulement avec un identifiant (un compte anonyme serait perdu)
-try{firebase.auth().onAuthStateChanged(u=>{const b=document.getElementById("logoutBtn");if(!b)return;b.hidden=!(u&&!u.isAnonymous);const pb=document.getElementById("pwBtn");if(pb)pb.hidden=b.hidden;b.onclick=()=>{if(b.dataset.sure){conseilLogout();return}b.dataset.sure=1;b.textContent="Confirmer la déconnexion";setTimeout(()=>{delete b.dataset.sure;b.textContent="Se déconnecter"},5000)}})}catch(e){}
+try{firebase.auth().onAuthStateChanged(u=>{const b=document.getElementById("logoutBtn");if(!b)return;b.hidden=!(u&&!u.isAnonymous);const pb=document.getElementById("pwBtn");if(pb)pb.hidden=b.hidden||!(u&&u.email);b.onclick=()=>{if(b.dataset.sure){conseilLogout();return}b.dataset.sure=1;b.textContent="Confirmer la déconnexion";setTimeout(()=>{delete b.dataset.sure;b.textContent="Se déconnecter"},5000)}})}catch(e){}
 // ---------- Compte Discord lié ----------
 function drawDcLink(){const box=document.getElementById("dcLink");if(!box)return;const m=(members||{})[uid]||{},L=m.dc;
   if(!m.pseudo){box.innerHTML='<span class="note">Enregistre d\'abord ton profil, puis lie ton Discord.</span>';return}

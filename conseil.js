@@ -40,6 +40,7 @@ const CONSEIL_NAV=[
   {id:"lol",href:"lol.html",label:"LoL",sub:[{id:"lol",href:"lol.html",label:"Accueil LoL",hide:1},{id:"newdawn",href:"newdawn.html",label:"LoL 2 · New Dawn"},{id:"mercato",href:"mercato.html",label:"Mercato"},{id:"worlds",href:"worlds.html",label:"Worlds 2026",hide:1},{id:"fantasy",href:"fantasy.html",label:"Fantasy",hide:1},{id:"cartes",href:"cartes.html",label:"LolMaster",hide:1},
     {id:"ladder",href:"ladder.html",label:"Ladder"},{id:"customs",href:"customs.html",label:"Customs & Clash"},{id:"team",href:"team.html",label:"Team 5v5 · recrutement"},{id:"pronos",href:"communaute.html#paris",label:"Pronos entre potes"},{id:"patch",href:"patch.html",label:"Patch"},{id:"devinettes",href:"devinettes.html",label:"Devinettes"}]},
   {id:"wow",href:"wow.html",label:"WoW",sub:[{id:"wow",href:"wow.html",label:"WoW Forever"}]},
+  {id:"valorant",href:"valorant.html",label:"Valorant",noBar:1,sub:[{id:"valorant",href:"valorant.html",label:"Classement"},{href:"valorant.html#news",label:"Actualités"}]},
   {id:"fortnite",href:"fortnite.html",label:"Fortnite",sub:[{id:"fortnite",href:"fortnite.html",label:"Chasse aux trésors"},{href:"fortnite.html#taux",label:"Taux de drop"}]},
   {id:"admin",href:"admin.html",label:"Sages",admin:1,noBar:1}
 ];
@@ -310,7 +311,7 @@ window.conseilPromos=async function(){try{if(document.querySelector(".cpromo"))r
 
 // ---------- Commentaires ----------
 // Un fil par page (collection « comments »). Il faut un profil avec un pseudo pour écrire ; chacun peut supprimer ses messages.
-const COMMENT_PAGES={team:"la team",newdawn:"New Dawn",pronos:"les pronos entre potes",accueil:"l'accueil",lol:"LoL",wow:"WoW Forever",fortnite:"Fortnite",mercato:"le mercato",patch:"le patch",worlds:"les Worlds",fantasy:"la Fantasy",ladder:"le ladder",tierlist:"la tier list",devinettes:"les Devinettes",customs:"les customs"};
+const COMMENT_PAGES={valorant:"Valorant",team:"la team",newdawn:"New Dawn",pronos:"les pronos entre potes",accueil:"l'accueil",lol:"LoL",wow:"WoW Forever",fortnite:"Fortnite",mercato:"le mercato",patch:"le patch",worlds:"les Worlds",fantasy:"la Fantasy",ladder:"le ladder",tierlist:"la tier list",devinettes:"les Devinettes",customs:"les customs"};
 window.conseilComments=async function(page){
   const wrap=document.querySelector(".wrap");if(!wrap||!COMMENT_PAGES[page]||document.getElementById("ccom"))return;
   const sec=document.createElement("section");sec.id="ccom";sec.className="frame panel ccom";sec.setAttribute("aria-labelledby","ccomT");
@@ -362,7 +363,7 @@ window.conseilHunt=async function(){const boxes=[...document.querySelectorAll("[
 
 // ---------- Thème « Collection holographique » et bandeau d'infos ----------
 (function(){const add=()=>{if(document.getElementById("tv-theme"))return;
-  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=19";document.head.appendChild(l)};
+  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=21";document.head.appendChild(l)};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();
 function defaultTicker(){const d=Math.ceil((Date.parse("2026-11-04T23:00:00Z")-Date.now())/864e5);
   return ["Worlds 2026 : Bilibili Gaming champion du monde, 3-1 contre Gen.G","Pick'em : un skin pour le 1er (offert par Skryvv) et un skin pour le 2e (offert par Tabaskoh)",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Pronos entre potes, tribunal et sage de la semaine dans Le Conseil","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes"]}
@@ -777,17 +778,20 @@ window.conseilTakeover=function(el,db,uid,old,pseudo){
 // L'identifiant devient une adresse technique « identifiant@conseil-des-sages.app » que personne ne voit.
 const ACC_DOMAIN="conseil-des-sages.app";
 const accSlug=id=>String(id||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
-const accName=u=>u&&!u.isAnonymous?(u.displayName||(u.email||"").split("@")[0]):null;
+const accName=u=>u&&!u.isAnonymous?(u.displayName||(u.email||"").split("@")[0]||"Compte Discord"):null;
 function renderAccount(u){const b=document.getElementById("cnavAcc");if(!b)return;b.hidden=false;const n=accName(u);
   b.textContent=n?n:"Connexion";b.classList.toggle("on",!!n);b.classList.remove("has-av");if(n)setTimeout(accAvatar,0);b.title=n?"Mon profil":"Crée ton identifiant ou connecte-toi pour retrouver tes données sur tous tes appareils";b.onclick=()=>{if(!n)return openAccount();if(/communaute\.html$/.test(location.pathname)){location.hash="profil"}else location.href="communaute.html#profil"}}
 window.conseilOpenAccount=(o)=>openAccount(o);
+// Bouton « Message » : ouvre la conversation Discord d'un sage qui a lié son compte (pas pour soi-même)
+window.conseilDcMsg=function(id,m){const d=m&&m.dc;if(!d||!/^\d{5,25}$/.test(d.id||"")||id===window.CONSEIL_UID)return "";
+  return `<a class="dcmsg" href="https://discord.com/users/${d.id}" target="_blank" rel="noopener" title="Envoyer un message sur Discord" aria-label="Envoyer un message Discord à ${conseilEsc(m.pseudo||"ce sage")}"><svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4v-4H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/></svg></a>`};
 // Lier son compte Discord : on part sur Discord, qui revient sur discord.html avec un code
 window.conseilDiscordLink=async function(mode){
   const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),12000);let r={},why="";
   try{const x=await fetch(RIOT_RELAY+"/discord?t="+Date.now(),{signal:ctl.signal,cache:"no-store"});r=await x.json().catch(()=>({}));if(!x.ok)why=" (robot : erreur "+x.status+")"}
   catch(e){why=e.name==="AbortError"?" (le robot ne répond pas)":" (robot injoignable)"}finally{clearTimeout(to)}
   if(!r.client_id)throw new Error(r.error?"Robot : "+r.error:"La liaison Discord n'est pas encore activée dans le robot"+why+". Vérifie DISCORD_CLIENT_ID et le nouveau worker.js.");
-  const st=(mode==="reset"?"r":"l")+Math.random().toString(36).slice(2)+Date.now().toString(36);try{sessionStorage.setItem("dc-state",st)}catch(e){}
+  const st=(mode==="reset"?"r":mode==="login"?"g":"l")+Math.random().toString(36).slice(2)+Date.now().toString(36);try{sessionStorage.setItem("dc-state",st)}catch(e){}
   const redirect=location.origin+"/discord.html";
   location.href="https://discord.com/oauth2/authorize?"+new URLSearchParams({client_id:r.client_id,response_type:"code",redirect_uri:redirect,scope:"identify guilds.members.read",state:st})};
 window.conseilDiscordCall=async function(body){const tok=await firebase.auth().currentUser.getIdToken();
@@ -839,13 +843,16 @@ function openAccount(opt){opt=opt||{};
   const draw=()=>{
     el.innerHTML=`<div class="cpop-box"><button class="cacc-x" type="button" aria-label="Fermer">×</button>
       ${name?`<span class="cpop-tag">Ton compte</span><p class="cpop-q" id="caccT">${conseilEsc(name)}</p>
-        <p class="cacc-txt">Tu es connecté avec ton identifiant : tu retrouves tes pronos, ta tier list, tes Pièces d'or et ton camp sur tous tes appareils.</p>
-        <form class="cacc-form" data-chg novalidate style="margin-top:6px"><p class="cacc-txt" style="margin:0;font-weight:800">Changer mon mot de passe</p>
+        <p class="cacc-txt">${u.email?"Tu es connecté avec ton identifiant":"Tu es connecté avec Discord"} : tu retrouves tes pronos, ta tier list, tes Pièces d'or et ton camp sur tous tes appareils.</p>
+        ${u.email?`<form class="cacc-form" data-chg novalidate style="margin-top:6px"><p class="cacc-txt" style="margin:0;font-weight:800">Changer mon mot de passe</p>
           <label>Nouveau mot de passe<input id="caccN1" type="password" autocomplete="new-password" minlength="6" required></label>
           <label>Confirme<input id="caccN2" type="password" autocomplete="new-password" minlength="6" required></label>
-          <p class="cacc-msg" role="status"></p><button class="cpop-yes" type="submit">Changer</button></form>
+          <p class="cacc-msg" role="status"></p><button class="cpop-yes" type="submit">Changer</button></form>`:""}
         <button class="cpop-yes cacc-out" type="button" data-out>Se déconnecter</button>`
-      :`<div class="cacc-tabs" role="tablist"><button role="tab" type="button" data-t="create" aria-selected="${tab==="create"}">Créer mon identifiant</button><button role="tab" type="button" data-t="login" aria-selected="${tab==="login"}">J'ai déjà un identifiant</button></div>
+      :`<button type="button" class="cpop-yes cdc-login" data-dclogin style="display:flex;align-items:center;justify-content:center;gap:10px"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M19.5 5.3A17 17 0 0 0 15.3 4l-.5 1.1a15.6 15.6 0 0 0-5.6 0L8.7 4a17 17 0 0 0-4.2 1.3C1.8 9.3 1.1 13.2 1.4 17a17 17 0 0 0 5.2 2.6l1.1-1.8a11 11 0 0 1-1.7-.8l.4-.3a12.2 12.2 0 0 0 11.2 0l.4.3a11 11 0 0 1-1.7.8l1.1 1.8a17 17 0 0 0 5.2-2.6c.4-4.4-.7-8.3-3.1-11.7ZM8.7 14.7c-1 0-1.9-1-1.9-2.1s.8-2.1 1.9-2.1 1.9 1 1.9 2.1-.8 2.1-1.9 2.1Zm6.6 0c-1 0-1.9-1-1.9-2.1s.8-2.1 1.9-2.1 1.9 1 1.9 2.1-.8 2.1-1.9 2.1Z"/></svg>Se connecter avec Discord</button>
+        <p class="cacc-txt" style="margin:0;text-align:center">Le plus simple : ton compte est créé ou retrouvé tout seul, avec ta photo et ton nom Discord.</p>
+        <p class="cacc-txt" style="margin:4px 0 0;text-align:center;font-weight:800">ou avec un identifiant</p>
+        <div class="cacc-tabs" role="tablist"><button role="tab" type="button" data-t="create" aria-selected="${tab==="create"}">Créer mon identifiant</button><button role="tab" type="button" data-t="login" aria-selected="${tab==="login"}">J'ai déjà un identifiant</button></div>
         ${opt.note?`<p class="cacc-txt" style="color:#ffe27a;font-weight:800">${conseilEsc(opt.note)}</p>`:""}<p class="cacc-txt">${tab==="create"?"Ajoute un identifiant et un mot de passe à ton compte actuel. Tu gardes tout (pronos, tier list, Pièces d'or, camp) et tu pourras te connecter sur n'importe quel appareil.":"Connecte-toi pour retrouver ton compte sur cet appareil."}</p>
         <form class="cacc-form" novalidate>
           <label>Identifiant<input id="caccId" autocomplete="username" maxlength="20" required value="${conseilEsc(tab==="create"?known:(opt.id||""))}"></label>
@@ -860,6 +867,8 @@ function openAccount(opt){opt=opt||{};
             <p class="cacc-txt" style="margin:0">Sinon, demande à Skryvv sur Discord : il peut te donner un mot de passe provisoire.</p></div>`:""}
         </form>`}</div>`;
     el.querySelector(".cacc-x").onclick=close;
+    const dl=el.querySelector("[data-dclogin]");if(dl)dl.onclick=()=>{dl.disabled=true;dl.lastChild.textContent="Ouverture de Discord…";try{sessionStorage.setItem("dc-return",location.pathname+location.search+location.hash)}catch(e){}
+      conseilDiscordLink("login").catch(e=>{dl.disabled=false;dl.lastChild.textContent=e.message})};
     const fg=el.querySelector("[data-forgot]");if(fg)fg.onclick=()=>{const b=el.querySelector("[data-forgotbox]");b.hidden=!b.hidden};
     const dr=el.querySelector("[data-dcreset]");if(dr)dr.onclick=()=>{dr.disabled=true;dr.textContent="Ouverture de Discord…";conseilDiscordLink("reset").catch(e=>{dr.disabled=false;dr.textContent=e.message})};
     el.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{tab=b.dataset.t;draw()});

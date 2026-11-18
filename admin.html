@@ -137,7 +137,7 @@ function draw(){
   for(const m of Object.values(P))if(m.pseudo)cnt[norm(m.pseudo)]=(cnt[norm(m.pseudo)]||0)+1;
   let L=Object.entries(P).map(([id,m])=>({id,m,dup:cnt[norm(m.pseudo)]>1,po:(W[id]||{}).po||0}));
   const dups=L.filter(x=>x.dup).length;
-  $("stats").innerHTML=`<span>${L.length} profils</span><span>${L.filter(x=>x.m.riotId).length} avec Riot ID</span><span>${L.filter(x=>x.m.wow&&x.m.wow.name).length} sur WoW</span><span>${L.filter(x=>x.m.fn&&x.m.fn.name).length} sur Fortnite</span><span class="${dups?"dup":""}">${dups} en double</span>${U?`<span>${Object.values(U).filter(u=>!u.anon).length} avec identifiant</span><span>${Object.values(U).filter(u=>u.anon).length} anonymes</span>`:""}${CLEANED?`<span>${CLEANED} compte(s) masqué(s) réaffiché(s)</span>`:""}${UERR?`<span class="dup">Identifiants indisponibles : ${esc(UERR)}</span>`:""}`;
+  $("stats").innerHTML=`<span>${L.length} profils</span><span>${L.filter(x=>x.m.riotId).length} avec Riot ID</span><span>${L.filter(x=>x.m.wow&&x.m.wow.name).length} sur WoW</span><span>${L.filter(x=>x.m.fn&&x.m.fn.name).length} sur Fortnite</span><span class="${dups?"dup":""}">${dups} en double</span>${U?`<span>${Object.values(U).filter(u=>u.discord).length} via Discord</span><span>${Object.values(U).filter(u=>!u.anon&&!u.discord).length} avec identifiant</span><span>${Object.values(U).filter(u=>u.anon).length} anonymes</span>`:""}${CLEANED?`<span>${CLEANED} compte(s) masqué(s) réaffiché(s)</span>`:""}${UERR?`<span class="dup">Identifiants indisponibles : ${esc(UERR)}</span>`:""}`;
   if(only)L=L.filter(x=>x.dup);
   if(q)L=L.filter(({id,m})=>[m.pseudo,m.riotId,m.discord,id,m.wow&&m.wow.name,m.fn&&m.fn.name,...(m.alts||[]).map(a=>a.riotId)].some(v=>norm(v).includes(q)));
   const key={acc:x=>U&&U[x.id]?(U[x.id].anon?"~":norm(U[x.id].id)):"~~",pseudo:x=>norm(x.m.pseudo),riot:x=>norm(x.m.riotId),po:x=>x.po,at:x=>stamp(x.m)}[sortK];
@@ -148,7 +148,7 @@ function draw(){
       <td>${acc(id)}</td>
       <td>${m.riotId?esc(m.riotId):"<small>—</small>"}${(m.alts||[]).length?`<br><small>+ ${m.alts.map(a=>esc(a.riotId||"")).join(", ")}</small>`:""}</td>
       <td>${games}</td><td><small style="color:#ffe27a">${po}</small></td><td><small>${esc(when(m))||"—"}</small></td>
-      <td style="display:flex;flex-direction:column;gap:6px;align-items:flex-start">${me||!U||!U[id]?"":EDIT[id]?pwForm(id,m):`<button type="button" class="del pw" data-pw="${esc(id)}" style="border-color:#7ad7ff;color:#7ad7ff">${U[id].anon?"Créer un identifiant":"Mot de passe"}</button>`}${me?"":`<button type="button" class="del" data-id="${esc(id)}" aria-label="Supprimer le profil de ${esc(m.pseudo||id)}">Supprimer</button>`}</td></tr>`}).join("")||'<tr><td colspan="7"><p class="note">Aucun profil.</p></td></tr>';
+      <td style="display:flex;flex-direction:column;gap:6px;align-items:flex-start">${me||!U||!U[id]?"":EDIT[id]?pwForm(id,m):`<button type="button" class="del pw" data-pw="${esc(id)}" style="border-color:#7ad7ff;color:#7ad7ff">${U[id].anon||U[id].discord?"Créer un identifiant":"Mot de passe"}</button>`}${me?"":`<button type="button" class="del" data-id="${esc(id)}" aria-label="Supprimer le profil de ${esc(m.pseudo||id)}">Supprimer</button>`}</td></tr>`}).join("")||'<tr><td colspan="7"><p class="note">Aucun profil.</p></td></tr>';
   $("rows").querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(b.dataset.copy).then(()=>{b.textContent="Copié !"}).catch(()=>{})});
   $("rows").querySelectorAll("[data-pw]").forEach(b=>b.onclick=()=>{EDIT[b.dataset.pw]=true;draw();const f=document.querySelector(`form[data-pwf="${b.dataset.pw}"] input:not([readonly])`);if(f)f.focus()});
   $("rows").querySelectorAll("[data-pwx]").forEach(b=>b.onclick=()=>{delete EDIT[b.dataset.pwx];draw()});
@@ -189,13 +189,13 @@ async function adminCall(body){const tok=await firebase.auth().currentUser.getId
 const slugify=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
 function pwForm(id,m){const u=U[id],inp='style="min-height:36px;padding:0 10px;border-radius:8px;border:1px solid var(--line);background:#0c0b14;color:#f2f0ff;font:600 .85rem var(--body);width:170px"';
   return `<form data-pwf="${esc(id)}" style="display:flex;flex-direction:column;gap:6px">
-    <label style="font-size:.75rem;color:#b4b0d0">Identifiant<input name="id" ${inp} ${u.anon?"":"readonly"} value="${esc(u.anon?slugify(m.pseudo):u.id)}"></label>
+    <label style="font-size:.75rem;color:#b4b0d0">Identifiant<input name="id" ${inp} ${u.anon||u.discord?"":"readonly"} value="${esc(u.anon||u.discord?slugify(m.pseudo):u.id)}"></label>
     <label style="font-size:.75rem;color:#b4b0d0">Mot de passe<input name="pw" type="text" autocomplete="off" ${inp} placeholder="vide = provisoire"></label>
     <span style="display:flex;gap:6px"><button type="submit" class="del" style="border-color:#7ad7ff;color:#7ad7ff">Valider</button><button type="button" class="del" data-pwx="${esc(id)}" style="border-color:#4a4668;color:#c9c5e6">Annuler</button></span>
     <small data-m role="status"></small></form>`}
 function acc(id){if(UERR)return "<small>?</small>";if(!U)return "<small>…</small>";const u=U[id];if(!u)return "<small>introuvable</small>";
   const last=u.last?new Date(u.last).toLocaleDateString("fr-FR",{day:"numeric",month:"short"}):"";
-  let h=u.anon?'<span class="tag">Anonyme</span>':`<b>${esc(u.id)}</b>`;h+=last?`<br><small>vu le ${esc(last)}</small>`:"";
+  let h=u.discord?'<span class="tag" style="border-color:#5865f2;color:#aab2ff">Discord</span>':u.anon?'<span class="tag">Anonyme</span>':`<b>${esc(u.id)}</b>`;h+=last?`<br><small>vu le ${esc(last)}</small>`:"";
   if(PW[id])h+=`<br><span style="display:inline-block;margin-top:4px;color:#ffe27a;font-weight:800">Identifiant ${esc((U[id]||{}).id||"")} · mot de passe : <code style="font:700 .95rem var(--mono);text-transform:none;letter-spacing:0;color:#fff;background:#0c0b14;padding:2px 6px;border-radius:6px;user-select:all">${esc(PW[id])}</code></span> <button type="button" class="del" data-copy="${esc(PW[id])}" style="min-height:30px;border-color:#ffe27a;color:#ffe27a">Copier</button>`;
   return h}
 document.querySelectorAll("th[data-s]").forEach(th=>th.onclick=()=>{const k=th.dataset.s;sortDir=sortK===k?-sortDir:1;sortK=k;draw()});
