@@ -82,7 +82,7 @@ def matchs():
     save("matchs.json", {"matches": out, "live": live, "reprise": reprise, "logos": {s.upper(): lg[s]["image"] for s in ("lec", "lck", "lpl") if s in lg}})
 
 def videos():
-    CH = {"lol": ["@LeagueOfLegendsFR", "@leagueoflegends"], "wow": ["@WorldofWarcraftFR", "@Warcraft"], "fortnite": ["@FortniteFR", "@Fortnite"]}
+    CH = {"lol": ["@LeagueOfLegendsFR", "@leagueoflegends"], "wow": ["@WorldofWarcraftFR", "@Warcraft"], "fortnite": ["@FortniteFR", "@Fortnite"], "valorant": ["@VALORANTfr", "@VALORANT"]}
     res = {}
     for jeu, handles in CH.items():
         vids = []
@@ -103,4 +103,38 @@ def videos():
         res[jeu] = vids[:8]
     save("videos.json", res)
 
-for f in (boutique, jeux_gratuits, matchs, videos): safe(f)
+def valorant_news():
+    # actualités officielles de playvalorant.com (page Next.js : les articles sont dans le JSON __NEXT_DATA__)
+    html = get("https://playvalorant.com/fr-fr/news/", raw=True).decode("utf8", "ignore")
+    m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S)
+    found = []
+    def walk(o):
+        if isinstance(o, dict):
+            title = o.get("title")
+            title = title if isinstance(title, str) else (title.get("value") if isinstance(title, dict) else None) if title else None
+            date = o.get("publishedAt") or o.get("date") or o.get("published_at")
+            link = o.get("action", {}).get("payload", {}).get("url") if isinstance(o.get("action"), dict) else None
+            link = link or o.get("url") or o.get("link")
+            if isinstance(link, dict): link = link.get("url") or link.get("href")
+            if title and date and isinstance(link, str):
+                img = o.get("media", {}).get("url") if isinstance(o.get("media"), dict) else None
+                cat = o.get("category") or o.get("tag") or ""
+                if isinstance(cat, dict): cat = cat.get("title") or cat.get("name") or ""
+                if isinstance(cat, list): cat = (cat[0].get("title") if cat and isinstance(cat[0], dict) else "")
+                desc = o.get("description")
+                if isinstance(desc, dict): desc = desc.get("body") or desc.get("value")
+                found.append({"t": title.strip(), "d": str(date), "u": link if link.startswith("http") else "https://playvalorant.com" + link,
+                              "img": img, "cat": cat if isinstance(cat, str) else "", "desc": re.sub(r"<[^>]+>", "", desc or "")[:220] if isinstance(desc, str) else ""})
+            for v in o.values(): walk(v)
+        elif isinstance(o, list):
+            for v in o: walk(v)
+    if m: walk(json.loads(m.group(1)))
+    seen, out = set(), []
+    for a in sorted(found, key=lambda a: a["d"], reverse=True):
+        if a["u"] in seen: continue
+        seen.add(a["u"]); out.append(a)
+    print("valorant news", len(out), out[:2])
+    if not out: raise Exception("aucun article trouvé (structure de la page changée ?)")
+    save("valorant-news.json", {"maj": datetime.now(timezone.utc).isoformat(), "articles": out[:12]})
+
+for f in (boutique, jeux_gratuits, matchs, videos, valorant_news): safe(f)
