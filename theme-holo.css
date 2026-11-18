@@ -333,3 +333,4 @@ td .cav-in,li .cav-in,b .cav-in{flex:none}
 .dcmsg:hover{background:#7983f5}
 .cdc-login,.cdc-login:hover{background:#5865f2!important;background-image:none!important;color:#fff!important;border-color:#5865f2!important}
 .cdc-login:hover{filter:brightness(1.1)}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}

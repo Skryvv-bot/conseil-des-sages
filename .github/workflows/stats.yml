@@ -1,0 +1,26 @@
+name: "Statistiques LoL (builds et tier list)"
+on:
+  workflow_dispatch:
+    inputs:
+      max_matches: { description: "Parties à lire au maximum", required: false, default: "900" }
+  schedule:
+    - cron: "17 2 * * *"   # chaque nuit (heure creuse pour ne pas gêner le robot du site)
+permissions:
+  contents: write
+concurrency: { group: stats, cancel-in-progress: false }
+jobs:
+  stats:
+    runs-on: ubuntu-latest
+    timeout-minutes: 170
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: site }
+      - name: Collecte des parties Master+ EUW
+        env:
+          RIOT_KEY: ${{ secrets.RIOT_KEY }}
+          MAX_MATCHES: ${{ inputs.max_matches || '900' }}
+        run: |
+          git clone -q --depth 1 -b stats "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" s || (mkdir s && cd s && git init -q -b stats)
+          cd s && python3 ../site/.github/donnees/stats.py
+          git config user.name "cds-bot" && git config user.email "cds-bot@users.noreply.github.com"
+          git add -A && (git commit -qm "Stats $(date -u +%FT%TZ)" && git push -q "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" stats || echo "rien de nouveau")

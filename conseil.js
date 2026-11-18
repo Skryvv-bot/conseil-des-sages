@@ -37,14 +37,14 @@ window.conseilShowAdmin=function(){const ok=window.CONSEIL_UID===CONSEIL_ADMIN;d
 // ---------- Navigation commune ----------
 const CONSEIL_NAV=[
   {id:"accueil",href:"index.html",label:"Accueil"},
-  {id:"lol",href:"lol.html",label:"LoL",sub:[{id:"lol",href:"lol.html",label:"Accueil LoL",hide:1},{id:"newdawn",href:"newdawn.html",label:"LoL 2 · New Dawn"},{id:"mercato",href:"mercato.html",label:"Mercato"},{id:"worlds",href:"worlds.html",label:"Worlds 2026",hide:1},{id:"fantasy",href:"fantasy.html",label:"Fantasy",hide:1},{id:"cartes",href:"cartes.html",label:"LolMaster",hide:1},
+  {id:"lol",href:"lol.html",label:"LoL",sub:[{id:"lol",href:"lol.html",label:"Accueil LoL",hide:1},{id:"newdawn",href:"newdawn.html",label:"LoL 2 · New Dawn"},{id:"builds",href:"builds.html",label:"Builds et tier list"},{id:"mercato",href:"mercato.html",label:"Mercato"},{id:"worlds",href:"worlds.html",label:"Worlds 2026",hide:1},{id:"fantasy",href:"fantasy.html",label:"Fantasy",hide:1},{id:"cartes",href:"cartes.html",label:"LolMaster",hide:1},
     {id:"ladder",href:"ladder.html",label:"Ladder"},{id:"customs",href:"customs.html",label:"Customs & Clash"},{id:"team",href:"team.html",label:"Team 5v5 · recrutement"},{id:"pronos",href:"communaute.html#paris",label:"Pronos entre potes"},{id:"patch",href:"patch.html",label:"Patch"},{id:"devinettes",href:"devinettes.html",label:"Devinettes"}]},
   {id:"wow",href:"wow.html",label:"WoW",sub:[{id:"wow",href:"wow.html",label:"WoW Forever"}]},
   {id:"valorant",href:"valorant.html",label:"Valorant",noBar:1,sub:[{id:"valorant",href:"valorant.html",label:"Classement"},{href:"valorant.html#news",label:"Actualités"}]},
   {id:"fortnite",href:"fortnite.html",label:"Fortnite",sub:[{id:"fortnite",href:"fortnite.html",label:"Chasse aux trésors"},{href:"fortnite.html#taux",label:"Taux de drop"}]},
   {id:"admin",href:"admin.html",label:"Sages",admin:1,noBar:1}
 ];
-const NAV_GROUP={ladder:"lol",worlds:"lol",tierlist:"lol",fantasy:"lol",cartes:"lol",customs:"lol",patch:"lol",mercato:"lol",pronos:"lol",team:"lol",newdawn:"lol",devinettes:"lol",jeux:"lol"};
+const NAV_GROUP={builds:"lol",ladder:"lol",worlds:"lol",tierlist:"lol",fantasy:"lol",cartes:"lol",customs:"lol",patch:"lol",mercato:"lol",pronos:"lol",team:"lol",newdawn:"lol",devinettes:"lol",jeux:"lol"};
 (function navStyles(){
   const css=`
 .cnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;margin:-20px calc(-1*max(16px,env(safe-area-inset-left,0px))) 0;padding:10px max(16px,env(safe-area-inset-left,0px));
@@ -311,7 +311,7 @@ window.conseilPromos=async function(){try{if(document.querySelector(".cpromo"))r
 
 // ---------- Commentaires ----------
 // Un fil par page (collection « comments »). Il faut un profil avec un pseudo pour écrire ; chacun peut supprimer ses messages.
-const COMMENT_PAGES={valorant:"Valorant",team:"la team",newdawn:"New Dawn",pronos:"les pronos entre potes",accueil:"l'accueil",lol:"LoL",wow:"WoW Forever",fortnite:"Fortnite",mercato:"le mercato",patch:"le patch",worlds:"les Worlds",fantasy:"la Fantasy",ladder:"le ladder",tierlist:"la tier list",devinettes:"les Devinettes",customs:"les customs"};
+const COMMENT_PAGES={builds:"les builds",valorant:"Valorant",team:"la team",newdawn:"New Dawn",pronos:"les pronos entre potes",accueil:"l'accueil",lol:"LoL",wow:"WoW Forever",fortnite:"Fortnite",mercato:"le mercato",patch:"le patch",worlds:"les Worlds",fantasy:"la Fantasy",ladder:"le ladder",tierlist:"la tier list",devinettes:"les Devinettes",customs:"les customs"};
 window.conseilComments=async function(page){
   const wrap=document.querySelector(".wrap");if(!wrap||!COMMENT_PAGES[page]||document.getElementById("ccom"))return;
   const sec=document.createElement("section");sec.id="ccom";sec.className="frame panel ccom";sec.setAttribute("aria-labelledby","ccomT");
@@ -363,7 +363,7 @@ window.conseilHunt=async function(){const boxes=[...document.querySelectorAll("[
 
 // ---------- Thème « Collection holographique » et bandeau d'infos ----------
 (function(){const add=()=>{if(document.getElementById("tv-theme"))return;
-  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=21";document.head.appendChild(l)};
+  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=22";document.head.appendChild(l)};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();
 function defaultTicker(){const d=Math.ceil((Date.parse("2026-11-04T23:00:00Z")-Date.now())/864e5);
   return ["Worlds 2026 : Bilibili Gaming champion du monde, 3-1 contre Gen.G","Pick'em : un skin pour le 1er (offert par Skryvv) et un skin pour le 2e (offert par Tabaskoh)",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Pronos entre potes, tribunal et sage de la semaine dans Le Conseil","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes"]}
