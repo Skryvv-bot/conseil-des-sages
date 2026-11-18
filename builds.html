@@ -8,11 +8,11 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png?v=4">
 <link rel="apple-touch-icon" href="icon-192.png?v=4">
-<link rel="stylesheet" href="conseil.css?v=1795005195">
+<link rel="stylesheet" href="conseil.css?v=1795005241">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="conseil.js?v=1795005195"></script>
+<script src="conseil.js?v=1795005241"></script>
 <style>
 .panel{padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
 .lead{margin:0;font-size:1.1rem;color:#c9c5e6;max-width:62ch}
@@ -127,8 +127,10 @@ const pct=x=>(100*x).toLocaleString("fr-FR",{maximumFractionDigits:1})+" %";
 const img={ch:k=>CH[k]?`https://ddragon.leagueoflegends.com/cdn/${V}/img/champion/${CH[k].id}.png`:"",it:i=>`https://ddragon.leagueoflegends.com/cdn/${V}/img/item/${i}.png`,
   ru:i=>RU[i]?"https://ddragon.leagueoflegends.com/cdn/img/"+RU[i].icon:"",sp:i=>SP[i]?`https://ddragon.leagueoflegends.com/cdn/${V}/img/spell/${SP[i].img}`:""};
 // victoires « lissées » vers 50 % pour les champions peu joués, puis palier S à D
-const score=(w,n)=>(w+25)/(n+50);
-const tierOf=s=>s>=.525?"S":s>=.512?"A":s>=.498?"B":s>=.485?"C":"D";
+// victoires lissées vers 50 % (un champion peu joué compte comme 100 parties à 50 %), puis paliers par rang :
+// les 10 % meilleurs en S, puis 20 % A, 40 % B, 20 % C, 10 % D (calculé sur tous les postes du patch)
+const score=(w,n)=>(w+50)/(n+100);
+let CUT=[];const tierOf=s=>s>=CUT[0]?"S":s>=CUT[1]?"A":s>=CUT[2]?"B":s>=CUT[3]?"C":"D";
 const fetchJ=u=>fetch(u).then(r=>r.ok?r.json():null).catch(()=>null);
 async function init(){
   const P=await fetchJ(RAW+"patches.json?t="+Math.floor(Date.now()/600e3));
@@ -145,11 +147,12 @@ async function init(){
   // on prend le patch le plus récent qui a assez de parties, sinon le précédent
   const best=P.patches.find(p=>p.parties>=300)||[...P.patches].sort((a,b)=>b.parties-a.parties)[0];$("patch").value=best.patch;load(best.patch)}
 async function load(p){$("rows").innerHTML='<tr><td colspan="7"><p class="note">Chargement…</p></td></tr>';S=await fetchJ(RAW+p+".json?t="+Math.floor(Date.now()/600e3));sel=null;$("build").hidden=true;draw()}
-function lines(){if(!S)return [];const N=S.parties||1,min=N<1000?8:Math.max(15,Math.round(N*0.004)),L=[];
+function lines(){if(!S)return [];const N=S.parties||1,min=N<1000?12:Math.max(15,Math.round(N*0.004)),L=[];
   for(const [k,ch] of Object.entries(S.champions))for(const [pos,R] of Object.entries(ch.postes||{})){if(pos==="AUTRE"||R.n<min)continue;
     L.push({k,pos,n:R.n,w:R.w,wr:R.w/R.n,pr:R.n/N,br:(ch.bans||0)/N,s:score(R.w,R.n),R,ch})}
   return L}
 function draw(){const q=$("q").value.trim().toLowerCase(),N=S?S.parties:0;
+  const all=lines().map(x=>x.s).sort((a,b)=>b-a),at=f=>all[Math.min(all.length-1,Math.floor(all.length*f))]??1;CUT=[at(.1),at(.3),at(.7),at(.9)];
   let L=lines().filter(x=>(!role||x.pos===role)&&(!q||(CH[x.k]?.name||"").toLowerCase().includes(q))).sort((a,b)=>b.s-a.s);
   $("tlInfo").textContent=S?`${N.toLocaleString("fr-FR")} parties analysées · mis à jour le ${new Date(S.maj).toLocaleDateString("fr-FR",{day:"numeric",month:"long"})}${N<1500?" · échantillon encore petit, ça s'affine chaque nuit":""}`:"";
   $("rows").innerHTML=L.length?L.slice(0,120).map(x=>{const t=tierOf(x.s),id=x.k+"|"+x.pos;return `<tr data-id="${esc(id)}" class="${sel===id?"sel":""}" tabindex="0"><td><span class="tier t-${t}">${t}</span></td>
