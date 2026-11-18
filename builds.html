@@ -8,11 +8,11 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png?v=4">
 <link rel="apple-touch-icon" href="icon-192.png?v=4">
-<link rel="stylesheet" href="conseil.css?v=1795005241">
+<link rel="stylesheet" href="conseil.css?v=1795006268">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="conseil.js?v=1795005241"></script>
+<script src="conseil.js?v=1795006268"></script>
 <style>
 .panel{padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
 .lead{margin:0;font-size:1.1rem;color:#c9c5e6;max-width:62ch}
@@ -97,13 +97,14 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
     <div class="htxt">
       <span class="eyebrow">League of Legends · statistiques du Conseil</span>
       <h1>Builds et tier list</h1>
-      <p class="lead">Les champions les plus forts du patch et leurs builds les plus joués, calculés par le Conseil à partir de parties classées Solo/Duo Master+ en EUW. Clique sur un champion pour voir son build.</p>
+      <p class="lead">Les champions les plus forts du patch et leurs builds les plus joués, calculés par le Conseil à partir de parties classées Solo/Duo Master+ en Europe de l'Ouest, en Corée et en Amérique du Nord. Clique sur un champion pour voir son build.</p>
     </div>
   </header>
 
   <section class="frame panel" aria-labelledby="t-tl">
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h2 id="t-tl" style="margin:0">Tier list</h2><span class="note" id="tlInfo"></span></div>
     <div class="bt-tools">
+      <label class="sr-only" for="region">Région</label><select id="region" aria-label="Région"><option value="all">Toutes les régions</option><option value="euw">Europe de l'Ouest</option><option value="kr">Corée</option><option value="na">Amérique du Nord</option></select>
       <label class="sr-only" for="patch">Patch</label><select id="patch" aria-label="Patch"></select>
       <div class="roles" id="roles" role="group" aria-label="Poste"></div>
       <input type="search" id="q" placeholder="Chercher un champion…" aria-label="Chercher un champion">
@@ -115,13 +116,23 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
     <div class="bhead" id="bHead"></div>
     <div class="bd" id="bBody"></div>
   </section>
-  <p class="src">Statistiques calculées par le Conseil avec l'API de Riot Games (parties classées Solo/Duo Master+ EUW, mises à jour chaque nuit). Images : Data Dragon de Riot Games. Un champion peu joué a des chiffres moins fiables : on ne l'affiche qu'à partir d'un minimum de parties.</p>
+  <p class="src">Statistiques calculées par le Conseil avec l'API de Riot Games (parties classées Solo/Duo Master+ EUW, Corée et Amérique du Nord, mises à jour chaque nuit). Images : Data Dragon de Riot Games. Un champion peu joué a des chiffres moins fiables : on ne l'affiche qu'à partir d'un minimum de parties.</p>
 </div>
 <script>
 conseilNav("builds");
 const $=id=>document.getElementById(id),esc=conseilEsc,RAW="https://raw.githubusercontent.com/Skryvv-bot/conseil-des-sages/stats/out/";
 const ROLES=[["","Tous"],["TOP","Top"],["JUNGLE","Jungle"],["MIDDLE","Mid"],["BOTTOM","Bot"],["UTILITY","Support"]],RN=Object.fromEntries(ROLES);
-let V="",CH={},IT={},RU={},SP={},S=null,role="",sel=null;
+let V="",CH={},IT={},RU={},SP={},S=null,role="",sel=null,REG={},region="all",OLD=false;
+const RNAME={euw:"EUW",kr:"Corée",na:"Amérique du Nord"};
+// fusion de plusieurs régions : on additionne tout
+function merge(list){const M={parties:0,champions:{},maj:""};for(const S of list){if(!S)continue;M.parties+=S.parties||0;if((S.maj||"")>M.maj)M.maj=S.maj;
+  for(const [k,c] of Object.entries(S.champions||{})){const T=M.champions[k]||(M.champions[k]={bans:0,postes:{},nom:c.nom});T.bans+=c.bans||0;
+    for(const [pos,R] of Object.entries(c.postes||{})){const X=T.postes[pos]||(T.postes[pos]={n:0,w:0,objets:{},bottes:{},builds:{},cle:{},runes2:{},sorts:{}});X.n+=R.n;X.w+=R.w;
+      for(const f of ["objets","bottes","builds","cle","runes2","sorts"])for(const [i,[n,w]] of Object.entries(R[f]||{})){const v=X[f][i]||(X[f][i]=[0,0]);v[0]+=n;v[1]+=w}}}}return M}
+function patchList(){const tot={};for(const [r,L] of Object.entries(REG))if(region==="all"||r===region)for(const p of L)tot[p.patch]=(tot[p.patch]||0)+p.parties;
+  return Object.entries(tot).map(([patch,parties])=>({patch,parties})).sort((a,b)=>{const x=a.patch.split(".").map(Number),y=b.patch.split(".").map(Number);return y[0]-x[0]||y[1]-x[1]})}
+function fillPatches(keep){const L=patchList();$("patch").innerHTML=L.map(p=>`<option value="${esc(p.patch)}">Patch ${esc(PL(p.patch))} · ${p.parties.toLocaleString("fr-FR")} parties</option>`).join("");
+  if(!L.length){S=null;draw();return}const best=(keep&&L.find(p=>p.patch===keep))||L.find(p=>p.parties>=300)||[...L].sort((a,b)=>b.parties-a.parties)[0];$("patch").value=best.patch;load(best.patch)}
 const PL=p=>{const [a,b]=String(p).split(".");return (+a<20?+a+10:+a)+"."+b};
 const pct=x=>(100*x).toLocaleString("fr-FR",{maximumFractionDigits:1})+" %";
 const img={ch:k=>CH[k]?`https://ddragon.leagueoflegends.com/cdn/${V}/img/champion/${CH[k].id}.png`:"",it:i=>`https://ddragon.leagueoflegends.com/cdn/${V}/img/item/${i}.png`,
@@ -134,19 +145,21 @@ let CUT=[];const tierOf=s=>s>=CUT[0]?"S":s>=CUT[1]?"A":s>=CUT[2]?"B":s>=CUT[3]?"
 const fetchJ=u=>fetch(u).then(r=>r.ok?r.json():null).catch(()=>null);
 async function init(){
   const P=await fetchJ(RAW+"patches.json?t="+Math.floor(Date.now()/600e3));
-  if(!P||!P.patches||!P.patches.length){$("rows").innerHTML='<tr><td colspan="7"><p class="note">Les premières statistiques arrivent après la première collecte de nuit.</p></td></tr>';return}
+  if(P&&!P.regions&&P.patches){REG={euw:P.patches};OLD=true}else if(P&&P.regions)REG=P.regions;
+  if(!P||!Object.values(REG).some(L=>L.length)){$("rows").innerHTML='<tr><td colspan="7"><p class="note">Les premières statistiques arrivent après la première collecte de nuit.</p></td></tr>';return}
   V=P.ddragon;const [c,i,r,s]=await Promise.all(["champion","item","runesReforged","summoner"].map(n=>fetchJ(`https://ddragon.leagueoflegends.com/cdn/${V}/data/fr_FR/${n}.json`)));
   for(const x of Object.values(c?.data||{}))CH[x.key]={id:x.id,name:x.name};IT=i?.data||{};
   for(const t of r||[]){RU[t.id]={name:t.name,icon:t.icon};for(const sl of t.slots)for(const p of sl.runes)RU[p.id]={name:p.name,icon:p.icon}}
   for(const x of Object.values(s?.data||{}))SP[x.key]={name:x.name,img:x.image.full};
-  $("patch").innerHTML=P.patches.map(p=>`<option value="${esc(p.patch)}">Patch ${esc(PL(p.patch))} · ${p.parties.toLocaleString("fr-FR")} parties</option>`).join("");
   $("patch").onchange=()=>load($("patch").value);
+  $("region").onchange=()=>{region=$("region").value;fillPatches($("patch").value)};
   $("roles").innerHTML=ROLES.map(([k,l])=>`<button type="button" data-r="${k}" aria-pressed="${k===role}">${l}</button>`).join("");
   $("roles").querySelectorAll("button").forEach(b=>b.onclick=()=>{role=b.dataset.r;$("roles").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));draw()});
   $("q").oninput=draw;
-  // on prend le patch le plus récent qui a assez de parties, sinon le précédent
-  const best=P.patches.find(p=>p.parties>=300)||[...P.patches].sort((a,b)=>b.parties-a.parties)[0];$("patch").value=best.patch;load(best.patch)}
-async function load(p){$("rows").innerHTML='<tr><td colspan="7"><p class="note">Chargement…</p></td></tr>';S=await fetchJ(RAW+p+".json?t="+Math.floor(Date.now()/600e3));sel=null;$("build").hidden=true;draw()}
+  fillPatches()}
+async function load(p){$("rows").innerHTML='<tr><td colspan="7"><p class="note">Chargement…</p></td></tr>';const t="?t="+Math.floor(Date.now()/600e3);
+  const regs=Object.keys(REG).filter(r=>(region==="all"||r===region)&&REG[r].some(x=>x.patch===p));
+  S=merge(await Promise.all(regs.map(r=>fetchJ(RAW+(OLD?"":r+"/")+p+".json"+t))));S.regs=regs;sel=null;$("build").hidden=true;draw()}
 function lines(){if(!S)return [];const N=S.parties||1,min=N<1000?12:Math.max(15,Math.round(N*0.004)),L=[];
   for(const [k,ch] of Object.entries(S.champions))for(const [pos,R] of Object.entries(ch.postes||{})){if(pos==="AUTRE"||R.n<min)continue;
     L.push({k,pos,n:R.n,w:R.w,wr:R.w/R.n,pr:R.n/N,br:(ch.bans||0)/N,s:score(R.w,R.n),R,ch})}
@@ -154,7 +167,7 @@ function lines(){if(!S)return [];const N=S.parties||1,min=N<1000?12:Math.max(15,
 function draw(){const q=$("q").value.trim().toLowerCase(),N=S?S.parties:0;
   const all=lines().map(x=>x.s).sort((a,b)=>b-a),at=f=>all[Math.min(all.length-1,Math.floor(all.length*f))]??1;CUT=[at(.1),at(.3),at(.7),at(.9)];
   let L=lines().filter(x=>(!role||x.pos===role)&&(!q||(CH[x.k]?.name||"").toLowerCase().includes(q))).sort((a,b)=>b.s-a.s);
-  $("tlInfo").textContent=S?`${N.toLocaleString("fr-FR")} parties analysées · mis à jour le ${new Date(S.maj).toLocaleDateString("fr-FR",{day:"numeric",month:"long"})}${N<1500?" · échantillon encore petit, ça s'affine chaque nuit":""}`:"";
+  $("tlInfo").textContent=S?`${N.toLocaleString("fr-FR")} parties analysées (${(S.regs||[]).map(r=>RNAME[r]||r).join(", ")}) · mis à jour le ${new Date(S.maj).toLocaleDateString("fr-FR",{day:"numeric",month:"long"})}${N<1500?" · échantillon encore petit, ça s'affine chaque nuit":""}`:"";
   $("rows").innerHTML=L.length?L.slice(0,120).map(x=>{const t=tierOf(x.s),id=x.k+"|"+x.pos;return `<tr data-id="${esc(id)}" class="${sel===id?"sel":""}" tabindex="0"><td><span class="tier t-${t}">${t}</span></td>
     <td><span class="ch"><img src="${img.ch(x.k)}" alt="" loading="lazy"><b>${esc(CH[x.k]?.name||x.ch.nom||x.k)}</b></span></td><td>${esc(RN[x.pos]||x.pos)}</td>
     <td class="${x.wr>=.5?"wr-up":"wr-dn"}">${pct(x.wr)}</td><td>${pct(x.pr)}</td><td>${pct(x.br)}</td><td>${x.n.toLocaleString("fr-FR")}</td></tr>`}).join(""):'<tr><td colspan="7"><p class="note">Pas assez de parties pour ce filtre.</p></td></tr>';
