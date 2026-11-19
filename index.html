@@ -12,7 +12,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="conseil.js?v=1795092701"></script>
+<script src="conseil.js?v=1795092907"></script>
 <script src="fantasy/score.js"></script>
 <style>
 /* Layout: QG du Conseil — emblème + titre, compte à rebours WoW en bandeau, grille 2 colonnes (Discord / parties LoL), tuiles vers les pages, résumé Worlds */
@@ -504,7 +504,7 @@ section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,
           <span class="dcstats" id="dcStats" hidden><span><i class="dot" style="background:#3ba55d"></i><b id="dcOn">–</b> en ligne</span><span><i class="dot" style="background:#747f8d"></i><b id="dcAll">–</b> membres</span></span>
         </div>
       </div>
-      <a class="btn discord" href="https://discord.gg/ekEVAX8JN" target="_blank" rel="noopener">Rejoindre le Discord</a>
+      <a class="btn discord" href="https://discord.gg/sJTEnWTueW" target="_blank" rel="noopener">Rejoindre le Discord</a>
       <div class="event" id="cdsEvent">
         <div class="ev-top"><span class="tag live">Événement</span><span class="ev-when" id="evWhen">Jeudi 22 octobre · 20 h 30</span></div>
         <b class="ev-title" id="evTitle">CDS Game : rendez-vous demain soir !</b>
@@ -517,7 +517,7 @@ section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,
         <p class="vc" id="dcVoice" style="margin-top:8px"></p>
         <div id="dcGames" hidden style="margin-top:12px;display:flex;flex-direction:column;gap:6px"><h3>En jeu maintenant</h3><div id="dcGamesList" style="display:flex;flex-direction:column;gap:6px"></div></div>
       </div>
-      <p class="note" style="font-size:.78rem">Lien d'invitation : discord.gg/ekEVAX8JN</p>
+      <p class="note" style="font-size:.78rem">Lien d'invitation : discord.gg/sJTEnWTueW</p>
     </section>
 
     <!-- Parties LoL -->
@@ -628,7 +628,7 @@ tickEvent();setInterval(tickEvent,1000);
   v.addEventListener("volumechange",()=>b.textContent=v.muted?"Activer le son":"Couper le son");})();
 if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!navigator.standalone)document.getElementById("iosHint").hidden=false;
 // ===== Réglages =====
-const DISCORD_INVITE="ekEVAX8JN", DISCORD_GUILD="781876426571251743";
+const DISCORD_INVITE="sJTEnWTueW", DISCORD_GUILD="781876426571251743";
 const WOW_LAUNCH=Date.parse("2026-11-04T23:00:00Z");   // 5 nov. 2026, 00:00 heure de Paris
 const LIVE_API="https://conseil-riot.perrotinyvanpro.workers.dev";   // adresse du relais Riot (Cloudflare Worker) une fois la clé obtenue, ex. "https://conseil-riot.xxx.workers.dev"
 const REGIONS={euw1:"EUW",eun1:"EUNE",na1:"NA",kr:"KR",br1:"BR",tr1:"TR",ru:"RU",jp1:"JP",la1:"LAN",la2:"LAS",oc1:"OCE"};
@@ -958,7 +958,7 @@ window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
 (function(){const fr=new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
   document.getElementById("hhDate").textContent=fr.charAt(0).toUpperCase()+fr.slice(1)+" · les jeux du moment"})();
 </script>
-<script src="mercato-data.js?v=1795092701"></script>
+<script src="mercato-data.js?v=1795092907"></script>
 <script>
 // Mercato « hype » : six équipes au choix du visiteur (gardées sur son appareil), avec leur cinq de départ 2027 pressenti
 (function(){const box=document.getElementById("hype");if(!box||!window.MERCATO)return;

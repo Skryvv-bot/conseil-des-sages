@@ -16,7 +16,7 @@ jobs:
           t(){ echo; echo "=== $1"; shift; code=$(curl -sS -m 25 -o out.txt -w "%{http_code}" "$@" || echo ERR); echo "HTTP $code"; head -c 900 out.txt; echo; }
           t "Discord widget" "https://discord.com/api/guilds/781876426571251743/widget.json"
           jq -r '"membres: \(.members|length) | avec photo: \([.members[]|select(.avatar_url)]|length) | avec jeu: \([.members[]|select(.game)]|length) | jeux: \([.members[]|select(.game)|.game.name]|unique|join(", "))"' out.txt || true
-          t "Discord invitation" "https://discord.com/api/v10/invites/ekEVAX8JN?with_counts=true"
+          t "Discord invitation" "https://discord.com/api/v10/invites/sJTEnWTueW?with_counts=true"
           jq -r '"en ligne: \(.approximate_presence_count) / membres: \(.approximate_member_count)"' out.txt || true
           t "Robot : routes" -H "$O" "$R/"
           t "Robot WoW (personnage cité sur le forum Blizzard)" -H "$O" "$R/wow?chars=judgement-judy,anduin-wrynn"
