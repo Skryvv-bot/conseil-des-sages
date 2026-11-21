@@ -8,11 +8,11 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png?v=4">
 <link rel="apple-touch-icon" href="icon-192.png?v=4">
-<link rel="stylesheet" href="conseil.css?v=1795093033">
+<link rel="stylesheet" href="conseil.css?v=1795254507">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="conseil.js?v=1795093033"></script>
+<script src="conseil.js?v=1795254507"></script>
 <script src="champions.js"></script>
 <style>
 .team{display:flex;flex-direction:column;gap:6px;padding:14px;border:1px solid var(--line2);background:var(--void)}
@@ -42,6 +42,15 @@
 @media (max-width:600px){.cov{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .cov div{padding:6px 8px;border:1px solid var(--line2);font-size:.82rem;min-width:0}
 .cov div.full{border-color:var(--ok)}
+.pch{display:flex;align-items:center;gap:6px;min-width:0;margin-top:4px}.pch span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.regs{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.rg{display:flex;gap:10px;align-items:center;padding:10px;border:1px solid var(--line2);background:var(--void);min-width:0}
+.rg .grow{min-width:0}.rg b{color:#fff;display:flex;align-items:center;flex-wrap:wrap}
+.rg small{display:block;color:var(--muted);font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rg .rk{display:inline-flex;align-items:center;gap:4px;font:600 .8rem var(--body)!important;color:#d9d5ef;letter-spacing:0!important;text-transform:none!important}
+.rg .rl{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}.rg .rl span{font:700 .64rem var(--mono);letter-spacing:.06em;padding:2px 6px;border:1px solid var(--line2);color:#d9d5ef}
+.rg .rl span.p{border-color:var(--ok);color:var(--ok)}
+.tp .who{display:flex;align-items:center;gap:8px;min-width:0}
 .cov div b{display:block;font:600 .66rem var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .date{font:700 1rem var(--display);color:var(--goldhi)}
 </style>
@@ -137,7 +146,7 @@ function allPlayers(){
 function renderPool(){
   const ps=allPlayers();
   $("pool").innerHTML=ps.length?ps.map(p=>`<div class="pp" role="checkbox" tabindex="0" data-k="${esc(p.key)}" aria-pressed="${selected.has(p.key)}"><span class="ck">${selected.has(p.key)?"✓":""}</span>
-    <span class="grow" style="min-width:0"><b class="ellip" style="display:block">${esc(p.name)}${p.key.startsWith("m:")?conseilCampTag(p.key.slice(2)):""}${p.guest?' <span class="note">(invité)</span>':""}</b><small>${esc(p.rank)}${p.auto?" (Riot)":""}${p.roles.length?" · "+p.roles.map(esc).join(", "):""}</small></span></div>`).join("")
+    ${p.key.startsWith("m:")?conseilAv(p.key.slice(2),p.name,30):""}<span class="grow" style="min-width:0"><b class="ellip" style="display:block">${esc(p.name)}${p.key.startsWith("m:")?conseilCampTag(p.key.slice(2)):""}${p.guest?' <span class="note">(invité)</span>':""}</b><small>${esc(p.rank)}${p.auto?" (Riot)":""}${p.roles.length?" · "+p.roles.map(esc).join(", "):""}</small></span></div>`).join("")
     :`<div class="note">${db?"Aucun membre avec un profil. Ajoute des invités ou crée ton profil dans Le Conseil.":connErr?"Membres indisponibles, ajoute des invités.":"Chargement des membres…"}</div>`;
   $("pool").querySelectorAll(".pp").forEach(el=>{const tg=()=>{const k=el.dataset.k;selected.has(k)?selected.delete(k):selected.add(k);renderPool()};el.onclick=tg;el.onkeydown=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();tg()}}});
   const n=[...selected].filter(k=>ps.some(p=>p.key===k)).length;
@@ -169,7 +178,7 @@ function generate(){
 function renderTeams(){
   if(!lastTeams)return;
   const card=(t,cls,label)=>{const sum=t.reduce((a,p)=>a+RVAL(p.rank),0);
-    return `<div class="team ${cls}"><h3><span>${label}</span><span class="note">Niveau ${(sum/t.length).toFixed(1).replace(".",",")}</span></h3>${t.map((p,i)=>`<div class="tp"><span class="role">${p.role}</span><span class="ellip"><b>${esc(p.name)}</b>${p.key.startsWith("m:")?conseilCampTag(p.key.slice(2)):""}${lastChamps?` · <span style="color:var(--hex)">${esc(lastChamps[cls][i])}</span>`:""}</span><span class="rk">${esc(p.rank)}</span></div>`).join("")}</div>`};
+    return `<div class="team ${cls}"><h3><span>${label}</span><span class="note">Niveau ${(sum/t.length).toFixed(1).replace(".",",")}</span></h3>${t.map((p,i)=>`<div class="tp"><span class="role">${p.role}</span><span class="ellip" style="display:flex;align-items:center;gap:8px">${p.key.startsWith("m:")?conseilAv(p.key.slice(2),p.name,26):""}<b>${esc(p.name)}</b>${p.key.startsWith("m:")?conseilCampTag(p.key.slice(2)):""}${lastChamps?` · <span style="color:var(--hex)">${esc(lastChamps[cls][i])}</span>`:""}</span><span class="rk">${esc(p.rank)}</span></div>`).join("")}</div>`};
   $("teams").innerHTML=card(lastTeams[0],"blue","Équipe bleue")+card(lastTeams[1],"red","Équipe rouge");
   $("champBtn").hidden=$("copyBtn").hidden=false;$("genBtn").textContent="Relancer";
 }
@@ -202,12 +211,20 @@ $("spin").onclick=()=>{if(spinning)return;spinning=true;$("spin").disabled=true;
 // ---------- Clash ----------
 function upcoming(){return Object.entries(events).filter(([,e])=>Date.parse(e.date)>Date.now()-6*3600e3).sort((a,b)=>Date.parse(a[1].date)-Date.parse(b[1].date))}
 function myPseudo(){return members[uid]?.pseudo||""}
+// profil d'un sage : photo, pseudo, rang (ladder du Conseil), Riot ID et bouton Message Discord
+const lv=id=>ladder?.current?.players?.[id]?.solo||ladder?.current?.players?.[id]?.flex||null;
+const chip=(id,name,sz=24)=>`<span class="pch">${id?conseilAv(id,name,sz):""}<span>${esc(name)}</span></span>`;
+function regCard(r){const m=members[r.uid]||{},v=lv(r.uid),rid=m.riotId||"";
+  return `<div class="rg">${conseilAv(r.uid,r.pseudo,44)}<div class="grow"><b>${esc(r.pseudo)}${conseilDcMsg?conseilDcMsg(r.uid,m):""}</b>
+    <span class="rk">${v?conseilRankEmblem(v.tier,20)+esc(conseilRankLabel(v)):"Non classé"}</span>
+    ${rid?`<small><a href="https://www.op.gg/summoners/euw/${encodeURIComponent(rid.replace("#","-"))}" target="_blank" rel="noopener">${esc(rid)}</a></small>`:""}
+    <div class="rl">${(r.roles||[]).map((x,i)=>`<span class="${i===0?"p":""}">${esc(x)}</span>`).join("")}</div></div></div>`}
 function clashTeams(list){
   const teams=[];const pool=list.slice().sort((a,b)=>(a.roles||[]).length-(b.roles||[]).length);
   const nT=Math.max(1,Math.floor(pool.length/5));for(let i=0;i<nT;i++)teams.push({});
   const rest=[];
-  for(const p of pool){let placed=false;for(const r of (p.roles||[]).length?p.roles:ROLES){const t=teams.find(t=>!t[r]);if(t){t[r]=p.pseudo;placed=true;break}}if(!placed)rest.push(p.pseudo)}
-  for(const t of teams)for(const r of ROLES)if(!t[r]&&rest.length)t[r]=rest.shift()+" (fill)";
+  for(const p of pool){let placed=false;for(const r of (p.roles||[]).length?p.roles:ROLES){const t=teams.find(t=>!t[r]);if(t){t[r]={pseudo:p.pseudo,uid:p.uid};placed=true;break}}if(!placed)rest.push({pseudo:p.pseudo,uid:p.uid})}
+  for(const t of teams)for(const r of ROLES)if(!t[r]&&rest.length)t[r]={...rest.shift(),fill:true};
   return{teams,rest};
 }
 const CLASH_NAMES={ionia:"Ionia",shurima:"Shurima",freljord:"Freljord",demacia:"Démacia",noxus:"Noxus",piltover:"Piltover",zaun:"Zaun",bilgewater:"Bilgewater",targon:"Targon",shadow_isles:"Îles obscures",bandle:"Bandle",ixtal:"Ixtal",void:"Néant",msi:"MSI",worlds:"Worlds"};
@@ -232,13 +249,14 @@ function renderClash(){
   if(!db){box.innerHTML=`<div class="note">${connErr?"Sessions indisponibles.":"Chargement…"}</div>`;return}
   if(!list.length){box.innerHTML=`<div class="empty">Aucune session Clash prévue. Crée la première avec le formulaire ci-dessus.</div>`;return}
   box.innerHTML=list.map(([id,e])=>{
-    const rs=Object.values(regs).filter(r=>r.event===id);const mine=regs[id+"_"+uid];
-    const cov=ROLES.map(r=>{const ns=rs.filter(x=>(x.roles||[]).includes(r)).map(x=>x.pseudo);return `<div class="${ns.length?"full":""}"><b>${r}</b>${ns.length?ns.map(esc).join(", "):"—"}</div>`}).join("");
+    const rs=Object.entries(regs).filter(([,r])=>r.event===id).map(([k,r])=>({...r,uid:k.slice(id.length+1)}));const mine=regs[id+"_"+uid];
+    const cov=ROLES.map(r=>{const ns=rs.filter(x=>(x.roles||[]).includes(r));return `<div class="${ns.length?"full":""}"><b>${r}</b>${ns.length?ns.map(x=>chip(x.uid,x.pseudo)).join(""):"—"}</div>`}).join("");
     const {teams,rest}=rs.length>=5?clashTeams(rs):{teams:[],rest:[]};
     return `<div class="ev" data-e="${id}"><div class="between"><div><span class="date">${new Date(e.date).toLocaleString("fr-FR",{weekday:"long",day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"})}</span><div><b>${esc(e.title)}</b> <span class="note">· créé par ${esc(e.pseudo||"un sage")}</span></div></div>
       <span class="tag ${rs.length>=5?"ok":""}">${rs.length} inscrit${rs.length>1?"s":""}</span></div>
       <div class="cov">${cov}</div>
-      ${teams.length?`<div class="grid2">${teams.map((t,i)=>`<div class="team"><h3>Équipe ${i+1}</h3>${ROLES.map(r=>`<div class="tp"><span class="role">${r}</span><span class="ellip">${t[r]?esc(t[r]):'<span class="note">à trouver</span>'}</span><span></span></div>`).join("")}</div>`).join("")}</div>${rest.length?`<p class="note">Remplaçants : ${rest.map(esc).join(", ")}</p>`:""}`:`<p class="note">Il faut 5 inscrits pour former une équipe.</p>`}
+      ${rs.length?`<div class="regs">${rs.map(regCard).join("")}</div>`:""}
+      ${teams.length?`<div class="grid2">${teams.map((t,i)=>`<div class="team"><h3>Équipe ${i+1}</h3>${ROLES.map(r=>`<div class="tp"><span class="role">${r}</span>${t[r]?`<span class="who">${conseilAv(t[r].uid,t[r].pseudo,26)}<span class="ellip"><b>${esc(t[r].pseudo)}</b>${t[r].fill?' <span class="note">(fill)</span>':""}</span></span>`:'<span class="note">à trouver</span>'}<span class="note">${lv(t[r]?.uid)?esc(conseilRankLabel(lv(t[r].uid),false)):""}</span></div>`).join("")}</div>`).join("")}</div>${rest.length?`<p class="note">Remplaçants : ${rest.map(x=>esc(x.pseudo)).join(", ")}</p>`:""}`:`<p class="note">Il faut 5 inscrits pour former une équipe.</p>`}
       <div class="row">${myPseudo()?`<span class="note">Mes postes :</span><span class="chips" data-roles>${ROLES.map(r=>`<button class="chip" data-r="${r}" aria-pressed="${!!mine&&(mine.roles||[]).includes(r)}">${r}</button>`).join("")}</span>
         <button class="btn small" data-act="join">${mine?"Mettre à jour":"Je m'inscris"}</button>${mine?`<button class="btn ghost small" data-act="leave">Me désinscrire</button>`:""}`:`<span class="note">Crée ton profil dans <a href="communaute.html#profil">Le Conseil</a> pour t'inscrire.</span>`}
         ${e.uid===uid?`<button class="btn ghost small" data-act="del">Supprimer la session</button>`:""}</div></div>`}).join("");
