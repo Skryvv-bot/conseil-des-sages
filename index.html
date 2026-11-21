@@ -12,7 +12,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="conseil.js?v=1795261446"></script>
+<script src="conseil.js?v=1795280785"></script>
 <script src="fantasy/score.js"></script>
 <style>
 /* Layout: QG du Conseil — emblème + titre, compte à rebours WoW en bandeau, grille 2 colonnes (Discord / parties LoL), tuiles vers les pages, résumé Worlds */
@@ -351,10 +351,57 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;max-width:70ch;margi
 section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,42,.55)),url("img/lol-aphelios.jpg") right 24%/50% auto no-repeat!important}
 @media (max-width:720px){section.frame.panel.flt{background:#17152a!important}}
 @media (prefers-reduced-motion:reduce){.hcard{transition:none}}
+
+/* Tournoi inter-Discord (idée d'Ewolo) */
+.tA{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);border-radius:18px;overflow:hidden;border:2px solid transparent;background:linear-gradient(#17152a,#17152a) padding-box,conic-gradient(from 210deg,#ff8ad8,#ffe27a,#8affc1,#7ad7ff,#b48aff,#ff8ad8) border-box}
+.tA-ph{position:relative;min-height:300px;background:radial-gradient(circle at 18% 22%,rgba(255,70,85,.30),transparent 42%),radial-gradient(circle at 85% 20%,rgba(122,215,255,.28),transparent 42%),radial-gradient(circle at 20% 85%,rgba(180,138,255,.28),transparent 45%),radial-gradient(circle at 85% 85%,rgba(255,226,122,.26),transparent 45%),#0c0b14;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px;gap:10px;text-align:center}
+.tA-cup{width:min(150px,40%);height:auto;filter:drop-shadow(0 10px 30px rgba(255,226,122,.35))}
+.tA-ph small{font:700 .72rem "JetBrains Mono",monospace;letter-spacing:.22em;color:#fff;text-transform:uppercase}
+.tA-ph .big{font:900 clamp(2rem,4.6vw,3rem)/1 Unbounded,sans-serif;color:#fff}.tA-ph .big span{color:#ffe27a}
+.tA-g{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.tA-g span{font:700 .68rem "JetBrains Mono",monospace;letter-spacing:.06em;padding:4px 8px;border-radius:99px;border:1px solid;background:rgba(12,11,20,.7)}
+.tA-tx{padding:24px;display:flex;flex-direction:column;gap:12px;justify-content:center;min-width:0}
+.tA-tx h2{margin:0;font-size:clamp(1.4rem,3vw,2.1rem)!important}
+.tA-tx p{margin:0;color:#c9c5e6}
+.tA-by{display:inline-flex;align-items:center;gap:8px;color:#c9c5e6;font-size:.9rem}.tA-by b{color:#fff}
+.tA-f{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tA-f details{background:#0c0b14;border:1px solid #3a3752;border-radius:12px;padding:10px;color:#fff;font-size:.88rem;min-width:0}
+.tA-f summary{cursor:pointer;font-weight:800;list-style:none;position:relative;padding-right:18px}.tA-f summary::after{content:"+";position:absolute;right:0;bottom:0;color:#7ad7ff;font-weight:900}.tA-f details[open] summary::after{content:"–"}.tA-f summary::-webkit-details-marker{display:none}
+.tA-f summary small{display:block;font:700 .62rem "JetBrains Mono",monospace;color:#7ad7ff;letter-spacing:.1em;margin-bottom:3px}
+.tA-f details p{font-size:.8rem;margin-top:6px}
+.tA-f details[open]{border-color:#ffe27a}
+.tA-b{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.tA-go{background:#ffe27a;color:#17152a!important;border-radius:12px;padding:11px 16px;font-weight:800;font-size:.92rem;text-decoration:none}
+.tA-go:hover{filter:brightness(1.08)}
+.tA-cd{display:inline-flex;align-items:baseline;gap:6px;background:#0c0b14;border:1px solid #3a3752;border-radius:999px;padding:5px 12px;font:700 .8rem "JetBrains Mono",monospace;color:#c9c5e6}
+.tA-cd b{font:900 1.05rem Unbounded,sans-serif;color:#ffe27a;white-space:nowrap}
+@media (max-width:820px){.tA{grid-template-columns:1fr}.tA-ph{min-height:0;padding:20px}.tA-f{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <section class="tA" id="tournoi" aria-labelledby="tAT">
+    <div class="tA-ph">
+      <svg class="tA-cup" viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="tAg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3b8"/><stop offset=".55" stop-color="#ffe27a"/><stop offset="1" stop-color="#d9a940"/></linearGradient></defs>
+        <path d="M30 14h60v10h14v12a20 20 0 0 1-20 20h-2.5A26 26 0 0 1 66 72.6V84h14v10H40V84h14V72.6A26 26 0 0 1 38.5 56H36a20 20 0 0 1-20-20V24h14zm0 20h-6v2a10 10 0 0 0 6 9.2zm60 0v11.2a10 10 0 0 0 6-9.2v-2z" fill="url(#tAg)"/>
+        <rect x="32" y="96" width="56" height="10" rx="3" fill="#d9a940"/>
+        <circle cx="47" cy="34" r="5" fill="#ff4655"/><circle cx="60" cy="30" r="5" fill="#7ad7ff"/><circle cx="73" cy="34" r="5" fill="#b48aff"/><circle cx="60" cy="44" r="5" fill="#8affc1"/></svg>
+      <small>Tournoi inter-Discord</small>
+      <div class="big">T1 <span>2027</span></div>
+      <div class="tA-g"><span style="color:#7ad7ff">LoL</span><span style="color:#ff4655">Valorant</span><span style="color:#b48aff">Runeterra</span><span style="color:#8affc1">TFT</span></div>
+    </div>
+    <div class="tA-tx">
+      <span class="tA-by"><span class="cav cav-in" data-av="yGM2OdQl92e2MCHYFAmkK6lUlYN2" data-avn="Ewolo" style="width:30px;height:30px">EW</span><span>Une idée de <b>Ewolo</b></span></span>
+      <h2 id="tAT">Un tournoi entre communautés Discord, début 2027</h2>
+      <p>Plusieurs serveurs réunis autour d'un événement compétitif et convivial, ouvert à tous les niveaux. Avant de lancer l'organisation, classe les trois formats par ordre de préférence.</p>
+      <div class="tA-f">
+        <details><summary><small>FORMAT 1</small>Multigaming Riot</summary><p>League of Legends, Valorant, Legends of Runeterra et Teamfight Tactics. Chaque communauté joue aux jeux qui l'intéressent, avec un nombre de joueurs adapté à chaque jeu.</p></details>
+        <details><summary><small>FORMAT 2</small>LoL multimodes</summary><p>Tout sur League of Legends : Faille de l'invocateur en 5v5, ARAM et d'autres modes selon les possibilités, pour que tout le monde trouve son format.</p></details>
+        <details><summary><small>FORMAT 3</small>SoloQ personnalisé</summary><p>Inscription individuelle, tier list selon le rang en ranked, équipes équilibrées, un nombre de matchs défini et un classement individuel.</p></details>
+      </div>
+      <div class="tA-b"><a class="tA-go" href="https://strawpoll.com/GeZAR7zVRyV" target="_blank" rel="noopener">Classer les 3 formats</a><span class="tA-cd" id="tACd"><b>J-40</b> fin du vote le 31 déc. à 23h59</span></div>
+    </div>
+  </section>
   <header class="hh">
     <div class="hh-txt">
       <span class="eyebrow" id="hhDate">Ta main du jour</span>
@@ -943,7 +990,7 @@ window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
 (function(){const fr=new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
   document.getElementById("hhDate").textContent=fr.charAt(0).toUpperCase()+fr.slice(1)+" · les jeux du moment"})();
 </script>
-<script src="mercato-data.js?v=1795261446"></script>
+<script src="mercato-data.js?v=1795280785"></script>
 <script>
 // Mercato « hype » : six équipes au choix du visiteur (gardées sur son appareil), avec leur cinq de départ 2027 pressenti
 (function(){const box=document.getElementById("hype");if(!box||!window.MERCATO)return;
@@ -1012,6 +1059,11 @@ window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
     box.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{fG=fG===b.dataset.g?"":b.dataset.g;draw()});
     ub.querySelectorAll("[data-u]").forEach(b=>b.onclick=()=>{fU=fU===b.dataset.u?"":b.dataset.u;draw()})}
   draw()})();
+</script>
+<script>
+(function(){const end=Date.parse("2026-12-31T23:59:00+01:00"),sec=document.getElementById("tournoi");if(!sec)return;
+  const d=Math.ceil((end-Date.now())/864e5);if(Date.now()>end+3*864e5){sec.remove();return}
+  document.getElementById("tACd").innerHTML=Date.now()>end?"<b>Vote terminé</b> résultats bientôt":d<=1?"<b>Dernier jour</b> fin du vote ce soir à 23h59":`<b>J-${d}</b> fin du vote le 31 déc. à 23h59`})();
 </script>
 </body>
 </html>
