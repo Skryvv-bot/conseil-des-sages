@@ -8,11 +8,11 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png?v=4">
 <link rel="apple-touch-icon" href="icon-192.png?v=4">
-<link rel="stylesheet" href="conseil.css?v=1795254507">
+<link rel="stylesheet" href="conseil.css?v=1795255796">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="conseil.js?v=1795254507"></script>
+<script src="conseil.js?v=1795255796"></script>
 <style>
 .panel{padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
 .lead{margin:0;font-size:1.1rem;color:#c9c5e6;max-width:62ch}
@@ -119,6 +119,13 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
     </table></div>
   </section>
 
+  <section class="frame panel" id="dcbot" hidden aria-labelledby="t-b">
+    <h2 id="t-b">Bot Discord (inscriptions Clash)</h2>
+    <p class="note">Le site lit les réactions du dernier message « Clash » du serveur (🪖 Top, 🌲 Jungle, 🐐 Mid, 🔫 ADC, 🦺 Support) et inscrit les sages dans l'onglet Clash de Customs.</p>
+    <p id="dcbotState" class="note">Vérification…</p>
+    <div class="row" style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn small" id="dcbotInvite" target="_blank" rel="noopener" hidden>Inviter le bot sur le serveur</a><button type="button" class="btn ghost small" id="dcbotTest">Revérifier</button></div>
+  </section>
+
   <section class="frame panel" id="orph" hidden aria-labelledby="t-o">
     <h2 id="t-o">Comptes sans profil</h2>
     <p class="note">Ces comptes ont des PO dans la banque mais aucun profil (souvent des connexions anonymes depuis un autre appareil). Ceux marqués « Doublon » portent le pseudo d'un sage qui a déjà un profil : ce sont des restes de doublons. « Supprimer les PO » efface leur portefeuille de la banque.</p>
@@ -132,6 +139,13 @@ let DB,P={},W={},U=null,UERR="",PW={},EDIT={},sortK="pseudo",sortDir=1;
 const norm=s=>String(s||"").trim().toLowerCase();
 const when=d=>{const t=d&&(d.updatedAt||d.at||d.createdAt);if(!t)return "";const x=typeof t==="number"?new Date(t):t.toDate?t.toDate():new Date(t);return isNaN(x)?"":x.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})};
 const stamp=d=>{const t=d&&(d.updatedAt||d.at||d.createdAt);if(!t)return 0;const x=typeof t==="number"?t:t.toDate?t.toDate().getTime():Date.parse(t);return x||0};
+// bot Discord : lien d'invitation (voir les salons + voir les anciens messages) et état de la lecture du message Clash
+async function dcBotCheck(){const st=$("dcbotState");st.textContent="Vérification…";
+  try{const c=await (await fetch(RIOT_RELAY+"/discord")).json();if(c.client_id){const a=$("dcbotInvite");a.href=`https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(c.client_id)}&scope=bot&permissions=66560&guild_id=781876426571251743&disable_guild_select=true`;a.hidden=false}}catch(e){}
+  try{const j=await (await fetch(RIOT_RELAY+"/discord/clash?fresh=1&t="+Date.now())).json();
+    st.textContent=j.error?"Inactif : "+(j.detail||j.error)+".":j.msg?`Actif · annonce de ${j.msg.author||"?"} du ${new Date(j.msg.at).toLocaleString("fr-FR",{weekday:"long",day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"})} · ${j.players.length} sage${j.players.length>1?"s":""} inscrit${j.players.length>1?"s":""} par réaction.`:`Actif · aucun message Clash ces 7 derniers jours (${j.readable||0} salon${j.readable>1?"s":""} lisible${j.readable>1?"s":""}).`}
+  catch(e){st.textContent="Robot injoignable."}}
+$("dcbotTest").onclick=dcBotCheck;
 function draw(){
   const q=norm($("q").value),only=$("onlyDup").checked,cnt={};
   for(const m of Object.values(P))if(m.pseudo)cnt[norm(m.pseudo)]=(cnt[norm(m.pseudo)]||0)+1;
@@ -210,7 +224,7 @@ conseilConnect().then(async({db,uid})=>{
     await new Promise(res=>{let tries=0;$("pinF").onsubmit=async e=>{e.preventDefault();const v=$("pin").value.trim();
       if(await sha("cds-admin:"+v)===PIN_HASH){try{sessionStorage.setItem("cds-admin-pin",PIN_HASH)}catch(x){}$("pinBox").hidden=true;res()}
       else{tries++;$("pin").value="";$("pinMsg").textContent="Code incorrect.";if(tries>=5){$("pinF").querySelector("button").disabled=true;$("pinMsg").textContent="Trop d'essais. Recharge la page pour réessayer.";}}}})}
-  DB=db;$("locked").hidden=true;$("box").hidden=false;
+  DB=db;$("locked").hidden=true;$("box").hidden=false;$("dcbot").hidden=false;dcBotCheck();
   const [r,w]=await Promise.all([db.collection("riot").get(),db.collection("wallets").get().catch(()=>null)]);
   r.forEach(d=>P[d.id]=d.data());if(w)w.forEach(d=>W[d.id]=d.data());draw();
   seedPseudos();cleanClaims();

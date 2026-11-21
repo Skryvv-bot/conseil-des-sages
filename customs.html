@@ -8,11 +8,11 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png?v=4">
 <link rel="apple-touch-icon" href="icon-192.png?v=4">
-<link rel="stylesheet" href="conseil.css?v=1795254507">
+<link rel="stylesheet" href="conseil.css?v=1795255796">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="conseil.js?v=1795254507"></script>
+<script src="conseil.js?v=1795255796"></script>
 <script src="champions.js"></script>
 <style>
 .team{display:flex;flex-direction:column;gap:6px;padding:14px;border:1px solid var(--line2);background:var(--void)}
@@ -50,6 +50,10 @@
 .rg .rk{display:inline-flex;align-items:center;gap:4px;font:600 .8rem var(--body)!important;color:#d9d5ef;letter-spacing:0!important;text-transform:none!important}
 .rg .rl{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}.rg .rl span{font:700 .64rem var(--mono);letter-spacing:.06em;padding:2px 6px;border:1px solid var(--line2);color:#d9d5ef}
 .rg .rl span.p{border-color:var(--ok);color:var(--ok)}
+.dcav{display:inline-block;border-radius:50%;overflow:hidden;flex:none;background:#5865f2}.dcav img{width:100%;height:100%;object-fit:cover;display:block}
+.tag.dc{border-color:#5865f2;color:#aab1ff}.ev.dcev{border-color:#5865f2}
+.rg .ns{color:#aab1ff;font-size:.74rem}
+.dcbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:.86rem;color:var(--muted)}.dcbar a{color:#aab1ff}
 .tp .who{display:flex;align-items:center;gap:8px;min-width:0}
 .cov div b{display:block;font:600 .66rem var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .date{font:700 1rem var(--display);color:var(--goldhi)}
@@ -213,9 +217,11 @@ function upcoming(){return Object.entries(events).filter(([,e])=>Date.parse(e.da
 function myPseudo(){return members[uid]?.pseudo||""}
 // profil d'un sage : photo, pseudo, rang (ladder du Conseil), Riot ID et bouton Message Discord
 const lv=id=>ladder?.current?.players?.[id]?.solo||ladder?.current?.players?.[id]?.flex||null;
-const chip=(id,name,sz=24)=>`<span class="pch">${id?conseilAv(id,name,sz):""}<span>${esc(name)}</span></span>`;
-function regCard(r){const m=members[r.uid]||{},v=lv(r.uid),rid=m.riotId||"";
-  return `<div class="rg">${conseilAv(r.uid,r.pseudo,44)}<div class="grow"><b>${esc(r.pseudo)}${conseilDcMsg?conseilDcMsg(r.uid,m):""}</b>
+const dav=(r,sz)=>r.uid?conseilAv(r.uid,r.pseudo,sz):r.av?`<span class="dcav" style="width:${sz}px;height:${sz}px"><img src="${esc(r.av)}" alt="" referrerpolicy="no-referrer" loading="lazy"></span>`:conseilAv("",r.pseudo,sz);
+const chip=(r,sz=24)=>`<span class="pch">${r.uid||r.av?dav(r,sz):""}<span>${esc(r.pseudo)}</span></span>`;
+function regCard(r){const m=members[r.uid]||(r.dcId?{dc:{id:r.dcId},pseudo:r.pseudo}:{}),v=lv(r.uid),rid=m.riotId||"";
+  return `<div class="rg">${dav(r,44)}<div class="grow"><b>${esc(r.pseudo)}${conseilDcMsg?conseilDcMsg(r.uid,m):""}</b>
+    ${r.dcId&&!r.uid?`<span class="ns">Inscrit sur Discord · pas encore de profil sur le site</span>`:""}
     <span class="rk">${v?conseilRankEmblem(v.tier,20)+esc(conseilRankLabel(v)):"Non classé"}</span>
     ${rid?`<small><a href="https://www.op.gg/summoners/euw/${encodeURIComponent(rid.replace("#","-"))}" target="_blank" rel="noopener">${esc(rid)}</a></small>`:""}
     <div class="rl">${(r.roles||[]).map((x,i)=>`<span class="${i===0?"p":""}">${esc(x)}</span>`).join("")}</div></div></div>`}
@@ -223,7 +229,7 @@ function clashTeams(list){
   const teams=[];const pool=list.slice().sort((a,b)=>(a.roles||[]).length-(b.roles||[]).length);
   const nT=Math.max(1,Math.floor(pool.length/5));for(let i=0;i<nT;i++)teams.push({});
   const rest=[];
-  for(const p of pool){let placed=false;for(const r of (p.roles||[]).length?p.roles:ROLES){const t=teams.find(t=>!t[r]);if(t){t[r]={pseudo:p.pseudo,uid:p.uid};placed=true;break}}if(!placed)rest.push({pseudo:p.pseudo,uid:p.uid})}
+  for(const p of pool){let placed=false;for(const r of (p.roles||[]).length?p.roles:ROLES){const t=teams.find(t=>!t[r]);if(t){t[r]={pseudo:p.pseudo,uid:p.uid,av:p.av};placed=true;break}}if(!placed)rest.push({pseudo:p.pseudo,uid:p.uid,av:p.av})}
   for(const t of teams)for(const r of ROLES)if(!t[r]&&rest.length)t[r]={...rest.shift(),fill:true};
   return{teams,rest};
 }
@@ -243,23 +249,55 @@ function renderOfficial(){
     if(!myPseudo()){$("clashErr").textContent="Crée d'abord ton profil dans Le Conseil.";$("clashErr").hidden=false;return}
     try{await db.collection("clash").add({title:clashName(t).slice(0,40),date:new Date(t.start).toISOString(),tournamentId:t.id,uid,pseudo:myPseudo(),created:new Date().toISOString()})}catch(e){console.warn(e)}});
 }
+// ---------- Inscriptions par réaction sur le message Clash de Discord ----------
+let dcClash=null,dcErr=null;
+async function loadDcClash(fresh){try{const r=await fetch(RIOT_RELAY+"/discord/clash"+(fresh?"?fresh=1&t="+Date.now():""));const j=await r.json();
+    if(j.error){dcErr=j;dcClash=null}else{dcErr=null;dcClash=j}}catch(e){dcErr={error:"net",detail:"robot injoignable"}}renderClash()}
+loadDcClash();setInterval(()=>{if(!document.hidden&&!$("v-clash").hidden)loadDcClash()},90e3);
+const JOURS=["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+// date du Clash d'après le texte du message (« ce soir à partir de 20h15 », « demain 21h », « samedi 20h »…)
+function dcDate(msg){const d=new Date(msg.at),txt=String(msg.content||"").toLowerCase();
+  if(/demain/.test(txt))d.setDate(d.getDate()+1);
+  else{const j=JOURS.findIndex(x=>new RegExp("\\b"+x+"\\b").test(txt));if(j>=0){let k=(j-d.getDay()+7)%7;d.setDate(d.getDate()+k)}}
+  const t=txt.match(/(\d{1,2})\s*h\s*(\d{2})?/);if(t&&+t[1]<24){d.setHours(+t[1],+(t[2]||0),0,0);return{d,timed:true}}
+  return{d,timed:false}}
+// qui a réagi : relié à son profil du site par le Discord lié, sinon par le nom
+function dcPlayers(){if(!dcClash?.players)return[];
+  const byDc={},byName={};for(const[k,m]of Object.entries(members)){if(m.dc?.id)byDc[m.dc.id]=k;for(const n of[m.discord,m.pseudo,m.dc?.user,m.dc?.global,m.dc?.nick])if(n)byName[String(n).trim().toLowerCase()]??=k}
+  return dcClash.players.map(p=>{const k=byDc[p.id]||byName[String(p.name).toLowerCase()]||byName[String(p.user).toLowerCase()]||null;
+    return{uid:k,pseudo:k&&members[k]?.pseudo||p.name,roles:p.roles,av:p.av,dcId:p.id,dc:true}})}
+const sameDay=(a,b)=>new Date(a).toDateString()===new Date(b).toDateString();
+function dcBar(){if(!dcClash?.msg)return"";const m=dcClash.msg;
+  return `<div class="dcbar"><span class="tag dc">Discord</span><span>Annonce de <b>${esc(m.author||"un sage")}</b> · ${dcClash.players.length} réaction${dcClash.players.length>1?"s":""} prise${dcClash.players.length>1?"s":""} en compte</span>
+    <a href="${esc(m.link)}" target="_blank" rel="noopener">Réagir sur Discord</a><button class="btn ghost small" data-dcfresh>Actualiser</button></div>`}
 function renderClash(){
   renderOfficial();
   const box=$("events"),list=upcoming();
+  // le message Discord rejoint la session du site prévue le même jour, sinon il devient sa propre session
+  let dcInfo=null;if(dcClash?.msg){const{d,timed}=dcDate(dcClash.msg);
+    if(timed?d.getTime()>Date.now()-6*3600e3:Date.parse(dcClash.msg.at)>Date.now()-20*3600e3){
+      const host=list.find(([,e])=>sameDay(e.date,d));dcInfo={host:host?host[0]:null,d,timed};
+      if(!host){list.unshift(["dc_"+dcClash.msg.id,{date:d.toISOString(),title:"Clash du Conseil (annonce Discord)",pseudo:dcClash.msg.author,dc:true,timed}]);list.sort((a,b)=>Date.parse(a[1].date)-Date.parse(b[1].date))}}}
   if(!db){box.innerHTML=`<div class="note">${connErr?"Sessions indisponibles.":"Chargement…"}</div>`;return}
-  if(!list.length){box.innerHTML=`<div class="empty">Aucune session Clash prévue. Crée la première avec le formulaire ci-dessus.</div>`;return}
-  box.innerHTML=list.map(([id,e])=>{
-    const rs=Object.entries(regs).filter(([,r])=>r.event===id).map(([k,r])=>({...r,uid:k.slice(id.length+1)}));const mine=regs[id+"_"+uid];
-    const cov=ROLES.map(r=>{const ns=rs.filter(x=>(x.roles||[]).includes(r));return `<div class="${ns.length?"full":""}"><b>${r}</b>${ns.length?ns.map(x=>chip(x.uid,x.pseudo)).join(""):"—"}</div>`}).join("");
+  const adminNote=uid===CONSEIL_ADMIN&&dcErr&&dcErr.error!=="net"?`<p class="note" data-admin-only>Admin · inscriptions Discord inactives : ${esc(dcErr.detail||dcErr.error)}.</p>`:"";
+  if(!list.length){box.innerHTML=adminNote+`<div class="empty">Aucune session Clash prévue. Crée la première avec le formulaire ci-dessus.</div>`;return}
+  box.innerHTML=adminNote+list.map(([id,e])=>{
+    let rs=Object.entries(regs).filter(([,r])=>r.event===id).map(([k,r])=>({...r,uid:k.slice(id.length+1)}));const mine=regs[id+"_"+uid];
+    const withDc=e.dc||dcInfo?.host===id;
+    if(withDc){const have=new Set(rs.map(x=>x.uid));for(const p of dcPlayers())if(!p.uid||!have.has(p.uid))rs.push(p)}
+    const cov=ROLES.map(r=>{const ns=rs.filter(x=>(x.roles||[]).includes(r));return `<div class="${ns.length?"full":""}"><b>${r}</b>${ns.length?ns.map(x=>chip(x)).join(""):"—"}</div>`}).join("");
     const {teams,rest}=rs.length>=5?clashTeams(rs):{teams:[],rest:[]};
-    return `<div class="ev" data-e="${id}"><div class="between"><div><span class="date">${new Date(e.date).toLocaleString("fr-FR",{weekday:"long",day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"})}</span><div><b>${esc(e.title)}</b> <span class="note">· créé par ${esc(e.pseudo||"un sage")}</span></div></div>
+    const when=e.dc&&!e.timed?new Date(e.date).toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"}):new Date(e.date).toLocaleString("fr-FR",{weekday:"long",day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"});
+    return `<div class="ev${withDc?" dcev":""}" data-e="${id}"><div class="between"><div><span class="date">${when}</span><div><b>${esc(e.title)}</b> <span class="note">· créé par ${esc(e.pseudo||"un sage")}</span></div></div>
       <span class="tag ${rs.length>=5?"ok":""}">${rs.length} inscrit${rs.length>1?"s":""}</span></div>
+      ${withDc?dcBar():""}
       <div class="cov">${cov}</div>
       ${rs.length?`<div class="regs">${rs.map(regCard).join("")}</div>`:""}
-      ${teams.length?`<div class="grid2">${teams.map((t,i)=>`<div class="team"><h3>Équipe ${i+1}</h3>${ROLES.map(r=>`<div class="tp"><span class="role">${r}</span>${t[r]?`<span class="who">${conseilAv(t[r].uid,t[r].pseudo,26)}<span class="ellip"><b>${esc(t[r].pseudo)}</b>${t[r].fill?' <span class="note">(fill)</span>':""}</span></span>`:'<span class="note">à trouver</span>'}<span class="note">${lv(t[r]?.uid)?esc(conseilRankLabel(lv(t[r].uid),false)):""}</span></div>`).join("")}</div>`).join("")}</div>${rest.length?`<p class="note">Remplaçants : ${rest.map(x=>esc(x.pseudo)).join(", ")}</p>`:""}`:`<p class="note">Il faut 5 inscrits pour former une équipe.</p>`}
-      <div class="row">${myPseudo()?`<span class="note">Mes postes :</span><span class="chips" data-roles>${ROLES.map(r=>`<button class="chip" data-r="${r}" aria-pressed="${!!mine&&(mine.roles||[]).includes(r)}">${r}</button>`).join("")}</span>
+      ${teams.length?`<div class="grid2">${teams.map((t,i)=>`<div class="team"><h3>Équipe ${i+1}</h3>${ROLES.map(r=>`<div class="tp"><span class="role">${r}</span>${t[r]?`<span class="who">${dav(t[r],26)}<span class="ellip"><b>${esc(t[r].pseudo)}</b>${t[r].fill?' <span class="note">(fill)</span>':""}</span></span>`:'<span class="note">à trouver</span>'}<span class="note">${lv(t[r]?.uid)?esc(conseilRankLabel(lv(t[r].uid),false)):""}</span></div>`).join("")}</div>`).join("")}</div>${rest.length?`<p class="note">Remplaçants : ${rest.map(x=>esc(x.pseudo)).join(", ")}</p>`:""}`:`<p class="note">Il faut 5 inscrits pour former une équipe.</p>`}
+      ${e.dc?`<div class="row"><span class="note">Inscriptions par réaction sur le message Discord : 🪖 Top · 🌲 Jungle · 🐐 Mid · 🔫 ADC · 🦺 Support. ${members[uid]?.dc?.id?"":"Lie ton Discord dans ton profil pour apparaître avec ta photo et ton rang."}</span></div>`:`<div class="row">${myPseudo()?`<span class="note">Mes postes :</span><span class="chips" data-roles>${ROLES.map(r=>`<button class="chip" data-r="${r}" aria-pressed="${!!mine&&(mine.roles||[]).includes(r)}">${r}</button>`).join("")}</span>
         <button class="btn small" data-act="join">${mine?"Mettre à jour":"Je m'inscris"}</button>${mine?`<button class="btn ghost small" data-act="leave">Me désinscrire</button>`:""}`:`<span class="note">Crée ton profil dans <a href="communaute.html#profil">Le Conseil</a> pour t'inscrire.</span>`}
-        ${e.uid===uid?`<button class="btn ghost small" data-act="del">Supprimer la session</button>`:""}</div></div>`}).join("");
+        ${e.uid===uid?`<button class="btn ghost small" data-act="del">Supprimer la session</button>`:""}</div>`}</div>`}).join("");
+  box.querySelectorAll("[data-dcfresh]").forEach(b=>b.onclick=()=>{b.disabled=true;b.textContent="…";loadDcClash(true)});
   box.querySelectorAll(".ev").forEach(ev=>{const id=ev.dataset.e;
     ev.querySelectorAll("[data-roles] .chip").forEach(c=>c.onclick=()=>c.setAttribute("aria-pressed",c.getAttribute("aria-pressed")!=="true"));
     ev.querySelectorAll("[data-act]").forEach(b=>b.onclick=async()=>{const act=b.dataset.act;
