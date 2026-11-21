@@ -17,6 +17,9 @@ jobs:
         run: |
           Q=$(python3 -c "import urllib.parse,os;print(urllib.parse.quote(os.environ['P']))")
           for r in ranks live; do echo "== /$r"; curl -s -H "Origin: https://leconseildessages.fr" "https://conseil-riot.perrotinyvanpro.workers.dev/$r?players=$Q" | head -c 3000; echo; done
+      - name: Inscriptions Clash par réaction Discord
+        run: |
+          curl -s -H "Origin: https://leconseildessages.fr" "https://conseil-riot.perrotinyvanpro.workers.dev/discord/clash?fresh=1&t=$(date +%s)" | python3 -c "import json,sys;d=json.load(sys.stdin);m=d.get('msg') or {};print(json.dumps({k:d.get(k) for k in ['error','detail','readable']}),'|',m.get('author'),m.get('at'),repr((m.get('content') or '')[:120]));[print(' -',p['name'],p['roles'],'av' if p.get('av') else '') for p in d.get('players',[])]"
       - name: Profils, récupérations et pseudos réservés (lecture publique)
         run: |
           python3 - <<'PY'
