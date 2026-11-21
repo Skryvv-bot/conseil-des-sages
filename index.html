@@ -12,7 +12,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="conseil.js?v=1795255796"></script>
+<script src="conseil.js?v=1795261446"></script>
 <script src="fantasy/score.js"></script>
 <style>
 /* Layout: QG du Conseil — emblème + titre, compte à rebours WoW en bandeau, grille 2 colonnes (Discord / parties LoL), tuiles vers les pages, résumé Worlds */
@@ -355,21 +355,6 @@ section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,
 </head>
 <body>
 <div class="wrap">
-  <section class="champ" aria-labelledby="chT">
-    <figure class="champ-ph"><img src="img/worlds/blg-champions.jpg" alt="Les joueurs de Bilibili Gaming soulèvent la Coupe de l'invocateur sur scène" width="1920" height="1080"><figcaption>Photo : CGTN</figcaption></figure>
-    <div class="champ-tx">
-      <span class="eyebrow">Worlds 2026 · finale du 14 novembre</span>
-      <h2 id="chT">Bilibili Gaming, champion du monde</h2>
-      <p class="champ-sc"><img src="img/equipes/bilibili-gaming.png" alt="" width="40" height="40"><b>BLG 3 – 1 Gen.G</b><span>Barclays Center, Brooklyn</span></p>
-      <p>Premier titre mondial pour BLG, et premier sacre de la Chine depuis 2021. Sur la route : les quatre équipes coréennes, dont T1 en demi-finale.</p>
-      <p class="champ-ro"><span><small>TOP</small>Bin</span><span><small>JGL</small>XUN</span><span><small>MID</small>Knight</span><span><small>BOT</small>Viper</span><span><small>SUP</small>ON</span></p>
-    </div>
-  </section>
-  <div class="winners">
-    <a class="win-c" href="worlds.html" id="winP"><span class="eyebrow" id="winPk">Pronos des Worlds</span><div class="win-b" id="winPb"><span class="note">Chargement…</span></div></a>
-    <a class="win-c" href="fantasy.html#classement" id="winF"><span class="eyebrow" id="winFk">CDS Fantasy</span><div class="win-b" id="winFb"><span class="note">Chargement…</span></div></a>
-  </div>
-
   <header class="hh">
     <div class="hh-txt">
       <span class="eyebrow" id="hhDate">Ta main du jour</span>
@@ -958,7 +943,7 @@ window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
 (function(){const fr=new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
   document.getElementById("hhDate").textContent=fr.charAt(0).toUpperCase()+fr.slice(1)+" · les jeux du moment"})();
 </script>
-<script src="mercato-data.js?v=1795255796"></script>
+<script src="mercato-data.js?v=1795261446"></script>
 <script>
 // Mercato « hype » : six équipes au choix du visiteur (gardées sur son appareil), avec leur cinq de départ 2027 pressenti
 (function(){const box=document.getElementById("hype");if(!box||!window.MERCATO)return;
