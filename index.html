@@ -12,7 +12,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="conseil.js?v=1795341169"></script>
+<script src="conseil.js?v=1795347424"></script>
 <script src="fantasy/score.js"></script>
 <style>
 /* Layout: QG du Conseil — emblème + titre, compte à rebours WoW en bandeau, grille 2 colonnes (Discord / parties LoL), tuiles vers les pages, résumé Worlds */
@@ -366,6 +366,12 @@ section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,
 .tA-f small{font:700 .62rem "JetBrains Mono",monospace;color:#7ad7ff;letter-spacing:.1em}
 .tA-f b{color:#fff;font-size:.92rem}
 .tA-f p{font-size:.82rem;line-height:1.4;color:#c9c5e6}
+.tA-f>div.lead{border-color:#ffe27a}
+.tA-v{margin-top:auto;padding-top:6px;display:flex;flex-direction:column;gap:5px}
+.tA-v .r{display:flex;justify-content:space-between;align-items:baseline;gap:6px;font-size:.74rem;color:#b4b0d0;white-space:nowrap}.tA-v .r b{color:#fff;font:800 .95rem Unbounded,sans-serif}
+.tA-v .bar{height:7px;border-radius:99px;background:#26233d;overflow:hidden}.tA-v .bar i{display:block;height:100%;background:linear-gradient(90deg,#8affc1,#7ad7ff)}
+.tA-f>div.lead .bar i{background:linear-gradient(90deg,#ffe27a,#ffb86b)}
+.tA-vn{font-size:.78rem;color:#b4b0d0}
 .tA-b{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .tA-go{background:#ffe27a;color:#17152a!important;border-radius:12px;padding:11px 16px;font-weight:800;font-size:.92rem;text-decoration:none}
 .tA-go:hover{filter:brightness(1.08)}
@@ -391,6 +397,7 @@ section.frame.panel.flt{background:linear-gradient(90deg,#17152a 55%,rgba(23,21,
         <div><small>FORMAT 2</small><b>Que du LoL, plusieurs modes</b><p>Faille 5v5, ARAM, et peut-être d'autres modes. Chacun joue le mode qu'il préfère.</p></div>
         <div><small>FORMAT 3</small><b>Inscription solo</b><p>Tu t'inscris seul, on fait des équipes équilibrées selon les rangs. Classement joueur par joueur.</p></div>
       </div>
+      <p class="tA-vn" id="tAVn"></p>
       <div class="tA-b"><a class="tA-go" href="https://strawpoll.com/GeZAR7zVRyV" target="_blank" rel="noopener">Classer les 3 formats</a><span class="tA-cd" id="tACd"><b>J-40</b> fin du vote le 31 déc. à 23h59</span></div>
     </div>
   </section>
@@ -982,7 +989,7 @@ window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
 (function(){const fr=new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
   document.getElementById("hhDate").textContent=fr.charAt(0).toUpperCase()+fr.slice(1)+" · les jeux du moment"})();
 </script>
-<script src="mercato-data.js?v=1795341169"></script>
+<script src="mercato-data.js?v=1795347424"></script>
 <script>
 // Mercato « hype » : six équipes au choix du visiteur (gardées sur son appareil), avec leur cinq de départ 2027 pressenti
 (function(){const box=document.getElementById("hype");if(!box||!window.MERCATO)return;
@@ -1056,6 +1063,15 @@ window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
 (function(){const end=Date.parse("2026-12-31T23:59:00+01:00"),sec=document.getElementById("tournoi");if(!sec)return;
   const d=Math.ceil((end-Date.now())/864e5);if(Date.now()>end+3*864e5){sec.remove();return}
   document.getElementById("tACd").innerHTML=Date.now()>end?"<b>Vote terminé</b> résultats bientôt":d<=1?"<b>Dernier jour</b> fin du vote ce soir à 23h59":`<b>J-${d}</b> fin du vote le 31 déc. à 23h59`})();
+</script>
+<script>
+// Résultats du sondage StrawPoll (relevé à la main) : 2 points pour un 1er choix, 1 pour un 2e
+const TOURNOI_VOTE={at:"2026-11-22T10:59:00+01:00",n:14,f:[{pts:23,first:10},{pts:13,first:2},{pts:6,first:2}]};
+(function(){const cards=document.querySelectorAll("#tournoi .tA-f>div"),v=TOURNOI_VOTE;if(!cards.length||!v)return;
+  const max=Math.max(...v.f.map(x=>x.pts)),tot=v.f.reduce((a,x)=>a+x.pts,0);
+  v.f.forEach((x,i)=>{const c=cards[i];if(!c)return;if(x.pts===max)c.classList.add("lead");
+    c.insertAdjacentHTML("beforeend",`<div class="tA-v"><div class="r"><b>${x.pts} pts</b><span>${x.first} en 1er choix</span></div><div class="bar"><i style="width:${Math.round(x.pts/max*100)}%"></i></div></div>`)});
+  const d=new Date(v.at);document.getElementById("tAVn").textContent=`${v.n} votants · résultats du ${d.toLocaleDateString("fr-FR",{day:"numeric",month:"long"})} à ${d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}).replace(":"," h ")} · 2 points pour un 1er choix, 1 pour un 2e`})();
 </script>
 </body>
 </html>
