@@ -363,10 +363,13 @@ window.conseilHunt=async function(){const boxes=[...document.querySelectorAll("[
 
 // ---------- Thème « Collection holographique » et bandeau d'infos ----------
 (function(){const add=()=>{if(document.getElementById("tv-theme"))return;
-  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=33";document.head.appendChild(l)};
+  const l=document.createElement("link");l.id="tv-theme";l.rel="stylesheet";l.href="theme-holo.css?v=34";document.head.appendChild(l)};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();
-function defaultTicker(){const d=Math.ceil((Date.parse("2026-11-04T23:00:00Z")-Date.now())/864e5);
-  return ["Worlds 2026 : Bilibili Gaming champion du monde, 3-1 contre Gen.G","Pick'em : un skin pour le 1er (offert par Skryvv) et un skin pour le 2e (offert par Tabaskoh)",d>0?`WoW Forever dans ${d} jour${d>1?"s":""} : fin de l'amitié`:"WoW Forever est sorti","Patch 26.21 résumé dans la rubrique Patch","Pronos entre potes, tribunal et sage de la semaine dans Le Conseil","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes"]}
+function defaultTicker(){const t=[];
+  if(Date.now()<Date.parse("2027-01-01T00:00:00+01:00"))t.push("Tournoi inter-Discord d’Ewolo : classe les 3 formats avant le 31 décembre, sur l’accueil");
+  t.push(Date.now()<Date.parse("2026-12-09T12:00:00+01:00")?"Patch 26.23 résumé dans la rubrique Patch · prochain patch le 9 décembre":"Patch 26.24 en ligne");
+  t.push("Mercato : Doran et Kanavi chez Dplus KIA, Zeus de retour chez T1 selon la presse","Clash : réagis au message Discord, tu apparais dans Customs avec ton profil","Builds et tier list du patch, mis à jour chaque nuit","Ladder du Conseil : les rangs officiels, mis à jour toutes les 15 minutes");
+  return t}
 window.conseilTicker=function(items){const el=document.getElementById("tvRun");if(items)window.__tickerItems=items;items=window.__tickerItems||[];
   const paid=(window.PAID_TICKER||[]).map(e=>`💬 ${e.byPseudo} : ${e.text}`);const all=[...paid,...items];if(!el||!all.length)return;
   const html=all.map(t=>`<span>${conseilEsc(t)}</span>`).join("");el.innerHTML=html+html};

@@ -8,12 +8,12 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png?v=4">
 <link rel="apple-touch-icon" href="icon-192.png?v=4">
-<link rel="stylesheet" href="conseil.css?v=1795281109">
+<link rel="stylesheet" href="conseil.css?v=1795341169">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="conseil.js?v=1795281109"></script>
-<script src="mercato-data.js?v=1795281109"></script>
+<script src="conseil.js?v=1795341169"></script>
+<script src="mercato-data.js?v=1795341169"></script>
 <style>
 .panel{padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
 .lead{margin:0;font-size:1.1rem;color:#c9c5e6;max-width:62ch}
@@ -113,7 +113,7 @@ ul.pl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;colo
       <div class="card"><span class="k">16 novembre</span><b>Fin de la plupart des contrats</b><span>Les joueurs non prolongés deviennent agents libres.</span></div>
       <div class="card"><span class="k">17 novembre</span><b>Ouverture du marché</b><span>Attendue vers 1 h du matin, heure de Paris. Avant, un club ne peut que prolonger ou libérer ses propres joueurs.</span></div>
     </div>
-    <p class="warn">Une rumeur n'est pas une annonce : tant que le club n'a rien officialisé, tout peut changer. Effectifs LEC mis à jour le <b>16 novembre 2026</b>.</p>
+    <p class="warn">Une rumeur n'est pas une annonce : tant que le club n'a rien officialisé, tout peut changer. Effectifs LEC et LCK mis à jour le <b>22 novembre 2026</b>.</p>
   </section>
 
   <section aria-label="Transferts par ligue" style="display:flex;flex-direction:column;gap:14px">
@@ -162,7 +162,7 @@ function tabs(){$("tabs").replaceChildren(...Object.entries(M).map(([k,l])=>{con
 function render(){const l=M[cur],only=$("onlyOf").checked;$("lnote").textContent=l.note;
   $("teams").replaceChildren(...l.teams.map(t=>{const list=(t.mv||[]).filter(m=>!only||m[0]==="o"),R=rows(t);
     const c=el("article","team"),h=el("div","th2"),im=new Image();if(TINT[t.slug])h.style.setProperty("--tint",TINT[t.slug]);
-    im.src="img/equipes/"+t.slug+".png";im.alt="";im.onerror=()=>im.remove();h.append(im,el("h3","",t.n),likeBtn(t));c.append(h);
+    im.src="img/equipes/"+t.slug+".png";im.alt="";im.onerror=()=>{const u=API[t.slug]?.image;if(u&&!im.dataset.f){im.dataset.f="1";im.src=u.replace(/^http:/,"https:")}else im.remove()};h.append(im,el("h3","",t.n),likeBtn(t));c.append(h);
     if(!R)c.append(el("div","nor","Pas encore d'effectif"));
     else{const box=el("div");for(const [r,o,n,s] of R){const w=el("div","rw");w.title=RNAME[r];
       w.append(icon(r),el("span","o"+(s!=="same"?" out":""),o),el("span","ar"+(s==="same"?" same":""),"→"),el("span","n "+s,n));box.append(w)}c.append(box)}
