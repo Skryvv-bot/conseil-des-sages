@@ -12,7 +12,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="conseil.js?v=1795347424"></script>
+<script src="conseil.js?v=1795798256"></script>
 <script src="fantasy/score.js"></script>
 <style>
 /* Layout: QG du Conseil — emblème + titre, compte à rebours WoW en bandeau, grille 2 colonnes (Discord / parties LoL), tuiles vers les pages, résumé Worlds */
@@ -989,7 +989,7 @@ window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
 (function(){const fr=new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
   document.getElementById("hhDate").textContent=fr.charAt(0).toUpperCase()+fr.slice(1)+" · les jeux du moment"})();
 </script>
-<script src="mercato-data.js?v=1795347424"></script>
+<script src="mercato-data.js?v=1795798256"></script>
 <script>
 // Mercato « hype » : six équipes au choix du visiteur (gardées sur son appareil), avec leur cinq de départ 2027 pressenti
 (function(){const box=document.getElementById("hype");if(!box||!window.MERCATO)return;
@@ -1066,7 +1066,7 @@ window.addEventListener("conseil-camps",()=>{try{renderAll()}catch(e){}});
 </script>
 <script>
 // Résultats du sondage StrawPoll (relevé à la main) : 2 points pour un 1er choix, 1 pour un 2e
-const TOURNOI_VOTE={at:"2026-11-22T10:59:00+01:00",n:14,f:[{pts:23,first:10},{pts:13,first:2},{pts:6,first:2}]};
+const TOURNOI_VOTE={at:"2026-11-27T17:49:00+01:00",n:22,f:[{pts:33,first:14},{pts:24,first:5},{pts:9,first:3}]};
 (function(){const cards=document.querySelectorAll("#tournoi .tA-f>div"),v=TOURNOI_VOTE;if(!cards.length||!v)return;
   const max=Math.max(...v.f.map(x=>x.pts)),tot=v.f.reduce((a,x)=>a+x.pts,0);
   v.f.forEach((x,i)=>{const c=cards[i];if(!c)return;if(x.pts===max)c.classList.add("lead");
