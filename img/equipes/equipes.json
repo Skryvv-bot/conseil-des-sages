@@ -286,27 +286,6 @@
         "image": "http://static.lolesports.com/players/1769091426725_LCK_BFX_Clear_F.png"
       },
       {
-        "n": "Taeyoon",
-        "first": "Taeyun",
-        "last": "Kim",
-        "role": "bottom",
-        "image": "http://static.lolesports.com/players/1778842617008_LCK_BFX_Taeyoon_F.PNG"
-      },
-      {
-        "n": "Grizzly",
-        "first": "Seunghoon",
-        "last": "Jo",
-        "role": "jungle",
-        "image": "http://static.lolesports.com/players/default-headshot.png"
-      },
-      {
-        "n": "MG",
-        "first": "Jihoon",
-        "last": "Lee",
-        "role": "mid",
-        "image": "http://static.lolesports.com/players/default-headshot.png"
-      },
-      {
         "n": "Kangin",
         "first": "Kangin",
         "last": "Choi",
@@ -335,6 +314,27 @@
         "image": "http://static.lolesports.com/players/1769090720455_image6-2026-01-22T150458.891.png"
       },
       {
+        "n": "Taeyoon",
+        "first": "Taeyun",
+        "last": "Kim",
+        "role": "bottom",
+        "image": "http://static.lolesports.com/players/1778842617008_LCK_BFX_Taeyoon_F.PNG"
+      },
+      {
+        "n": "Grizzly",
+        "first": "Seunghoon",
+        "last": "Jo",
+        "role": "jungle",
+        "image": "http://static.lolesports.com/players/default-headshot.png"
+      },
+      {
+        "n": "MG",
+        "first": "Jihoon",
+        "last": "Lee",
+        "role": "mid",
+        "image": "http://static.lolesports.com/players/default-headshot.png"
+      },
+      {
         "n": "VicLa",
         "first": "Deakwang",
         "last": "Lee",
@@ -358,11 +358,11 @@
     "image": "http://static.lolesports.com/teams/1643979272144_SK_Monochrome.png",
     "players": [
       {
-        "n": "Skeanz",
-        "first": "Duncan",
-        "last": "Marquet",
-        "role": "jungle",
-        "image": "http://static.lolesports.com/players/1784888813852_Skeanz-01.png"
+        "n": "SlowQ",
+        "first": "Yebit",
+        "last": "Seo",
+        "role": "mid",
+        "image": "http://static.lolesports.com/players/1784888808082_SlowQ-01.png"
       },
       {
         "n": "Wunder",
@@ -393,11 +393,11 @@
         "image": "http://static.lolesports.com/players/1784888796423_MikyX-01.png"
       },
       {
-        "n": "SlowQ",
-        "first": "Yebit",
-        "last": "Seo",
-        "role": "mid",
-        "image": "http://static.lolesports.com/players/1784888808082_SlowQ-01.png"
+        "n": "Skeanz",
+        "first": "Duncan",
+        "last": "Marquet",
+        "role": "jungle",
+        "image": "http://static.lolesports.com/players/1784888813852_Skeanz-01.png"
       }
     ]
   },
@@ -416,6 +416,20 @@
     "league": "LEC",
     "image": "http://static.lolesports.com/teams/1765897105091_GIANTX-logotype-white.png",
     "players": [
+      {
+        "n": "ISMA",
+        "first": "Ismaïl",
+        "last": "Boualem",
+        "role": "jungle",
+        "image": "http://static.lolesports.com/players/1784889470494_Isma-01.png"
+      },
+      {
+        "n": "Jackies",
+        "first": "Adam",
+        "last": "Jeřábek",
+        "role": "mid",
+        "image": "http://static.lolesports.com/players/1784889460898_Jackies-01.png"
+      },
       {
         "n": "Oscarinin",
         "first": "Oscar",
@@ -450,20 +464,6 @@
         "last": "Yoon",
         "role": "support",
         "image": "http://static.lolesports.com/players/1784889465968_Jun-01.png"
-      },
-      {
-        "n": "Jackies",
-        "first": "Adam",
-        "last": "Jeřábek",
-        "role": "mid",
-        "image": "http://static.lolesports.com/players/1784889460898_Jackies-01.png"
-      },
-      {
-        "n": "ISMA",
-        "first": "Ismaïl",
-        "last": "Boualem",
-        "role": "jungle",
-        "image": "http://static.lolesports.com/players/1784889470494_Isma-01.png"
       }
     ]
   },
@@ -519,6 +519,20 @@
     "image": "http://static.lolesports.com/teams/1673425724696_NIP-Symbol-RGB-NeonYellow1.png",
     "players": [
       {
+        "n": "fengyue",
+        "first": "RunLai",
+        "last": "Wang",
+        "role": "support",
+        "image": "http://static.lolesports.com/players/1768348013713_fengyue.png"
+      },
+      {
+        "n": "Photic",
+        "first": "Qi-Shen ",
+        "last": "Ying",
+        "role": "bottom",
+        "image": "http://static.lolesports.com/players/1768348885435_photic.png"
+      },
+      {
         "n": "Hoya",
         "first": "Yongho",
         "last": "Yoon",
@@ -538,20 +552,6 @@
         "last": "Kwanmo",
         "role": "jungle",
         "image": "http://static.lolesports.com/players/1768348142810_guwon.png"
-      },
-      {
-        "n": "fengyue",
-        "first": "RunLai",
-        "last": "Wang",
-        "role": "support",
-        "image": "http://static.lolesports.com/players/1768348013713_fengyue.png"
-      },
-      {
-        "n": "Photic",
-        "first": "Qi-Shen ",
-        "last": "Ying",
-        "role": "bottom",
-        "image": "http://static.lolesports.com/players/1768348885435_photic.png"
       }
     ]
   },
@@ -568,13 +568,6 @@
         "last": "Syun",
         "role": "mid",
         "image": "http://static.lolesports.com/players/1769088332489_LCK_NS_Calix_F.png"
-      },
-      {
-        "n": "Diable",
-        "first": "Nam",
-        "last": "Daegeun",
-        "role": "bottom",
-        "image": "http://static.lolesports.com/players/1778842694156_LCK_NS_Diable_F.PNG"
       },
       {
         "n": "Sponge",
@@ -612,6 +605,13 @@
         "image": "http://static.lolesports.com/players/1769084566201_image6-2026-01-22T132214.656.png"
       },
       {
+        "n": "Kingen",
+        "first": "Sunghoon ",
+        "last": "Hwang",
+        "role": "top",
+        "image": "http://static.lolesports.com/players/1769088303035_LCK_NS_Kingen_F.PNG"
+      },
+      {
         "n": "Lehends",
         "first": "Siu",
         "last": "Son",
@@ -633,11 +633,11 @@
         "image": "http://static.lolesports.com/players/1769084677995_image6-2026-01-22T132347.123.png"
       },
       {
-        "n": "Kingen",
-        "first": "Sunghoon ",
-        "last": "Hwang",
-        "role": "top",
-        "image": "http://static.lolesports.com/players/1769088303035_LCK_NS_Kingen_F.PNG"
+        "n": "Diable",
+        "first": "Nam",
+        "last": "Daegeun",
+        "role": "bottom",
+        "image": "http://static.lolesports.com/players/1778842694156_LCK_NS_Diable_F.PNG"
       }
     ]
   },
@@ -663,6 +663,13 @@
         "image": "http://static.lolesports.com/players/1774651666226_jojopyun.png"
       },
       {
+        "n": "NightSlayer",
+        "first": "Ivan ",
+        "last": "Bilous",
+        "role": "top",
+        "image": "http://static.lolesports.com/players/default-headshot.png"
+      },
+      {
         "n": "Myrwn",
         "first": "Álex ",
         "last": "Villarejo Pastor",
@@ -682,13 +689,6 @@
         "last": "Fernández del Amo",
         "role": "support",
         "image": "http://static.lolesports.com/players/1774651304778_alvaro.png"
-      },
-      {
-        "n": "NightSlayer",
-        "first": "Ivan ",
-        "last": "Bilous",
-        "role": "top",
-        "image": "http://static.lolesports.com/players/default-headshot.png"
       }
     ]
   },
@@ -722,20 +722,6 @@
     "league": "LCK",
     "image": "http://static.lolesports.com/teams/1716454325887_Nowyprojekt.png",
     "players": [
-      {
-        "n": "DDahyuk",
-        "first": "Minhyuk",
-        "last": "Ahn",
-        "role": "top",
-        "image": "http://static.lolesports.com/players/1769090323253_image6-2026-01-22T145701.864.png"
-      },
-      {
-        "n": "Roamer",
-        "first": "Woojin",
-        "last": "Cho",
-        "role": "mid",
-        "image": "http://static.lolesports.com/players/1769091227250_LCK_BRO_Roamer_F.PNG"
-      },
       {
         "n": "Casting",
         "first": "Minje",
@@ -793,6 +779,20 @@
         "image": "http://static.lolesports.com/players/1769089985671_image6-2026-01-22T145216.586.png"
       },
       {
+        "n": "Roamer",
+        "first": "Woojin",
+        "last": "Cho",
+        "role": "mid",
+        "image": "http://static.lolesports.com/players/1769091227250_LCK_BRO_Roamer_F.PNG"
+      },
+      {
+        "n": "DDahyuk",
+        "first": "Minhyuk",
+        "last": "Ahn",
+        "role": "top",
+        "image": "http://static.lolesports.com/players/1769090323253_image6-2026-01-22T145701.864.png"
+      },
+      {
         "n": "Pungyeon",
         "first": "Lee",
         "last": "Jonghyuk",
@@ -816,6 +816,13 @@
         "image": "http://static.lolesports.com/players/default-headshot.png"
       },
       {
+        "n": "Yukino",
+        "first": "Johnny",
+        "last": "Dang",
+        "role": "jungle",
+        "image": "http://static.lolesports.com/players/1768550253363_Yukino-01.png"
+      },
+      {
         "n": "Tao",
         "first": "Hong Tao Alessandro",
         "last": "Xu",
@@ -835,13 +842,6 @@
         "last": "Payet",
         "role": "support",
         "image": "http://static.lolesports.com/players/1768550244013_Prime-01.png"
-      },
-      {
-        "n": "Yukino",
-        "first": "Johnny",
-        "last": "Dang",
-        "role": "jungle",
-        "image": "http://static.lolesports.com/players/1768550253363_Yukino-01.png"
       }
     ]
   },
@@ -930,6 +930,20 @@
         "image": "http://static.lolesports.com/players/1784889269441_Nuc-01.png"
       },
       {
+        "n": "Rooster",
+        "first": "Yunhwan",
+        "last": "Shin",
+        "role": "top",
+        "image": "http://static.lolesports.com/players/1784889280158_Rooster-01.png"
+      },
+      {
+        "n": "Boukada",
+        "first": "Lahlou",
+        "last": "Mehdi",
+        "role": "jungle",
+        "image": "http://static.lolesports.com/players/1768550943317_Boukada-01.png"
+      },
+      {
         "n": "Paduck",
         "first": "Seokhyeon",
         "last": "Park",
@@ -949,20 +963,6 @@
         "last": "IZZO",
         "role": "none",
         "image": "http://static.lolesports.com/players/1639647042551_placeholder.png"
-      },
-      {
-        "n": "Rooster",
-        "first": "Yunhwan",
-        "last": "Shin",
-        "role": "top",
-        "image": "http://static.lolesports.com/players/1784889280158_Rooster-01.png"
-      },
-      {
-        "n": "Boukada",
-        "first": "Lahlou",
-        "last": "Mehdi",
-        "role": "jungle",
-        "image": "http://static.lolesports.com/players/1768550943317_Boukada-01.png"
       }
     ]
   },
@@ -1550,6 +1550,27 @@
     "image": "http://static.lolesports.com/teams/1672933861879_Heretics-Full-Color.png",
     "players": [
       {
+        "n": "Hype ",
+        "first": "Junghyun",
+        "last": "Byun",
+        "role": "bottom",
+        "image": "http://static.lolesports.com/players/1784888690157_Hype-01.png"
+      },
+      {
+        "n": "Daglas",
+        "first": "Kacper",
+        "last": "Dagiel",
+        "role": "jungle",
+        "image": "http://static.lolesports.com/players/1784888701799_Daglas-01.png"
+      },
+      {
+        "n": "Way",
+        "first": "Han",
+        "last": "Kil",
+        "role": "support",
+        "image": "http://static.lolesports.com/players/1784888696000_Way-01.png"
+      },
+      {
         "n": "Tracyn",
         "first": "Sebastian",
         "last": "Wojtoń",
@@ -1569,27 +1590,6 @@
         "last": "Ölmez",
         "role": "mid",
         "image": "http://static.lolesports.com/players/1784888684908_Serin-01.png"
-      },
-      {
-        "n": "Daglas",
-        "first": "Kacper",
-        "last": "Dagiel",
-        "role": "jungle",
-        "image": "http://static.lolesports.com/players/1784888701799_Daglas-01.png"
-      },
-      {
-        "n": "Way",
-        "first": "Han",
-        "last": "Kil",
-        "role": "support",
-        "image": "http://static.lolesports.com/players/1784888696000_Way-01.png"
-      },
-      {
-        "n": "Hype ",
-        "first": "Junghyun",
-        "last": "Byun",
-        "role": "bottom",
-        "image": "http://static.lolesports.com/players/1784888690157_Hype-01.png"
       }
     ]
   },
@@ -1812,20 +1812,6 @@
         "image": "http://static.lolesports.com/players/1769083077918_image6144.png"
       },
       {
-        "n": "Painter",
-        "first": "Eunhu",
-        "last": "Kim",
-        "role": "jungle",
-        "image": "http://static.lolesports.com/players/1769084021546_image6-2026-01-22T131032.591.png"
-      },
-      {
-        "n": "Peyz",
-        "first": "SOOHWAN",
-        "last": "Kim",
-        "role": "bottom",
-        "image": "http://static.lolesports.com/players/1769087491906_LCK_T1_Peyz_F.PNG"
-      },
-      {
         "n": "Doran",
         "first": "Hyeonjun",
         "last": "Choi",
@@ -1852,6 +1838,20 @@
         "last": "Ryu",
         "role": "support",
         "image": "http://static.lolesports.com/players/1769087515444_LCK_T1_Keria_F.PNG"
+      },
+      {
+        "n": "Painter",
+        "first": "Eunhu",
+        "last": "Kim",
+        "role": "jungle",
+        "image": "http://static.lolesports.com/players/1769084021546_image6-2026-01-22T131032.591.png"
+      },
+      {
+        "n": "Peyz",
+        "first": "SOOHWAN",
+        "last": "Kim",
+        "role": "bottom",
+        "image": "http://static.lolesports.com/players/1769087491906_LCK_T1_Peyz_F.PNG"
       }
     ]
   },
@@ -1862,13 +1862,6 @@
     "league": "LEC",
     "image": "http://static.lolesports.com/teams/1631819669150_fnc-2021-worlds.png",
     "players": [
-      {
-        "n": "Upset",
-        "first": "Elias",
-        "last": "Lipp",
-        "role": "bottom",
-        "image": "http://static.lolesports.com/players/1784889551806_Upset-01.png"
-      },
       {
         "n": "Vladi",
         "first": "Vladimiros",
@@ -1889,6 +1882,13 @@
         "last": "Tantis",
         "role": "top",
         "image": "http://static.lolesports.com/players/1774651449505_empyros.png"
+      },
+      {
+        "n": "Upset",
+        "first": "Elias",
+        "last": "Lipp",
+        "role": "bottom",
+        "image": "http://static.lolesports.com/players/1784889551806_Upset-01.png"
       },
       {
         "n": "Soboro",
@@ -1914,6 +1914,13 @@
     "image": "http://static.lolesports.com/teams/1631819297476_edg-2021-worlds.png",
     "players": [
       {
+        "n": "Zdz",
+        "first": "De-Zhang",
+        "last": "Zhu",
+        "role": "top",
+        "image": "http://static.lolesports.com/players/1772232892468_zdz-Photoroom.png"
+      },
+      {
         "n": "Leave",
         "first": "HONGCHAO",
         "last": "HU",
@@ -1926,13 +1933,6 @@
         "last": " Ping-Yang",
         "role": "support",
         "image": "http://static.lolesports.com/players/1768348863818_parukia.png"
-      },
-      {
-        "n": "Zdz",
-        "first": "De-Zhang",
-        "last": "Zhu",
-        "role": "top",
-        "image": "http://static.lolesports.com/players/1772232892468_zdz-Photoroom.png"
       },
       {
         "n": "Jiejie",
@@ -1965,11 +1965,11 @@
     "image": "http://static.lolesports.com/teams/1634763008788_220px-Team_WE_logo.png",
     "players": [
       {
-        "n": "Karis",
-        "first": "Hongjo",
-        "last": "Kim",
-        "role": "mid",
-        "image": "http://static.lolesports.com/players/1768348517805_karis.png"
+        "n": "Erha",
+        "first": "XUYE",
+        "last": "SHI",
+        "role": "support",
+        "image": "http://static.lolesports.com/players/1775225577413_erha.png"
       },
       {
         "n": "Tyrion",
@@ -1979,18 +1979,11 @@
         "image": "http://static.lolesports.com/players/default-headshot.png"
       },
       {
-        "n": "Erha",
-        "first": "XUYE",
-        "last": "SHI",
-        "role": "support",
-        "image": "http://static.lolesports.com/players/1775225577413_erha.png"
-      },
-      {
-        "n": "Cube",
-        "first": "Yi",
-        "last": "Dai",
-        "role": "top",
-        "image": "http://static.lolesports.com/players/1768347927566_cube.png"
+        "n": "Karis",
+        "first": "Hongjo",
+        "last": "Kim",
+        "role": "mid",
+        "image": "http://static.lolesports.com/players/1768348517805_karis.png"
       },
       {
         "n": "About",
@@ -2005,6 +1998,13 @@
         "last": "WANG",
         "role": "jungle",
         "image": "http://static.lolesports.com/players/1768348759598_monki.png"
+      },
+      {
+        "n": "Cube",
+        "first": "Yi",
+        "last": "Dai",
+        "role": "top",
+        "image": "http://static.lolesports.com/players/1768347927566_cube.png"
       }
     ]
   },
